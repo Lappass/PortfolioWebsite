@@ -3,6 +3,7 @@ import { escapeHtml as e } from "./html";
 import { profile } from "./profile";
 import { PageChapters } from "./page-chapters";
 import { ProfileOrb } from "./profile-orb";
+import { ProfileEntry } from "./profile-entry";
 import "./profile-workspace.css";
 
 const isWeb = (value: string) => /^(https?:|mailto:)/i.test(value);
@@ -18,6 +19,7 @@ export class ProfilePage {
   private returnFocus: HTMLElement | null = null;
   private chapters = new PageChapters(this.root);
   private orb?: ProfileOrb;
+  private entry?: ProfileEntry;
 
   constructor(private onClose: () => void, private workspace: (active: boolean, instant: boolean) => void = () => {}) {
     this.root.className = "project-page profile-page";
@@ -43,6 +45,8 @@ export class ProfilePage {
 
   open(options: { instant?: boolean; push?: boolean } = {}) {
     if (this.isOpen) return;
+    this.entry?.dispose();
+    this.orb?.dispose();
     this.render();
     if (options.push !== false && location.hash !== PROFILE_HASH) {
       history.pushState({ profile: true }, "", PROFILE_HASH);
@@ -58,14 +62,17 @@ export class ProfilePage {
     this.root.classList.add("visible");
     this.root.scrollTop = 0;
     this.chapters.sync();
-    this.orb?.dispose();
-    this.orb = new ProfileOrb(this.root.querySelector('canvas')!, Boolean(options.instant) || matchMedia('(prefers-reduced-motion: reduce)').matches, profile.name);
+    const reduced = Boolean(options.instant) || matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const startOrb = () => { if(this.isOpen) this.orb = new ProfileOrb(this.root.querySelector('.profile-orb-study canvas')!, reduced, profile.name); };
+    if(reduced) startOrb();
+    else this.entry = new ProfileEntry(this.root, startOrb);
     this.root.querySelector<HTMLElement>("#profile-title")?.focus({ preventScroll: true });
   }
 
   close(options: { syncHistory?: boolean } = {}) {
     if (!this.isOpen) return false;
     this.state = "closing";
+    this.entry?.dispose();
     this.workspace(false, this.root.classList.contains('instant'));
     this.orb?.dispose();
     this.root.classList.remove("visible");

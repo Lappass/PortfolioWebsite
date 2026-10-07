@@ -25,3 +25,15 @@ Validation: production build passed. Headless Edge at 1600×900, 390×844 and
 workspace camera progress, chapter navigation, Escape and interrupted entry.
 No page errors. Screenshots in `verification/profile-workspace/` were inspected.
 These are browser viewport checks, not physical mobile-device validation.
+
+## Particle entry follow-up
+
+The entry now runs for 1.5 seconds: central sphere, brief dispersion, particles
+forming the exact `Shuhang Chen` heading, then movement to the real heading and
+a crossfade into the text. Supporting content reveals at the same time; the
+small interactive orb starts after completion. Heading sampling includes font,
+letter spacing and wrapping, and caches the mask until its dimensions change.
+The entry canvas is removed on completion or interruption. Reduced motion
+skips it. Desktop clock-controlled screenshots at 250ms, 750ms and 1600ms
+verify the sphere, complete name and final page; viewport/escape checks and
+production build passed.

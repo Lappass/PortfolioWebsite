@@ -1,6 +1,10 @@
 #stage[data-workspace="true"] > :not(#three-scene):not(#modal-root):not(#toast) { opacity: 0 !important; pointer-events: none !important; transition: opacity 250ms; }
-.profile-page { background: rgba(var(--theme-paper-rgb,234,229,225),.94); transform: translateX(5vw); }
-.profile-page.visible { transition: opacity 700ms 550ms, transform 900ms 450ms cubic-bezier(.22,1,.36,1); }
+.profile-page { background: rgba(var(--theme-paper-rgb,234,229,225),.94); transform: none; }
+.profile-page.visible { transition: opacity 280ms; }
+.profile-entry-field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
+.profile-page.entering { overflow-y: hidden; }
+.profile-page.entering :is(.pp-bar,.pp-chapters,.profile-introduction > :not(h1),.profile-orb-study,.profile-signature,.pp-section) { opacity: var(--profile-reveal,0); pointer-events: none; }
+.profile-page.entering #profile-title { opacity: var(--profile-heading,0); }
 .profile-page.instant,.profile-page.instant.visible { transition: none; transform: none; }
 .profile-page .pp-body { max-width: 1440px; }
 .profile-page .profile-hero { grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 30px; min-height: calc(100svh - 260px); padding: 48px 0 28px; align-content: center; }
