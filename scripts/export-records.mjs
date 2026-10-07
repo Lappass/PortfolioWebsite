@@ -7,7 +7,7 @@ const output = new URL("../public/archives/", import.meta.url);
 await fs.mkdir(output, { recursive: true });
 for (const record of records) {
   await fs.writeFile(
-    new URL(`RHINE-LAB-${record.id}.txt`, output),
+    new URL(`LAPPAS-${record.id}.txt`, output),
     archiveText(record),
     "utf8",
   );

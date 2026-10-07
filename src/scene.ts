@@ -787,7 +787,7 @@ export class ArchiveScene {
     c.fillRect(12, 12, 1000, 6);
     c.fillRect(12, 419, 1000, 3);
     c.font = "bold 81px MiSans";
-    c.fillText("RHINE LAB, LLC.", 22, 116);
+    c.fillText("LAPPAS.WORKS", 22, 116);
     c.font = "32px MiSans";
     c.fillStyle = "#878476";
     c.fillText("INTERNAL DATABASE", 25, 174);
@@ -797,7 +797,7 @@ export class ArchiveScene {
     c.fillRect(782, 32, 221, 39);
     c.fillStyle = "#eee9de";
     c.font = "24px MiSans";
-    c.fillText("R L / I S", 809, 61);
+    c.fillText("P F / A R", 809, 61);
     c.fillStyle = "#171713";
     c.font = "bold 64px MiSans";
     c.fillText("INFO", 830, 143);

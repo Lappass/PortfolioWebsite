@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Rhine Lab · Analysis OS",
-  "short_name": "Rhine Lab",
-  "description": "莱茵生命交互式三维研究档案终端",
+  "name": "Lappas · Portfolio",
+  "short_name": "Lappas",
+  "description": "陈澍航 Lappas 的三维档案式作品集",
   "lang": "zh-CN",
   "start_url": "./?source=pwa",
   "scope": "./",

@@ -10,4 +10,4 @@ await mkdir('public/icons',{recursive:true});
 await writeFile('public/icons/app-icon.svg',svg);
 for(const [name,size] of [['apple-touch-icon',180],['icon-192',192],['icon-512',512],['icon-maskable-512',512]])
   await sharp(Buffer.from(svg)).resize(size,size).png().toFile(`public/icons/${name}.png`);
-console.log('Shared Rhine Lab mark exported to four home-screen icons.');
+console.log('Shared Lappas mark exported to four home-screen icons.');

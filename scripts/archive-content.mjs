@@ -92,5 +92,5 @@ export async function loadContent() {
 }
 
 export function archiveText(r) {
-  return `\uFEFFRHINE LAB · INTERNAL DATABASE\nFILE ${r.id} / ${r.title}\n${r.en}\n\n科室：${r.department}\n编目范围：${r.date}\n相关人物：${r.lead}\n访问范围：${r.clearance}\n\n${r.abstract}\n\n研究记录\n${r.findings.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n\n设定参考：${r.source}\n本文为基于公开设定的档案式改写，非游戏原文。\n`;
+  return `\uFEFFLAPPAS · PORTFOLIO ARCHIVE\nFILE ${r.id} / ${r.title}\n${r.en}\n\n角色：${r.department}\n时间：${r.date}\n技术与协作：${r.lead}\n状态：${r.clearance}\n\n${r.abstract}\n\n项目要点\n${r.findings.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n\n项目链接：${r.source}\n`;
 }

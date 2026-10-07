@@ -1,5 +1,5 @@
 import { bootMotion } from "./boot-motion";
-import { bootMarkContour } from "./brand";
+import { bootMarkContour, bootPromptPath, bootCursorOffsetY } from "./brand";
 import { themeAmount } from "./theme-ui";
 import { BootLettering } from "./boot-lettering";
 
@@ -55,10 +55,10 @@ export class BootSequence {
     this.contour.setAttribute("pathLength", "1");
     const symbols = mark.querySelector("path:not([pathLength])")!;
     this.plus = document.createElementNS(ns, "path");
-    this.plus.setAttribute("d", "M44 70h50M69 45v50");
+    this.plus.setAttribute("d", bootPromptPath);
     this.minus = document.createElementNS(ns, "path");
-    this.minus.setAttribute("d", "M219 70h44");
     [this.plus, this.minus].forEach((p) => {
+      p.setAttribute("fill", "none");
       p.setAttribute("stroke", "currentColor");
       p.setAttribute("stroke-width", "15");
       mark.insertBefore(p, symbols);
@@ -104,7 +104,7 @@ export class BootSequence {
       el.replaceChildren(ink);
     });
     this.poweredHTML = this.el(".powered").innerHTML;
-    new BootLettering(this.brandLines[0], ["brand"]).setText("RHINE LAB");
+    new BootLettering(this.brandLines[0], []).setText("LAPPAS");
     // Bind after collecting the original ring paths. Phrase artwork also has
     // SVG paths, and must never be included in the scan's animated geometry.
     this.accessLettering = new BootLettering(this.el(".access-text"), ["access"]);
@@ -117,7 +117,7 @@ export class BootSequence {
       [".welcome-database", "database", "INTERNAL DATABASE"],
     ] as const) new BootLettering(this.el(selector), [key]).setText(text);
     this.companyInk.forEach((el) =>
-      new BootLettering(el.querySelector("span")!, ["company"]).setText("RHINE LAB.LLC."),
+      new BootLettering(el.querySelector("span")!, []).setText("LAPPAS.WORKS"),
     );
   }
   private el(selector: string) {
@@ -150,7 +150,7 @@ export class BootSequence {
     );
     this.minus.setAttribute(
       "d",
-      `M${-s.logo.minusWidth / 2} 0h${s.logo.minusWidth}`,
+      `M${-s.logo.minusWidth / 2} ${bootCursorOffsetY}h${s.logo.minusWidth}`,
     );
     this.minus.setAttribute(
       "transform",

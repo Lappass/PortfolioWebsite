@@ -1,5 +1,4 @@
 import { hasTypingBetween } from "./typing-rhythm";
-import { TYPING_PCM, TYPING_SAMPLE_RATE } from "./typing-samples";
 import { assetUrl } from "./asset-url";
 export type Sound =
   | "page-open"
@@ -37,14 +36,18 @@ function typingSample(c: BaseAudioContext) {
   let bank = typingBuffers.get(c);
   if (!bank) {
     bank = {
-      buffers: TYPING_PCM.map((encoded) => {
-        const bytes = atob(encoded);
-        const buffer = c.createBuffer(1, bytes.length / 2, TYPING_SAMPLE_RATE);
+      buffers: [3100, 3600, 4200].map((tone, variant) => {
+        const rate = c.sampleRate;
+        const buffer = c.createBuffer(1, Math.round(rate * 0.038), rate);
         const data = buffer.getChannelData(0);
+        let seed = 0x9e3779b9 + variant * 7919;
         for (let i = 0; i < data.length; i++) {
-          const word =
-            bytes.charCodeAt(i * 2) | (bytes.charCodeAt(i * 2 + 1) << 8);
-          data[i] = (word > 32767 ? word - 65536 : word) / 32768;
+          seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+          const t = i / rate;
+          const noise = (seed / 0xffffffff) * 2 - 1;
+          const click = noise * Math.exp(-t * 520) * 0.5;
+          const tick = Math.sin(2 * Math.PI * tone * t) * Math.exp(-t * 260) * 0.28;
+          data[i] = (click + tick) * Math.min(1, t * rate / 24);
         }
         return buffer;
       }),
