@@ -9,7 +9,7 @@ import { ThemeWave } from "./theme-motion";
 import { themeMaterial, themeEnvironment } from "./theme-material";
 import { RhythmMotion, rhythmDisplacement, quietBands, type MusicBands, type RhythmStyle } from "./archive-play-motion";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
-import { buildGameCase, poseCase, printCase } from "./game-case";
+import { buildGameCase, poseCase, printCase, transferPrint } from "./game-case";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -515,6 +515,7 @@ export class ArchiveScene {
   }
 
   private caseMode = false;
+  private printTimer = 0;
   private coverAttribute?: THREE.InstancedBufferAttribute;
   private coverUpdates?: InstanceUpdates;
   private loadGameCase(gltf: GLTF, count: number) {
@@ -539,7 +540,7 @@ export class ArchiveScene {
     this.scene.add(this.shadowCoverage.mesh);
     this.appearance.prepare(this.model);
     this.appearance.apply(this.model, 0);
-    printCase(this.model, fileAtCell(this.selectedCell), anisotropy);
+    printCase(this.model, fileAtCell(this.selectedCell), anisotropy, true);
     this.scene.add(this.model);
     this.model.position.copy(this.cellPosition(poolCell(this.selectedSlot)));
     this.loaded = true;
@@ -763,7 +764,7 @@ export class ArchiveScene {
       const group = this.model.clone(true);
       if (this.caseMode) {
         this.appearance.prepare(group);
-        printCase(group, fileAtCell(this.selectedCell), this.renderer.capabilities.getMaxAnisotropy());
+        transferPrint(this.model, group);
       } else {
       const label = group.children[group.children.length - 1] as THREE.Mesh;
       const canvas = document.createElement("canvas");
@@ -827,7 +828,13 @@ export class ArchiveScene {
   }
   private drawLabel(index: number) {
     if (this.caseMode) {
-      printCase(this.model, index, this.renderer.capabilities.getMaxAnisotropy());
+      const anisotropy = this.renderer.capabilities.getMaxAnisotropy();
+      printCase(this.model, index, anisotropy, false);
+      // Paint the full-resolution print only once browsing pauses.
+      clearTimeout(this.printTimer);
+      this.printTimer = window.setTimeout(() => {
+        if (this.loaded && fileAtCell(this.selectedCell) === index) printCase(this.model, index, anisotropy, true);
+      }, 300);
       return;
     }
     if (!this.labelTexture) return;

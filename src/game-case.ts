@@ -41,6 +41,7 @@ function labelTexture(canvas: HTMLCanvasElement, anisotropy: number) {
   return map;
 }
 
+let cover: { map: THREE.CanvasTexture; rows: number } | undefined;
 function coverAtlas(anisotropy: number) {
   const rows = Math.ceil(records.length / ATLAS_COLUMNS);
   const tile = Math.floor(4096 / ATLAS_COLUMNS), tileH = Math.floor(tile / INSERT_ASPECT);
@@ -50,7 +51,7 @@ function coverAtlas(anisotropy: number) {
   c.fillRect(0, 0, canvas.width, canvas.height);
   records.forEach((record, i) => paintInsert(c, record, i + 1, (i % ATLAS_COLUMNS) * tile + 2, Math.floor(i / ATLAS_COLUMNS) * tileH + 1, tile - 4));
   const map = texture(canvas, anisotropy);
-  map.generateMipmaps = true;
+  map.userData.shared = true;
   return { map, rows };
 }
 
@@ -70,7 +71,8 @@ export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number):
   };
   const high = materials();
   const coverAttribute = new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1).setUsage(THREE.DynamicDrawUsage);
-  const { map: atlas, rows } = coverAtlas(anisotropy);
+  cover = coverAtlas(anisotropy);
+  const { map: atlas, rows } = cover;
   const low: Record<string, THREE.MeshPhysicalMaterial> = {
     Case_Shell: high.Case_Shell.clone(),
     Insert_Print: high.Insert_Print.clone(),
@@ -132,18 +134,66 @@ export function poseCase(group: THREE.Object3D, open: number, time: number) {
   }
 }
 
-/** Assign printed textures for one record to a prepared case group. */
-export function printCase(group: THREE.Object3D, index: number, anisotropy: number) {
+export const isSharedMap = (map: THREE.Texture | null | undefined) => Boolean(map?.userData.shared);
+
+function setMap(mat: THREE.MeshPhysicalMaterial, map: THREE.Texture | null) {
+  if (mat.map === map) return;
+  // Only the presence of a map changes the shader program.
+  if (Boolean(mat.map) !== Boolean(map)) mat.needsUpdate = true;
+  if (!isSharedMap(mat.map)) mat.map?.dispose();
+  mat.map = map;
+}
+
+/** Point an insert's UVs at one atlas tile, or back at a full print (tile = null). */
+function setTile(mesh: THREE.Mesh, index: number | null) {
+  const uv = mesh.geometry.getAttribute("uv") as THREE.BufferAttribute;
+  mesh.userData.baseUv ??= Array.from(uv.array as Float32Array);
+  const base = mesh.userData.baseUv as number[];
+  const rows = cover!.rows;
+  for (let i = 0; i < uv.count; i++) {
+    const u = base[i * 2], v = base[i * 2 + 1];
+    if (index === null) uv.setXY(i, u, v);
+    else uv.setXY(i, ((index % ATLAS_COLUMNS) + u) / ATLAS_COLUMNS, (Math.floor(index / ATLAS_COLUMNS) + v) / rows);
+  }
+  uv.needsUpdate = true;
+}
+
+/**
+ * Print one record on a prepared case. While browsing, the cover reuses the
+ * array atlas (no painting or upload); `detail` paints the full-resolution
+ * insert and disc label once the selection settles.
+ */
+export function printCase(group: THREE.Object3D, index: number, anisotropy: number, detail: boolean) {
   const record = records[index];
-  const insert = texture(insertCanvas(record, index + 1, 2048), anisotropy);
-  const label = labelTexture(discLabelCanvas(record), anisotropy);
+  const insert = detail ? texture(insertCanvas(record, index + 1, 1536), anisotropy) : cover!.map;
+  const label = detail ? labelTexture(discLabelCanvas(record), anisotropy) : null;
   for (const child of group.children) {
     if (!(child instanceof THREE.Mesh)) continue;
-    const surface = child.userData.surface;
-    if (surface !== "Insert_Print" && surface !== "Disc_Label") continue;
     const mat = child.material as THREE.MeshPhysicalMaterial;
-    mat.map?.dispose();
-    mat.map = surface === "Insert_Print" ? insert : label;
-    mat.needsUpdate = true;
+    if (child.userData.surface === "Insert_Print") {
+      setTile(child, detail ? null : index);
+      setMap(mat, insert);
+    }
+    if (child.userData.surface === "Disc_Label") setMap(mat, label);
+  }
+}
+
+/** Hand the printed textures of `from` to a prepared copy, without repainting. */
+export function transferPrint(from: THREE.Object3D, to: THREE.Object3D) {
+  for (const target of to.children) {
+    const source = from.getObjectByName(target.name);
+    if (!(target instanceof THREE.Mesh) || !(source instanceof THREE.Mesh)) continue;
+    if (target.userData.surface !== "Insert_Print" && target.userData.surface !== "Disc_Label") continue;
+    // The copy keeps the UVs it was printed with; the selected case rewrites its own.
+    if (target.userData.surface === "Insert_Print") {
+      target.geometry = source.geometry.clone();
+      target.userData.ownGeometry = true;
+    }
+    const sourceMat = source.material as THREE.MeshPhysicalMaterial;
+    const targetMat = target.material as THREE.MeshPhysicalMaterial;
+    targetMat.map = sourceMat.map;
+    targetMat.needsUpdate = true;
+    sourceMat.map = null;
+    sourceMat.needsUpdate = true;
   }
 }

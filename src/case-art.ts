@@ -158,8 +158,8 @@ export function paintDiscLabel(c: CanvasRenderingContext2D, r: ArchiveRecord, si
   c.textAlign = "left";
 }
 
-export function discLabelCanvas(r: ArchiveRecord) {
-  const canvas = Object.assign(document.createElement("canvas"), { width: 1024, height: 1024 });
-  paintDiscLabel(canvas.getContext("2d")!, r);
+export function discLabelCanvas(r: ArchiveRecord, size = 512) {
+  const canvas = Object.assign(document.createElement("canvas"), { width: size, height: size });
+  paintDiscLabel(canvas.getContext("2d")!, r, size);
   return canvas;
 }
