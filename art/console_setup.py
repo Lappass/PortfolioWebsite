@@ -8,6 +8,7 @@ Origin: centre of the console's footprint on the stand top (z = 0).
 Named nodes used by the site: Console_Slot (slot centre), Slot_Light, Monitor_Screen.
 """
 from pathlib import Path
+from math import pi, sin, cos
 
 import bmesh
 import bpy
@@ -36,7 +37,7 @@ def material(name, color, roughness, metallic=0.0, emission=None, strength=4.0):
     return mat
 
 
-SHELL = material("Console_Shell", (0.9, 0.91, 0.92), 0.35)
+SHELL = material("Console_Shell", (0.68, 0.70, 0.69), 0.43)
 CORE = material("Console_Core", (0.02, 0.022, 0.026), 0.3)
 LIGHT = material("Slot_Light", (0.5, 0.7, 1.0), 0.3, emission=(0.35, 0.6, 1.0))
 STAND = material("Stand_Wood", (0.045, 0.05, 0.06), 0.55)
@@ -60,15 +61,104 @@ def box(name, size, location, mat, bevel=0.03, segments=3):
 # Stand under everything, its top at z = 0, slightly behind the console front.
 box("Stand", (SW, SD, SH), (MX / 2, 0.1, -SH / 2), STAND, bevel=0.04)
 
-# Console lying flat: black core band between two white shells that flare out.
-box("Console_Core", (CW - 0.2, CD - 0.1, CH * 0.42), (0, 0, CH * 0.5), CORE, bevel=0.03)
-box("Console_Shell_Lower", (CW, CD, CH * 0.32), (0, 0, CH * 0.16), SHELL, bevel=0.12, segments=6)
-box("Console_Shell_Upper", (CW + 0.12, CD + 0.08, CH * 0.3), (0, 0, CH * 0.85), SHELL, bevel=0.12, segments=6)
-# Front: a horizontal disc slot in the black band, a light strip and a power button.
+# Moulded enclosure with a recessed graphite chassis, floating top and rubber feet.
+# A real open mouth between the upper/lower chassis rails receives the animated disc.
+RUBBER = material("Rubber", (0.009, 0.012, 0.014), 0.86)
+METAL = material("Port_Metal", (0.25, 0.28, 0.30), 0.28, metallic=0.8)
+INK = material("Printed_Legends", (0.32, 0.35, 0.36), 0.6)
+SHADOW = material("Recess_Shadow", (0.004, 0.006, 0.008), 0.8)
+
+def shell(name, levels):
+    # Rounded perimeter rings, with tapered side walls rather than stacked cubes.
+    verts, faces = [], []
+    count = 36
+    for z, width, depth, radius in levels:
+        for cx, cy, start in [(width/2-radius, depth/2-radius, 0),
+                               (-width/2+radius, depth/2-radius, pi/2),
+                               (-width/2+radius, -depth/2+radius, pi),
+                               (width/2-radius, -depth/2+radius, 3*pi/2)]:
+            for i in range(9):
+                a = start + i*pi/16
+                verts.append((cx+radius*cos(a), cy+radius*sin(a), z))
+    faces.append(tuple(reversed(range(count))))
+    for ring in range(len(levels)-1):
+        for i in range(count):
+            a, b = ring*count+i, ring*count+(i+1)%count
+            faces.append((a, b, b+count, a+count))
+    faces.append(tuple(range((len(levels)-1)*count, len(levels)*count)))
+    mesh = bpy.data.meshes.new(name)
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    scene.collection.objects.link(obj)
+    mesh.materials.append(SHELL)
+    bevel = obj.modifiers.new("Moulded edge highlights", "BEVEL")
+    bevel.width, bevel.segments = 0.012, 2
+    obj.modifiers.new("Panel normals", "WEIGHTED_NORMAL")
+    return obj
+
+shell("Console_Shell_Lower", [(0.09, 3.55, 2.36, .17), (.15, 3.90, 2.62, .20),
+                              (.29, 3.92, 2.64, .20), (.32, 3.84, 2.56, .18)])
+shell("Console_Shell_Upper", [(.66, 3.82, 2.54, .16), (.73, 4.02, 2.68, .20),
+                              (.88, 3.96, 2.64, .21), (.95, 3.78, 2.48, .23)])
+for x in [-1.42, 1.42]:
+    for y in [-.88, .88]:
+        box("Console_Rubber_Foot", (.44, .36, .09), (x, y, .045), RUBBER, .035)
+box("Console_Chassis_Floor", (3.65, 2.38, .12), (0, 0, .36), CORE, .025)
+box("Console_Chassis_Ceiling", (3.65, 2.38, .13), (0, 0, .60), CORE, .025)
+box("Console_Drive_Interior", (3.4, .1, .17), (-.12, 1.10, .475), SHADOW, .01)
+for x in [-1.77, 1.77]:
+    box("Console_Side_Vent_Recess", (.08, 2.2, .25), (x, 0, .49), SHADOW, .02)
+    for i in range(27):
+        box("Console_Side_Louvre", (.12, .028, .23), (x, -1.03+i*.079, .49), CORE, .006, 2)
+
 slot_z = CH * 0.5
-box("Console_Slot_Recess", (2.9, 0.06, 0.07), (-0.25, -CD / 2 + 0.02, slot_z), material("Slot_Shadow", (0, 0, 0), 0.9), bevel=0)
-box("Slot_Light", (CW - 0.5, 0.03, 0.025), (0, -CD / 2 - 0.035, CH * 0.33), LIGHT, bevel=0)
-box("Console_Button", (0.18, 0.05, 0.08), (1.55, -CD / 2 + 0.01, slot_z), SHELL, bevel=0.02)
+# Front fascia surrounds a 2.9 x .09 clear opening, centred on the original marker.
+for z in [.3775, .5875]:
+    box("Console_Fascia_Rail", (3.65, .14, .105), (0, -1.23, z), CORE, .014)
+box("Console_Fascia_Left", (.125, .14, .12), (-1.7625, -1.23, .475), CORE, .012)
+box("Console_Control_Panel", (.375, .14, .12), (1.6375, -1.23, .475), CORE, .012)
+for z in [.425, .525]:
+    box("Console_Drive_Lip", (2.91, .05, .012), (-.25, -1.301, z), RUBBER, .005, 2)
+box("Slot_Light", (1.10, .018, .012), (-1.08, -1.323, .685), LIGHT, .005, 3)
+
+def front_text(name, text, location, size, mat):
+    bpy.ops.object.select_all(action="DESELECT")
+    curve = bpy.data.curves.new(name, "FONT")
+    curve.body, curve.size, curve.extrude = text, size, 0
+    obj = bpy.data.objects.new(name, curve)
+    scene.collection.objects.link(obj)
+    obj.location = location
+    obj.rotation_euler.x = pi/2
+    curve.materials.append(mat)
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
+    bpy.ops.object.convert(target="MESH")
+    obj.select_set(False)
+
+# USB-C and USB-A sockets: metal rims, recessed dark cavities, central tongues.
+for name, x, w, h in [("USB_C", .87, .16, .052), ("USB_A", 1.15, .22, .072)]:
+    box("Console_"+name+"_Rim", (w, .018, h), (x, -1.308, .587), METAL, .015, 4)
+    box("Console_"+name+"_Cavity", (w-.018, .012, h-.014), (x, -1.320, .587), SHADOW, .01, 3)
+    box("Console_"+name+"_Tongue", (w*.64, .008, .011), (x, -1.328, .582), CORE, .002, 2)
+box("Console_Power_Button", (.12, .02, .065), (1.63, -1.31, .48), METAL, .025, 5)
+front_text("Console_Power_Legend", "I", (1.618, -1.324, .46), .052, SHELL)
+front_text("Console_Eject_Legend", "EJECT", (1.47, -1.305, .36), .04, INK)
+front_text("Console_Drive_Legend", "DISC / 01", (-1.59, -1.307, .362), .045, INK)
+
+# Split top service panel and ventilation grille set into the aft edge.
+box("Console_Top_Seam", (.012, 2.20, .003), (.98, 0, .953), SHADOW, .001, 1)
+for i in range(32):
+    box("Console_Top_Intake", (.045, .32, .006), (-1.48+i*.076, .89, .954), SHADOW, .016, 3)
+front_text("Console_Serial", "L A P P A S  /  0 1", (-1.50, -1.307, .205), .062, INK)
+
+# Back I/O panel with distinct power, HDMI and network sockets.
+box("Console_Rear_Panel", (3.4, .05, .25), (0, 1.20, .49), CORE, .015)
+for x, w in [(-1.23, .26), (-.61, .29), (.04, .24)]:
+    box("Console_Rear_Port_Rim", (w, .018, .13), (x, 1.231, .48), METAL, .018)
+    box("Console_Rear_Port_Recess", (w-.03, .014, .10), (x, 1.244, .48), SHADOW, .012)
+for i in range(13):
+    box("Console_Rear_Exhaust", (.028, .015, .17), (.48+i*.077, 1.235, .49), SHADOW, .008, 2)
 # Marker at the slot mouth; the site sends the disc here.
 bpy.ops.object.empty_add(location=(-0.25, -CD / 2, slot_z))
 bpy.context.object.name = "Console_Slot"
@@ -115,7 +205,30 @@ scene.render.resolution_x, scene.render.resolution_y = 1400, 800
 scene.render.filepath = str(ROOT / "art/console-setup-studio.png")
 bpy.ops.render.render(write_still=True)
 
+# Close-up for checking manufactured edges and the physical slot opening.
+cam.location = (4.5, -6.5, 3.8)
+cam.rotation_euler = (Vector((0, 0, .43)) - cam.location).to_track_quat("-Z", "Y").to_euler()
+cam.data.lens = 58
+scene.render.filepath = str(ROOT / "art/console-detail.png")
+bpy.ops.render.render(write_still=True)
+
+# Batch static details by material; keep the animated light and screen independent.
+# This retains editable part names in the .blend and avoids hundreds of web draw calls.
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "art/console-setup.blend"))
+for mat in list(bpy.data.materials):
+    pieces = [o for o in scene.objects if o.type == "MESH" and o.name.startswith("Console_")
+              and o.data.materials and o.data.materials[0] == mat]
+    if len(pieces) < 2:
+        continue
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in pieces:
+        obj.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+        for modifier in list(obj.modifiers):
+            bpy.ops.object.modifier_apply(modifier=modifier.name)
+    bpy.context.view_layer.objects.active = pieces[0]
+    bpy.ops.object.join()
+    pieces[0].name = "Console_Batch_" + mat.name
 for obj in scene.objects:
     obj.select_set(obj.type in {"MESH", "EMPTY"})
 bpy.ops.export_scene.gltf(
