@@ -8,6 +8,8 @@ const surfaces: Record<string, string> = {
 /** Extend existing optical shaders; one float per instance avoids new meshes or passes. */
 export function themeMaterial(material: THREE.Material, name: string, instanced = false, subduedIndex = { value: 0 }) {
   const amount = { value: 0 };
+  // Game cases keep their own printed colours in both themes.
+  if (/^(Case_|Insert_|Disc|Hub_)/.test(name)) return amount;
   const before = material.onBeforeCompile;
   const cache = material.customProgramCacheKey.bind(material)();
   const color = new THREE.Color(surfaces[name] ?? (name.includes("Orange") ? "#bb8850" : "#969f9f"));

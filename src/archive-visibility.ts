@@ -1,5 +1,7 @@
 import * as THREE from 'three';
-import { COLUMN_SPACING, ROW_SPACING, type ArchiveCell } from './archive-loop.ts';
+import { CARD_HALF_WIDTH, COLUMN_SPACING, ROW_SPACING, type ArchiveCell } from './archive-loop.ts';
+
+const CARD_MARGIN = CARD_HALF_WIDTH + 0.3;
 
 const edges = [[0,1],[0,2],[0,4],[1,3],[1,5],[2,3],[2,6],[3,7],[4,5],[4,6],[5,7],[6,7]];
 /** A view-aligned pool, clipped to the height slab the array can occupy. */
@@ -39,15 +41,15 @@ export class ArchiveVisibility {
       if(t>=0&&t<=1)slab.expandByPoint(start.clone().lerp(end,t));
     }
     if(slab.isEmpty()) { this.candidates=0; return this.cachedCells = []; }
-    const minLane=Math.floor((slab.min.x-2.8+trackX)/COLUMN_SPACING+2)-1;
-    const maxLane=Math.ceil((slab.max.x+2.8+trackX)/COLUMN_SPACING+2)+1;
+    const minLane=Math.floor((slab.min.x-CARD_MARGIN+trackX)/COLUMN_SPACING+2)-1;
+    const maxLane=Math.ceil((slab.max.x+CARD_MARGIN+trackX)/COLUMN_SPACING+2)+1;
     const minRow=Math.floor((slab.min.z-.6-trackZ)/ROW_SPACING+15.5)-2;
     const maxRow=Math.ceil((slab.max.z+.6-trackZ)/ROW_SPACING+15.5)+2;
     const cells: ArchiveCell[]=[];
     for(let lane=minLane;lane<=maxLane;lane++)for(let row=minRow;row<=maxRow;row++) {
       const x=(lane-2)*COLUMN_SPACING-trackX, z=(row-15.5)*ROW_SPACING+trackZ;
-      this.box.min.set(x-2.8,bottom,z-1.2);
-      this.box.max.set(x+2.8,top,z+1.2);
+      this.box.min.set(x-CARD_MARGIN,bottom,z-1.2);
+      this.box.max.set(x+CARD_MARGIN,top,z+1.2);
       if(this.frustum.intersectsBox(this.box))cells.push({lane,row});
     }
     this.candidates=cells.length;
@@ -56,8 +58,8 @@ export class ArchiveVisibility {
   intersects(x: number, y: number, z: number) {
     // Conservative over the subtle x-axis lean and normal wave amplitude.
     // Additional depth keeps adjacent offscreen shadow casters in the set.
-    this.box.min.set(x-2.8,y-.3,z-1.2);
-    this.box.max.set(x+2.8,y+4.1,z+1.2);
+    this.box.min.set(x-CARD_MARGIN,y-.3,z-1.2);
+    this.box.max.set(x+CARD_MARGIN,y+4.1,z+1.2);
     return this.frustum.intersectsBox(this.box);
   }
 }

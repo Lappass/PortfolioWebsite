@@ -1,5 +1,8 @@
 import * as THREE from "three";
 import { InstanceUpdates } from "./instance-updates.ts";
+import { CARD_HALF_WIDTH } from "./archive-loop.ts";
+
+const CARD_MARGIN = CARD_HALF_WIDTH + 0.3;
 
 /** Colour/transmission/normal passes need only the actual camera frustum.
  * The wider existing archive pool remains intact for offscreen shadow casters.
@@ -17,8 +20,8 @@ export class ArchiveDrawCoverage {
   }
   contains(x: number, y: number, z: number) {
     // Same conservative card bounds as the original pool, including its lean.
-    this.box.min.set(x - 2.8, y - 0.3, z - 1.2);
-    this.box.max.set(x + 2.8, y + 4.1, z + 1.2);
+    this.box.min.set(x - CARD_MARGIN, y - 0.3, z - 1.2);
+    this.box.max.set(x + CARD_MARGIN, y + 4.1, z + 1.2);
     return this.frustum.intersectsBox(this.box);
   }
 }

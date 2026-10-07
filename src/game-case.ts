@@ -1,0 +1,149 @@
+import * as THREE from "three";
+import type { GLTF } from "three/addons/loaders/GLTFLoader.js";
+import { records } from "./data";
+import { CASE_H, INSERT_ASPECT, discLabelCanvas, insertCanvas, paintInsert } from "./case-art";
+
+/** Archive units: the case stands 3.7 tall on y = 0, front cover towards +Z. */
+const SCALE = 3.7 / CASE_H;
+const ATLAS_COLUMNS = 5;
+const SURFACE: Record<string, string> = {
+  Case_Tray: "Case_Shell", Case_Lid: "Case_Shell",
+  Insert_Front: "Insert_Print", Insert_Spine: "Insert_Print", Insert_Back: "Insert_Print",
+  Disc: "Disc_Surface", Disc_Label: "Disc_Label", Disc_Hub: "Hub_Plastic",
+};
+// The array draws only the closed exterior; the inside appears on the selected case.
+const EXTERIOR = ["Case_Tray", "Case_Lid", "Insert_Front", "Insert_Spine", "Insert_Back"];
+const PART: Record<string, "lid" | "disc"> = { Case_Lid: "lid", Insert_Front: "lid", Disc: "disc", Disc_Label: "disc" };
+
+export const isCaseSurface = (name: string) => /^(Case_|Insert_|Disc|Hub_)/.test(name);
+
+function materials() {
+  const shell = new THREE.MeshPhysicalMaterial({ name: "Case_Shell", color: "#121619", roughness: 0.32, clearcoat: 0.6, clearcoatRoughness: 0.25 });
+  const print = new THREE.MeshPhysicalMaterial({ name: "Insert_Print", color: "#ffffff", roughness: 0.45, clearcoat: 1, clearcoatRoughness: 0.06 });
+  const disc = new THREE.MeshPhysicalMaterial({ name: "Disc_Surface", color: "#d9dde0", metalness: 1, roughness: 0.12, iridescence: 1, iridescenceIOR: 1.6, iridescenceThicknessRange: [180, 620] });
+  const label = new THREE.MeshPhysicalMaterial({ name: "Disc_Label", color: "#ffffff", roughness: 0.4 });
+  const hub = new THREE.MeshPhysicalMaterial({ name: "Hub_Plastic", color: "#1d2226", roughness: 0.5 });
+  return { Case_Shell: shell, Insert_Print: print, Disc_Surface: disc, Disc_Label: label, Hub_Plastic: hub } as Record<string, THREE.MeshPhysicalMaterial>;
+}
+
+function texture(canvas: HTMLCanvasElement, anisotropy: number, flipY = false) {
+  const map = new THREE.CanvasTexture(canvas);
+  map.flipY = flipY;
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.anisotropy = anisotropy;
+  return map;
+}
+/** The disc label's planar UVs run bottom-up and mirrored, unlike the insert. */
+function labelTexture(canvas: HTMLCanvasElement, anisotropy: number) {
+  const map = texture(canvas, anisotropy, true);
+  map.wrapS = THREE.RepeatWrapping;
+  map.repeat.x = -1;
+  return map;
+}
+
+function coverAtlas(anisotropy: number) {
+  const rows = Math.ceil(records.length / ATLAS_COLUMNS);
+  const tile = Math.floor(4096 / ATLAS_COLUMNS), tileH = Math.floor(tile / INSERT_ASPECT);
+  const canvas = Object.assign(document.createElement("canvas"), { width: tile * ATLAS_COLUMNS, height: tileH * rows });
+  const c = canvas.getContext("2d")!;
+  c.fillStyle = "#14181b";
+  c.fillRect(0, 0, canvas.width, canvas.height);
+  records.forEach((record, i) => paintInsert(c, record, i + 1, (i % ATLAS_COLUMNS) * tile + 2, Math.floor(i / ATLAS_COLUMNS) * tileH + 1, tile - 4));
+  const map = texture(canvas, anisotropy);
+  map.generateMipmaps = true;
+  return { map, rows };
+}
+
+export interface GameCase {
+  selected: THREE.Mesh[];
+  instanced: { geometry: THREE.BufferGeometry; material: THREE.MeshPhysicalMaterial; castShadow: boolean }[];
+  palettes: [string, THREE.MeshPhysicalMaterial, THREE.MeshPhysicalMaterial | undefined][];
+  coverAttribute: THREE.InstancedBufferAttribute;
+}
+
+export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number): GameCase {
+  gltf.scene.updateMatrixWorld(true);
+  const base = new THREE.Matrix4().makeScale(SCALE, SCALE, SCALE).multiply(new THREE.Matrix4().makeTranslation(0, CASE_H / 2, 0));
+  const pivot = {
+    lid: gltf.scene.getObjectByName("Case_Lid")!.getWorldPosition(new THREE.Vector3()).applyMatrix4(base),
+    disc: gltf.scene.getObjectByName("Disc")!.getWorldPosition(new THREE.Vector3()).applyMatrix4(base),
+  };
+  const high = materials();
+  const coverAttribute = new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1).setUsage(THREE.DynamicDrawUsage);
+  const { map: atlas, rows } = coverAtlas(anisotropy);
+  const low: Record<string, THREE.MeshPhysicalMaterial> = {
+    Case_Shell: high.Case_Shell.clone(),
+    Insert_Print: high.Insert_Print.clone(),
+  };
+  low.Insert_Print.map = atlas;
+  low.Insert_Print.clearcoat = 0.6;
+  low.Insert_Print.onBeforeCompile = (shader) => {
+    shader.vertexShader = "attribute float archiveCover;\n" + shader.vertexShader.replace(
+      "#include <uv_vertex>",
+      `#include <uv_vertex>\nvMapUv = (vec2(mod(archiveCover, ${ATLAS_COLUMNS}.0), floor((archiveCover + 0.5) / ${ATLAS_COLUMNS}.0)) + vMapUv) / vec2(${ATLAS_COLUMNS}.0, ${rows}.0);`,
+    );
+  };
+  low.Insert_Print.customProgramCacheKey = () => "archive-cover-atlas";
+
+  const selected: THREE.Mesh[] = [];
+  const instanced: GameCase["instanced"] = [];
+  const meshes: THREE.Mesh[] = [];
+  gltf.scene.traverse((o) => { if (o instanceof THREE.Mesh && SURFACE[o.name]) meshes.push(o); });
+  // The tray must be the first instanced batch: picking and shadows use it.
+  meshes.sort((a, b) => Number(b.name === "Case_Tray") - Number(a.name === "Case_Tray"));
+  for (const source of meshes) {
+    const surface = SURFACE[source.name];
+    const geometry = source.geometry.clone().applyMatrix4(base.clone().multiply(source.matrixWorld));
+    if (EXTERIOR.includes(source.name)) {
+      const arrayGeometry = geometry.clone();
+      if (surface === "Insert_Print") arrayGeometry.setAttribute("archiveCover", coverAttribute);
+      instanced.push({ geometry: arrayGeometry, material: low[surface], castShadow: source.name === "Case_Tray" });
+    }
+    const part = PART[source.name];
+    if (part) geometry.translate(-pivot[part].x, -pivot[part].y, -pivot[part].z);
+    const mesh = new THREE.Mesh(geometry, high[surface]);
+    mesh.name = source.name;
+    mesh.userData.surface = surface;
+    mesh.userData.casePart = part;
+    if (part) mesh.position.copy(pivot[part]);
+    mesh.userData.caseBase = mesh.position.toArray();
+    mesh.castShadow = source.name === "Case_Tray" || source.name === "Case_Lid" || part === "disc";
+    mesh.receiveShadow = true;
+    selected.push(mesh);
+  }
+  const palettes: GameCase["palettes"] = Object.entries(high).map(([name, mat]) => [name, mat, low[name]]);
+  return { selected, instanced, palettes, coverAttribute };
+}
+
+/** Lid swings open on the spine hinge, then the disc rises and spins. */
+export function poseCase(group: THREE.Object3D, open: number, time: number) {
+  const lid = THREE.MathUtils.smoothstep(open, 0, 0.7);
+  const lift = THREE.MathUtils.smoothstep(open, 0.45, 1);
+  for (const child of group.children) {
+    const part = child.userData.casePart;
+    if (!part) continue;
+    const [x, y, z] = child.userData.caseBase as number[];
+    // Half-open like a door, so the cover art stays readable beside the disc.
+    if (part === "lid") child.rotation.y = -1.25 * lid;
+    else {
+      child.position.set(x + 1.35 * lift, y + 0.2 * lift, z + 0.55 * lift);
+      child.rotation.z = time * 1.4 * lift;
+    }
+  }
+}
+
+/** Assign printed textures for one record to a prepared case group. */
+export function printCase(group: THREE.Object3D, index: number, anisotropy: number) {
+  const record = records[index];
+  const insert = texture(insertCanvas(record, index + 1, 2048), anisotropy);
+  const label = labelTexture(discLabelCanvas(record), anisotropy);
+  for (const child of group.children) {
+    if (!(child instanceof THREE.Mesh)) continue;
+    const surface = child.userData.surface;
+    if (surface !== "Insert_Print" && surface !== "Disc_Label") continue;
+    const mat = child.material as THREE.MeshPhysicalMaterial;
+    mat.map?.dispose();
+    mat.map = surface === "Insert_Print" ? insert : label;
+    mat.needsUpdate = true;
+  }
+}

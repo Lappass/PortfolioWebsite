@@ -186,7 +186,7 @@ export class CardAppearance {
     for (const child of group.children) {
       const mesh = child as THREE.Mesh;
       const mat = mesh.material as THREE.MeshBasicMaterial;
-      if (!mesh.userData.surface) mat.map?.dispose();
+      if (!mesh.userData.surface || mesh.userData.surface === "Insert_Print" || mesh.userData.surface === "Disc_Label") mat.map?.dispose();
       mat.dispose();
     }
   }

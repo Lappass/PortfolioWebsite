@@ -8,7 +8,8 @@ import { disposeThreeTree } from "./three-resources";
 import { ThemeWave } from "./theme-motion";
 import { themeMaterial, themeEnvironment } from "./theme-material";
 import { RhythmMotion, rhythmDisplacement, quietBands, type MusicBands, type RhythmStyle } from "./archive-play-motion";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
+import { buildGameCase, poseCase, printCase } from "./game-case";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -30,6 +31,7 @@ import {
   LOOP_COLUMNS,
   LOOP_ROWS,
   COLUMN_SPACING,
+  CARD_HALF_WIDTH,
   ROW_SPACING,
   type ArchiveCell,
   type ArchiveNavigation,
@@ -344,7 +346,7 @@ export class ArchiveScene {
     this.composer.addPass(new OutputPass());
     this.bindPointer();
   }
-  async load(assetUrl = publicAsset("assets/archive-cassette.glb")) {
+  async load(assetUrl = publicAsset("assets/game-case.glb")) {
     this.labelMark.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(labelMarkSvg)}`;
     await this.labelMark.decode();
     const gltf = await new GLTFLoader().loadAsync(
@@ -361,6 +363,7 @@ export class ArchiveScene {
       const cell = poolCell(index);
       this.cells.push(cell);
     }
+    if (/game-case/.test(assetUrl)) return this.loadGameCase(gltf, count);
     for (const mesh of meshes) {
       const geom = mesh.geometry
         .clone()
@@ -506,6 +509,37 @@ export class ArchiveScene {
     this.appearance.prepare(this.model);
     this.appearance.apply(this.model, 0);
     this.drawLabel(0);
+    this.scene.add(this.model);
+    this.model.position.copy(this.cellPosition(poolCell(this.selectedSlot)));
+    this.loaded = true;
+  }
+
+  private caseMode = false;
+  private coverAttribute?: THREE.InstancedBufferAttribute;
+  private coverUpdates?: InstanceUpdates;
+  private loadGameCase(gltf: GLTF, count: number) {
+    this.caseMode = true;
+    const anisotropy = this.renderer.capabilities.getMaxAnisotropy();
+    const build = buildGameCase(gltf, count, anisotropy);
+    for (const [name, high, low] of build.palettes) this.appearance.register(name, high, low);
+    this.coverAttribute = build.coverAttribute;
+    this.themeAttribute ??= new THREE.InstancedBufferAttribute(new Float32Array(count), 1).setUsage(THREE.DynamicDrawUsage);
+    for (const part of build.instanced) {
+      part.geometry.setAttribute("archiveTheme", this.themeAttribute);
+      const inst = new THREE.InstancedMesh(part.geometry, part.material, count);
+      inst.instanceMatrix = this.instances[0]?.instanceMatrix ?? inst.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      inst.castShadow = part.castShadow;
+      inst.receiveShadow = true;
+      inst.frustumCulled = false;
+      this.instances.push(inst);
+      this.scene.add(inst);
+    }
+    for (const mesh of build.selected) this.model.add(mesh);
+    this.shadowCoverage = new ArchiveShadowCoverage(this.instances.find(mesh => mesh.castShadow)!);
+    this.scene.add(this.shadowCoverage.mesh);
+    this.appearance.prepare(this.model);
+    this.appearance.apply(this.model, 0);
+    printCase(this.model, fileAtCell(this.selectedCell), anisotropy);
     this.scene.add(this.model);
     this.model.position.copy(this.cellPosition(poolCell(this.selectedSlot)));
     this.loaded = true;
@@ -727,6 +761,10 @@ export class ArchiveScene {
     const changed = !sameCell(cell, this.selectedCell);
     if (this.looping && changed && this.loaded && this.lift.value > 0.0001) {
       const group = this.model.clone(true);
+      if (this.caseMode) {
+        this.appearance.prepare(group);
+        printCase(group, fileAtCell(this.selectedCell), this.renderer.capabilities.getMaxAnisotropy());
+      } else {
       const label = group.children[group.children.length - 1] as THREE.Mesh;
       const canvas = document.createElement("canvas");
       canvas.width = 1024;
@@ -744,6 +782,7 @@ export class ArchiveScene {
       // before installing appearance shaders, so theme hooks are not appended
       // to the original label a second time on every selection.
       this.appearance.prepare(group);
+      }
       this.appearance.apply(group, ease(this.lift.value / 0.4));
       this.appearance.setClarity(group, this.modelClarity());
       this.scene.add(group);
@@ -787,6 +826,10 @@ export class ArchiveScene {
     this.pulses = this.pulses.slice(-6);
   }
   private drawLabel(index: number) {
+    if (this.caseMode) {
+      printCase(this.model, index, this.renderer.capabilities.getMaxAnisotropy());
+      return;
+    }
     if (!this.labelTexture) return;
     const c = this.labelCanvas.getContext("2d")!;
     c.fillStyle = "#e6e2d9";
@@ -825,6 +868,13 @@ export class ArchiveScene {
     this.themeAttribute = new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1).setUsage(THREE.DynamicDrawUsage);
     if (previousTheme) this.themeAttribute.array.set(previousTheme.array);
     for (const inst of this.instances) inst.geometry.setAttribute("archiveTheme", this.themeAttribute);
+    if (this.coverAttribute) {
+      const previousCover = this.coverAttribute;
+      this.coverAttribute = new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1).setUsage(THREE.DynamicDrawUsage);
+      this.coverAttribute.array.set(previousCover.array);
+      for (const inst of this.instances) if (inst.geometry.getAttribute("archiveCover")) inst.geometry.setAttribute("archiveCover", this.coverAttribute);
+      this.coverUpdates = new InstanceUpdates(this.coverAttribute);
+    }
     this.matrixUpdates = new InstanceUpdates(matrix);
     this.themeUpdates = new InstanceUpdates(this.themeAttribute);
     this.instanceCapacity = capacity;
@@ -1436,6 +1486,7 @@ export class ArchiveScene {
       cinematic ? shot + 5 : undefined);
     this.appearance.apply(this.model, ease(this.lift.value / 0.4));
     this.appearance.setClarity(this.model, this.modelClarity());
+    if (this.caseMode) poseCase(this.model, this.modelClarity(), time);
     // Reference 26.92–27.76: the array travels horizontally into a white field.
     const entry = cinematic ? ease((shot - 21.9) / 0.86) : this.reveal;
     const entranceTime = THREE.MathUtils.clamp((shot - 21.92) / 0.75, 0, 1);
@@ -1462,6 +1513,7 @@ export class ArchiveScene {
       this.appearance.setTheme(o.group, this.theme.sample(o.cell, time), indexDim(o.lift.value));
       o.clarity = this.motion.modelDecryption ? o.clarity * Math.exp(-dt * 9) : 0;
       this.appearance.setClarity(o.group, o.clarity);
+      if (this.caseMode) poseCase(o.group, o.clarity, time);
       const { row, lane } = o.cell;
       o.group.rotation.x =
         (field(row + 0.5, lane) - field(row - 0.5, lane)) *
@@ -1583,7 +1635,7 @@ export class ArchiveScene {
       const pixelScale = 1080 / openingSpan(span);
       const anchorAim = this.model.position
         .clone()
-        .add(new THREE.Vector3(-2.5, 3.7, 0));
+        .add(new THREE.Vector3(-CARD_HALF_WIDTH, 3.7, 0));
       anchorAim.addScaledVector(
         right,
         -(THREE.MathUtils.lerp(840, 518, pan) - 960) * openingAspect / pixelScale,
@@ -1616,7 +1668,7 @@ export class ArchiveScene {
         .normalize();
       const anchorAim = this.model.position
         .clone()
-        .add(new THREE.Vector3(-2.5, 3.7, 0));
+        .add(new THREE.Vector3(-CARD_HALF_WIDTH, 3.7, 0));
       anchorAim.addScaledVector(right, -(screenX - 960) * openingAspect / pixelScale);
       anchorAim.addScaledVector(up, -(540 - screenY) / pixelScale);
       cameraAim.lerp(anchorAim, ease((shot - 27.3) / 0.5));
@@ -1693,6 +1745,7 @@ export class ArchiveScene {
     this.shadowCoverage?.begin();
     this.matrixUpdates ??= new InstanceUpdates(this.instances[0].instanceMatrix);
     if (this.themeAttribute) this.themeUpdates ??= new InstanceUpdates(this.themeAttribute);
+    if (this.coverAttribute) this.coverUpdates ??= new InstanceUpdates(this.coverAttribute);
     for (const cell of this.cells) {
       const { row, lane } = cell;
       if (hidden.has(cellKey(cell))) continue;
@@ -1713,6 +1766,7 @@ export class ArchiveScene {
       this.ensureInstanceCapacity(i + 1);
       this.drawnCells.push(cell);
       this.themeUpdates?.scalar(i, this.theme.sample(cell, time));
+      this.coverUpdates?.scalar(i, fileAtCell(cell));
       this.matrixUpdates!.set(i * 16, this.dummy.matrix.elements);
     }
     const countChanged = this.instances[0].count !== this.drawnCells.length;
@@ -1726,6 +1780,7 @@ export class ArchiveScene {
     // renderer culling and do not need an O(n) bound recomputation each frame.
     if (matricesChanged || countChanged || !this.instances[0].boundingSphere) this.instances[0].computeBoundingSphere();
     this.themeUpdates?.commit();
+    const coversChanged = this.coverUpdates?.commit() ?? false;
     let neighborTop = -Infinity;
     const lane = selectedLane,
       row = selectedRow;
@@ -1773,7 +1828,7 @@ export class ArchiveScene {
     this.scene.updateMatrixWorld();
     // A changed instance buffer already proves the image changed. Avoid a
     // material/matrix snapshot on those busy frames; capture when it settles.
-    if (matricesChanged || cinematic) {
+    if (matricesChanged || coversChanged || cinematic) {
       state.invalidate();
     } else {
       state.begin();
@@ -1840,8 +1895,8 @@ export class ArchiveScene {
     };
     return {
       decryption: { ...this.decryption.frame, clarity: this.decryption.clarity, modelClarity: this.modelClarity() },
-      topLeft: project(-2.5, 3.7, 0),
-      topRight: project(2.5, 3.7, 0),
+      topLeft: project(-CARD_HALF_WIDTH, 3.7, 0),
+      topRight: project(CARD_HALF_WIDTH, 3.7, 0),
       labelTopLeft: project(-1.855, 3.27, 0.255),
       labelBottomLeft: project(-1.855, 2.81, 0.255),
       modelPosition: this.model.position

@@ -6,7 +6,9 @@ export type ArchiveNavigation =
 
 export const LOOP_COLUMNS = 9;
 export const LOOP_ROWS = 32;
-export const COLUMN_SPACING = 5.2;
+// Game cases stand portrait: 1.47 half width, 2.94 wide, 3.7 tall.
+export const CARD_HALF_WIDTH = 1.47;
+export const COLUMN_SPACING = 3.2;
 export const ROW_SPACING = 0.62;
 const POOL_LANES = [0, 1, 2, 3, 4, -2, -1, 5, 6];
 
