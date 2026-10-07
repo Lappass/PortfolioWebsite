@@ -89,10 +89,11 @@ export class ConsoleSetup {
     this.group.updateMatrixWorld(true);
     const eye = this.group.worldToLocal(camera.clone());
     this.monitor.rotation.y = THREE.MathUtils.clamp(Math.atan2(eye.x - this.monitorPivot.x, eye.z - this.monitorPivot.z), -0.9, 0.9);
-    const reading = THREE.MathUtils.smoothstep(insert, 0.5, 0.58) * (1 - THREE.MathUtils.smoothstep(insert, 0.95, 1));
-    if (this.light) this.light.emissiveIntensity = 0.6 + reading * (1.5 + 1.2 * Math.sin(time * 16));
+    const power = THREE.MathUtils.smoothstep(insert, 0.06, 0.18);
+    const reading = THREE.MathUtils.smoothstep(insert, 0.46, 0.55) * (1 - THREE.MathUtils.smoothstep(insert, 0.94, 0.99));
+    if (this.light) this.light.emissiveIntensity = power * (0.7 + reading * (1.5 + 1.2 * Math.sin(insert * 110)));
     this.lamp.intensity = 2.4 * THREE.MathUtils.smoothstep(insert, 0.02, 0.2) * (1 - THREE.MathUtils.smoothstep(insert, 0.85, 1));
-    this.draw(THREE.MathUtils.smoothstep(insert, 0.55, 0.97), title);
+    this.draw(insert, title);
   }
 
   /** World-space corners of the screen, for handing over to the page. */
@@ -105,32 +106,65 @@ export class ConsoleSetup {
   }
 
   private draw(progress: number, title: string) {
-    const key = `${progress.toFixed(3)}|${title}`;
+    // Every visual follows the insertion timeline, including interrupted ejection.
+    // Quantise uploads to ~30 fps during the six-second sequence; idle screens reuse pixels.
+    progress = Math.round(progress * 180) / 180;
+    const key = `${progress}|${title}`;
     if (key === this.drawn) return;
     this.drawn = key;
     const c = this.canvas.getContext("2d")!, w = this.canvas.width, h = this.canvas.height;
-    const bg = c.createRadialGradient(w * 0.5, h * 0.35, 40, w * 0.5, h * 0.5, w * 0.75);
-    bg.addColorStop(0, "#2a2620");
+    c.fillStyle = "#020305";
+    c.fillRect(0, 0, w, h);
+    const ease = THREE.MathUtils.smoothstep;
+    const wake = ease(progress, 0.54, 0.62);
+    if (!wake) {
+      this.texture.needsUpdate = true;
+      return;
+    }
+    c.save();
+    c.globalAlpha = wake;
+    const bg = c.createRadialGradient(w / 2, h * 0.43, 0, w / 2, h / 2, w * 0.65);
+    bg.addColorStop(0, "#26231e");
     bg.addColorStop(1, "#07080b");
     c.fillStyle = bg;
     c.fillRect(0, 0, w, h);
+    // A narrow backlight line opens into the screen before the logo resolves.
+    const flash = ease(progress, 0.54, 0.57) * (1 - ease(progress, 0.58, 0.64));
+    c.fillStyle = `rgba(255,232,192,${flash * 0.8})`;
+    c.fillRect(w * 0.18, h / 2 - 1, w * 0.64, 2);
+
+    const logo = ease(progress, 0.63, 0.75);
+    c.save();
+    c.globalAlpha *= logo;
+    const scale = 0.91 + 0.09 * logo;
+    c.translate(w / 2, h * 0.42 + (1 - logo) * 18);
+    c.scale(scale, scale);
     c.fillStyle = "#eef3ff";
     c.textAlign = "center";
-    c.font = "700 64px MiSans, sans-serif";
-    c.fillText("LAPPAS", w / 2, h * 0.42);
-    if (progress > 0) {
+    c.font = "700 82px MiSans, sans-serif";
+    c.fillText("LAPPAS", 0, 0);
+    c.font = "500 18px MiSans, sans-serif";
+    c.fillStyle = "#cbb797";
+    c.fillText("W O R K S   /   C O N S O L E", 0, 42);
+    c.restore();
+
+    if (progress >= 0.75) {
+      const system = ease(progress, 0.75, 0.83);
+      const read = ease(progress, 0.85, 0.98);
+      c.globalAlpha *= system;
+      c.textAlign = "center";
       c.font = "500 34px MiSans, sans-serif";
       c.fillStyle = "rgba(238, 243, 255, 0.85)";
-      c.fillText(title, w / 2, h * 0.53);
+      c.fillText(progress < 0.85 ? "系统启动中" : title, w / 2, h * 0.57);
       c.fillStyle = "rgba(238, 243, 255, 0.18)";
-      c.fillRect(w * 0.3, h * 0.62, w * 0.4, 4);
+      c.fillRect(w * 0.3, h * 0.65, w * 0.4, 4);
       c.fillStyle = "#e0b878";
-      c.fillRect(w * 0.3, h * 0.62, w * 0.4 * progress, 4);
+      c.fillRect(w * 0.3, h * 0.65, w * 0.4 * (progress < 0.85 ? system * 0.12 : 0.12 + read * 0.88), 4);
       c.font = "500 22px MiSans, sans-serif";
       c.fillStyle = "rgba(238, 243, 255, 0.55)";
-      c.fillText(progress < 1 ? "正在读取光盘…" : "准备就绪", w / 2, h * 0.7);
+      c.fillText(progress < 0.85 ? "BOOT / 初始化系统…" : progress < 0.98 ? "DISC / 正在读取作品…" : "READY / 准备就绪", w / 2, h * 0.73);
     }
-    c.textAlign = "left";
+    c.restore();
     this.texture.needsUpdate = true;
   }
 }

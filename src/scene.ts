@@ -557,7 +557,7 @@ export class ArchiveScene {
   private updateInsert(dt: number) {
     const { insert } = this;
     // Linear time; poseCase and the camera apply the easing.
-    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 4.4 : -dt / 1.6), 0, 1);
+    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 6 : -dt / 1.6), 0, 1);
     if (insert.value >= 1 && this.insertDone) {
       this.insertDone();
       this.insertDone = undefined;
@@ -570,7 +570,7 @@ export class ArchiveScene {
     this.model.updateMatrixWorld();
     const local = (v: THREE.Vector3) => v.clone().applyMatrix4(this.model.matrixWorld);
     const toConsole = THREE.MathUtils.smoothstep(p, 0, 0.2);
-    const toScreen = THREE.MathUtils.smoothstep(p, 0.58, 0.92);
+    const toScreen = THREE.MathUtils.smoothstep(p, 0.54, 0.73);
     // Frame the console (slot just right of centre, the case still at the left edge).
     const consoleAim = local(this.setup.slotLocal.clone().add(new THREE.Vector3(-1.3, 0.9, 0)));
     const aim = detailAim.clone().lerp(consoleAim, toConsole).lerp(local(this.setup.screenLocal), toScreen);

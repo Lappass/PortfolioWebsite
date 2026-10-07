@@ -280,6 +280,7 @@ function showProjectPage(options: { instant?: boolean; push?: boolean; intro?: b
 }
 // The disc goes into the slot bar first; the hub opens once it has been read.
 let discInserting = false;
+let consoleCueProgress = 0;
 async function insertDiscAndOpen() {
   if (discInserting || projectPage.isOpen || mode !== "detail") return;
   if (!scene || !motionActive("modelDecryption")) {
@@ -290,6 +291,7 @@ async function insertDiscAndOpen() {
     return;
   }
   discInserting = true;
+  consoleCueProgress = scene.insertProgress;
   $("#stage").dataset.inserting = "true";
   audio.play("disc-insert");
   await scene.insertDisc();
@@ -1122,6 +1124,12 @@ function frame(ms: number) {
   wallpaperEffects?.update(time, motionIsReduced(), motionActive("pointerParallax"));
   // The calibrated 2D opening fully covers the scene until array entry.
   if (!viewer?.isOpen && !projectPage.covering && !profilePage.covering && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
+  if (discInserting && scene) {
+    const progress = scene.insertProgress;
+    if (consoleCueProgress < 0.63 && progress >= 0.63) audio.play("brand");
+    if (consoleCueProgress < 0.85 && progress >= 0.85) audio.play("scan");
+    consoleCueProgress = progress;
+  }
   viewer?.update(time);
   if (threeState === "closing" && scene?.presentationHidden) releaseThree();
   playground?.position();
