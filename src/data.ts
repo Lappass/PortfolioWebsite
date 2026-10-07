@@ -14,6 +14,7 @@ export interface ArchiveRecord {
   source: string;
   tags?: string[];
   cover?: string;
+  hero?: string;
   gallery?: { src: string; caption?: string }[];
   video?: string;
   unity?: string;

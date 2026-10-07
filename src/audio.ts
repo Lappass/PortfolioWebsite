@@ -17,7 +17,10 @@ export type Sound =
   | "array"
   | "inspect"
   | "explode"
-  | "assemble";
+  | "assemble"
+  | "disc-insert"
+  | "disc-read"
+  | "disc-eject";
 export type SoundScene = "boot" | "archive" | "detail" | "viewer";
 export type AudioPreferences = {
   sound: boolean;
@@ -249,6 +252,22 @@ export function synthesizeSound(
       glass(1150, 0.071, 0.58);
       glass(2180, 0.025, 0.36, 0.16);
       air(3100, 4400, 0.014, 0.25, 0.035, 0.025);
+      break;
+    // Slot loader: friction, a motor spinning up, then a seated click.
+    case "disc-insert":
+      air(500, 2600, 0.045, 0.75, 0, 0.05);
+      tone(80, 240, 0.03, 1.1, 0.1, 0.12);
+      glass(980, 0.05, 0.3, 0.78);
+      break;
+    case "disc-read":
+      tone(523, 523, 0.024, 0.5, 0, 0.01);
+      tone(784, 784, 0.02, 0.55, 0.13, 0.01);
+      tone(1046, 1046, 0.018, 0.8, 0.26, 0.01);
+      air(5200, 7000, 0.012, 0.6, 0.26, 0.05);
+      break;
+    case "disc-eject":
+      tone(240, 90, 0.026, 0.6, 0, 0.03);
+      air(2400, 600, 0.04, 0.55, 0.05, 0.03);
       break;
     case "confirm":
       tone(640, 640, 0.039, 0.095, 0, 0.008);

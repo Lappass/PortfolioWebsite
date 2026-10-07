@@ -2,6 +2,22 @@ import "./project-page.css";
 import type { ArchiveRecord } from "./data";
 import { escapeHtml } from "./html";
 import { logo } from "./brand";
+import { paintArtwork } from "./case-art";
+
+const heroArt = new Map<string, string>();
+/** Key art for the hub: the work's own image, or its generated cover art at screen size. */
+function heroSource(r: ArchiveRecord) {
+  const own = r.hero ?? r.cover;
+  if (own) return media(own);
+  let url = heroArt.get(r.id);
+  if (!url) {
+    const canvas = Object.assign(document.createElement("canvas"), { width: 1600, height: 900 });
+    paintArtwork(canvas.getContext("2d")!, r, 0, 1600, 900);
+    url = canvas.toDataURL("image/jpeg", 0.86);
+    heroArt.set(r.id, url);
+  }
+  return url;
+}
 
 const isWeb = (value: string) => /^https?:\/\//i.test(value);
 const media = (value: string) => escapeHtml(isWeb(value) ? value : `${import.meta.env.BASE_URL}${value.replace(/^\//, "")}`);
@@ -24,6 +40,7 @@ export class ProjectPage {
   private timer = 0;
   private pushed = false;
   private returnFocus: HTMLElement | null = null;
+  private introTimer = 0;
 
   constructor(private handlers: { close: () => void; navigate: (direction: 1 | -1) => void }) {
     this.root.id = "project-page";
@@ -42,6 +59,8 @@ export class ProjectPage {
       if (action === "prev") this.handlers.navigate(-1);
       if (action === "next") this.handlers.navigate(1);
       if (action === "unity") this.loadUnity(button);
+      if (action === "more") this.root.querySelector(".pp-body")?.scrollIntoView({ behavior: "smooth" });
+      if (action === "start") this.start();
       if (action === "fullscreen") void this.root.querySelector<HTMLIFrameElement>(".pp-unity iframe")?.requestFullscreen?.().catch(() => {});
     });
     this.root.addEventListener("keydown", (event) => this.trapFocus(event));
@@ -52,7 +71,7 @@ export class ProjectPage {
   get covering() { return this.state === "open"; }
   get currentId() { return this.record?.id ?? null; }
 
-  open(record: ArchiveRecord, neighbours: Neighbours, options: { instant?: boolean; push?: boolean } = {}) {
+  open(record: ArchiveRecord, neighbours: Neighbours, options: { instant?: boolean; push?: boolean; intro?: boolean } = {}) {
     if (this.isOpen) { this.render(record, neighbours); return; }
     this.render(record, neighbours);
     if (options.push !== false && location.hash !== workHash(record.id)) {
@@ -63,6 +82,10 @@ export class ProjectPage {
     clearTimeout(this.timer);
     this.root.hidden = false;
     this.root.classList.toggle("instant", Boolean(options.instant));
+    // The key art reveal plays once, right after a disc has been read.
+    this.root.classList.toggle("intro", Boolean(options.intro));
+    clearTimeout(this.introTimer);
+    if (options.intro) this.introTimer = window.setTimeout(() => this.root.classList.remove("intro"), 2600);
     this.state = "opening";
     // Commit the hidden state first so the fade actually runs.
     void this.root.offsetWidth;
@@ -92,12 +115,24 @@ export class ProjectPage {
         <span class="pp-brand" aria-hidden="true">LAPPAS</span>
         <nav aria-label="切换作品"><button type="button" data-page="prev" aria-label="上一个作品：${e(previous.title)}">← <span>上一个</span></button><span class="pp-count">${pad(position)} / ${pad(total)}</span><button type="button" data-page="next" aria-label="下一个作品：${e(next.title)}"><span>下一个</span> →</button></nav>
       </header>
+      <section class="pp-hub">
+        <div class="pp-hub-art"><img src="${heroSource(r)}" alt="" decoding="async"></div>
+        <div class="pp-hub-content">
+          <div class="pp-kicker"><i></i>${e(r.category)} <span>·</span> ${e(r.id)}</div>
+          <h1 id="pp-title" tabindex="-1">${e(r.title)}</h1>
+          <div class="pp-en">${e(r.en)}</div>
+          <div class="pp-hub-actions">
+            <button type="button" class="pp-start" data-page="start">▶ <span>${r.unity ? "开始试玩" : r.video ? "播放视频" : "访问项目"}</span></button>
+            <button type="button" data-page="more">项目信息 <span>↓</span></button>
+          </div>
+        </div>
+      </section>
       <article class="pp-body">
         <section class="pp-hero">
           <div class="pp-frame pp-hero-media">${this.heroMarkup(r)}</div>
           <div class="pp-info">
             <div class="pp-kicker"><i></i>${e(r.category)} <span>·</span> ${e(r.id)}</div>
-            <h1 id="pp-title" tabindex="-1">${e(r.title)}</h1>
+            <h2>${e(r.title)}</h2>
             <div class="pp-en">${e(r.en)}</div>
             <dl class="pp-meta">
               <div><dt>角色</dt><dd>${e(r.department)}</dd></div>
@@ -161,6 +196,22 @@ export class ProjectPage {
     if (isFile(src)) return `<video controls playsinline preload="metadata"${r.cover ? ` poster="${media(r.cover)}"` : ""} src="${media(src)}"></video>`;
     if (isWeb(src)) return `<iframe src="${escapeHtml(src)}" title="${escapeHtml(r.title)} 视频" loading="lazy" allow="fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe>`;
     return "";
+  }
+
+  /** The hub's primary action: play the demo or video, otherwise open the project. */
+  private start() {
+    const r = this.record;
+    if (!r) return;
+    const media = this.root.querySelector<HTMLElement>(".pp-hero-media");
+    if (r.unity || r.video) {
+      media?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const play = this.root.querySelector<HTMLElement>(".pp-play");
+      if (play) this.loadUnity(play);
+      else void this.root.querySelector<HTMLVideoElement>(".pp-hero-media video")?.play().catch(() => {});
+      return;
+    }
+    const url = r.links?.[0]?.url ?? r.source;
+    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   private loadUnity(button: HTMLElement) {

@@ -21,7 +21,7 @@ export function paletteOf(r: ArchiveRecord) {
 const accentOf = (r: ArchiveRecord) => paletteOf(r).base;
 
 /** One of several generated compositions, so neighbouring cases never match. */
-function paintArtwork(c: CanvasRenderingContext2D, r: ArchiveRecord, x: number, w: number, h: number) {
+export function paintArtwork(c: CanvasRenderingContext2D, r: ArchiveRecord, x: number, w: number, h: number) {
   const p = paletteOf(r), layout = p.seed % 5, rand = (i: number) => ((p.seed >> (i % 24)) % 1000) / 1000;
   c.fillStyle = p.base;
   c.fillRect(x, 0, w, h);

@@ -27,7 +27,7 @@ const isMediaPath = (value) =>
 function validateMedia(record, label, errors) {
   if (record.tags !== undefined && (!Array.isArray(record.tags) || !record.tags.every(isText)))
     errors.push(`${label}.tags：必须是非空文本数组`);
-  for (const key of ["cover", "video", "unity"])
+  for (const key of ["cover", "hero", "video", "unity"])
     if (record[key] !== undefined && !isMediaPath(record[key]))
       errors.push(`${label}.${key}：必须是 public 目录内的路径或 HTTP(S) 链接`);
   if (record.gallery !== undefined && (!Array.isArray(record.gallery) ||

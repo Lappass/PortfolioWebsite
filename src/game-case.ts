@@ -117,10 +117,20 @@ export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number):
   return { selected, instanced, palettes, coverAttribute };
 }
 
-/** Lid swings open on the spine hinge, then the disc rises and spins. */
-export function poseCase(group: THREE.Object3D, open: number, time: number) {
+/** Console origin (bottom centre) in case-local units; its top slit sits beside the open case. */
+export const SLOT_POSITION = new THREE.Vector3(3.35, -1.9, 0.55);
+export const SLOT_TOP = SLOT_POSITION.y + 2.9;
+const DISC_RADIUS = 0.6 * SCALE;
+
+/**
+ * Lid swings open on the spine hinge, then the disc rises and spins. `insert`
+ * carries the disc over the slot bar and sinks it edge-first below the slit.
+ */
+export function poseCase(group: THREE.Object3D, open: number, time: number, insert = 0) {
   const lid = THREE.MathUtils.smoothstep(open, 0, 0.7);
   const lift = THREE.MathUtils.smoothstep(open, 0.45, 1);
+  const travel = THREE.MathUtils.smoothstep(insert, 0.05, 0.42);
+  const sink = THREE.MathUtils.smoothstep(insert, 0.42, 0.82);
   for (const child of group.children) {
     const part = child.userData.casePart;
     if (!part) continue;
@@ -128,8 +138,14 @@ export function poseCase(group: THREE.Object3D, open: number, time: number) {
     // Half-open like a door, so the cover art stays readable beside the disc.
     if (part === "lid") child.rotation.y = -1.25 * lid;
     else {
-      child.position.set(x + 1.35 * lift, y + 0.2 * lift, z + 0.55 * lift);
-      child.rotation.z = time * 1.4 * lift;
+      const outX = x + 1.35 * lift, outY = y + 0.2 * lift, outZ = z + 0.55 * lift;
+      const aboveY = SLOT_TOP + DISC_RADIUS + 0.08;
+      child.position.set(
+        THREE.MathUtils.lerp(outX, SLOT_POSITION.x, travel),
+        THREE.MathUtils.lerp(outY, aboveY, travel) - sink * (2 * DISC_RADIUS + 0.2),
+        THREE.MathUtils.lerp(outZ, SLOT_POSITION.z, travel),
+      );
+      child.rotation.z = time * 1.4 * lift + insert * 22;
     }
   }
 }

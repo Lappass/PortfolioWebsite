@@ -267,14 +267,43 @@ function projectNeighbours(index: number) {
   const at = (offset: number) => records[projectOrder[wrap(position + offset, projectOrder.length)]];
   return { previous: at(-1), next: at(1), position: position + 1, total: projectOrder.length };
 }
-function showProjectPage(options: { instant?: boolean; push?: boolean } = {}) {
+function showProjectPage(options: { instant?: boolean; push?: boolean; intro?: boolean } = {}) {
   projectPage.open(records[selected], projectNeighbours(selected), {
     instant: options.instant ?? !motionActive("surfaceTransitions"),
     push: options.push,
+    intro: options.intro,
   });
 }
+// The disc goes into the slot bar first; the hub opens once it has been read.
+let discInserting = false;
+async function insertDiscAndOpen() {
+  if (discInserting || projectPage.isOpen || mode !== "detail") return;
+  if (!scene || !motionActive("modelDecryption")) {
+    scene?.insertDisc(true);
+    $("#stage").dataset.inserting = "true";
+    showProjectPage();
+    audio.play("page-open");
+    return;
+  }
+  discInserting = true;
+  $("#stage").dataset.inserting = "true";
+  audio.play("disc-insert");
+  await scene.insertDisc();
+  discInserting = false;
+  // Ejected or left the detail view while the disc was going in.
+  if (mode !== "detail" || $("#stage").dataset.inserting !== "true") return;
+  audio.play("disc-read");
+  showProjectPage({ intro: true });
+}
+function ejectDisc(sound = true) {
+  discInserting = false;
+  if (!$("#stage").dataset.inserting) return;
+  delete $("#stage").dataset.inserting;
+  scene?.ejectDisc();
+  if (sound && mode === "detail") audio.play("disc-eject");
+}
 function closeProjectPage() {
-  if (projectPage.close()) audio.play("back");
+  if (projectPage.close()) ejectDisc();
 }
 function openProjectAt(index: number, options: { instant?: boolean; push?: boolean } = {}) {
   pageNavigating = true;
@@ -282,6 +311,8 @@ function openProjectAt(index: number, options: { instant?: boolean; push?: boole
   select(index);
   setMode("detail");
   pageNavigating = false;
+  scene?.insertDisc(true);
+  $("#stage").dataset.inserting = "true";
   showProjectPage(options);
 }
 const projectPage = new ProjectPage({
@@ -297,7 +328,10 @@ window.addEventListener("popstate", () => {
   const id = workIdFromHash();
   const index = id ? records.findIndex((record) => record.id === id) : -1;
   if (index < 0) {
-    if (projectPage.isOpen) projectPage.close({ syncHistory: false });
+    if (projectPage.isOpen) {
+      projectPage.close({ syncHistory: false });
+      ejectDisc();
+    }
   } else if (index !== selected || !projectPage.isOpen) openProjectAt(index, { push: false });
 });
 function recordAccess() {
@@ -410,7 +444,10 @@ function setMode(next: Mode) {
     $("#hover-label").hidden = true;
   }
   if (next === "detail" && mode !== "detail") recordAccess();
-  if (next !== "detail" && !pageNavigating) projectPage.close();
+  if (next !== "detail" && !pageNavigating) {
+    projectPage.close();
+    ejectDisc(false);
+  }
   mode = next;
   syncWallpaperBackground();
   audio.setScene(next);
@@ -868,10 +905,7 @@ document.addEventListener("click", (e) => {
     );
     audio.play("page-open");
   }
-  if (action === "project-page" && mode === "detail") {
-    showProjectPage();
-    audio.play("page-open");
-  }
+  if (action === "project-page" && mode === "detail") void insertDiscAndOpen();
   if (action === "back") {
     setMode("archive");
     audio.play("back");
@@ -924,6 +958,7 @@ document.addEventListener("keydown", (e) => {
   const typing = e.target instanceof HTMLInputElement;
   if (e.key === "Escape") {
     if (modal) closeModal();
+    else if (discInserting) ejectDisc();
     else if (mode === "detail" || (mode === "boot" && ready)) { const sound = mode === "detail" ? "back" : "ui-tick"; setMode("archive"); audio.play(sound); }
     return;
   }

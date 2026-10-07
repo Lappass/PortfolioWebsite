@@ -132,3 +132,6 @@
 :is([data-layout="compact"], [data-layout="portrait"])#stage[data-mode="archive"] .callout-abstract { -webkit-line-clamp: 2; font-size: 13px; margin-top: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"])#stage[data-mode="archive"] .callout-tags { display: none; }
 :is([data-layout="compact"], [data-layout="portrait"])#stage[data-mode="archive"] .read-file { margin-top: 12px; font-size: 12px; }
+
+/* While the disc goes into the slot, the detail panel steps aside. */
+#stage[data-inserting="true"] :is(#detail-content, .object-caption, .back-button, #inspection-marks, #inspection-text) { opacity: 0 !important; pointer-events: none; transition: opacity 0.35s; }

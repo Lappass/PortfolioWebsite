@@ -9,7 +9,7 @@ import { ThemeWave } from "./theme-motion";
 import { themeMaterial, themeEnvironment } from "./theme-material";
 import { RhythmMotion, rhythmDisplacement, quietBands, type MusicBands, type RhythmStyle } from "./archive-play-motion";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
-import { buildGameCase, poseCase, printCase, transferPrint } from "./game-case";
+import { buildGameCase, poseCase, printCase, transferPrint, SLOT_POSITION } from "./game-case";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -516,6 +516,71 @@ export class ArchiveScene {
 
   private caseMode = false;
   private printTimer = 0;
+  // Disc insertion: 0 = in the open case, 1 = seated in the slot bar and read.
+  private insert = { value: 0, target: 0 };
+  private insertDone?: () => void;
+  private slot?: THREE.Group;
+  private slotLight?: THREE.MeshPhysicalMaterial;
+  get insertProgress() { return this.insert.value; }
+  /** Resolves once the disc is seated and the slot has finished reading. */
+  insertDisc(immediate = false) {
+    this.insert.target = 1;
+    if (immediate || !this.caseMode) this.insert.value = 1;
+    return new Promise<void>((resolve) => {
+      if (this.insert.value >= 1) resolve();
+      else this.insertDone = resolve;
+    });
+  }
+  ejectDisc(immediate = false) {
+    this.insert.target = 0;
+    this.insertDone = undefined;
+    if (immediate) this.insert.value = 0;
+  }
+  private async loadSlot() {
+    const gltf = await new GLTFLoader().loadAsync(publicAsset("assets/console-slot.glb"));
+    const slot = new THREE.Group();
+    gltf.scene.traverse((o) => {
+      if (!(o instanceof THREE.Mesh)) return;
+      const source = o.material as THREE.MeshStandardMaterial;
+      const mat = new THREE.MeshPhysicalMaterial({ color: source.color, roughness: source.roughness, clearcoat: 0.4, clearcoatRoughness: 0.3 });
+      if (o.name === "Slot_Light") {
+        mat.emissive.set("#7aa8ff");
+        this.slotLight = mat;
+      }
+      const mesh = new THREE.Mesh(o.geometry, mat);
+      mesh.applyMatrix4(o.matrixWorld);
+      mesh.castShadow = true;
+      slot.add(mesh);
+    });
+    slot.matrixAutoUpdate = false;
+    slot.visible = false;
+    this.slot = slot;
+    this.scene.add(slot);
+  }
+  private updateInsert(dt: number) {
+    const { insert } = this;
+    // Linear time; poseCase applies the easing. Inserting reads slower than ejecting.
+    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 2.1 : -dt / 0.9), 0, 1);
+    if (insert.value >= 1 && this.insertDone) {
+      this.insertDone();
+      this.insertDone = undefined;
+    }
+  }
+  private placeSlot(time: number) {
+    if (!this.slot) return;
+    const p = this.insert.value;
+    this.slot.visible = p > 0;
+    // The console rises in beside the case, then its strip pulses while reading.
+    const rise = THREE.MathUtils.smoothstep(p, 0, 0.22);
+    this.model.updateMatrixWorld();
+    this.slot.matrix.copy(this.model.matrixWorld).multiply(
+      new THREE.Matrix4().makeTranslation(SLOT_POSITION.x, SLOT_POSITION.y - 1.6 * (1 - rise), SLOT_POSITION.z),
+    );
+    this.slot.matrixWorldNeedsUpdate = true;
+    const reading = THREE.MathUtils.smoothstep(p, 0.8, 0.86);
+    if (this.slotLight) this.slotLight.emissiveIntensity = 0.5 + reading * (1.6 + 1.4 * Math.sin(time * 18));
+  }
+
   private coverAttribute?: THREE.InstancedBufferAttribute;
   private coverUpdates?: InstanceUpdates;
   private loadGameCase(gltf: GLTF, count: number) {
@@ -541,6 +606,7 @@ export class ArchiveScene {
     this.appearance.prepare(this.model);
     this.appearance.apply(this.model, 0);
     printCase(this.model, fileAtCell(this.selectedCell), anisotropy, true);
+    void this.loadSlot().catch((error) => console.warn("Slot bar unavailable", error));
     this.scene.add(this.model);
     this.model.position.copy(this.cellPosition(poolCell(this.selectedSlot)));
     this.loaded = true;
@@ -616,6 +682,7 @@ export class ArchiveScene {
     };
   }
   setMode(mode: "hidden" | "archive" | "detail") {
+    if (mode !== "detail") this.ejectDisc();
     this.cancelPointer();
     this.setHover(null);
     if (mode === "detail") this.decryption.enter(this.scanBlend > .9 && this.decryption.clarity > .999);
@@ -1493,7 +1560,10 @@ export class ArchiveScene {
       cinematic ? shot + 5 : undefined);
     this.appearance.apply(this.model, ease(this.lift.value / 0.4));
     this.appearance.setClarity(this.model, this.modelClarity());
-    if (this.caseMode) poseCase(this.model, this.modelClarity(), time);
+    if (this.caseMode) {
+      this.updateInsert(dt);
+      poseCase(this.model, this.modelClarity(), time, this.insert.value);
+    }
     // Reference 26.92–27.76: the array travels horizontally into a white field.
     const entry = cinematic ? ease((shot - 21.9) / 0.86) : this.reveal;
     const entranceTime = THREE.MathUtils.clamp((shot - 21.92) / 0.75, 0, 1);
@@ -1831,11 +1901,13 @@ export class ArchiveScene {
     this.renderer.info.reset();
     // Keep all simulation and picking current. Reuse the composited canvas only
     // when its actual inputs are identical, including late textures and materials.
+    if (this.caseMode) this.placeSlot(time);
     const state = this.renderState;
     this.scene.updateMatrixWorld();
     // A changed instance buffer already proves the image changed. Avoid a
     // material/matrix snapshot on those busy frames; capture when it settles.
-    if (matricesChanged || coversChanged || cinematic) {
+    const inserting = this.insert.value > 0 && this.insert.value < 1 || (this.insert.value === 1 && this.insert.target === 1);
+    if (matricesChanged || coversChanged || cinematic || inserting) {
       state.invalidate();
     } else {
       state.begin();
