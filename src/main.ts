@@ -156,7 +156,7 @@ function readLocal<T>(key: string, fallback: T): T {
   }
 }
 const saved = new Set<string>(readLocal<string[]>("rhine-saved", []));
-const storedPrefs = readLocal<Partial<{ sound: boolean; music: boolean; soundVolume: number; musicVolume: number; reduced: boolean; quality: boolean; rendering: RenderQuality; superPerformance: boolean; colorTheme: "light" | "dark"; motion: StoredMotion; motionPreset: MotionPreset }>>("rhine-settings", {});
+const storedPrefs = readLocal<Partial<{ sound: boolean; music: boolean; soundVolume: number; musicVolume: number; reduced: boolean; quality: boolean; rendering: RenderQuality; superPerformance: boolean; colorTheme: "light" | "dark"; themeChosen: boolean; motion: StoredMotion; motionPreset: MotionPreset }>>("rhine-settings", {});
 const initialMotion = createMotionPreferences(
   storedPrefs.motion,
   storedPrefs.reduced ?? (storedPrefs.motion === undefined
@@ -174,7 +174,8 @@ const prefs = {
   quality: storedPrefs.quality ?? true,
   superPerformance: storedPrefs.superPerformance ?? false,
   rendering: normalizeQuality(storedPrefs.rendering, storedPrefs.quality !== false),
-  colorTheme: storedPrefs.colorTheme === "dark" ? "dark" : "light",
+  colorTheme: storedPrefs.themeChosen && storedPrefs.colorTheme === "light" ? "light" : "dark",
+  themeChosen: storedPrefs.themeChosen ?? false,
 };
 const motionActive = (key: MotionKey) => motionEnabled(prefs.motion, key);
 const motionIsReduced = () => Object.values(prefs.motion).every((value) => !value);
@@ -260,7 +261,6 @@ let viewer: ModelViewer | undefined;
 const accessLog: { id: string; time: string }[] = [];
 const columnMemory = archiveColumns.map((_, lane) => columnFiles(lane)[0]);
 const projectOrder = records.map((_, index) => index);
-let detailEnteredAt = 0;
 let pageNavigating = false;
 function projectNeighbours(index: number) {
   const position = projectOrder.indexOf(index);
@@ -274,10 +274,7 @@ function showProjectPage(options: { instant?: boolean; push?: boolean } = {}) {
   });
 }
 function closeProjectPage() {
-  if (mode === "detail") {
-    setMode("archive");
-    audio.play("back");
-  } else projectPage.close();
+  if (projectPage.close()) audio.play("back");
 }
 function openProjectAt(index: number, options: { instant?: boolean; push?: boolean } = {}) {
   pageNavigating = true;
@@ -300,10 +297,7 @@ window.addEventListener("popstate", () => {
   const id = workIdFromHash();
   const index = id ? records.findIndex((record) => record.id === id) : -1;
   if (index < 0) {
-    if (projectPage.isOpen) {
-      projectPage.close({ syncHistory: false });
-      if (mode === "detail") setMode("archive");
-    }
+    if (projectPage.isOpen) projectPage.close({ syncHistory: false });
   } else if (index !== selected || !projectPage.isOpen) openProjectAt(index, { push: false });
 });
 function recordAccess() {
@@ -415,10 +409,7 @@ function setMode(next: Mode) {
     hoverCode.finish();
     $("#hover-label").hidden = true;
   }
-  if (next === "detail" && mode !== "detail") {
-    recordAccess();
-    detailEnteredAt = performance.now();
-  }
+  if (next === "detail" && mode !== "detail") recordAccess();
   if (next !== "detail" && !pageNavigating) projectPage.close();
   mode = next;
   syncWallpaperBackground();
@@ -590,6 +581,7 @@ function renderDetail() {
   <dl class="metadata"><div><dt>ROLE / 角色</dt><dd>${escapeHtml(r.department)}</dd></div><div><dt>TIMELINE / 时间</dt><dd>${escapeHtml(r.date)}</dd></div><div><dt>STACK / 技术与协作</dt><dd>${escapeHtml(r.lead)}</dd></div><div><dt>STATUS / 状态</dt><dd><i></i>${r.clearance === "RESTRICTED" ? "进行中" : "已完成 · 可查看"}</dd></div></dl>
   <div class="detail-tabs" role="tablist"><button id="tab-overview" class="active" role="tab" aria-controls="tab-panel" aria-selected="true" data-tab="overview">01 <span>概述</span></button><button id="tab-notes" role="tab" aria-controls="tab-panel" aria-selected="false" data-tab="notes">02 <span>项目要点</span></button><button id="tab-history" role="tab" aria-controls="tab-panel" aria-selected="false" data-tab="history">03 <span>访问日志</span></button><i class="tab-indicator" aria-hidden="true"></i></div>
   <div id="tab-panel" class="tab-panel" role="tabpanel">${overview()}</div>
+  <button class="detail-more" data-action="project-page">查看详细信息<span>→</span></button>
   <div class="detail-actions"><button class="solid-button" data-action="bookmark">${saved.has(r.id) ? "− REMOVE FROM SAVED" : "＋ SAVE ARCHIVE"}<span>${saved.has(r.id) ? "已收藏" : "收藏档案"}</span></button><a class="export-button" href="${assetUrl(`archives/LAPPAS-${r.id}.txt`)}" download="LAPPAS-${r.id}.txt" aria-label="导出 ${r.id} 档案">EXPORT <span>↓</span></a></div>
   <div class="detail-footnote"><a href="${escapeHtml(r.source)}" target="_blank" rel="noopener">项目链接 ↗</a><span>${String(selected + 1).padStart(3, "0")} / ${String(records.length).padStart(3, "0")}</span></div>`;
   $("#detail-content").setAttribute("tabindex", "-1");
@@ -800,7 +792,7 @@ document.addEventListener("change", (e) => {
 });
 document.addEventListener("click", (e) => {
   const themeButton = (e.target as Element).closest<HTMLElement>("[data-color-theme]");
-  if (themeButton) { prefs.colorTheme = themeButton.dataset.colorTheme === "dark" ? "dark" : "light"; savePrefs(); return; }
+  if (themeButton) { prefs.colorTheme = themeButton.dataset.colorTheme === "dark" ? "dark" : "light"; prefs.themeChosen = true; savePrefs(); return; }
   if (!started) return;
   if (modalClosing) return;
   const el = (e.target as Element).closest<HTMLElement>("button");
@@ -874,6 +866,10 @@ document.addEventListener("click", (e) => {
       () => activeScene.createAssemblyModel(),
       !motionActive("viewerNavigation"),
     );
+    audio.play("page-open");
+  }
+  if (action === "project-page" && mode === "detail") {
+    showProjectPage();
     audio.play("page-open");
   }
   if (action === "back") {
@@ -1073,13 +1069,6 @@ function frame(ms: number) {
   wallpaperEffects?.update(time, motionIsReduced(), motionActive("pointerParallax"));
   // The calibrated 2D opening fully covers the scene until array entry.
   if (!viewer?.isOpen && !projectPage.covering && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
-  if (mode === "detail" && !projectPage.isOpen && !viewer?.isOpen && !modal) {
-    // Let the card draw out and decrypt, then hand over to the full project page.
-    const elapsed = ms - detailEnteredAt;
-    const settled = !scene || !motionActive("modelDecryption")
-      || (scene.detailVisibility >= 0.95 && (scene.decryptionFrame.phase === "clear" || elapsed > 2600));
-    if (settled && elapsed > (scene ? 900 : 0)) showProjectPage();
-  }
   viewer?.update(time);
   if (threeState === "closing" && scene?.presentationHidden) releaseThree();
   playground?.position();

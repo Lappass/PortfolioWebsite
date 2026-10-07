@@ -35,6 +35,12 @@ import {
   type ArchiveNavigation,
 } from "./archive-loop";
 import { labelMarkSvg } from "./brand";
+// The baked assets still carry the former company inscription on the shell edge.
+function removeLegacyLettering(root: THREE.Object3D) {
+  const found: THREE.Object3D[] = [];
+  root.traverse((o) => { if (/Moulded_Lettering/.test(o.name)) found.push(o); });
+  found.forEach((o) => o.removeFromParent());
+}
 import { archiveFraming } from "./viewport-layout";
 import { ArchiveDrag, ArchivePlaneMomentum, type DragAxis, type DragProjection, type DragPosition } from "./archive-drag";
 import { assetUrl as publicAsset } from "./asset-url";
@@ -344,6 +350,7 @@ export class ArchiveScene {
     const gltf = await new GLTFLoader().loadAsync(
       assetUrl,
     );
+    removeLegacyLettering(gltf.scene);
     gltf.scene.updateMatrixWorld(true);
     const meshes: THREE.Mesh[] = [];
     gltf.scene.traverse((o) => {
@@ -509,6 +516,7 @@ export class ArchiveScene {
     this.assemblyTemplate ??= new GLTFLoader()
       .loadAsync(publicAsset("assets/archive-assembly.glb"))
       .then((gltf) => {
+        removeLegacyLettering(gltf.scene);
         gltf.scene.updateMatrixWorld(true);
         return gltf.scene;
       })

@@ -102,6 +102,24 @@
 }
 #stage[data-mode="archive"] .read-file:hover { background: var(--theme-accent, #9b7247); }
 
+.detail-more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 50px;
+  margin-top: 26px;
+  padding: 0 18px;
+  border: 1px solid var(--theme-ink, #080a08);
+  color: var(--theme-ink, #080a08);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  transition: background 0.2s, color 0.2s;
+}
+.detail-more > span { font-size: 20px; transition: transform 0.2s; }
+.detail-more:hover { background: var(--theme-ink, #080a08); color: var(--theme-paper, #eae5e1); }
+.detail-more:hover > span { transform: translateX(6px); }
+
 /* One quiet bottom band instead of three competing corners. */
 #stage:is([data-mode="archive"], [data-mode="detail"]) .powered { opacity: 0; pointer-events: none; }
 #stage[data-mode="archive"]:is([data-layout="desktop"], [data-layout="opening"]) .archive-counter > div { font-size: 44px; }
