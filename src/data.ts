@@ -22,20 +22,22 @@ export interface ArchiveRecord {
 }
 
 export const records: ArchiveRecord[] = content.records;
+export const featuredFiles = content.featured.map(id => records.findIndex(record => record.id === id));
+export const experimentFiles = records.map((_, index) => index).filter(index => !featuredFiles.includes(index));
 export const categories = ["全部档案", ...content.categories];
-/** All works stand in one wave line; categories remain for search filters. */
-export const archiveColumns = ["全部作品"];
+/** Four featured works share one line; the other records stay in Experiments. */
+export const archiveColumns = ["精选项目"];
 // The line runs down the centre lane of the original five, so the opening stays framed.
 export const LINE_LANE = 2;
 
 export function columnFiles(_lane: number) {
-  return records.map((_, index) => index);
+  return featuredFiles;
 }
 export function fileLocation(index: number) {
-  const row = 12 + index;
+  const row = 12 + Math.max(0, featuredFiles.indexOf(index));
   return { lane: LINE_LANE, row, slot: LINE_LANE * 32 + row };
 }
 export function fileAtSlot(slot: number) {
-  const n = records.length;
-  return ((((slot % 32) - 12) % n) + n) % n;
+  const n = featuredFiles.length;
+  return featuredFiles[((((slot % 32) - 12) % n) + n) % n];
 }

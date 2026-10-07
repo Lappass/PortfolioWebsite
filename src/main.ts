@@ -7,6 +7,7 @@ import { escapeHtml } from "./html";
 import { ProjectPage, workIdFromHash } from "./project-page";
 
 import { ProfilePage, PROFILE_HASH } from "./profile-page";
+import "./portfolio-hierarchy.css";
 import { normalizeQuality, qualityPresets, type QualityPreset, type RenderQuality } from "./render-quality";
 import { qualityMarkup, syncQualityUI } from "./quality-settings";
 import { superPerformanceQuality, wallpaperQuality } from "./wallpaper-quality";
@@ -27,6 +28,8 @@ import { loadBootWebfonts } from "./boot-lettering";
 import { wrap, type ArchiveNavigation } from "./archive-loop";
 import {
   records,
+  featuredFiles,
+  experimentFiles,
   categories,
   archiveColumns,
   columnFiles,
@@ -70,10 +73,8 @@ $("#stage").innerHTML = `
   <div id="boot-background" class="boot-background"><svg viewBox="0 0 1920 1080" preserveAspectRatio="none"><g fill="none" stroke="#fff" stroke-width="3"><path d="M-210 705C-45 705 182 704 247 567C337 377 99 306 4 435S27 680 169 631C309 584 227 314 279 111S568-113 568-113"/><path d="M1560-80C1374 114 1671 168 1601 323S1371 367 1431 480S1692 666 1559 787S1329 886 1498 1130"/><circle cx="1450" cy="648" r="346"/><circle cx="1450" cy="648" r="348"/></g></svg></div>
   <header class="brand">${brandHeading}</header>
   <nav class="system-nav" aria-label="系统导航">
-    <button data-action="about" aria-label="关于我"><span aria-hidden="true">◉</span> 关于</button>
-    <button data-action="search"><span class="nav-glyph">⌕</span> ARCHIVE INDEX <span class="key">/</span></button>
+    <button class="creator-entry" data-action="about" aria-label="认识我 Shuhang Chen"><svg viewBox="0 0 40 30" aria-hidden="true"><rect x="1" y="1" width="38" height="28" rx="2"/><circle cx="11" cy="11" r="4"/><path d="M5 22c0-7 12-7 12 0M23 10h10M23 16h7M23 22h10"/></svg><span><strong>认识我</strong><small>SHUHANG CHEN</small></span><i>↗</i></button>
     <button data-action="saved" aria-label="查看收藏档案" title="收藏档案">＋ SAVED <span id="saved-count">00</span></button>
-    <button class="settings-button" data-action="settings" aria-label="系统设置" title="系统设置"><span class="settings-glyph" aria-hidden="true">◷</span><span class="settings-label">设置</span></button>
   </nav>
   <button id="skip" class="skip" data-action="skip">ENTER SYSTEM <span>↗</span></button>
   <section id="boot" class="boot" aria-label="系统启动">
@@ -88,7 +89,7 @@ $("#stage").innerHTML = `
   <section id="archive-ui" class="archive-ui" aria-label="档案选择">
     <div class="archive-callout"><div class="eyebrow"><i aria-hidden="true"></i><span id="archive-category">机构档案</span></div><button class="file-title" data-action="open">FILE NUMBER: <span id="selected-id">X-<span id="selected-code">001</span></span><span class="file-open">↗</span></button><div class="callout-rule"><i></i></div><div class="file-summary"><span id="selected-title">作品集</span><span id="selected-clearance">BUSINESS AREA</span></div><p id="selected-abstract" class="callout-abstract"></p><ul id="selected-tags" class="callout-tags"></ul><button class="read-file" data-action="open">查看项目 <span>→</span></button></div>
     <div id="hover-label" class="hover-label" hidden>X-<span id="hover-code">001</span> / <span id="hover-title"></span></div>
-    <div class="archive-counter"><span class="tiny-label">ARCHIVE / SELECT</span><div><span id="selected-number">01</span><i>/</i><span class="count-total">12</span></div></div>
+    <div class="archive-counter"><span class="tiny-label">SELECTED WORKS / 精选项目</span><div><span id="selected-number">01</span><i>/</i><span class="count-total">04</span></div></div>
     <div class="archive-navigation"><button data-action="prev" aria-label="上一个档案">↑</button><div id="file-ticks" class="file-ticks"></div><button data-action="next" aria-label="下一个档案">↓</button></div>
     <div class="column-navigation"><button data-action="column-prev" aria-label="上一列">←</button><div><span id="column-number">COLUMN <span id="column-index">03</span> / 05</span><strong id="column-name">机构档案</strong></div><button data-action="column-next" aria-label="下一列">→</button></div>
     <div class="archive-hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> 浏览作品 <span>／</span> 拖动滑行 <span>／</span> <kbd>ENTER</kbd> 打开</div>
@@ -98,6 +99,7 @@ $("#stage").innerHTML = `
     <div class="object-caption"><span id="object-id">NO.001</span><div>INTERNAL DATABASE</div><small>DRAG TO INSPECT <span>↔</span></small><button class="viewer-open" data-action="model-viewer">360° 查看文档模型 <span>↗</span></button></div>
     <article id="detail-content" class="detail-content"></article>
   </section>
+  <button class="experiments-entry" data-action="experiments"><svg class="experiment-stack" viewBox="0 0 40 34" aria-hidden="true"><path d="M3 28h34M5 26V12h24v14M10 12V7h24v19M15 7V2h24v24"/></svg><span><strong>EXPERIMENTS</strong><small>实验合集 · ${String(experimentFiles.length).padStart(2,"0")}</small></span><span>↗</span></button>
   <div class="powered">POWERED BY <b>LAPPAS</b><i></i></div>
   <footer class="system-footer"><span><i class="status-light"></i> SESSION AUTHORIZED${isWallpaper ? '<button type="button" class="three-toggle" data-action="toggle-three" aria-pressed="true" title="卸载三维模型，保留 2D 界面">3D 开启</button>' : ''}</span><span>VISITOR <i>／</i> <span id="clock">00:00:00</span></span><button data-action="replay" title="重播启动流程">REINITIALIZE ↗</button></footer>
   <div id="pwa-update-notice" class="pwa-update-notice" role="status" hidden><span>新版本已就绪</span><button data-pwa-action="update">更新并重启 ↻</button></div>
@@ -109,16 +111,17 @@ $("#boot-background").insertAdjacentHTML(
   "beforeend",
   '<div class="boot-white"></div>',
 );
+$(".system-footer").insertAdjacentHTML("beforeend", '<button class="footer-preferences" data-action="settings" aria-label="画面与声音设置">偏好设置</button>');
 const bootSequence = new BootSequence($("#stage"));
 $("#viewport").insertAdjacentHTML("beforeend", '<button class="mobile-entry" data-action="skip">进入档案 <span>→</span></button>');
 
 type Mode = "boot" | "archive" | "detail";
 let mode: Mode = "boot",
-  selected = 0,
+  selected = featuredFiles[0],
   bootStart = 0,
   lastStep = "",
   ready = false;
-let modal: "search" | "saved" | "settings" | null = null,
+let modal: "search" | "saved" | "settings" | "experiments" | null = null,
   searchQuery = "",
   filter = "全部档案";
 let activeTab = "overview";
@@ -263,14 +266,17 @@ let resumeSelection = -1;
 let viewer: ModelViewer | undefined;
 const accessLog: { id: string; time: string }[] = [];
 const columnMemory = archiveColumns.map((_, lane) => columnFiles(lane)[0]);
-const projectOrder = records.map((_, index) => index);
+let projectIndex = featuredFiles[0];
+const projectOrderFor = (index: number) => featuredFiles.includes(index) ? featuredFiles : experimentFiles;
 let pageNavigating = false;
 function projectNeighbours(index: number) {
+  const projectOrder = projectOrderFor(index);
   const position = projectOrder.indexOf(index);
   const at = (offset: number) => records[projectOrder[wrap(position + offset, projectOrder.length)]];
   return { previous: at(-1), next: at(1), position: position + 1, total: projectOrder.length };
 }
 function showProjectPage(options: { instant?: boolean; push?: boolean; intro?: boolean; from?: { left: number; top: number; right: number; bottom: number } | null } = {}) {
+  projectIndex = selected;
   projectPage.open(records[selected], projectNeighbours(selected), {
     instant: options.instant ?? !motionActive("surfaceTransitions"),
     push: options.push,
@@ -312,6 +318,12 @@ function closeProjectPage() {
   if (projectPage.close()) ejectDisc();
 }
 function openProjectAt(index: number, options: { instant?: boolean; push?: boolean } = {}) {
+  if (!featuredFiles.includes(index)) {
+    ejectDisc(false);
+    projectIndex = index;
+    projectPage.open(records[index], projectNeighbours(index), { instant: options.instant ?? !motionActive("surfaceTransitions"), push: options.push });
+    return;
+  }
   pageNavigating = true;
   if (mode === "detail") setMode("archive");
   select(index);
@@ -328,7 +340,8 @@ const profilePage = new ProfilePage(() => { if (profilePage.close()) audio.play(
 const projectPage = new ProjectPage({
   close: closeProjectPage,
   navigate: (direction) => {
-    const position = projectOrder.indexOf(selected);
+    const projectOrder = projectOrderFor(projectIndex);
+    const position = projectOrder.indexOf(projectIndex);
     openProjectAt(projectOrder[wrap(position + direction, projectOrder.length)], { instant: true, push: false });
     audio.play("tick");
   },
@@ -347,7 +360,7 @@ window.addEventListener("popstate", () => {
       projectPage.close({ syncHistory: false });
       ejectDisc();
     }
-  } else if (index !== selected || !projectPage.isOpen) openProjectAt(index, { push: false });
+  } else if (index !== projectIndex || !projectPage.isOpen) openProjectAt(index, { push: false });
 });
 function recordAccess() {
   accessLog.unshift({
@@ -444,7 +457,7 @@ matchMedia("(pointer: coarse)").addEventListener("change", fit);
 fit();
 $("#file-ticks").innerHTML = columnFiles(fileLocation(selected).lane)
   .map(
-    (index) => `<button data-select="${index}"></button>`,
+    (index, position) => `<button data-select="${index}"><span>${String(position+1).padStart(2,"0")}</span></button>`,
   )
   .join("");
 const fileTicks = [...$("#file-ticks").querySelectorAll<HTMLButtonElement>("button")];
@@ -588,8 +601,8 @@ function replayBootAfterModal(forcePreview: boolean) {
   lastStep = "";
   setMode(!motionActive("boot") && !forcePreview ? "archive" : "boot");
   audio.restartBoot();
-  scene?.select(0);
-  selected = 0;
+  scene?.select(featuredFiles[0]);
+  selected = featuredFiles[0];
   updateSelection();
   if (!forcePreview) audio.play("ui-tick");
 }
@@ -726,9 +739,11 @@ function closeModal(afterClose?: () => void) {
 }
 function renderModal() {
   if (!modal) return;
+  const directoryTitle = modal === "experiments" ? "EXPERIMENTS" : modal === "saved" ? "SAVED ARCHIVES" : "ARCHIVE INDEX";
+  const directoryLabel = modal === "experiments" ? "实验合集 / 小项目与练习" : modal === "saved" ? "收藏档案" : "内部档案检索";
   modalTransition?.dispose();
   $("#modal-root").innerHTML =
-    `<div class="modal-backdrop"><section class="terminal-modal ${modal === "settings" ? "settings-modal" : ""}" role="dialog" aria-modal="true" aria-label="${modal === "settings" ? "系统设置" : modal === "saved" ? "收藏档案" : "档案检索"}"><div class="modal-top"><span>LAPPAS / ${modal === "settings" ? "SYSTEM PREFERENCES" : "ARCHIVE DIRECTORY"}</span><button data-action="close-modal" aria-label="关闭窗口">CLOSE <span>×</span></button></div>${modal === "settings" ? settingsMarkup() : `<h2>${modal === "saved" ? "SAVED ARCHIVES" : "ARCHIVE INDEX"}<small>${modal === "saved" ? "收藏档案" : "内部档案检索"}</small></h2><div class="search-field"><span>⌕</span><input id="archive-search" type="search" autocomplete="off" placeholder="输入作品编号、名称或角色" aria-label="检索档案"/><span class="key">ESC</span></div><div class="category-filters">${categories.map((c, i) => `<button data-filter="${escapeHtml(c)}" class="${i === 0 ? "active" : ""}">${escapeHtml(c)}</button>`).join("")}</div><div class="result-header"><span>FILE / 档案</span><span>ROLE / 角色</span><span>ACCESS</span></div><div id="search-results" class="search-results"></div><div class="modal-bottom"><span id="result-count"></span><span>INTERNAL DATABASE <i>●</i> CONNECTED</span></div>`}</section></div>`;
+    `<div class="modal-backdrop"><section class="terminal-modal ${modal === "settings" ? "settings-modal" : modal === "experiments" ? "experiments-modal" : ""}" role="dialog" aria-modal="true" aria-label="${modal === "settings" ? "系统设置" : directoryLabel}"><div class="modal-top"><span>LAPPAS / ${modal === "settings" ? "SYSTEM PREFERENCES" : "ARCHIVE DIRECTORY"}</span><button data-action="close-modal" aria-label="关闭窗口">CLOSE <span>×</span></button></div>${modal === "settings" ? settingsMarkup() : `<h2>${directoryTitle}<small>${directoryLabel}</small></h2><div class="search-field"><span>⌕</span><input id="archive-search" type="search" autocomplete="off" placeholder="输入作品编号、名称或角色" aria-label="检索档案"/><span class="key">ESC</span></div><div class="category-filters">${categories.map((c, i) => `<button data-filter="${escapeHtml(c)}" class="${i === 0 ? "active" : ""}">${escapeHtml(c)}</button>`).join("")}</div><div class="result-header"><span>FILE / 档案</span><span>ROLE / 角色</span><span>ACCESS</span></div><div id="search-results" class="search-results"></div><div class="modal-bottom"><span id="result-count"></span><span>INTERNAL DATABASE <i>●</i> CONNECTED</span></div>`}</section></div>`;
   const backdrop = $(".modal-backdrop");
   backdrop.hidden = true;
   modalTransition = new SurfaceTransition(backdrop, $(".terminal-modal"));
@@ -753,13 +768,14 @@ function renderResults() {
   const results = records
     .map((r, i) => ({ r, i }))
     .filter(
-      ({ r }) =>
+      ({ r, i }) =>
+        (modal !== "experiments" || experimentFiles.includes(i)) &&
         (modal !== "saved" || saved.has(r.id)) &&
         (filter === "全部档案" || r.category === filter) &&
         `${r.id} ${r.title} ${r.en} ${r.department} ${r.lead}`
           .toLowerCase()
           .includes(searchQuery.toLowerCase()),
-    );
+    ).sort((a,b) => modal === "experiments" ? b.r.date.localeCompare(a.r.date) : a.i - b.i);
   $("#search-results").innerHTML = results.length
     ? results
         .map(
@@ -866,8 +882,8 @@ document.addEventListener("click", (e) => {
   if (el.dataset.result) {
     const index = Number(el.dataset.result);
     closeModal(() => {
-      select(index);
-      openFile();
+      if (featuredFiles.includes(index)) { select(index); openFile(); }
+      else openProjectAt(index);
     });
     return;
   }
@@ -928,14 +944,14 @@ document.addEventListener("click", (e) => {
     setMode("archive");
     audio.play("back");
   }
-  if (action === "search" || action === "saved" || action === "settings") {
+  if (action === "search" || action === "saved" || action === "settings" || action === "experiments") {
     el.focus({ preventScroll: true });
     openModal(action);
   }
   if (action === "close-modal") closeModal();
   if (action === "bookmark") toggleSaved();
   if (action === "reset-search") {
-    modal = "search";
+    modal = modal === "experiments" ? "experiments" : "search";
     searchQuery = "";
     filter = "全部档案";
     renderModal();
@@ -1018,7 +1034,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "/") {
     e.preventDefault();
     if (mode === "boot") setMode("archive");
-    openModal("search");
+    openModal("experiments");
   }
   if (e.key === "ArrowLeft" && mode !== "boot") {
     e.preventDefault();

@@ -126,6 +126,18 @@ for (const [name, mutate, error] of invalidCases) {
     assert.throws(() => validateContent(invalid), error);
   });
 }
+
+test("featured projects preserve their explicit display order", () => {
+  const edited = structuredClone(content);
+  edited.featured = ["X-010", "X-007", "X-004", "X-001"];
+  assert.deepEqual(validateContent(edited).featured, edited.featured);
+});
+for (const featured of [["X-001"], ["X-001","X-001","X-004","X-007"], ["X-001","X-004","X-007","X-999"]]) {
+  test(`rejects invalid featured selection ${featured.join(',')}`, () => {
+    const edited = structuredClone(content); edited.featured = featured;
+    assert.throws(() => validateContent(edited), /featured/);
+  });
+}
 test("accepts reordered categories", () => {
   const edited = structuredClone(content);
   edited.categories.reverse();

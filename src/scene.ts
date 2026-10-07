@@ -1854,6 +1854,8 @@ export class ArchiveScene {
       const { row, lane } = cell;
       // One wave line: neighbouring lanes stay empty.
       if (lane !== selectedLane) continue;
+      // Four physical cases: one occurrence per featured work, no repeated wall.
+      if (!cinematic && (row < this.selectedCell.row - 1 || row > this.selectedCell.row + 2)) continue;
       if (hidden.has(cellKey(cell))) continue;
       const x = (lane - 2) * COLUMN_SPACING - trackX;
       const y = -4.6 + field(row, lane) + hoverLift(cell) - this.presentationDrop(cell);

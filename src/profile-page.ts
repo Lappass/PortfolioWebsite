@@ -3,7 +3,7 @@ import { escapeHtml as e } from "./html";
 import { profile } from "./profile";
 import { PageChapters } from "./page-chapters";
 import { ProfileOrb } from "./profile-orb";
-import { ProfileEntry } from "./profile-entry";
+import { ProfileCardEntry as ProfileEntry } from "./profile-card-entry";
 import "./profile-workspace.css";
 
 const isWeb = (value: string) => /^(https?:|mailto:)/i.test(value);

@@ -37,3 +37,8 @@ The entry canvas is removed on completion or interruption. Reduced motion
 skips it. Desktop clock-controlled screenshots at 250ms, 750ms and 1600ms
 verify the sphere, complete name and final page; viewport/escape checks and
 production build passed.
+
+The user's subsequent choice supersedes the particle-name entry: personal
+information now opens with an identity card from the prominent creator button.
+The particle sphere remains inside the page. Current behaviour and verification
+are documented in `PORTFOLIO-HIERARCHY.md`.

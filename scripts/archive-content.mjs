@@ -80,6 +80,8 @@ export function validateContent(content) {
       errors.push(`${label}.source：必须是有效的 HTTP 或 HTTPS 链接`);
     validateMedia(record, label, errors);
   });
+  if (content.featured !== undefined && (!Array.isArray(content.featured) || content.featured.length !== 4 || new Set(content.featured).size !== 4 || !content.featured.every(id => records.some(record => record?.id === id))))
+    errors.push("featured：必须按展示顺序列出四个不同且存在的作品编号");
   if (errors.length)
     throw new Error(`档案数据校验失败：\n- ${errors.join("\n- ")}`);
   return content;

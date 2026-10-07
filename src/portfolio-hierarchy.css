@@ -1,0 +1,51 @@
+.system-nav .creator-entry { display: flex; align-items: center; gap: 14px; padding: 12px 18px; border: 1px solid rgba(var(--theme-ink-rgb,8,10,8),.3); background: rgba(var(--theme-paper-rgb,234,229,225),.82); color: var(--theme-ink); }
+.creator-entry svg { width: 40px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.3; }
+.creator-entry > span { display: grid; gap: 5px; text-align: left; }
+.creator-entry strong { font-size: 16px; font-weight: 600; }
+.creator-entry small { font-size: 9px; letter-spacing: .12em; }
+.creator-entry i { font-style: normal; font-size: 22px; margin-left: 10px; }
+.system-nav .creator-entry:hover { border-color: var(--theme-accent); color: var(--theme-accent); }
+.experiments-entry { display: none; position: absolute; right: 8%; bottom: 120px; align-items: center; gap: 18px; padding: 14px 0; border-top: 1px solid rgba(var(--theme-ink-rgb,8,10,8),.25); color: var(--theme-ink); background: transparent; cursor: pointer; text-align: left; }
+#stage[data-mode="archive"] .experiments-entry { display: flex; }
+.experiments-entry > span:nth-child(2) { display: grid; gap: 8px; }
+.experiments-entry strong { font-size: 14px; letter-spacing: .1em; font-weight: 500; }
+.experiments-entry small { font-size: 11px; color: var(--theme-muted); }
+.experiment-stack { width: 34px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.3; flex: none; }
+.experiments-entry:hover { color: var(--theme-accent); }
+.system-footer .footer-preferences { font-size: 10px; color: var(--theme-muted); }
+.experiments-modal .result-row { min-height: 72px; }
+.profile-entry-card { position: fixed; z-index: 5; left: calc(50% - min(210px, 44vw)); top: calc(50% - 130px); width: min(420px,88vw); box-sizing: border-box; padding: 24px; background: var(--pp-paper); color: var(--pp-ink); border: 1px solid var(--pp-ink); box-shadow: 12px 12px 0 rgba(var(--theme-ink-rgb,8,10,8),.08); pointer-events: none; }
+.identity-card-head,.identity-card-foot { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: .14em; }
+.identity-card-head { border-bottom: 1px solid var(--pp-line); padding-bottom: 16px; }
+.identity-card-face { display: flex; align-items: center; gap: 24px; padding: 28px 0; }
+.identity-card-monogram { display: grid; place-items: center; flex: none; width: 82px; height: 100px; border: 1px solid var(--pp-line); font-size: 34px; }
+.identity-card-face > div { display: grid; gap: 12px; }
+.identity-card-face small { font-size: 9px; letter-spacing: .12em; color: var(--pp-muted); }
+.identity-card-face strong { font-size: 25px; font-weight: 600; }
+.identity-card-face div > span { font-size: 10px; letter-spacing: .1em; }
+.identity-card-foot { border-top: 1px solid var(--pp-line); padding-top: 16px; color: var(--pp-muted); }
+@media(max-width:700px) {
+ .system-nav .creator-entry { gap: 8px; padding: 9px 12px; }
+ .creator-entry svg { width: 30px; height: 24px; }
+ .creator-entry strong { font-size: 13px; }
+ .creator-entry small { font-size: 8px; }
+ .creator-entry i { margin-left: 0; font-size: 18px; }
+ .experiments-entry { right: var(--edge,20px); bottom: 104px; gap: 12px; }
+ .experiments-entry strong { font-size: 12px; }
+ .experiments-entry small { font-size: 10px; }
+ .identity-card-face { gap: 14px; }
+ .identity-card-face strong { font-size: 22px; }
+ .identity-card-monogram { width: 64px; height: 84px; font-size: 28px; }
+}
+#stage[data-layout="portrait"] .system-nav { top: 80px; left: var(--edge); right: var(--edge); justify-content: space-between; }
+#stage[data-layout="portrait"] .archive-navigation { bottom: 145px; }
+.file-ticks button > span { position: absolute; left: 50%; bottom: -18px; transform: translateX(-50%); font-size: 10px; color: var(--theme-muted); }
+.file-ticks button.selected > span { color: var(--theme-ink); }
+[data-layout="portrait"] .system-nav .creator-entry { order: 2; }
+[data-layout="portrait"] .system-nav [data-action="saved"] { order: 1; }
+[data-layout="portrait"] .experiments-entry { bottom: 54px; max-width: 160px; gap: 8px; }
+[data-layout="portrait"] .experiment-stack { width: 24px; height: 24px; }
+#stage[data-layout="compact"] .experiments-entry { bottom: 46px; right: var(--edge); padding: 6px 0; gap: 10px; }
+#stage[data-layout="compact"] .experiments-entry strong { font-size: 12px; }
+#stage[data-layout="compact"] .experiments-entry small { font-size: 10px; }
+#stage[data-layout="compact"] .experiment-stack { width: 24px; height: 24px; }
