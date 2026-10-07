@@ -85,8 +85,8 @@ export class ConsoleSetup {
   }
 
   /** Follow the case; `insert` drives the slot light and the loading screen. */
-  update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, title: string) {
-    const presence = THREE.MathUtils.smoothstep(insert, 0.18, 0.28);
+  update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, title: string, workspace = 0) {
+    const presence = Math.max(THREE.MathUtils.smoothstep(insert, 0.18, 0.28), THREE.MathUtils.smoothstep(workspace, .3, .8));
     this.group.visible = visible && this.loaded && presence > 0;
     if (!this.group.visible) return;
     for (const surface of this.surfaces) {

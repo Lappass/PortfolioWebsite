@@ -1,6 +1,6 @@
 {
-  "name": "陈澍航",
-  "alias": "Lappas",
+  "name": "Shuhang Chen",
+  "alias": "Shuhang Chen",
   "role": "游戏开发者",
   "roleEn": "GAME DEVELOPER",
   "tagline": "占位简介：一两句话介绍你做什么游戏、擅长什么、正在寻找怎样的机会。",
@@ -25,9 +25,9 @@
   ],
   "resume": "",
   "boot": {
-    "greeting": "HELLO, I'M LAPPAS",
+    "greeting": "HELLO, I'M SHUHANG CHEN",
     "identityLabel": "PLAYER",
-    "identity": "CHEN SHUHANG",
+    "identity": "SHUHANG CHEN",
     "role": "GAME DEVELOPER",
     "loading": "LOADING SELECTED WORKS",
     "ready": "PRESS START",

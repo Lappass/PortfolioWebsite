@@ -527,6 +527,11 @@ export class ArchiveScene {
   private printTimer = 0;
   // Disc insertion: 0 = in the open case, 1 = read by the console, camera at the monitor.
   private insert = { value: 0, target: 0 };
+  private workspace = { value: 0, target: 0 };
+  setWorkspace(active: boolean, instant = false) {
+    this.workspace.target = active ? 1 : 0;
+    if (instant) this.workspace.value = this.workspace.target;
+  }
   private insertDone?: () => void;
   private setup = new ConsoleSetup();
   private terminalArrayVisibility = { value: 1 };
@@ -1341,6 +1346,7 @@ export class ArchiveScene {
   ) {
     const elapsed = Math.max(0, time - this.last || 0.016);
     const dt = Math.min(elapsed, 0.05);
+    this.workspace.value += (this.workspace.target - this.workspace.value) * (this.reduced ? 1 : 1 - Math.exp(-Math.min(elapsed, .25) * 4));
     this.last = time;
     this.clock = time;
     if (!this.loaded) return;
@@ -1788,6 +1794,14 @@ export class ArchiveScene {
       const front = new THREE.Vector3(0, 0.11, 1).transformDirection(this.model.matrixWorld);
       viewDirection.lerp(front, THREE.MathUtils.smoothstep(this.insert.value, 0.40, 0.78)).normalize();
     }
+    if (!cinematic && this.workspace.value > .001) {
+      const p = this.workspace.value;
+      const aim = new THREE.Vector3(4.2, 2.1, -1.8).applyMatrix4(this.model.matrixWorld);
+      cameraAim.lerp(aim, p);
+      const side = new THREE.Vector3(.68, .22, .72).normalize().transformDirection(this.model.matrixWorld);
+      viewDirection.lerp(side, p).normalize();
+      viewSpan = THREE.MathUtils.lerp(viewSpan, Math.max(9, 14 / this.camera.aspect), p);
+    }
     const cameraPosition = cameraAim
       .clone()
       .addScaledVector(viewDirection, distance);
@@ -1798,7 +1812,7 @@ export class ArchiveScene {
     const cameraTransition = this.targetDetail || this.detail > 0.01
       ? this.motion.detailTransition
       : this.motion.selectionTransition;
-    const cameraBlend = cinematic ? 1 : cameraTransition ? 1 - Math.exp(-dt * 5) : 1;
+    const cameraBlend = cinematic ? 1 : this.workspace.value > .001 ? (this.reduced ? 1 : 1 - Math.exp(-Math.min(elapsed, .25) * 5)) : cameraTransition ? 1 - Math.exp(-dt * 5) : 1;
     this.camera.position.lerp(cameraPosition, cameraBlend);
     this.cameraAim.lerp(cameraAim, cameraBlend);
     this.camera.lookAt(this.cameraAim);
@@ -1916,13 +1930,13 @@ export class ArchiveScene {
     // Keep all simulation and picking current. Reuse the composited canvas only
     // when its actual inputs are identical, including late textures and materials.
     if (this.caseMode) {
-      const arrayVisibility = cinematic ? 1 : 1 - THREE.MathUtils.smoothstep(this.insert.value, 0, 0.10);
+      const arrayVisibility = cinematic ? 1 : 1 - THREE.MathUtils.smoothstep(Math.max(this.insert.value, this.workspace.value * .16), 0, 0.10);
       this.terminalArrayVisibility.value = arrayVisibility;
       for (const inst of this.instances) inst.visible = arrayVisibility > 0;
       if (this.shadowCoverage) this.shadowCoverage.mesh.visible = arrayVisibility === 1;
       for (const outgoing of this.outgoing) outgoing.group.visible = arrayVisibility === 1;
       this.model.updateMatrixWorld();
-      this.setup.update(this.model.matrixWorld, this.camera.position, !cinematic && this.detail > 0.02 && this.presence > 0.01, this.insert.value, time, records[fileAtCell(this.selectedCell)].title);
+      this.setup.update(this.model.matrixWorld, this.camera.position, !cinematic && (this.detail > 0.02 || this.workspace.value > .01) && this.presence > 0.01, this.insert.value, time, records[fileAtCell(this.selectedCell)].title, this.workspace.value);
     }
     const state = this.renderState;
     this.scene.updateMatrixWorld();
@@ -2018,6 +2032,7 @@ export class ArchiveScene {
       superPerformance: this.superPerformance,
       presentation: this.presence,
       terminal: {
+        workspace: this.workspace.value,
         visible: this.setup.group.visible,
         arrayVisibility: this.terminalArrayVisibility.value,
         progress: this.insert.value,

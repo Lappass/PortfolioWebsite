@@ -2,6 +2,8 @@ import "./project-page.css";
 import { escapeHtml as e } from "./html";
 import { profile } from "./profile";
 import { PageChapters } from "./page-chapters";
+import { ProfileOrb } from "./profile-orb";
+import "./profile-workspace.css";
 
 const isWeb = (value: string) => /^(https?:|mailto:)/i.test(value);
 const asset = (value: string) => e(isWeb(value) ? value : `${import.meta.env.BASE_URL}${value.replace(/^\//, "")}`);
@@ -15,8 +17,9 @@ export class ProfilePage {
   private pushed = false;
   private returnFocus: HTMLElement | null = null;
   private chapters = new PageChapters(this.root);
+  private orb?: ProfileOrb;
 
-  constructor(private onClose: () => void) {
+  constructor(private onClose: () => void, private workspace: (active: boolean, instant: boolean) => void = () => {}) {
     this.root.className = "project-page profile-page";
     this.root.setAttribute("role", "dialog");
     this.root.setAttribute("aria-modal", "true");
@@ -36,7 +39,7 @@ export class ProfilePage {
   }
 
   get isOpen() { return this.state === "open"; }
-  get covering() { return this.state === "open"; }
+  get covering() { return false; } // The workspace camera continues behind the page.
 
   open(options: { instant?: boolean; push?: boolean } = {}) {
     if (this.isOpen) return;
@@ -50,16 +53,21 @@ export class ProfilePage {
     this.root.hidden = false;
     this.root.classList.toggle("instant", Boolean(options.instant));
     this.state = "open";
+    this.workspace(true, Boolean(options.instant));
     void this.root.offsetWidth;
     this.root.classList.add("visible");
     this.root.scrollTop = 0;
     this.chapters.sync();
+    this.orb?.dispose();
+    this.orb = new ProfileOrb(this.root.querySelector('canvas')!, Boolean(options.instant) || matchMedia('(prefers-reduced-motion: reduce)').matches, profile.name);
     this.root.querySelector<HTMLElement>("#profile-title")?.focus({ preventScroll: true });
   }
 
   close(options: { syncHistory?: boolean } = {}) {
     if (!this.isOpen) return false;
     this.state = "closing";
+    this.workspace(false, this.root.classList.contains('instant'));
+    this.orb?.dispose();
     this.root.classList.remove("visible");
     if (options.syncHistory !== false && location.hash === PROFILE_HASH) {
       if (this.pushed) history.back();
@@ -83,8 +91,8 @@ export class ProfilePage {
     this.root.innerHTML = `
       <header class="pp-bar">
         <button type="button" data-profile="back">← <span>返回作品</span><small>ESC</small></button>
-        <span class="pp-brand" aria-hidden="true">LAPPAS</span>
-        <span class="pp-count">PLAYER PROFILE</span>
+        <span class="pp-brand" aria-hidden="true">${e(p.name.toUpperCase())}</span>
+        <span class="pp-count">BEHIND THE WORKS / 创作幕后</span>
       </header>
       <nav class="pp-chapters" aria-label="个人档案章节">
         <span class="pp-index-label">PERSONNEL / 01</span>
@@ -92,18 +100,16 @@ export class ProfilePage {
       </nav>
       <article class="pp-body">
         <section class="profile-hero" data-section="identity" tabindex="-1" aria-label="身份">
-          <div class="profile-identity">
-            <div class="pp-label">01 / IDENTITY</div>
-            <div class="profile-avatar">${avatar}</div>
-            <div class="profile-id"><span>PERSONNEL RECORD</span><strong>LP—001</strong><span>${e(p.alias.toUpperCase())}</span></div>
-          </div>
-          <div>
+          <div class="profile-introduction">
+            <div class="pp-label">01 / THE PERSON BEHIND THE WORKS</div>
             <div class="pp-kicker"><i></i>${e(p.roleEn)} <span>·</span> ${e(p.role)}</div>
             <h1 id="profile-title" tabindex="-1">${e(p.name)}</h1>
             <div class="pp-en">${e(p.alias)} / CREATOR PROFILE</div>
             <p class="pp-abstract">${e(p.tagline)}</p>
             <div class="pp-links">${links.map((link) => `<a href="${asset(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} <span>↗</span></a>`).join("")}</div>
           </div>
+          <figure class="profile-orb-study"><div class="profile-orb-meta"><span>STUDY / 001</span><span>PARTICLE FIELD</span></div><canvas aria-label="可随鼠标扰动、在球体和文字之间变换的粒子实验"></canvas><figcaption><span>FORM → MOTION → PLAY</span><span>移动鼠标，扰动粒子</span></figcaption></figure>
+          <div class="profile-signature"><div class="profile-avatar">${avatar}</div><span>${e(p.alias.toUpperCase())} / SC—001</span><span>SCROLL TO EXPLORE ↓</span></div>
         </section>
         <section class="pp-section pp-highlights" data-section="about" tabindex="-1" aria-label="关于我">
           <div class="pp-label"><span class="pp-section-number">02</span>ABOUT / 关于我</div>
@@ -111,7 +117,7 @@ export class ProfilePage {
         </section>
         <section class="pp-section pp-highlights" data-section="skills" tabindex="-1" aria-label="技能">
           <div class="pp-label"><span class="pp-section-number">03</span>SKILLS / 技能</div>
-          <div class="profile-skills">${p.skills.map((s, i) => `<div><div class="pp-label">0${i + 1} / ${e(s.group)}</div><ul class="pp-tags">${s.items.map((item) => `<li>${e(item)}</li>`).join("")}</ul></div>`).join("")}</div>
+          <div class="profile-skills">${p.skills.map((s, i) => `<div><span class="profile-tool-number">0${i + 1}</span><div><h3>${e(s.group)}</h3><p>${s.items.map(e).join(" / ")}</p></div></div>`).join("")}</div>
         </section>
         <section class="pp-section pp-highlights" data-section="experience" tabindex="-1" aria-label="经历">
           <div class="pp-label"><span class="pp-section-number">04</span>EXPERIENCE / 经历</div>

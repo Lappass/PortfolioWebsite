@@ -321,7 +321,10 @@ function openProjectAt(index: number, options: { instant?: boolean; push?: boole
   $("#stage").dataset.inserting = "true";
   showProjectPage(options);
 }
-const profilePage = new ProfilePage(() => { if (profilePage.close()) audio.play("page-close"); });
+const profilePage = new ProfilePage(() => { if (profilePage.close()) audio.play("page-close"); }, (active, instant) => {
+  scene?.setWorkspace(active, instant);
+  $("#stage").dataset.workspace = String(active);
+});
 const projectPage = new ProjectPage({
   close: closeProjectPage,
   navigate: (direction) => {
@@ -1123,7 +1126,7 @@ function frame(ms: number) {
       : undefined;
   wallpaperEffects?.update(time, motionIsReduced(), motionActive("pointerParallax"));
   // The calibrated 2D opening fully covers the scene until array entry.
-  if (!viewer?.isOpen && !projectPage.covering && !profilePage.covering && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
+    if (!viewer?.isOpen && (!projectPage.covering || profilePage.isOpen) && !profilePage.covering && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
   if (discInserting && scene) {
     const progress = scene.insertProgress;
     if (consoleCueProgress < 0.63 && progress >= 0.63) audio.play("brand");
