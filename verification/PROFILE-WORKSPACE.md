@@ -42,3 +42,6 @@ The user's subsequent choice supersedes the particle-name entry: personal
 information now opens with an identity card from the prominent creator button.
 The particle sphere remains inside the page. Current behaviour and verification
 are documented in `PORTFOLIO-HIERARCHY.md`.
+
+Latest correction restores the particle-name entry and original About button;
+the identity-card experiment is withdrawn. Four featured projects remain.

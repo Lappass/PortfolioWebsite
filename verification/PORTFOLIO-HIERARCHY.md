@@ -38,3 +38,7 @@ navigation spacing. Browser simulations are not physical iPhone validation.
 The complete six-second insertion and return sequence was also rechecked at
 desktop, portrait and landscape sizes: the archive hides during insertion, the
 screen fits without tilt, the project route opens and the selection returns.
+
+Latest user correction: retain the four-project tier and removed top links,
+but withdraw the identity card. The original About button and particle-name
+entry are restored. Footer preferences and Experiments remain available.
