@@ -44,7 +44,7 @@
 [data-dark-surface="true"] :is(#inspection-marks, .inspection-overlay) { color: var(--theme-ink); }
 [data-dark-surface="true"] :is(.back-button, .viewer-back, .viewer-reset, .viewer-index, .viewer-parts, .file-title, .file-open, .read-file, .column-navigation, .archive-counter) { color: var(--theme-ink); }
 @media(max-width: 700px) { .theme-settings { align-items: flex-start; }.theme-choices button { min-width: 58px; } }
-[data-dark-surface="true"] .archive-atmosphere { background: radial-gradient(ellipse 60% 55% at 82% 8%, rgba(86, 146, 255, 0.3), transparent 70%), radial-gradient(ellipse 55% 50% at 8% 95%, rgba(40, 96, 230, 0.24), transparent 70%); }
+[data-dark-surface="true"] .archive-atmosphere { background: radial-gradient(ellipse 34% 46% at 22% -6%, rgba(214, 170, 130, 0.36), rgba(214, 170, 130, 0.1) 45%, transparent 75%), radial-gradient(ellipse 80% 22% at 40% 108%, rgba(80, 100, 130, 0.28), transparent 75%); }
 [data-dark-surface="true"] .archive-atmosphere::before { background: linear-gradient(180deg, rgba(var(--theme-paper-rgb), .35), transparent 38%), radial-gradient(ellipse at 42% 47%, transparent 32%, rgba(var(--theme-paper-rgb), .19) 85%); }
 [data-dark-surface="true"] .archive-atmosphere::after { background: linear-gradient(90deg, transparent 40%, rgba(var(--theme-paper-rgb), .2) 59%, rgba(var(--theme-paper-rgb), .92) 68%, var(--theme-paper) 100%); }
 [data-dark-surface="true"] [data-layout="portrait"] .archive-atmosphere::after { background: linear-gradient(180deg, transparent 28%, rgba(var(--theme-paper-rgb), .2) 39%, rgba(var(--theme-paper-rgb), .96) 51%, var(--theme-paper) 60%); }

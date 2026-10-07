@@ -56,7 +56,7 @@ export class ConsoleSetup {
       } else {
         const standard = new THREE.MeshStandardMaterial({ color: source.color, roughness: source.roughness, metalness: source.metalness });
         if (o.name === "Slot_Light") {
-          standard.emissive.set("#5f9bff");
+          standard.emissive.set("#ffd9a0");
           this.light = standard;
         }
         material = standard;
@@ -105,8 +105,8 @@ export class ConsoleSetup {
     this.drawn = key;
     const c = this.canvas.getContext("2d")!, w = this.canvas.width, h = this.canvas.height;
     const bg = c.createRadialGradient(w * 0.5, h * 0.35, 40, w * 0.5, h * 0.5, w * 0.75);
-    bg.addColorStop(0, "#123a7a");
-    bg.addColorStop(1, "#040b1c");
+    bg.addColorStop(0, "#2a2620");
+    bg.addColorStop(1, "#07080b");
     c.fillStyle = bg;
     c.fillRect(0, 0, w, h);
     c.fillStyle = "#eef3ff";
@@ -119,7 +119,7 @@ export class ConsoleSetup {
       c.fillText(title, w / 2, h * 0.53);
       c.fillStyle = "rgba(238, 243, 255, 0.18)";
       c.fillRect(w * 0.3, h * 0.62, w * 0.4, 4);
-      c.fillStyle = "#7fb0ff";
+      c.fillStyle = "#e0b878";
       c.fillRect(w * 0.3, h * 0.62, w * 0.4 * progress, 4);
       c.font = "500 22px MiSans, sans-serif";
       c.fillStyle = "rgba(238, 243, 255, 0.55)";

@@ -1115,7 +1115,7 @@ function frame(ms: number) {
   const time = ms / 1000;
   const theme = scene?.themeAmount ?? (prefs.colorTheme === "dark" ? 1 : 0);
   paintTheme(theme);
-  particles.update(ms, mode === "archive" && !projectPage.isOpen && !profilePage.isOpen && !modal, motionIsReduced(), theme > 0.5 ? "190, 214, 255" : "52, 50, 44");
+  particles.update(ms, mode === "archive" && !projectPage.isOpen && !profilePage.isOpen && !modal, motionIsReduced(), theme > 0.5);
   viewer?.setTheme(theme);
   playground?.tick(time);
   const cinema =

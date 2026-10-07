@@ -41,8 +41,8 @@ export function themeMaterial(material: THREE.Material, name: string, instanced 
 
 type Baseline = { background: THREE.Color; fog?: THREE.Color; intensity: number; exposure: number; lights: { light: THREE.Light; intensity: number }[]; floor?: { material: THREE.MeshStandardMaterial; color: THREE.Color } };
 const scenes = new WeakMap<THREE.Scene, Baseline>();
-// Console-home night blue: deep navy field, blue haze.
-const background = new THREE.Color("#08142e"), floorColor = new THREE.Color("#0c1d44"), mistColor = new THREE.Color("#173468");
+// Console-home night: near-black field with a faint cool haze.
+const background = new THREE.Color("#0b0d12"), floorColor = new THREE.Color("#10131a"), mistColor = new THREE.Color("#1b1f2a");
 export function themeEnvironment(scene: THREE.Scene, renderer: THREE.WebGLRenderer, amount: number) {
   let baseline = scenes.get(scene);
   if (!baseline) {
