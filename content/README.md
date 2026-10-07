@@ -25,7 +25,7 @@
 | `tags`    | 技术标签数组，显示在选中卡片和项目页；缺省时按 `lead` 拆分                 |
 | `cover`   | 封面图，例如 `works/x-001/cover.jpg`（建议 16:9）                          |
 | `hero`    | 插入光盘后首页铺满全屏的主视觉（16:9，宽至少 1920）；缺省时用 `cover`，再缺省时用生成的封面图案 |
-| `gallery` | 画廊数组，每项 `{ "src": "...", "caption": "可选说明" }`                   |
+| `gallery` | 画廊数组，每项 `{ "src": "...", "caption": "可选标题", "note": "可选旁注正文" }`；有 `note` 时可点击编号标题展开说明 |
 | `video`   | `.mp4` / `.webm` 文件路径，或 B 站、YouTube 等嵌入播放器的 HTTPS 地址      |
 | `unity`   | Unity WebGL 构建的 `index.html` 路径，例如 `works/x-005/unity/index.html`；页面先显示封面，点击后才加载 |
 | `links`   | 链接数组，每项 `{ "label": "GitHub", "url": "https://..." }`               |

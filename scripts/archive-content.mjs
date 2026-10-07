@@ -31,8 +31,8 @@ function validateMedia(record, label, errors) {
     if (record[key] !== undefined && !isMediaPath(record[key]))
       errors.push(`${label}.${key}：必须是 public 目录内的路径或 HTTP(S) 链接`);
   if (record.gallery !== undefined && (!Array.isArray(record.gallery) ||
-    !record.gallery.every((item) => item && isMediaPath(item.src) && (item.caption === undefined || isText(item.caption)))))
-    errors.push(`${label}.gallery：每项需要有效的 src，caption 可选`);
+    !record.gallery.every((item) => item && isMediaPath(item.src) && (item.caption === undefined || isText(item.caption)) && (item.note === undefined || isText(item.note)))))
+    errors.push(`${label}.gallery：每项需要有效的 src，caption 和 note 为可选纯文本`);
   if (record.links !== undefined && (!Array.isArray(record.links) ||
     !record.links.every((item) => item && isText(item.label) && isWebUrl(item.url))))
     errors.push(`${label}.links：每项需要 label 和 HTTP(S) url`);

@@ -3,6 +3,7 @@ import type { ArchiveRecord } from "./data";
 import { escapeHtml } from "./html";
 import { logo } from "./brand";
 import { paintArtwork } from "./case-art";
+import { PageChapters } from "./page-chapters";
 
 const heroArt = new Map<string, string>();
 /** Key art for the hub: the work's own image, or its generated cover art at screen size. */
@@ -41,6 +42,7 @@ export class ProjectPage {
   private pushed = false;
   private returnFocus: HTMLElement | null = null;
   private introTimer = 0;
+  private chapters = new PageChapters(this.root);
 
   constructor(private handlers: { close: () => void; navigate: (direction: 1 | -1) => void }) {
     this.root.id = "project-page";
@@ -96,6 +98,7 @@ export class ProjectPage {
     this.root.classList.add("visible");
     if (from) requestAnimationFrame(() => { this.root.style.clipPath = "inset(0 0 0 0 round 0px)"; });
     this.root.scrollTop = 0;
+    this.chapters.sync();
     this.root.querySelector<HTMLElement>("#pp-title")?.focus({ preventScroll: true });
     this.timer = window.setTimeout(() => { this.state = "open"; }, options.instant ? 0 : from ? 760 : 340);
   }
@@ -110,17 +113,20 @@ export class ProjectPage {
     const tags = r.tags?.length ? `<ul class="pp-tags">${r.tags.map((tag) => `<li>${e(tag)}</li>`).join("")}</ul>` : "";
     const links = [...(r.links ?? []), ...(r.links?.some((link) => link.url === r.source) ? [] : [{ label: "项目链接", url: r.source }])];
     const gallery = r.gallery?.length
-      ? `<section class="pp-section"><div class="pp-label">GALLERY / 图片</div><div class="pp-gallery">${r.gallery.map((item) => `<figure><img src="${media(item.src)}" alt="${e(item.caption ?? r.title)}" loading="lazy" decoding="async">${item.caption ? `<figcaption>${e(item.caption)}</figcaption>` : ""}</figure>`).join("")}</div></section>`
+      ? `<section class="pp-section" data-section="gallery" tabindex="-1" aria-label="画面记录"><div class="pp-label"><span class="pp-section-number">${r.unity && r.video ? "04" : "03"}</span>VISUAL RECORDS / 画面记录</div><div class="pp-gallery">${r.gallery.map((item, i) => `<figure><div class="pp-record-image"><img src="${media(item.src)}" alt="${e(item.caption ?? r.title)}" loading="lazy" decoding="async"><span class="pp-image-index" aria-hidden="true">${pad(i + 1)}</span></div><figcaption>${item.note ? `<details class="pp-image-note"><summary><span class="pp-note-number">${pad(i + 1)}</span><span>${e(item.caption ?? "画面说明")}</span><span class="pp-note-plus" aria-hidden="true">＋</span></summary><p>${e(item.note)}</p></details>` : `<span class="pp-note-number">${pad(i + 1)}</span>${e(item.caption ?? r.title)}`}</figcaption></figure>`).join("")}</div></section>`
       : "";
     const heroIsVideo = !r.unity && r.video;
-    const video = r.video && !heroIsVideo ? `<section class="pp-section"><div class="pp-label">VIDEO / 视频</div><div class="pp-frame">${this.videoMarkup(r)}</div></section>` : "";
+    const video = r.video && !heroIsVideo ? `<section class="pp-section" data-section="video" tabindex="-1" aria-label="演示视频"><div class="pp-label">VIDEO / 视频</div><div class="pp-frame">${this.videoMarkup(r)}</div></section>` : "";
+    const chapters = [["overview", "作品"], ["info", "概述"], ...(video ? [["video", "演示"]] : []), ...(gallery ? [["gallery", "画面"]] : []), ["findings", "要点"]];
     this.root.innerHTML = `
       <header class="pp-bar">
         <button type="button" data-page="back">← <span>返回阵列</span><small>ESC</small></button>
         <span class="pp-brand" aria-hidden="true">LAPPAS</span>
         <nav aria-label="切换作品"><button type="button" data-page="prev" aria-label="上一个作品：${e(previous.title)}">← <span>上一个</span></button><span class="pp-count">${pad(position)} / ${pad(total)}</span><button type="button" data-page="next" aria-label="下一个作品：${e(next.title)}"><span>下一个</span> →</button></nav>
       </header>
-      <section class="pp-hub">
+      <nav class="pp-chapters" aria-label="项目章节"><span class="pp-index-label">ARCHIVE / ${e(r.id)}</span>${chapters.map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>${pad(i + 1)}</small>${label}</button>`).join("")}</nav>
+      <section class="pp-hub" data-section="overview" tabindex="-1" aria-label="作品封面">
+        <div class="pp-field-index" aria-hidden="true">SELECTED WORK / ${pad(position)}<span>${e(r.clearance)}</span></div>
         <div class="pp-hub-art"><img src="${heroSource(r)}" alt="" decoding="async"></div>
         <div class="pp-hub-content">
           <div class="pp-kicker"><i></i>${e(r.category)} <span>·</span> ${e(r.id)}</div>
@@ -133,8 +139,8 @@ export class ProjectPage {
         </div>
       </section>
       <article class="pp-body">
-        <section class="pp-hero">
-          <div class="pp-frame pp-hero-media">${this.heroMarkup(r)}</div>
+        <section class="pp-hero" data-section="info" tabindex="-1" aria-label="项目概述">
+          <div><div class="pp-label"><span class="pp-section-number">02</span>PROJECT / 项目概述</div><div class="pp-frame pp-hero-media">${this.heroMarkup(r)}</div><div class="pp-media-caption"><span>FIG. 01</span>${e(r.unity ? "交互演示" : r.video ? "演示视频" : r.title)}</div></div>
           <div class="pp-info">
             <div class="pp-kicker"><i></i>${e(r.category)} <span>·</span> ${e(r.id)}</div>
             <h2>${e(r.title)}</h2>
@@ -152,13 +158,14 @@ export class ProjectPage {
         </section>
         ${video}
         ${gallery}
-        <section class="pp-section pp-highlights">
-          <div class="pp-label">HIGHLIGHTS / 项目要点</div>
+        <section class="pp-section pp-highlights" data-section="findings" tabindex="-1" aria-label="项目要点">
+          <div class="pp-label"><span class="pp-section-number">${pad(chapters.length)}</span>FIELD NOTES / 项目要点</div>
           <ol>${r.findings.map((item, i) => `<li><span>${pad(i + 1)}</span>${e(item)}</li>`).join("")}</ol>
         </section>
       </article>
       <footer class="pp-next"><button type="button" data-page="next"><span>NEXT PROJECT / 下一个</span><strong>${e(next.title)} →</strong></button></footer>`;
     if (changed) this.root.scrollTop = 0;
+    this.chapters.sync();
   }
 
   close(options: { syncHistory?: boolean } = {}) {
@@ -240,7 +247,7 @@ export class ProjectPage {
 
   private trapFocus(event: KeyboardEvent) {
     if (event.key !== "Tab") return;
-    const items = [...this.root.querySelectorAll<HTMLElement>("a[href],button,iframe,video[controls],[tabindex='0']")]
+    const items = [...this.root.querySelectorAll<HTMLElement>("a[href],button,summary,iframe,video[controls],[tabindex='0']")]
       .filter((el) => el.getClientRects().length > 0);
     const first = items[0], last = items.at(-1);
     if (event.shiftKey && (document.activeElement === first || document.activeElement?.id === "pp-title")) { event.preventDefault(); last?.focus(); }

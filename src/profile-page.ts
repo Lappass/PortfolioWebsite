@@ -1,6 +1,7 @@
 import "./project-page.css";
 import { escapeHtml as e } from "./html";
 import { profile } from "./profile";
+import { PageChapters } from "./page-chapters";
 
 const isWeb = (value: string) => /^(https?:|mailto:)/i.test(value);
 const asset = (value: string) => e(isWeb(value) ? value : `${import.meta.env.BASE_URL}${value.replace(/^\//, "")}`);
@@ -13,6 +14,7 @@ export class ProfilePage {
   private timer = 0;
   private pushed = false;
   private returnFocus: HTMLElement | null = null;
+  private chapters = new PageChapters(this.root);
 
   constructor(private onClose: () => void) {
     this.root.className = "project-page profile-page";
@@ -23,6 +25,13 @@ export class ProfilePage {
     document.body.append(this.root);
     this.root.addEventListener("click", (event) => {
       if ((event.target as Element).closest("[data-profile='back']")) this.onClose();
+    });
+    this.root.addEventListener("keydown", (event) => {
+      if (event.key !== "Tab") return;
+      const items = [...this.root.querySelectorAll<HTMLElement>("a[href],button")].filter(el => el.getClientRects().length);
+      const first = items[0], last = items.at(-1);
+      if (event.shiftKey && (document.activeElement === first || document.activeElement?.id === "profile-title")) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
     });
   }
 
@@ -44,6 +53,7 @@ export class ProfilePage {
     void this.root.offsetWidth;
     this.root.classList.add("visible");
     this.root.scrollTop = 0;
+    this.chapters.sync();
     this.root.querySelector<HTMLElement>("#profile-title")?.focus({ preventScroll: true });
   }
 
@@ -76,27 +86,35 @@ export class ProfilePage {
         <span class="pp-brand" aria-hidden="true">LAPPAS</span>
         <span class="pp-count">PLAYER PROFILE</span>
       </header>
+      <nav class="pp-chapters" aria-label="个人档案章节">
+        <span class="pp-index-label">PERSONNEL / 01</span>
+        ${[["identity", "身份"], ["about", "关于"], ["skills", "技能"], ["experience", "经历"]].map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>0${i + 1}</small>${label}</button>`).join("")}
+      </nav>
       <article class="pp-body">
-        <section class="profile-hero">
-          <div class="profile-avatar">${avatar}</div>
+        <section class="profile-hero" data-section="identity" tabindex="-1" aria-label="身份">
+          <div class="profile-identity">
+            <div class="pp-label">01 / IDENTITY</div>
+            <div class="profile-avatar">${avatar}</div>
+            <div class="profile-id"><span>PERSONNEL RECORD</span><strong>LP—001</strong><span>${e(p.alias.toUpperCase())}</span></div>
+          </div>
           <div>
             <div class="pp-kicker"><i></i>${e(p.roleEn)} <span>·</span> ${e(p.role)}</div>
             <h1 id="profile-title" tabindex="-1">${e(p.name)}</h1>
-            <div class="pp-en">${e(p.alias)}</div>
+            <div class="pp-en">${e(p.alias)} / CREATOR PROFILE</div>
             <p class="pp-abstract">${e(p.tagline)}</p>
             <div class="pp-links">${links.map((link) => `<a href="${asset(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} <span>↗</span></a>`).join("")}</div>
           </div>
         </section>
-        <section class="pp-section pp-highlights">
-          <div class="pp-label">ABOUT / 关于我</div>
+        <section class="pp-section pp-highlights" data-section="about" tabindex="-1" aria-label="关于我">
+          <div class="pp-label"><span class="pp-section-number">02</span>ABOUT / 关于我</div>
           <div class="profile-bio">${p.bio.map((paragraph) => `<p>${e(paragraph)}</p>`).join("")}</div>
         </section>
-        <section class="pp-section pp-highlights">
-          <div class="pp-label">SKILLS / 技能</div>
-          <div class="profile-skills">${p.skills.map((s) => `<div><div class="pp-label">${e(s.group)}</div><ul class="pp-tags">${s.items.map((item) => `<li>${e(item)}</li>`).join("")}</ul></div>`).join("")}</div>
+        <section class="pp-section pp-highlights" data-section="skills" tabindex="-1" aria-label="技能">
+          <div class="pp-label"><span class="pp-section-number">03</span>SKILLS / 技能</div>
+          <div class="profile-skills">${p.skills.map((s, i) => `<div><div class="pp-label">0${i + 1} / ${e(s.group)}</div><ul class="pp-tags">${s.items.map((item) => `<li>${e(item)}</li>`).join("")}</ul></div>`).join("")}</div>
         </section>
-        <section class="pp-section pp-highlights">
-          <div class="pp-label">EXPERIENCE / 经历</div>
+        <section class="pp-section pp-highlights" data-section="experience" tabindex="-1" aria-label="经历">
+          <div class="pp-label"><span class="pp-section-number">04</span>EXPERIENCE / 经历</div>
           <ol>${p.experience.map((x) => `<li><span>${e(x.time)}</span><div><strong>${e(x.title)}</strong><br>${e(x.detail)}</div></li>`).join("")}</ol>
         </section>
       </article>`;
