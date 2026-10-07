@@ -9,7 +9,7 @@ import { ThemeWave } from "./theme-motion";
 import { themeMaterial, themeEnvironment } from "./theme-material";
 import { RhythmMotion, rhythmDisplacement, quietBands, type MusicBands, type RhythmStyle } from "./archive-play-motion";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
-import { buildGameCase, poseCase, printCase, transferPrint, SLOT_POSITION } from "./game-case";
+import { buildGameCase, poseCase, printCase, transferPrint } from "./game-case";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -232,7 +232,7 @@ export class ArchiveScene {
   private dragging = false;
   private hoverCell: ArchiveCell | null = null;
   private hoverLifts = new Map<string, number>();
-  private archiveDrag = new ArchiveDrag();
+  private archiveDrag = Object.assign(new ArchiveDrag(), { lockLane: true });
   private dragTrack: DragPosition | null = null;
   private navigatingDrag = false;
   private archiveMomentum: { motion: ArchivePlaneMomentum; time: number } | null = null;
@@ -560,23 +560,47 @@ export class ArchiveScene {
   private updateInsert(dt: number) {
     const { insert } = this;
     // Linear time; poseCase applies the easing. Inserting reads slower than ejecting.
-    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 2.1 : -dt / 0.9), 0, 1);
+    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 1.7 : -dt / 0.9), 0, 1);
     if (insert.value >= 1 && this.insertDone) {
       this.insertDone();
       this.insertDone = undefined;
     }
   }
-  private placeSlot(time: number) {
+  // The console sits just below the frame, bottom right; only its slit and strip show.
+  // It lowers out of the detail text's way and rises while a disc goes in.
+  private slotHeight = -0.8;
+  private slotTime = 0;
+  /** The slit's top centre in case-local units, for the disc path. */
+  private slotLocal = new THREE.Vector3(3.35, 1, 0.55);
+  private placeSlot(time: number, cinematic: boolean) {
     if (!this.slot) return;
     const p = this.insert.value;
-    this.slot.visible = p > 0;
-    // The console rises in beside the case, then its strip pulses while reading.
-    const rise = THREE.MathUtils.smoothstep(p, 0, 0.22);
+    const dt = Math.min(0.1, Math.max(0, time - this.slotTime));
+    this.slotTime = time;
+    this.slot.visible = !cinematic && this.presence > 0.01;
+    const target = p > 0
+      ? THREE.MathUtils.lerp(-1.02, -0.32, THREE.MathUtils.smoothstep(p, 0, 0.3))
+      : this.targetDetail > 0 ? -0.97 : -0.8;
+    this.slotHeight = THREE.MathUtils.damp(this.slotHeight, target - 1.2 * (1 - this.presence), 6, dt);
+    const camera = this.camera;
+    const forward = camera.getWorldDirection(new THREE.Vector3());
+    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
     this.model.updateMatrixWorld();
-    this.slot.matrix.copy(this.model.matrixWorld).multiply(
-      new THREE.Matrix4().makeTranslation(SLOT_POSITION.x, SLOT_POSITION.y - 1.6 * (1 - rise), SLOT_POSITION.z),
-    );
+    const centre = new THREE.Vector3(0, 1.85, 0).applyMatrix4(this.model.matrixWorld);
+    // While browsing it stands well in front of the line (scaled to keep its apparent size);
+    // with a file open it sits just nearer than the case, so its body hides a sinking disc.
+    const caseDepth = centre.sub(camera.position).dot(forward);
+    const depth = caseDepth - THREE.MathUtils.lerp(30, 0.8, THREE.MathUtils.clamp(this.detail, 0, 1));
+    const scale = depth / caseDepth;
+    const halfHeight = depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const top = camera.position.clone()
+      .addScaledVector(forward, depth)
+      .addScaledVector(right, 0.42 * halfHeight * camera.aspect)
+      .addScaledVector(up, this.slotHeight * halfHeight);
+    this.slot.matrix.compose(top.clone().addScaledVector(up, -2.9 * scale), camera.quaternion, new THREE.Vector3(scale, scale, scale));
     this.slot.matrixWorldNeedsUpdate = true;
+    this.slotLocal.copy(this.model.worldToLocal(top));
     const reading = THREE.MathUtils.smoothstep(p, 0.8, 0.86);
     if (this.slotLight) this.slotLight.emissiveIntensity = 0.5 + reading * (1.6 + 1.4 * Math.sin(time * 18));
   }
@@ -1562,7 +1586,7 @@ export class ArchiveScene {
     this.appearance.setClarity(this.model, this.modelClarity());
     if (this.caseMode) {
       this.updateInsert(dt);
-      poseCase(this.model, this.modelClarity(), time, this.insert.value);
+      poseCase(this.model, this.modelClarity(), time, this.insert.value, this.slotLocal);
     }
     // Reference 26.92–27.76: the array travels horizontally into a white field.
     const entry = cinematic ? ease((shot - 21.9) / 0.86) : this.reveal;
@@ -1825,6 +1849,8 @@ export class ArchiveScene {
     if (this.coverAttribute) this.coverUpdates ??= new InstanceUpdates(this.coverAttribute);
     for (const cell of this.cells) {
       const { row, lane } = cell;
+      // One wave line: neighbouring lanes stay empty.
+      if (lane !== selectedLane) continue;
       if (hidden.has(cellKey(cell))) continue;
       const x = (lane - 2) * COLUMN_SPACING - trackX;
       const y = -4.6 + field(row, lane) + hoverLift(cell) - this.presentationDrop(cell);
@@ -1901,7 +1927,7 @@ export class ArchiveScene {
     this.renderer.info.reset();
     // Keep all simulation and picking current. Reuse the composited canvas only
     // when its actual inputs are identical, including late textures and materials.
-    if (this.caseMode) this.placeSlot(time);
+    if (this.caseMode) this.placeSlot(time, Boolean(cinematic));
     const state = this.renderState;
     this.scene.updateMatrixWorld();
     // A changed instance buffer already proves the image changed. Avoid a

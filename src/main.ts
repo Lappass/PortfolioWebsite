@@ -5,6 +5,8 @@ import "./document-decryption.css";
 import "./decryption.css";
 import { escapeHtml } from "./html";
 import { ProjectPage, workIdFromHash } from "./project-page";
+import { ParticleField } from "./particles";
+import { ProfilePage, PROFILE_HASH } from "./profile-page";
 import { normalizeQuality, qualityPresets, type QualityPreset, type RenderQuality } from "./render-quality";
 import { qualityMarkup, syncQualityUI } from "./quality-settings";
 import { superPerformanceQuality, wallpaperQuality } from "./wallpaper-quality";
@@ -68,6 +70,7 @@ $("#stage").innerHTML = `
   <div id="boot-background" class="boot-background"><svg viewBox="0 0 1920 1080" preserveAspectRatio="none"><g fill="none" stroke="#fff" stroke-width="3"><path d="M-210 705C-45 705 182 704 247 567C337 377 99 306 4 435S27 680 169 631C309 584 227 314 279 111S568-113 568-113"/><path d="M1560-80C1374 114 1671 168 1601 323S1371 367 1431 480S1692 666 1559 787S1329 886 1498 1130"/><circle cx="1450" cy="648" r="346"/><circle cx="1450" cy="648" r="348"/></g></svg></div>
   <header class="brand">${brandHeading}</header>
   <nav class="system-nav" aria-label="系统导航">
+    <button data-action="about" aria-label="关于我"><span aria-hidden="true">◉</span> 关于</button>
     <button data-action="search"><span class="nav-glyph">⌕</span> ARCHIVE INDEX <span class="key">/</span></button>
     <button data-action="saved" aria-label="查看收藏档案" title="收藏档案">＋ SAVED <span id="saved-count">00</span></button>
     <button class="settings-button" data-action="settings" aria-label="系统设置" title="系统设置"><span class="settings-glyph" aria-hidden="true">◷</span><span class="settings-label">设置</span></button>
@@ -88,7 +91,7 @@ $("#stage").innerHTML = `
     <div class="archive-counter"><span class="tiny-label">ARCHIVE / SELECT</span><div><span id="selected-number">01</span><i>/</i><span class="count-total">12</span></div></div>
     <div class="archive-navigation"><button data-action="prev" aria-label="上一个档案">↑</button><div id="file-ticks" class="file-ticks"></div><button data-action="next" aria-label="下一个档案">↓</button></div>
     <div class="column-navigation"><button data-action="column-prev" aria-label="上一列">←</button><div><span id="column-number">COLUMN <span id="column-index">03</span> / 05</span><strong id="column-name">机构档案</strong></div><button data-action="column-next" aria-label="下一列">→</button></div>
-    <div class="archive-hint"><kbd>←</kbd> <kbd>→</kbd> 切换列 <span>／</span> <kbd>↑</kbd> <kbd>↓</kbd> 前后档案 <span>／</span> <kbd>ENTER</kbd> 读取</div>
+    <div class="archive-hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> 浏览作品 <span>／</span> 拖动滑行 <span>／</span> <kbd>ENTER</kbd> 打开</div>
   </section>
   <section id="detail-ui" class="detail-ui" aria-label="档案内容" hidden>
     <button class="back-button" data-action="back">← <span>ARCHIVE OVERVIEW</span><small>ESC</small></button>
@@ -102,6 +105,9 @@ $("#stage").innerHTML = `
   <div id="loading" class="loading"><div class="loading-mark">${logo}</div><span>CONNECTING TO INTERNAL DATABASE</span><i></i></div>
 `;
 
+const particles = new ParticleField($("#stage"));
+// Above the 3D archive, below every interface layer.
+$(".archive-atmosphere").after(particles.canvas);
 $("#boot-background").insertAdjacentHTML(
   "beforeend",
   '<div class="boot-white"></div>',
@@ -315,6 +321,7 @@ function openProjectAt(index: number, options: { instant?: boolean; push?: boole
   $("#stage").dataset.inserting = "true";
   showProjectPage(options);
 }
+const profilePage = new ProfilePage(() => { if (profilePage.close()) audio.play("page-close"); });
 const projectPage = new ProjectPage({
   close: closeProjectPage,
   navigate: (direction) => {
@@ -325,6 +332,11 @@ const projectPage = new ProjectPage({
 });
 window.addEventListener("popstate", () => {
   if (!started || !ready) return;
+  if (location.hash === PROFILE_HASH) {
+    if (!profilePage.isOpen) profilePage.open({ push: false, instant: !motionActive("surfaceTransitions") });
+    return;
+  }
+  if (profilePage.isOpen) profilePage.close({ syncHistory: false });
   const id = workIdFromHash();
   const index = id ? records.findIndex((record) => record.id === id) : -1;
   if (index < 0) {
@@ -508,10 +520,9 @@ function stepFile(direction: number) {
     { axis: "row", direction },
   );
 }
+// All works share one line: sideways input steps along it as well.
 function stepColumn(direction: number) {
-  const lane = fileLocation(selected).lane;
-  const next = wrap(lane + direction, archiveColumns.length);
-  select(columnMemory[next], { axis: "lane", direction });
+  stepFile(direction);
 }
 function updateSelection(navigation?: ArchiveNavigation) {
   const r = records[selected];
@@ -551,7 +562,7 @@ function updateSelection(navigation?: ArchiveNavigation) {
         ? direction
         : "auto",
   });
-  columnTitle.update({ text: archiveColumns[lane], animated: motionActive("rollingText") && mode === "archive" });
+  columnTitle.update({ text: archiveColumns[0], animated: motionActive("rollingText") && mode === "archive" });
   $<HTMLButtonElement>('[data-action="column-prev"]').disabled = false;
   $<HTMLButtonElement>('[data-action="column-next"]').disabled = false;
   fileTicks.forEach((button, slot) => {
@@ -906,6 +917,10 @@ document.addEventListener("click", (e) => {
     audio.play("page-open");
   }
   if (action === "project-page" && mode === "detail") void insertDiscAndOpen();
+  if (action === "about") closeModal(() => {
+    profilePage.open({ instant: !motionActive("surfaceTransitions") });
+    audio.play("page-open");
+  });
   if (action === "back") {
     setMode("archive");
     audio.play("back");
@@ -944,6 +959,10 @@ document.addEventListener("keydown", (e) => {
   if (viewer?.isOpen) return;
   if (projectPage.isOpen) {
     if (e.key === "Escape") { e.preventDefault(); closeProjectPage(); }
+    return;
+  }
+  if (profilePage.isOpen) {
+    if (e.key === "Escape") { e.preventDefault(); if (profilePage.close()) audio.play("page-close"); }
     return;
   }
   if (playground?.active && !modal) {
@@ -1095,6 +1114,7 @@ function frame(ms: number) {
   const time = ms / 1000;
   const theme = scene?.themeAmount ?? (prefs.colorTheme === "dark" ? 1 : 0);
   paintTheme(theme);
+  particles.update(ms, mode === "archive" && !projectPage.isOpen && !profilePage.isOpen && !modal, motionIsReduced(), theme > 0.5 ? "214, 226, 232" : "52, 50, 44");
   viewer?.setTheme(theme);
   playground?.tick(time);
   const cinema =
@@ -1103,7 +1123,7 @@ function frame(ms: number) {
       : undefined;
   wallpaperEffects?.update(time, motionIsReduced(), motionActive("pointerParallax"));
   // The calibrated 2D opening fully covers the scene until array entry.
-  if (!viewer?.isOpen && !projectPage.covering && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
+  if (!viewer?.isOpen && !projectPage.covering && !profilePage.covering && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
   viewer?.update(time);
   if (threeState === "closing" && scene?.presentationHidden) releaseThree();
   playground?.position();
@@ -1287,6 +1307,10 @@ function completeStartup(silent: boolean) {
   if (reviewParams.get("scene") === "archive" || (!motionActive("boot") && !reviewParams.has("time"))) setMode("archive");
   if (reviewParams.get("scene") === "detail") setMode("detail");
   if (isWallpaper && wallpaperHost()?.properties.boot?.value === false) setMode("archive");
+  if (location.hash === PROFILE_HASH && !isWallpaper) {
+    setMode("archive");
+    profilePage.open({ instant: true, push: false });
+  }
   const sharedWork = records.findIndex((record) => record.id === workIdFromHash());
   if (sharedWork >= 0 && !isWallpaper) openProjectAt(sharedWork, { instant: true, push: false });
   $("#stage").inert = false;

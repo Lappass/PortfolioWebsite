@@ -2,6 +2,7 @@ import { bootMotion } from "./boot-motion";
 import { bootMarkContour, bootPromptPath, bootCursorOffsetY } from "./brand";
 import { themeAmount } from "./theme-ui";
 import { BootLettering } from "./boot-lettering";
+import { profile } from "./profile";
 
 const ns = "http://www.w3.org/2000/svg";
 const arc = (r: number, start: number, sweep: number, x = 960, y = 540) => {
@@ -112,12 +113,12 @@ export class BootSequence {
       "identity", "request", "processing", "processingGlitch",
     ]);
     for (const [selector, key, text] of [
-      [".scan > span", "permission", "PERMISSION AUTHORIZED"],
-      [".welcome-heading", "welcome", "WELCOME TO"],
-      [".welcome-database", "database", "INTERNAL DATABASE"],
+      [".scan > span", "permission", profile.boot.ready],
+      [".welcome-heading", "welcome", profile.boot.welcome],
+      [".welcome-database", "database", profile.boot.subtitle],
     ] as const) new BootLettering(this.el(selector), [key]).setText(text);
     this.companyInk.forEach((el) =>
-      new BootLettering(el.querySelector("span")!, []).setText("LAPPAS.WORKS"),
+      new BootLettering(el.querySelector("span")!, []).setText(profile.boot.studio),
     );
   }
   private el(selector: string) {

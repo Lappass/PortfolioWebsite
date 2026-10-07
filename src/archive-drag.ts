@@ -6,6 +6,9 @@ export type DragProjection = Record<DragAxis, { x: number; y: number }>;
 export class ArchiveDrag {
   active = false;
   moved = false;
+  /** Single-line layout: follow only the row track, projected onto the pointer path. */
+  lockLane = false;
+  private rowAxis = { x: 0, y: 0 };
   value: DragPosition = { lane: 0, row: 0 };
   private x = 0;
   private y = 0;
@@ -26,6 +29,7 @@ export class ArchiveDrag {
     this.motionDirection = { x: 0, y: 0 };
     this.pointer = { x, y };
     const { lane, row } = projection;
+    this.rowAxis = row;
     const determinant = lane.x * row.y - row.x * lane.y;
     const area = Math.hypot(lane.x, lane.y) * Math.hypot(row.x, row.y);
     this.inverse =
@@ -42,12 +46,15 @@ export class ArchiveDrag {
       dy = y - this.y;
     const distance = Math.hypot(dx, dy);
     if (distance > 7) this.moved = true;
-    if (!this.inverse || (!this.active && distance < 10)) return;
+    const rowLength = this.rowAxis.x ** 2 + this.rowAxis.y ** 2;
+    if ((this.lockLane ? rowLength < 1e-9 : !this.inverse) || (!this.active && distance < 10)) return;
     this.active = true;
-    const value = {
-      lane: dx * this.inverse.lane.x + dy * this.inverse.lane.y,
-      row: dx * this.inverse.row.x + dy * this.inverse.row.y,
-    };
+    const value = this.lockLane
+      ? { lane: 0, row: (dx * this.rowAxis.x + dy * this.rowAxis.y) / rowLength }
+      : {
+          lane: dx * this.inverse!.lane.x + dy * this.inverse!.lane.y,
+          row: dx * this.inverse!.row.x + dy * this.inverse!.row.y,
+        };
     const previous = this.samples.at(-1);
     if (previous) {
       const delta = { x: x - this.pointer.x, y: y - this.pointer.y };

@@ -6,13 +6,6 @@
     "视觉设计",
     "实验项目"
   ],
-  "columns": [
-    "三维图形",
-    "交互设计",
-    "网页开发",
-    "视觉设计",
-    "实验项目"
-  ],
   "records": [
     {
       "id": "X-001",
@@ -30,16 +23,36 @@
         "模型通过 Blender 脚本生成，保留可复现源文件。"
       ],
       "source": "https://github.com/LBEILC/RhineLabUI",
-      "tags": ["TypeScript", "Three.js", "Vite", "Blender"],
+      "tags": [
+        "TypeScript",
+        "Three.js",
+        "Vite",
+        "Blender"
+      ],
       "cover": "works/x-001/cover.jpg",
       "gallery": [
-        { "src": "works/x-001/detail.jpg", "caption": "卡片抽出与解密过渡" },
-        { "src": "works/x-001/boot.jpg", "caption": "开场标志描边" },
-        { "src": "works/x-001/welcome.jpg", "caption": "欢迎画面" }
+        {
+          "src": "works/x-001/detail.jpg",
+          "caption": "卡片抽出与解密过渡"
+        },
+        {
+          "src": "works/x-001/boot.jpg",
+          "caption": "开场标志描边"
+        },
+        {
+          "src": "works/x-001/welcome.jpg",
+          "caption": "欢迎画面"
+        }
       ],
       "links": [
-        { "label": "GitHub", "url": "https://github.com/LBEILC/RhineLabUI" },
-        { "label": "在线访问", "url": "https://rhine.lubeiluchen.cc/" }
+        {
+          "label": "GitHub",
+          "url": "https://github.com/LBEILC/RhineLabUI"
+        },
+        {
+          "label": "在线访问",
+          "url": "https://rhine.lubeiluchen.cc/"
+        }
       ]
     },
     {
@@ -78,91 +91,6 @@
     },
     {
       "id": "X-004",
-      "title": "网页开发 · 作品 04",
-      "en": "WEB WORK 04",
-      "department": "待填写：你在项目中的角色",
-      "category": "网页开发",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-005",
-      "title": "网页开发 · 作品 05",
-      "en": "WEB WORK 05",
-      "department": "待填写：你在项目中的角色",
-      "category": "网页开发",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-006",
-      "title": "网页开发 · 作品 06",
-      "en": "WEB WORK 06",
-      "department": "待填写：你在项目中的角色",
-      "category": "网页开发",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-007",
-      "title": "网页开发 · 作品 07",
-      "en": "WEB WORK 07",
-      "department": "待填写：你在项目中的角色",
-      "category": "网页开发",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-008",
-      "title": "网页开发 · 作品 08",
-      "en": "WEB WORK 08",
-      "department": "待填写：你在项目中的角色",
-      "category": "网页开发",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-009",
       "title": "三维图形 · 作品 01",
       "en": "3D GRAPHICS WORK 01",
       "department": "待填写：你在项目中的角色",
@@ -179,7 +107,7 @@
       "source": "https://github.com/LBEILC"
     },
     {
-      "id": "X-010",
+      "id": "X-005",
       "title": "三维图形 · 作品 02",
       "en": "3D GRAPHICS WORK 02",
       "department": "待填写：你在项目中的角色",
@@ -196,7 +124,7 @@
       "source": "https://github.com/LBEILC"
     },
     {
-      "id": "X-011",
+      "id": "X-006",
       "title": "三维图形 · 作品 03",
       "en": "3D GRAPHICS WORK 03",
       "department": "待填写：你在项目中的角色",
@@ -213,92 +141,7 @@
       "source": "https://github.com/LBEILC"
     },
     {
-      "id": "X-012",
-      "title": "三维图形 · 作品 04",
-      "en": "3D GRAPHICS WORK 04",
-      "department": "待填写：你在项目中的角色",
-      "category": "三维图形",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-013",
-      "title": "三维图形 · 作品 05",
-      "en": "3D GRAPHICS WORK 05",
-      "department": "待填写：你在项目中的角色",
-      "category": "三维图形",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-014",
-      "title": "三维图形 · 作品 06",
-      "en": "3D GRAPHICS WORK 06",
-      "department": "待填写：你在项目中的角色",
-      "category": "三维图形",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-015",
-      "title": "三维图形 · 作品 07",
-      "en": "3D GRAPHICS WORK 07",
-      "department": "待填写：你在项目中的角色",
-      "category": "三维图形",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-016",
-      "title": "三维图形 · 作品 08",
-      "en": "3D GRAPHICS WORK 08",
-      "department": "待填写：你在项目中的角色",
-      "category": "三维图形",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-017",
+      "id": "X-007",
       "title": "交互设计 · 作品 01",
       "en": "INTERACTION WORK 01",
       "department": "待填写：你在项目中的角色",
@@ -315,7 +158,7 @@
       "source": "https://github.com/LBEILC"
     },
     {
-      "id": "X-018",
+      "id": "X-008",
       "title": "交互设计 · 作品 02",
       "en": "INTERACTION WORK 02",
       "department": "待填写：你在项目中的角色",
@@ -332,109 +175,7 @@
       "source": "https://github.com/LBEILC"
     },
     {
-      "id": "X-019",
-      "title": "交互设计 · 作品 03",
-      "en": "INTERACTION WORK 03",
-      "department": "待填写：你在项目中的角色",
-      "category": "交互设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-020",
-      "title": "交互设计 · 作品 04",
-      "en": "INTERACTION WORK 04",
-      "department": "待填写：你在项目中的角色",
-      "category": "交互设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-021",
-      "title": "交互设计 · 作品 05",
-      "en": "INTERACTION WORK 05",
-      "department": "待填写：你在项目中的角色",
-      "category": "交互设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-022",
-      "title": "交互设计 · 作品 06",
-      "en": "INTERACTION WORK 06",
-      "department": "待填写：你在项目中的角色",
-      "category": "交互设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-023",
-      "title": "交互设计 · 作品 07",
-      "en": "INTERACTION WORK 07",
-      "department": "待填写：你在项目中的角色",
-      "category": "交互设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-024",
-      "title": "交互设计 · 作品 08",
-      "en": "INTERACTION WORK 08",
-      "department": "待填写：你在项目中的角色",
-      "category": "交互设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-025",
+      "id": "X-009",
       "title": "视觉设计 · 作品 01",
       "en": "VISUAL WORK 01",
       "department": "待填写：你在项目中的角色",
@@ -451,7 +192,7 @@
       "source": "https://github.com/LBEILC"
     },
     {
-      "id": "X-026",
+      "id": "X-010",
       "title": "视觉设计 · 作品 02",
       "en": "VISUAL WORK 02",
       "department": "待填写：你在项目中的角色",
@@ -468,109 +209,7 @@
       "source": "https://github.com/LBEILC"
     },
     {
-      "id": "X-027",
-      "title": "视觉设计 · 作品 03",
-      "en": "VISUAL WORK 03",
-      "department": "待填写：你在项目中的角色",
-      "category": "视觉设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-028",
-      "title": "视觉设计 · 作品 04",
-      "en": "VISUAL WORK 04",
-      "department": "待填写：你在项目中的角色",
-      "category": "视觉设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-029",
-      "title": "视觉设计 · 作品 05",
-      "en": "VISUAL WORK 05",
-      "department": "待填写：你在项目中的角色",
-      "category": "视觉设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-030",
-      "title": "视觉设计 · 作品 06",
-      "en": "VISUAL WORK 06",
-      "department": "待填写：你在项目中的角色",
-      "category": "视觉设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-031",
-      "title": "视觉设计 · 作品 07",
-      "en": "VISUAL WORK 07",
-      "department": "待填写：你在项目中的角色",
-      "category": "视觉设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-032",
-      "title": "视觉设计 · 作品 08",
-      "en": "VISUAL WORK 08",
-      "department": "待填写：你在项目中的角色",
-      "category": "视觉设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-033",
+      "id": "X-011",
       "title": "实验项目 · 作品 01",
       "en": "EXPERIMENT WORK 01",
       "department": "待填写：你在项目中的角色",
@@ -587,111 +226,9 @@
       "source": "https://github.com/LBEILC"
     },
     {
-      "id": "X-034",
+      "id": "X-012",
       "title": "实验项目 · 作品 02",
       "en": "EXPERIMENT WORK 02",
-      "department": "待填写：你在项目中的角色",
-      "category": "实验项目",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-035",
-      "title": "实验项目 · 作品 03",
-      "en": "EXPERIMENT WORK 03",
-      "department": "待填写：你在项目中的角色",
-      "category": "实验项目",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-036",
-      "title": "实验项目 · 作品 04",
-      "en": "EXPERIMENT WORK 04",
-      "department": "待填写：你在项目中的角色",
-      "category": "实验项目",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-037",
-      "title": "实验项目 · 作品 05",
-      "en": "EXPERIMENT WORK 05",
-      "department": "待填写：你在项目中的角色",
-      "category": "实验项目",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-038",
-      "title": "实验项目 · 作品 06",
-      "en": "EXPERIMENT WORK 06",
-      "department": "待填写：你在项目中的角色",
-      "category": "实验项目",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-039",
-      "title": "实验项目 · 作品 07",
-      "en": "EXPERIMENT WORK 07",
-      "department": "待填写：你在项目中的角色",
-      "category": "实验项目",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/LBEILC"
-    },
-    {
-      "id": "X-040",
-      "title": "实验项目 · 作品 08",
-      "en": "EXPERIMENT WORK 08",
       "department": "待填写：你在项目中的角色",
       "category": "实验项目",
       "date": "待填写：时间",

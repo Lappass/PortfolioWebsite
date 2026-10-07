@@ -43,26 +43,15 @@ export function validateContent(content) {
   if (!content || typeof content !== "object" || Array.isArray(content)) {
     throw new Error("档案数据必须是 JSON 对象。");
   }
-  for (const key of ["categories", "columns"]) {
-    const names = content[key];
-    if (!Array.isArray(names) || names.length !== 5 || !names.every(isText)) {
-      errors.push(`${key}：必须包含五个非空分类名称`);
-    } else if (new Set(names).size !== 5 || names.includes("全部档案")) {
-      errors.push(`${key}：分类名称不能重复，也不能使用“全部档案”`);
-    }
+  const names = content.categories;
+  if (!Array.isArray(names) || names.length === 0 || !names.every(isText)) {
+    errors.push("categories：至少需要一个非空分类名称");
+  } else if (new Set(names).size !== names.length || names.includes("全部档案")) {
+    errors.push("categories：分类名称不能重复，也不能使用“全部档案”");
   }
-  const categories = Array.isArray(content.categories)
-    ? content.categories
-    : [];
-  const columns = Array.isArray(content.columns) ? content.columns : [];
-  if (
-    categories.some((name) => !columns.includes(name)) ||
-    columns.some((name) => !categories.includes(name))
-  ) {
-    errors.push("categories 与 columns 必须包含相同的五个分类（顺序可以不同）");
-  }
+  const categories = Array.isArray(names) ? names : [];
   const records = Array.isArray(content.records) ? content.records : [];
-  if (records.length !== 40) errors.push("records：当前阵列要求四十份档案");
+  if (records.length === 0) errors.push("records：至少需要一份作品");
   const ids = new Set();
   records.forEach((record, index) => {
     const label = `records[${index}]`;
@@ -91,11 +80,6 @@ export function validateContent(content) {
       errors.push(`${label}.source：必须是有效的 HTTP 或 HTTPS 链接`);
     validateMedia(record, label, errors);
   });
-  for (const name of columns) {
-    if (records.filter((record) => record?.category === name).length !== 8) {
-      errors.push(`分类“${name}”：当前阵列要求八份档案`);
-    }
-  }
   if (errors.length)
     throw new Error(`档案数据校验失败：\n- ${errors.join("\n- ")}`);
   return content;

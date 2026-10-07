@@ -82,10 +82,16 @@ export class ProjectPage {
     clearTimeout(this.timer);
     this.root.hidden = false;
     this.root.classList.toggle("instant", Boolean(options.instant));
-    // The key art reveal plays once, right after a disc has been read.
-    this.root.classList.toggle("intro", Boolean(options.intro));
+    // After a disc is read: a short console loading screen, then the key art reveal.
     clearTimeout(this.introTimer);
-    if (options.intro) this.introTimer = window.setTimeout(() => this.root.classList.remove("intro"), 2600);
+    this.root.classList.remove("intro");
+    this.root.classList.toggle("loading", Boolean(options.intro));
+    if (options.intro) {
+      this.introTimer = window.setTimeout(() => {
+        this.root.classList.replace("loading", "intro");
+        this.introTimer = window.setTimeout(() => this.root.classList.remove("intro"), 2600);
+      }, 1600);
+    }
     this.state = "opening";
     // Commit the hidden state first so the fade actually runs.
     void this.root.offsetWidth;
@@ -115,6 +121,12 @@ export class ProjectPage {
         <span class="pp-brand" aria-hidden="true">LAPPAS</span>
         <nav aria-label="切换作品"><button type="button" data-page="prev" aria-label="上一个作品：${e(previous.title)}">← <span>上一个</span></button><span class="pp-count">${pad(position)} / ${pad(total)}</span><button type="button" data-page="next" aria-label="下一个作品：${e(next.title)}"><span>下一个</span> →</button></nav>
       </header>
+      <div class="pp-loading" aria-hidden="true">
+        <div class="pp-loading-mark">${logo}</div>
+        <div class="pp-loading-title">${e(r.title)}</div>
+        <div class="pp-loading-bar"><i></i></div>
+        <div class="pp-loading-status"><span class="pp-loading-disc"></span>正在读取光盘</div>
+      </div>
       <section class="pp-hub">
         <div class="pp-hub-art"><img src="${heroSource(r)}" alt="" decoding="async"></div>
         <div class="pp-hub-content">
@@ -159,6 +171,8 @@ export class ProjectPage {
   close(options: { syncHistory?: boolean } = {}) {
     if (!this.isOpen) return false;
     clearTimeout(this.timer);
+    clearTimeout(this.introTimer);
+    this.root.classList.remove("loading", "intro");
     this.state = "closing";
     this.root.classList.remove("visible");
     if (options.syncHistory !== false && workIdFromHash()) {

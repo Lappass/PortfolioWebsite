@@ -117,16 +117,15 @@ export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number):
   return { selected, instanced, palettes, coverAttribute };
 }
 
-/** Console origin (bottom centre) in case-local units; its top slit sits beside the open case. */
-export const SLOT_POSITION = new THREE.Vector3(3.35, -1.9, 0.55);
-export const SLOT_TOP = SLOT_POSITION.y + 2.9;
 const DISC_RADIUS = 0.6 * SCALE;
+const DEFAULT_SLOT = new THREE.Vector3(3.35, 1, 0.55);
 
 /**
  * Lid swings open on the spine hinge, then the disc rises and spins. `insert`
- * carries the disc over the slot bar and sinks it edge-first below the slit.
+ * carries the disc over the console slit (`slotTop`, case-local) and sinks it,
+ * where the console body hides it.
  */
-export function poseCase(group: THREE.Object3D, open: number, time: number, insert = 0) {
+export function poseCase(group: THREE.Object3D, open: number, time: number, insert = 0, slotTop?: THREE.Vector3) {
   const lid = THREE.MathUtils.smoothstep(open, 0, 0.7);
   const lift = THREE.MathUtils.smoothstep(open, 0.45, 1);
   const travel = THREE.MathUtils.smoothstep(insert, 0.05, 0.42);
@@ -139,11 +138,12 @@ export function poseCase(group: THREE.Object3D, open: number, time: number, inse
     if (part === "lid") child.rotation.y = -1.25 * lid;
     else {
       const outX = x + 1.35 * lift, outY = y + 0.2 * lift, outZ = z + 0.55 * lift;
-      const aboveY = SLOT_TOP + DISC_RADIUS + 0.08;
+      const slot = slotTop ?? DEFAULT_SLOT;
+      const aboveY = slot.y + DISC_RADIUS + 0.08;
       child.position.set(
-        THREE.MathUtils.lerp(outX, SLOT_POSITION.x, travel),
+        THREE.MathUtils.lerp(outX, slot.x, travel),
         THREE.MathUtils.lerp(outY, aboveY, travel) - sink * (2 * DISC_RADIUS + 0.2),
-        THREE.MathUtils.lerp(outZ, SLOT_POSITION.z, travel),
+        THREE.MathUtils.lerp(outZ, slot.z, travel),
       );
       child.rotation.z = time * 1.4 * lift + insert * 22;
     }

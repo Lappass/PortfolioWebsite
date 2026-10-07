@@ -3,6 +3,7 @@
 import { brandTrack, companyTrack, scanTrack, track } from "./boot-tracks";
 import { scanOrbitTrack } from "./boot-orbit-tracks";
 import { bootLogoTrack } from "./boot-logo-tracks";
+import { profile } from "./profile";
 export const progress = (t: number, a: number, b: number) =>
   Math.max(0, Math.min(1, (t - a) / (b - a)));
 export const smooth = (p: number) => p * p * (3 - 2 * p);
@@ -34,16 +35,18 @@ export function bootMotion(appTime: number) {
           : t < 22.76
             ? "scan"
             : "welcome";
+  const intro = profile.boot;
   let auth = "";
   if (f < 363) {
-    auth = typed("ID CONFIRMED", f, 282, 295);
-    if (f >= 320) auth += " : " + typed("VISITOR", f, 321, 339);
-  } else if (f < 421) auth = typed("REQUEST RECEIVED", f, 367, 389);
+    auth = typed(intro.identityLabel, f, 282, 295);
+    if (f >= 320) auth += " : " + typed(intro.identity, f, 321, 339);
+  } else if (f < 421) auth = typed(intro.role, f, 367, 389);
   else {
-    auth = typed("START PROCESSING", f, 423, 440);
+    auth = typed(intro.loading, f, 423, 440);
     if (f >= 449)
       auth += ".".repeat(Math.min(3, 1 + Math.floor((f - 449) / 4)));
-    if (at(f, [479, 485, 486])) auth = "              SING...";
+    // The glitch frames keep only the tail of the line, as in the reference.
+    if (at(f, [479, 485, 486])) auth = " ".repeat(Math.max(0, intro.loading.length - 4)) + intro.loading.slice(-4) + "...";
   }
   const frame = t * 25;
   const scan = scanTrack(frame);
@@ -57,9 +60,10 @@ export function bootMotion(appTime: number) {
     f,
     step,
     auth,
-    access: "ACCESS PERMISSION REQUIRED".slice(
+    // The measured reveal counts are for 26 characters; scale them to the greeting.
+    access: intro.greeting.slice(
       0,
-      f < 170 ? 0 : accessCounts[Math.min(17, f - 170)],
+      f < 170 ? 0 : Math.round(accessCounts[Math.min(17, f - 170)] * intro.greeting.length / 26),
     ),
     accessOpacity: f >= 170 && f < 227 ? (f === 226 ? 0.25 : 1) : 0,
     logoOpacity: t >= 9.16 && t < 19.48 ? 1 : 0,

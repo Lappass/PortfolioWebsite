@@ -9,7 +9,7 @@ import {
 import { escapeHtml } from "../src/html.ts";
 
 const content = await loadContent();
-test("all forty downloads match the shared content, including the UTF-8 BOM", async () => {
+test("all downloads match the shared content, including the UTF-8 BOM", async () => {
   for (const record of content.records) {
     assert.equal(
       (
@@ -63,18 +63,11 @@ const invalidCases = [
     /未知分类/,
   ],
   [
-    "unbalanced columns",
+    "no records",
     (c) => {
-      c.records[0].category = c.columns[0];
+      c.records = [];
     },
-    /八份档案/,
-  ],
-  [
-    "missing record",
-    (c) => {
-      c.records.pop();
-    },
-    /四十份档案/,
+    /至少需要一份作品/,
   ],
   [
     "null record",
@@ -125,13 +118,6 @@ const invalidCases = [
     },
     /全部档案/,
   ],
-  [
-    "mismatched columns",
-    (c) => {
-      c.columns[0] = "其他";
-    },
-    /相同的五个分类/,
-  ],
 ];
 for (const [name, mutate, error] of invalidCases) {
   test(`rejects ${name}`, () => {
@@ -140,7 +126,7 @@ for (const [name, mutate, error] of invalidCases) {
     assert.throws(() => validateContent(invalid), error);
   });
 }
-test("accepts independent filter and column order", () => {
+test("accepts reordered categories", () => {
   const edited = structuredClone(content);
   edited.categories.reverse();
   assert.equal(validateContent(edited), edited);
