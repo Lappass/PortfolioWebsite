@@ -12,6 +12,12 @@ of lateral clearance. A common thin base and amber edge connect the assembly.
 The disc rotates into the vertical drive plane before entering its actual opening.
 The final camera faces the display squarely, with its stand visibly separated.
 
+Follow-up: the screen bottom was lowered from 2.05 to 0.95 units, shortening
+the stem and putting its top just above the upright console. The boot camera
+uses the loaded screen centre, so the lower display remains centred throughout
+the final reading shot. Production build and the same three viewport checks
+were rerun for this height revision.
+
 Blender generation: `art/console_setup.py`, editable source: `art/console-setup.blend`.
 The local Blender script workflow was authorized in this conversation.
 

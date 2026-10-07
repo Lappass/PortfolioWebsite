@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CW, CH, CD = 3.9, 0.95, 2.6        # console
 SW, SH, SD = 12.0, 0.24, 6.0       # shared terminal base (top at z = 0)
 MW, MH = 6.4, 3.6                  # monitor screen
-MX, MZ, MY = 0.0, 2.05, 2.15       # visible stem and clear gap behind the console
+MX, MZ, MY = 0.0, 0.95, 2.15       # compact stem; console stands beside the display
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene

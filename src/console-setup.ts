@@ -16,7 +16,7 @@ export class ConsoleSetup {
   readonly group = new THREE.Group();
   /** Slot mouth and screen centre, in case-local units. */
   readonly slotLocal = new THREE.Vector3(8.675, 2.4, 0.05);
-  readonly screenLocal = new THREE.Vector3(4.2, 3.85, -3.035);
+  readonly screenLocal = new THREE.Vector3(4.2, 2.75, -3.035);
   screenHeight = 3.6;
   private monitor = new THREE.Group();
   private lamp = new THREE.PointLight("#ffe2bd", 0, 24, 0);
