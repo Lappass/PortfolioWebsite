@@ -2,10 +2,10 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 /**
- * Where the stand sits relative to the selected case (case-local units): far
- * enough right to stay out of frame, clear of the detail text, until the camera moves.
+ * Shared terminal: open case at left, monitor at centre, upright drive at right,
+ * with a continuous base beneath the assembly.
  */
-const SETUP_ORIGIN = new THREE.Vector3(9, 0, -0.6);
+const SETUP_ORIGIN = new THREE.Vector3(4.2, 0, -1);
 
 /**
  * The console and monitor beside the open case (art/console_setup.py). The disc
@@ -15,15 +15,16 @@ const SETUP_ORIGIN = new THREE.Vector3(9, 0, -0.6);
 export class ConsoleSetup {
   readonly group = new THREE.Group();
   /** Slot mouth and screen centre, in case-local units. */
-  readonly slotLocal = new THREE.Vector3(8.75, 0.475, 0.7);
-  readonly screenLocal = new THREE.Vector3(16.4, 3.05, -0.69);
-  screenHeight = 4.6;
+  readonly slotLocal = new THREE.Vector3(8.675, 2.4, 0.05);
+  readonly screenLocal = new THREE.Vector3(4.2, 3.85, -3.035);
+  screenHeight = 3.6;
   private monitor = new THREE.Group();
   private lamp = new THREE.PointLight("#ffe2bd", 0, 24, 0);
   private screenGeometry?: THREE.BufferGeometry;
   /** Monitor foot centre in setup units (art/console_setup.py: MX, foot y). */
-  private monitorPivot = new THREE.Vector3(7.4, 0, -0.2);
+  private monitorPivot = new THREE.Vector3(0, 0, -2.35);
   private light?: THREE.MeshStandardMaterial;
+  private surfaces: THREE.Material[] = [];
   private canvas = Object.assign(document.createElement("canvas"), { width: 1280, height: 720 });
   private texture = new THREE.CanvasTexture(this.canvas);
   private drawn = "";
@@ -38,7 +39,7 @@ export class ConsoleSetup {
     this.monitor.position.copy(this.monitorPivot);
     this.group.add(this.monitor);
     // A local warm key light, lit only while the camera is at the console (decay 0, range 24).
-    this.lamp.position.set(8.6, 6.5, 5);
+    this.lamp.position.set(-2, 6.5, 5);
     this.group.add(this.lamp);
   }
 
@@ -66,6 +67,10 @@ export class ConsoleSetup {
         material = standard;
       }
       const mesh = new THREE.Mesh(o.geometry, material);
+      // Hashed coverage keeps depth ordering correct while the whole assembly
+      // fades in; transparent shells would expose parts through each other.
+      material.alphaHash = true;
+      this.surfaces.push(material);
       mesh.applyMatrix4(o.matrixWorld);
       mesh.castShadow = o.name !== "Stand" && o.name !== "Monitor_Screen";
       mesh.receiveShadow = true;
@@ -81,14 +86,16 @@ export class ConsoleSetup {
 
   /** Follow the case; `insert` drives the slot light and the loading screen. */
   update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, title: string) {
-    this.group.visible = visible && this.loaded;
+    const presence = THREE.MathUtils.smoothstep(insert, 0.18, 0.28);
+    this.group.visible = visible && this.loaded && presence > 0;
     if (!this.group.visible) return;
+    for (const surface of this.surfaces) {
+      surface.opacity = presence;
+    }
     this.group.matrix.copy(caseMatrix).multiply(new THREE.Matrix4().makeTranslation(SETUP_ORIGIN));
     this.group.matrixWorldNeedsUpdate = true;
-    // Angle the monitor towards the viewer, as one would a TV.
-    this.group.updateMatrixWorld(true);
-    const eye = this.group.worldToLocal(camera.clone());
-    this.monitor.rotation.y = THREE.MathUtils.clamp(Math.atan2(eye.x - this.monitorPivot.x, eye.z - this.monitorPivot.z), -0.9, 0.9);
+    // One assembled terminal: screen and drive share a fixed forward direction.
+    this.monitor.rotation.y = 0;
     const power = THREE.MathUtils.smoothstep(insert, 0.06, 0.18);
     const reading = THREE.MathUtils.smoothstep(insert, 0.46, 0.55) * (1 - THREE.MathUtils.smoothstep(insert, 0.94, 0.99));
     if (this.light) this.light.emissiveIntensity = power * (0.7 + reading * (1.5 + 1.2 * Math.sin(insert * 110)));

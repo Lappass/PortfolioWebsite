@@ -529,6 +529,7 @@ export class ArchiveScene {
   private insert = { value: 0, target: 0 };
   private insertDone?: () => void;
   private setup = new ConsoleSetup();
+  private terminalArrayVisibility = { value: 1 };
   get insertProgress() { return this.insert.value; }
   /** Resolves once the disc is read and the monitor fills the frame. */
   insertDisc(immediate = false) {
@@ -570,11 +571,13 @@ export class ArchiveScene {
     this.model.updateMatrixWorld();
     const local = (v: THREE.Vector3) => v.clone().applyMatrix4(this.model.matrixWorld);
     const toConsole = THREE.MathUtils.smoothstep(p, 0, 0.2);
-    const toScreen = THREE.MathUtils.smoothstep(p, 0.54, 0.73);
+    const toScreen = THREE.MathUtils.smoothstep(p, 0.48, 0.78);
     // Frame the console (slot just right of centre, the case still at the left edge).
-    const consoleAim = local(this.setup.slotLocal.clone().add(new THREE.Vector3(-1.3, 0.9, 0)));
+    const consoleAim = local(this.setup.slotLocal.clone().add(new THREE.Vector3(-4.4, .45, -1)));
     const aim = detailAim.clone().lerp(consoleAim, toConsole).lerp(local(this.setup.screenLocal), toScreen);
-    const span = THREE.MathUtils.lerp(THREE.MathUtils.lerp(detailSpan, 6.8, toConsole), this.setup.screenHeight * 1.5, toScreen);
+    const assemblySpan = Math.max(8.6, 13.6 / this.camera.aspect);
+    const screenSpan = Math.max(this.setup.screenHeight * 1.95, 7.5 / this.camera.aspect);
+    const span = THREE.MathUtils.lerp(THREE.MathUtils.lerp(detailSpan, assemblySpan, toConsole), screenSpan, toScreen);
     // Focus is exact, not damped: first the case, then the slot itself, then the screen.
     this.insertFocus = local(new THREE.Vector3(0, 1.85, 0)).lerp(local(this.setup.slotLocal), toConsole).lerp(local(this.setup.screenLocal), toScreen);
     return { aim, span };
@@ -585,7 +588,7 @@ export class ArchiveScene {
   private loadGameCase(gltf: GLTF, count: number) {
     this.caseMode = true;
     const anisotropy = this.renderer.capabilities.getMaxAnisotropy();
-    const build = buildGameCase(gltf, count, anisotropy);
+    const build = buildGameCase(gltf, count, anisotropy, this.terminalArrayVisibility);
     for (const [name, high, low] of build.palettes) this.appearance.register(name, high, low);
     this.coverAttribute = build.coverAttribute;
     this.themeAttribute ??= new THREE.InstancedBufferAttribute(new Float32Array(count), 1).setUsage(THREE.DynamicDrawUsage);
@@ -1780,6 +1783,10 @@ export class ArchiveScene {
       const shot = this.insertShot(cameraAim.clone(), framing.span);
       cameraAim.copy(shot.aim);
       viewSpan = shot.span;
+      // Finish facing the fixed screen head-on; retain a little elevation to
+      // keep the console below it visible without skewing the screen edges.
+      const front = new THREE.Vector3(0, 0.11, 1).transformDirection(this.model.matrixWorld);
+      viewDirection.lerp(front, THREE.MathUtils.smoothstep(this.insert.value, 0.40, 0.78)).normalize();
     }
     const cameraPosition = cameraAim
       .clone()
@@ -1909,6 +1916,11 @@ export class ArchiveScene {
     // Keep all simulation and picking current. Reuse the composited canvas only
     // when its actual inputs are identical, including late textures and materials.
     if (this.caseMode) {
+      const arrayVisibility = cinematic ? 1 : 1 - THREE.MathUtils.smoothstep(this.insert.value, 0, 0.10);
+      this.terminalArrayVisibility.value = arrayVisibility;
+      for (const inst of this.instances) inst.visible = arrayVisibility > 0;
+      if (this.shadowCoverage) this.shadowCoverage.mesh.visible = arrayVisibility === 1;
+      for (const outgoing of this.outgoing) outgoing.group.visible = arrayVisibility === 1;
       this.model.updateMatrixWorld();
       this.setup.update(this.model.matrixWorld, this.camera.position, !cinematic && this.detail > 0.02 && this.presence > 0.01, this.insert.value, time, records[fileAtCell(this.selectedCell)].title);
     }
@@ -2005,6 +2017,12 @@ export class ArchiveScene {
       reusedFrames: this.reusedFrames,
       superPerformance: this.superPerformance,
       presentation: this.presence,
+      terminal: {
+        visible: this.setup.group.visible,
+        arrayVisibility: this.terminalArrayVisibility.value,
+        progress: this.insert.value,
+        screen: this.setup.group.visible ? this.setup.screenCorners().map(corner => corner.project(this.camera).toArray()) : [],
+      },
       triangles: this.renderer.info.render.triangles,
       archiveCount: this.drawnCells.length,
       archiveCandidates: this.cells.length,

@@ -18,7 +18,7 @@ const PART: Record<string, "lid" | "disc"> = { Case_Lid: "lid", Insert_Front: "l
 export const isCaseSurface = (name: string) => /^(Case_|Insert_|Disc|Hub_)/.test(name);
 
 function materials() {
-  const shell = new THREE.MeshPhysicalMaterial({ name: "Case_Shell", color: "#121619", roughness: 0.32, clearcoat: 0.6, clearcoatRoughness: 0.25 });
+  const shell = new THREE.MeshPhysicalMaterial({ name: "Case_Shell", color: "#171a1d", roughness: 0.43, clearcoat: 0.35, clearcoatRoughness: 0.25 });
   const print = new THREE.MeshPhysicalMaterial({ name: "Insert_Print", color: "#ffffff", roughness: 0.45, clearcoat: 1, clearcoatRoughness: 0.06 });
   const disc = new THREE.MeshPhysicalMaterial({ name: "Disc_Surface", color: "#d9dde0", metalness: 1, roughness: 0.12, iridescence: 1, iridescenceIOR: 1.6, iridescenceThicknessRange: [180, 620] });
   const label = new THREE.MeshPhysicalMaterial({ name: "Disc_Label", color: "#ffffff", roughness: 0.4 });
@@ -62,7 +62,7 @@ export interface GameCase {
   coverAttribute: THREE.InstancedBufferAttribute;
 }
 
-export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number): GameCase {
+export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number, arrayVisibility = { value: 1 }): GameCase {
   gltf.scene.updateMatrixWorld(true);
   const base = new THREE.Matrix4().makeScale(SCALE, SCALE, SCALE).multiply(new THREE.Matrix4().makeTranslation(0, CASE_H / 2, 0));
   const pivot = {
@@ -86,6 +86,22 @@ export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number):
     );
   };
   low.Insert_Print.customProgramCacheKey = () => "archive-cover-atlas";
+  for (const mat of Object.values(low)) {
+    const compile = mat.onBeforeCompile.bind(mat);
+    const cacheKey = mat.customProgramCacheKey.bind(mat);
+    mat.onBeforeCompile = (shader, renderer) => {
+      compile(shader, renderer);
+      shader.uniforms.terminalArrayVisibility = arrayVisibility;
+      shader.fragmentShader = "uniform float terminalArrayVisibility;\n" + shader.fragmentShader.replace(
+        "#include <dithering_fragment>",
+        `#include <dithering_fragment>
+        float terminalNoise = fract(sin(dot(floor(gl_FragCoord.xy), vec2(12.9898,78.233))) * 43758.5453);
+        if (terminalArrayVisibility <= terminalNoise) discard;`,
+      );
+    };
+    const key = cacheKey();
+    mat.customProgramCacheKey = () => key + "-terminal-fade";
+  }
 
   const selected: THREE.Mesh[] = [];
   const instanced: GameCase["instanced"] = [];
@@ -118,18 +134,18 @@ export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number):
 }
 
 const DISC_RADIUS = 0.6 * SCALE;
-const DEFAULT_SLOT = new THREE.Vector3(8.75, 0.475, 0.7);
+const DEFAULT_SLOT = new THREE.Vector3(8.675, 2.4, 0.05);
 
 /**
  * Lid swings open on the spine hinge, then the disc rises and spins. `insert`
- * lays the disc flat in front of the console slot (`slotTop`, case-local) and
+ * turns the disc upright in front of the console slot (`slotTop`, case-local) and
  * pushes it in, where the console body hides it.
  */
 export function poseCase(group: THREE.Object3D, open: number, time: number, insert = 0, slotTop?: THREE.Vector3) {
   const lid = THREE.MathUtils.smoothstep(open, 0, 0.7);
   const lift = THREE.MathUtils.smoothstep(open, 0.45, 1);
-  const travel = THREE.MathUtils.smoothstep(insert, 0.1, 0.36);
-  const push = THREE.MathUtils.smoothstep(insert, 0.38, 0.54);
+  const travel = THREE.MathUtils.smoothstep(insert, 0.24, 0.43);
+  const push = THREE.MathUtils.smoothstep(insert, 0.44, 0.58);
   const slot = slotTop ?? DEFAULT_SLOT;
   for (const child of group.children) {
     const part = child.userData.casePart;
@@ -144,8 +160,8 @@ export function poseCase(group: THREE.Object3D, open: number, time: number, inse
         THREE.MathUtils.lerp(outY, slot.y, travel),
         THREE.MathUtils.lerp(outZ, slot.z + DISC_RADIUS + 0.2, travel) - push * (2 * DISC_RADIUS + 0.5),
       );
-      child.rotation.x = -Math.PI / 2 * travel;
-      child.rotation.z = time * 1.4 * lift + insert * 18;
+      child.rotation.y = Math.PI / 2 * travel;
+      child.rotation.z = time * 1.4 * lift + insert * 4;
     }
   }
 }

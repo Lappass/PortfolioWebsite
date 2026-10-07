@@ -1,4 +1,4 @@
-"""Generic living-room setup: a low stand, a horizontal console with a front
+"""Generic living-room setup: a low stand, an upright console with a vertical
 disc slot, and a 16:9 monitor. No brand marks.
 
 Run: blender --background --factory-startup --python art/console_setup.py
@@ -12,13 +12,13 @@ from math import pi, sin, cos
 
 import bmesh
 import bpy
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 ROOT = Path(__file__).resolve().parents[1]
 CW, CH, CD = 3.9, 0.95, 2.6        # console
-SW, SH, SD = 17.0, 1.3, 3.0        # stand (top at z = 0)
-MW, MH = 8.2, 4.6                  # monitor screen
-MX, MZ = 7.4, 0.75                 # monitor centre x, screen bottom height
+SW, SH, SD = 12.0, 0.24, 6.0       # shared terminal base (top at z = 0)
+MW, MH = 6.4, 3.6                  # monitor screen
+MX, MZ, MY = 0.0, 2.05, 2.15       # visible stem and clear gap behind the console
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
@@ -39,7 +39,7 @@ def material(name, color, roughness, metallic=0.0, emission=None, strength=4.0):
 
 SHELL = material("Console_Shell", (0.68, 0.70, 0.69), 0.43)
 CORE = material("Console_Core", (0.02, 0.022, 0.026), 0.3)
-LIGHT = material("Slot_Light", (0.5, 0.7, 1.0), 0.3, emission=(0.35, 0.6, 1.0))
+LIGHT = material("Slot_Light", (0.8, 0.57, 0.27), 0.3, emission=(1.0, 0.66, 0.27))
 STAND = material("Stand_Wood", (0.045, 0.05, 0.06), 0.55)
 BEZEL = material("Monitor_Bezel", (0.015, 0.016, 0.018), 0.25, metallic=0.4)
 SCREEN = material("Monitor_Screen", (0.01, 0.015, 0.03), 0.15, emission=(0.02, 0.05, 0.12), strength=1.0)
@@ -59,7 +59,8 @@ def box(name, size, location, mat, bevel=0.03, segments=3):
 
 
 # Stand under everything, its top at z = 0, slightly behind the console front.
-box("Stand", (SW, SD, SH), (MX / 2, 0.1, -SH / 2), STAND, bevel=0.04)
+box("Stand", (SW, SD, SH), (-0.1, 0.65, -SH / 2), STAND, bevel=0.08)
+box("Stand_Edge", (SW-.16, .025, .02), (-.1, -2.36, -.07), LIGHT, bevel=.008)
 
 # Moulded enclosure with a recessed graphite chassis, floating top and rubber feet.
 # A real open mouth between the upper/lower chassis rails receives the animated disc.
@@ -163,14 +164,29 @@ for i in range(13):
 bpy.ops.object.empty_add(location=(-0.25, -CD / 2, slot_z))
 bpy.context.object.name = "Console_Slot"
 
+# Upright twin-panel enclosure beside the display, inspired by the PS5 silhouette.
+# Keep the manufactured drive, ports and ventilation, rotating the entire chassis
+# so its genuine open drive mouth becomes vertical. A dedicated foot supports it.
+upright = Matrix.Translation(Vector((4.0, .25, 2.15))) @ Matrix.Rotation(pi/2, 4, 'Y')
+for obj in list(scene.objects):
+    if obj.name.startswith('Console_') or obj.name == 'Slot_Light':
+        if obj.name.startswith('Console_Rubber_Foot'):
+            bpy.data.objects.remove(obj, do_unlink=True)
+        else:
+            obj.matrix_world = upright @ obj.matrix_world
+box('Console_Vertical_Base', (1.65, 2.8, .16), (4.48, .25, .08), BEZEL, .07)
+
 # Monitor on a short foot, screen facing front.
-box("Monitor_Foot", (2.4, 1.2, 0.06), (MX, 0.2, 0.03), BEZEL, bevel=0.02)
-box("Monitor_Neck", (0.3, 0.2, MZ + 0.2), (MX, 0.35, (MZ + 0.2) / 2), BEZEL, bevel=0.02)
-box("Monitor_Frame", (MW + 0.24, 0.22, MH + 0.24), (MX, 0.2, MZ + MH / 2), BEZEL, bevel=0.04)
+box("Monitor_Foot", (2.3, 1.05, 0.07), (MX, MY+.2, .035), BEZEL, bevel=.04)
+box("Monitor_Neck", (.34, .22, MZ+.2), (MX, MY+.35, (MZ+.2)/2), BEZEL, bevel=.035)
+box("Monitor_Rear", (MW+.16, .19, MH+.16), (MX, MY+.08, MZ+MH/2), SHELL, bevel=.065)
+box("Monitor_Frame", (MW+.24, .22, MH+.24), (MX, MY, MZ+MH/2), BEZEL, bevel=.045)
+box("Monitor_Chin", (MW+.12, .035, .12), (MX, MY-.125, MZ-.065), CORE, bevel=.015)
+front_text("Monitor_Name", "L A P P A S  /  T E R M I N A L", (-.72, MY-.146, MZ-.084), .048, SHELL)
 # The screen is a plain quad with 0..1 UVs so the site can draw on it.
 mesh = bpy.data.meshes.new("Monitor_Screen")
 bm = bmesh.new()
-y = 0.2 - 0.115
+y = MY - 0.115
 corners = [(MX - MW / 2, y, MZ), (MX + MW / 2, y, MZ), (MX + MW / 2, y, MZ + MH), (MX - MW / 2, y, MZ + MH)]
 verts = [bm.verts.new(c) for c in corners]
 face = bm.faces.new(verts)
@@ -186,10 +202,17 @@ screen = bpy.data.objects.new("Monitor_Screen", mesh)
 scene.collection.objects.link(screen)
 screen.data.materials.append(SCREEN)
 
+# Physical assembly checks: the stand is behind the enclosure and the screen
+# has a visibly exposed stem, rather than a chin apparently buried in the shell.
+assert MX + (MW + .24) / 2 < 4.0
+assert MX + 2.3 / 2 < 4.48 - 1.65 / 2
+print(f"monitor / console lateral gap: {4.0 - MX - (MW + .24) / 2:.3f}")
+
 bpy.ops.object.camera_add(location=(4, -26, 7))
 cam = bpy.context.object
-cam.rotation_euler = (Vector((3.6, 0, 2)) - cam.location).to_track_quat("-Z", "Y").to_euler()
-cam.data.lens = 50
+cam.location = (8, -15, 8)
+cam.rotation_euler = (Vector((-.5, .4, 1.7)) - cam.location).to_track_quat("-Z", "Y").to_euler()
+cam.data.lens = 38
 scene.camera = cam
 for name, loc, power in [("Key", (-6, -10, 10), 4000), ("Rim", (12, 6, 8), 3000), ("Fill", (8, -12, 2), 1200)]:
     bpy.ops.object.light_add(type="AREA", location=loc)
@@ -206,8 +229,8 @@ scene.render.filepath = str(ROOT / "art/console-setup-studio.png")
 bpy.ops.render.render(write_still=True)
 
 # Close-up for checking manufactured edges and the physical slot opening.
-cam.location = (4.5, -6.5, 3.8)
-cam.rotation_euler = (Vector((0, 0, .43)) - cam.location).to_track_quat("-Z", "Y").to_euler()
+cam.location = (8, -7.5, 4.8)
+cam.rotation_euler = (Vector((4.48, .25, 2.15)) - cam.location).to_track_quat("-Z", "Y").to_euler()
 cam.data.lens = 58
 scene.render.filepath = str(ROOT / "art/console-detail.png")
 bpy.ops.render.render(write_still=True)
