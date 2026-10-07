@@ -36,23 +36,9 @@ export function selectionCell(
   current: ArchiveCell,
   navigation?: ArchiveNavigation,
 ): ArchiveCell {
-  if (navigation && "cell" in navigation) return { ...navigation.cell };
-  const next = fileLocation(index);
-  const row = nearestOccurrence(
-    next.row,
-    current.row,
-    columnFiles(next.lane).length,
-  );
-  if (navigation?.axis === "row") {
-    return { lane: current.lane, row: current.row + navigation.direction };
-  }
-  return {
-    lane:
-      navigation?.axis === "lane"
-        ? current.lane + navigation.direction
-        : nearestOccurrence(next.lane, current.lane, archiveColumns.length),
-    row,
-  };
+  // The portfolio has a finite shelf; navigation always targets its real slot.
+  const canonical = fileLocation(index);
+  return { lane: canonical.lane, row: canonical.row };
 }
 
 // Preserve the reference animation's original first 160 instances. The four

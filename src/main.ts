@@ -531,8 +531,10 @@ function select(index: number, navigation?: ArchiveNavigation) {
 function stepFile(direction: number) {
   const files = columnFiles(fileLocation(selected).lane);
   if (files.length < 2) return;
+  const next = Math.max(0, Math.min(files.length - 1, files.indexOf(selected) + direction));
+  if (files[next] === selected) return;
   select(
-    files[(files.indexOf(selected) + direction + files.length) % files.length],
+    files[next],
     { axis: "row", direction },
   );
 }
@@ -570,6 +572,8 @@ function updateSelection(navigation?: ArchiveNavigation) {
         : "auto",
   });
   $(".count-total").textContent = String(files.length).padStart(2, "0");
+  $<HTMLButtonElement>('[data-action="prev"]').disabled = files.indexOf(selected) === 0;
+  $<HTMLButtonElement>('[data-action="next"]').disabled = files.indexOf(selected) === files.length - 1;
   columnCounter.update({
     value: lane + 1,
     animated: motionActive("rollingNumbers") && mode === "archive",

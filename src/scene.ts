@@ -563,7 +563,7 @@ export class ArchiveScene {
   private updateInsert(dt: number) {
     const { insert } = this;
     // Linear time; poseCase and the camera apply the easing.
-    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 6 : -dt / 1.6), 0, 1);
+    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 3.6 : -dt / 1.1), 0, 1);
     if (insert.value >= 1 && this.insertDone) {
       this.insertDone();
       this.insertDone = undefined;
@@ -1078,7 +1078,7 @@ export class ArchiveScene {
       : -2.17 - (coordinate - 15.5) * ROW_SPACING;
   }
   private navigatePlane(coordinate: DragPosition) {
-    const goal = { lane: Math.round(coordinate.lane), row: Math.round(coordinate.row) };
+    const goal = { lane: 2, row: THREE.MathUtils.clamp(Math.round(coordinate.row), 12, 15) };
     if (sameCell(goal, this.selectedCell)) return;
     const from = { ...this.selectedCell };
     const steps = Math.min(64, Math.max(Math.abs(goal.lane - from.lane), Math.abs(goal.row - from.row)));
@@ -1173,9 +1173,11 @@ export class ArchiveScene {
       this.lastInteraction = this.clock;
       canvas.style.cursor = "grabbing";
       this.dragTrack = {
-        lane: startTrack.lane + this.archiveDrag.value.lane * COLUMN_SPACING,
-        row: startTrack.row - this.archiveDrag.value.row * ROW_SPACING,
+        lane: this.trackPosition("lane", 2),
+        row: this.trackPosition("row", THREE.MathUtils.clamp(this.trackCoordinate("row", startTrack.row - this.archiveDrag.value.row * ROW_SPACING), 12, 15)),
       };
+      // Consume overshoot at the boundary so reversing takes over immediately.
+      startTrack.row = this.dragTrack.row + this.archiveDrag.value.row * ROW_SPACING;
       this.columnCamera.value = this.dragTrack.lane;
       this.rail.value = this.dragTrack.row;
       this.columnCamera.velocity = this.rail.velocity = 0;
@@ -1357,7 +1359,7 @@ export class ArchiveScene {
     this.theme.beginFrame();
     themeEnvironment(this.scene, this.renderer, this.themeAmount);
     const blend = 1 - Math.exp(-dt * (this.motion.selectionTransition ? 2.8 : 35));
-    const detailBlend = 1 - Math.exp(-dt * (this.motion.detailTransition ? 2.8 : 35));
+    const detailBlend = 1 - Math.exp(-dt * (this.motion.detailTransition ? (this.caseMode && this.targetDetail ? 5.5 : 2.8) : 35));
     this.reveal = cinematic
       ? cinematic.reveal
       : THREE.MathUtils.lerp(this.reveal, this.targetReveal, blend);
@@ -1380,6 +1382,15 @@ export class ArchiveScene {
     const momentum = !cinematic ? this.archiveMomentum : null;
     if (momentum) {
       momentum.motion.step(Math.min(Math.max(time - momentum.time, 0), 0.25));
+      momentum.motion.lane.value = momentum.motion.lane.target = 2;
+      momentum.motion.lane.velocity = 0;
+      momentum.motion.lane.phase = "idle";
+      momentum.motion.row.target = THREE.MathUtils.clamp(momentum.motion.row.target, 12, 15);
+      if (momentum.motion.row.value < 12 || momentum.motion.row.value > 15) {
+        momentum.motion.row.value = momentum.motion.row.target = THREE.MathUtils.clamp(momentum.motion.row.value, 12, 15);
+        momentum.motion.row.velocity = 0;
+        momentum.motion.row.phase = "idle";
+      }
       momentum.time = time;
       this.navigatePlane(momentum.motion.value);
       this.lastInteraction = time;
@@ -1549,7 +1560,7 @@ export class ArchiveScene {
                 !this.targetDetail &&
                 this.lift.value < 0.4
               ? 7.6
-              : 4.2,
+              : this.caseMode && this.targetDetail ? 6.8 : 4.2,
           dt,
         );
       }
@@ -1565,7 +1576,7 @@ export class ArchiveScene {
     const detail = this.detail;
     // Keep the physical decryption timeline alive even when its model visuals
     // are disabled; the document mask uses the same timeline independently.
-    this.decryption.update(dt, detail > .78 && this.lift.value > 3.3, false,
+    this.decryption.update(this.caseMode && this.targetDetail ? dt * 1.6 : dt, detail > .78 && this.lift.value > 3.3, false,
       cinematic ? shot + 5 : undefined);
     this.appearance.apply(this.model, ease(this.lift.value / 0.4));
     this.appearance.setClarity(this.model, this.modelClarity());
@@ -1855,7 +1866,7 @@ export class ArchiveScene {
       // One wave line: neighbouring lanes stay empty.
       if (lane !== selectedLane) continue;
       // Four physical cases: one occurrence per featured work, no repeated wall.
-      if (!cinematic && (row < this.selectedCell.row - 1 || row > this.selectedCell.row + 2)) continue;
+      if (!cinematic && (row < 12 || row > 15)) continue;
       if (hidden.has(cellKey(cell))) continue;
       const x = (lane - 2) * COLUMN_SPACING - trackX;
       const y = -4.6 + field(row, lane) + hoverLift(cell) - this.presentationDrop(cell);

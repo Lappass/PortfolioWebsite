@@ -42,3 +42,12 @@ screen fits without tilt, the project route opens and the selection returns.
 Latest user correction: retain the four-project tier and removed top links,
 but withdraw the identity card. The original About button and particle-name
 entry are restored. Footer preferences and Experiments remain available.
+
+The shelf is now finite: canonical rows 12–15, no recycled occurrences. Keyboard,
+buttons and wheel stop at either end; dragging and momentum clamp to the same
+range, consuming overshoot so reversal takes over immediately. End arrows are
+disabled. Box extraction/camera entry and lid reveal are accelerated; insertion
+is 3.6 seconds instead of six, ejection 1.1 seconds instead of 1.6. Physical
+height, animation order and the reduced-motion path remain intact. Build and
+Edge checks verified keyboard/wheel boundaries, drag release staying within the
+shelf, project opening and return, with no page errors.
