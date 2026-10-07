@@ -139,4 +139,8 @@
 /* All works stand in one line: no column switching. */
 #stage .column-navigation { display: none !important; }
 
-.particle-field { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; }
+
+
+/* While the disc goes in, the camera is on the console: drop the veil that backs the detail text. */
+.archive-atmosphere { transition: opacity 0.5s; }
+#stage[data-inserting="true"] .archive-atmosphere { opacity: 0; }

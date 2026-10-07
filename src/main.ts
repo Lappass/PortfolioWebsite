@@ -5,7 +5,7 @@ import "./document-decryption.css";
 import "./decryption.css";
 import { escapeHtml } from "./html";
 import { ProjectPage, workIdFromHash } from "./project-page";
-import { ParticleField } from "./particles";
+
 import { ProfilePage, PROFILE_HASH } from "./profile-page";
 import { normalizeQuality, qualityPresets, type QualityPreset, type RenderQuality } from "./render-quality";
 import { qualityMarkup, syncQualityUI } from "./quality-settings";
@@ -105,9 +105,6 @@ $("#stage").innerHTML = `
   <div id="loading" class="loading"><div class="loading-mark">${logo}</div><span>CONNECTING TO INTERNAL DATABASE</span><i></i></div>
 `;
 
-const particles = new ParticleField($("#stage"));
-// Above the 3D archive, below every interface layer.
-$(".archive-atmosphere").after(particles.canvas);
 $("#boot-background").insertAdjacentHTML(
   "beforeend",
   '<div class="boot-white"></div>',
@@ -1115,7 +1112,7 @@ function frame(ms: number) {
   const time = ms / 1000;
   const theme = scene?.themeAmount ?? (prefs.colorTheme === "dark" ? 1 : 0);
   paintTheme(theme);
-  particles.update(ms, mode === "archive" && !projectPage.isOpen && !profilePage.isOpen && !modal, motionIsReduced(), theme > 0.5);
+  scene?.setDustVisible(mode === "archive" && !projectPage.isOpen && !profilePage.isOpen && !modal);
   viewer?.setTheme(theme);
   playground?.tick(time);
   const cinema =

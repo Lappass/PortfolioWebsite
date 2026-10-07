@@ -11,6 +11,7 @@ import { RhythmMotion, rhythmDisplacement, quietBands, type MusicBands, type Rhy
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { buildGameCase, poseCase, printCase, transferPrint } from "./game-case";
 import { ConsoleSetup } from "./console-setup";
+import { ParticleField } from "./particles";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -318,8 +319,12 @@ export class ArchiveScene {
     floor.rotation.x = -Math.PI / 2;
     floor.name = "archive-floor";
     floor.position.y = -4.63;
+    // Draw the floor first so the dust (renderOrder -5) sits above it and below the cases.
+    floor.renderOrder = -10;
     floor.receiveShadow = true;
     this.scene.add(floor);
+    this.dust = new ParticleField(this.renderer.domElement);
+    this.scene.add(this.dust.points);
     this.camera.position.set(-62.26, 35.98, 43.28);
     this.cameraAim.set(-0.5, 1.1, 0.4);
     this.camera.fov = 6.15;
@@ -516,6 +521,9 @@ export class ArchiveScene {
   }
 
   private caseMode = false;
+  private dust!: ParticleField;
+  private dustVisible = false;
+  setDustVisible(visible: boolean) { this.dustVisible = visible; }
   private printTimer = 0;
   // Disc insertion: 0 = in the open case, 1 = read by the console, camera at the monitor.
   private insert = { value: 0, target: 0 };
@@ -555,6 +563,7 @@ export class ArchiveScene {
       this.insertDone = undefined;
     }
   }
+  private insertFocus: THREE.Vector3 | null = null;
   /** Camera takeover while inserting: case → console → monitor screen. */
   private insertShot(detailAim: THREE.Vector3, detailSpan: number) {
     const p = this.insert.value;
@@ -562,9 +571,12 @@ export class ArchiveScene {
     const local = (v: THREE.Vector3) => v.clone().applyMatrix4(this.model.matrixWorld);
     const toConsole = THREE.MathUtils.smoothstep(p, 0, 0.2);
     const toScreen = THREE.MathUtils.smoothstep(p, 0.58, 0.92);
-    const consoleAim = local(new THREE.Vector3(0, 1.85, 0).lerp(this.setup.slotLocal, 0.5).add(new THREE.Vector3(0, 0.5, 0)));
+    // Frame the console (slot just right of centre, the case still at the left edge).
+    const consoleAim = local(this.setup.slotLocal.clone().add(new THREE.Vector3(-1.3, 0.9, 0)));
     const aim = detailAim.clone().lerp(consoleAim, toConsole).lerp(local(this.setup.screenLocal), toScreen);
-    const span = THREE.MathUtils.lerp(THREE.MathUtils.lerp(detailSpan, 8.2, toConsole), this.setup.screenHeight * 1.5, toScreen);
+    const span = THREE.MathUtils.lerp(THREE.MathUtils.lerp(detailSpan, 6.8, toConsole), this.setup.screenHeight * 1.5, toScreen);
+    // Focus is exact, not damped: first the case, then the slot itself, then the screen.
+    this.insertFocus = local(new THREE.Vector3(0, 1.85, 0)).lerp(local(this.setup.slotLocal), toConsole).lerp(local(this.setup.screenLocal), toScreen);
     return { aim, span };
   }
 
@@ -1881,8 +1893,8 @@ export class ArchiveScene {
           : this.targetDetail
             ? "lifting"
             : "preview";
-    // While inserting, focus follows the camera to the console and the monitor.
-    const focalPoint = (this.insert.value > 0 ? this.cameraAim.clone() : this.model.position.clone().add(new THREE.Vector3(0, 2, 0)))
+    // While inserting, focus racks from the case to the console slot and then the monitor.
+    const focalPoint = (this.insert.value > 0 && this.insertFocus ? this.insertFocus.clone() : this.model.position.clone().add(new THREE.Vector3(0, 2, 0)))
       .applyMatrix4(this.camera.matrixWorldInverse);
     const bokehUniforms = this.bokeh.uniforms as Record<
       string,
@@ -1904,8 +1916,12 @@ export class ArchiveScene {
     this.scene.updateMatrixWorld();
     // A changed instance buffer already proves the image changed. Avoid a
     // material/matrix snapshot on those busy frames; capture when it settles.
+    const bufferWidth = this.renderer.getDrawingBufferSize(new THREE.Vector2()).x;
+    this.dust.update(time, this.dustVisible && !cinematic, this.reduced, this.themeAmount > 0.5, bufferWidth / Math.max(1, this.renderer.domElement.clientWidth));
     const inserting = this.insert.value > 0 && this.insert.value < 1 || (this.insert.value === 1 && this.insert.target === 1);
-    if (matricesChanged || coversChanged || cinematic || inserting) {
+    // The dust moves every frame, so a reused composite would freeze it.
+    const dustMoving = this.dust.active;
+    if (matricesChanged || coversChanged || cinematic || inserting || dustMoving) {
       state.invalidate();
     } else {
       state.begin();

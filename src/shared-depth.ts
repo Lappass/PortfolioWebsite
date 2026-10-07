@@ -78,7 +78,12 @@ export class SharedDepthBokeh extends BokehPass {
     const ao = this.source(), uniforms = this.uniforms as Record<string, {value: any}>;
     // Lower resolution AO must retain the original full resolution depth pass.
     if (!ao.enabled || ao.width !== this.width || ao.height !== this.height) {
-      return super.render(renderer, write, read, delta, mask);
+      // Screen-space dust must not appear in the depth the blur reads.
+      const hidden: THREE.Object3D[] = [];
+      this.scene.traverseVisible(object => { if (object.userData.excludeFromAO) hidden.push(object); });
+      for (const object of hidden) object.visible = false;
+      try { return super.render(renderer, write, read, delta, mask); }
+      finally { for (const object of hidden) object.visible = true; }
     }
     const originalDepth = uniforms.tDepth.value;
     uniforms.tDepth.value = ao.normalRenderTarget.textures[1];

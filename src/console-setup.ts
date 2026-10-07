@@ -19,6 +19,7 @@ export class ConsoleSetup {
   readonly screenLocal = new THREE.Vector3(16.4, 3.05, -0.69);
   screenHeight = 4.6;
   private monitor = new THREE.Group();
+  private lamp = new THREE.PointLight("#ffe2bd", 0, 24, 0);
   private screenGeometry?: THREE.BufferGeometry;
   /** Monitor foot centre in setup units (art/console_setup.py: MX, foot y). */
   private monitorPivot = new THREE.Vector3(7.4, 0, -0.2);
@@ -36,6 +37,9 @@ export class ConsoleSetup {
     this.texture.flipY = false;
     this.monitor.position.copy(this.monitorPivot);
     this.group.add(this.monitor);
+    // A local warm key light, lit only while the camera is at the console (decay 0, range 24).
+    this.lamp.position.set(8.6, 6.5, 5);
+    this.group.add(this.lamp);
   }
 
   async load(url: string) {
@@ -87,6 +91,7 @@ export class ConsoleSetup {
     this.monitor.rotation.y = THREE.MathUtils.clamp(Math.atan2(eye.x - this.monitorPivot.x, eye.z - this.monitorPivot.z), -0.9, 0.9);
     const reading = THREE.MathUtils.smoothstep(insert, 0.5, 0.58) * (1 - THREE.MathUtils.smoothstep(insert, 0.95, 1));
     if (this.light) this.light.emissiveIntensity = 0.6 + reading * (1.5 + 1.2 * Math.sin(time * 16));
+    this.lamp.intensity = 2.4 * THREE.MathUtils.smoothstep(insert, 0.02, 0.2) * (1 - THREE.MathUtils.smoothstep(insert, 0.85, 1));
     this.draw(THREE.MathUtils.smoothstep(insert, 0.55, 0.97), title);
   }
 
