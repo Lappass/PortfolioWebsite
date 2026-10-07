@@ -4,6 +4,7 @@ import { DocumentDecryption } from "./document-decryption";
 import "./document-decryption.css";
 import "./decryption.css";
 import { escapeHtml } from "./html";
+import { ProjectPage, workIdFromHash } from "./project-page";
 import { normalizeQuality, qualityPresets, type QualityPreset, type RenderQuality } from "./render-quality";
 import { qualityMarkup, syncQualityUI } from "./quality-settings";
 import { superPerformanceQuality, wallpaperQuality } from "./wallpaper-quality";
@@ -11,6 +12,7 @@ import "@kitlangton/rolling-number/styles.css";
 import "./style.css";
 import "./quality-settings.css";
 import "./responsive.css";
+import "./selection-card.css";
 import { viewportLayout, openingLayout } from "./viewport-layout";
 import { assetUrl } from "./asset-url";
 import { initPwa, pwaSettingsMarkup } from "./pwa";
@@ -81,7 +83,7 @@ $("#stage").innerHTML = `
   <svg id="inspection-marks" viewBox="0 0 1920 1080" aria-hidden="true"><path id="inspection-lines"/><g id="inspection-corners"></g><circle id="inspection-point" r="1.8"/></svg>
   <div id="inspection-text" aria-hidden="true">CONFIDENTIALITY:<strong>GENERAL BUSINESS USE</strong></div>
   <section id="archive-ui" class="archive-ui" aria-label="档案选择">
-    <div class="archive-callout"><div class="eyebrow">INTERNAL DATABASE <span>／</span> <span id="archive-category">机构档案</span></div><button class="file-title" data-action="open">FILE NUMBER: <span id="selected-id">X-<span id="selected-code">001</span></span><span class="file-open">↗</span></button><div class="callout-rule"><i></i></div><div class="file-summary"><span id="selected-title">作品集</span><span id="selected-clearance">BUSINESS AREA</span></div><button class="read-file" data-action="open">ACCESS FILE <span>→</span></button></div>
+    <div class="archive-callout"><div class="eyebrow"><i aria-hidden="true"></i><span id="archive-category">机构档案</span></div><button class="file-title" data-action="open">FILE NUMBER: <span id="selected-id">X-<span id="selected-code">001</span></span><span class="file-open">↗</span></button><div class="callout-rule"><i></i></div><div class="file-summary"><span id="selected-title">作品集</span><span id="selected-clearance">BUSINESS AREA</span></div><p id="selected-abstract" class="callout-abstract"></p><ul id="selected-tags" class="callout-tags"></ul><button class="read-file" data-action="open">查看项目 <span>→</span></button></div>
     <div id="hover-label" class="hover-label" hidden>X-<span id="hover-code">001</span> / <span id="hover-title"></span></div>
     <div class="archive-counter"><span class="tiny-label">ARCHIVE / SELECT</span><div><span id="selected-number">01</span><i>/</i><span class="count-total">12</span></div></div>
     <div class="archive-navigation"><button data-action="prev" aria-label="上一个档案">↑</button><div id="file-ticks" class="file-ticks"></div><button data-action="next" aria-label="下一个档案">↓</button></div>
@@ -257,6 +259,53 @@ let resumeSelection = -1;
 let viewer: ModelViewer | undefined;
 const accessLog: { id: string; time: string }[] = [];
 const columnMemory = archiveColumns.map((_, lane) => columnFiles(lane)[0]);
+const projectOrder = records.map((_, index) => index);
+let detailEnteredAt = 0;
+let pageNavigating = false;
+function projectNeighbours(index: number) {
+  const position = projectOrder.indexOf(index);
+  const at = (offset: number) => records[projectOrder[wrap(position + offset, projectOrder.length)]];
+  return { previous: at(-1), next: at(1), position: position + 1, total: projectOrder.length };
+}
+function showProjectPage(options: { instant?: boolean; push?: boolean } = {}) {
+  projectPage.open(records[selected], projectNeighbours(selected), {
+    instant: options.instant ?? !motionActive("surfaceTransitions"),
+    push: options.push,
+  });
+}
+function closeProjectPage() {
+  if (mode === "detail") {
+    setMode("archive");
+    audio.play("back");
+  } else projectPage.close();
+}
+function openProjectAt(index: number, options: { instant?: boolean; push?: boolean } = {}) {
+  pageNavigating = true;
+  if (mode === "detail") setMode("archive");
+  select(index);
+  setMode("detail");
+  pageNavigating = false;
+  showProjectPage(options);
+}
+const projectPage = new ProjectPage({
+  close: closeProjectPage,
+  navigate: (direction) => {
+    const position = projectOrder.indexOf(selected);
+    openProjectAt(projectOrder[wrap(position + direction, projectOrder.length)], { instant: true, push: false });
+    audio.play("tick");
+  },
+});
+window.addEventListener("popstate", () => {
+  if (!started || !ready) return;
+  const id = workIdFromHash();
+  const index = id ? records.findIndex((record) => record.id === id) : -1;
+  if (index < 0) {
+    if (projectPage.isOpen) {
+      projectPage.close({ syncHistory: false });
+      if (mode === "detail") setMode("archive");
+    }
+  } else if (index !== selected || !projectPage.isOpen) openProjectAt(index, { push: false });
+});
 function recordAccess() {
   accessLog.unshift({
     id: records[selected].id,
@@ -366,7 +415,11 @@ function setMode(next: Mode) {
     hoverCode.finish();
     $("#hover-label").hidden = true;
   }
-  if (next === "detail" && mode !== "detail") recordAccess();
+  if (next === "detail" && mode !== "detail") {
+    recordAccess();
+    detailEnteredAt = performance.now();
+  }
+  if (next !== "detail" && !pageNavigating) projectPage.close();
   mode = next;
   syncWallpaperBackground();
   audio.setScene(next);
@@ -396,7 +449,7 @@ function setMode(next: Mode) {
   scene?.setMode(next === "boot" ? "hidden" : next);
   if (next !== "boot") {
     bootSequence.reset();
-    $(".file-title").firstChild!.textContent = "FILE NUMBER: ";
+    $(".file-title").firstChild!.textContent = "";
     $("#stage").dataset.boot = "done";
   }
   if (next === "detail" && previousMode !== "detail") {
@@ -439,6 +492,9 @@ function updateSelection(navigation?: ArchiveNavigation) {
   selectionTitle.update({ text: r.title, animated: motionActive("rollingText") && mode === "archive" });
   clearanceTitle.update({ text: r.clearance, animated: motionActive("rollingText") && mode === "archive" });
   categoryTitle.update({ text: r.category, animated: motionActive("rollingText") && mode === "archive" });
+  $("#selected-abstract").textContent = r.abstract;
+  const tags = r.tags?.length ? r.tags : r.lead.split(/\s*[/·]\s*/).filter(Boolean);
+  $("#selected-tags").innerHTML = [...tags.slice(0, 4), r.date].map((tag) => `<li>${escapeHtml(tag)}</li>`).join("");
   const direction =
     navigation && "axis" in navigation
       ? navigation.direction > 0
@@ -856,6 +912,10 @@ document.addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
   if (!started) return;
   if (viewer?.isOpen) return;
+  if (projectPage.isOpen) {
+    if (e.key === "Escape") { e.preventDefault(); closeProjectPage(); }
+    return;
+  }
   if (playground?.active && !modal) {
     if (e.key === "Escape") { e.preventDefault(); playground.stop(); }
     else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter", "/"].includes(e.key) && !(e.target instanceof HTMLButtonElement)) e.preventDefault();
@@ -1012,7 +1072,14 @@ function frame(ms: number) {
       : undefined;
   wallpaperEffects?.update(time, motionIsReduced(), motionActive("pointerParallax"));
   // The calibrated 2D opening fully covers the scene until array entry.
-  if (!viewer?.isOpen && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
+  if (!viewer?.isOpen && !projectPage.covering && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
+  if (mode === "detail" && !projectPage.isOpen && !viewer?.isOpen && !modal) {
+    // Let the card draw out and decrypt, then hand over to the full project page.
+    const elapsed = ms - detailEnteredAt;
+    const settled = !scene || !motionActive("modelDecryption")
+      || (scene.detailVisibility >= 0.95 && (scene.decryptionFrame.phase === "clear" || elapsed > 2600));
+    if (settled && elapsed > (scene ? 900 : 0)) showProjectPage();
+  }
   viewer?.update(time);
   if (threeState === "closing" && scene?.presentationHidden) releaseThree();
   playground?.position();
@@ -1196,6 +1263,8 @@ function completeStartup(silent: boolean) {
   if (reviewParams.get("scene") === "archive" || (!motionActive("boot") && !reviewParams.has("time"))) setMode("archive");
   if (reviewParams.get("scene") === "detail") setMode("detail");
   if (isWallpaper && wallpaperHost()?.properties.boot?.value === false) setMode("archive");
+  const sharedWork = records.findIndex((record) => record.id === workIdFromHash());
+  if (sharedWork >= 0 && !isWallpaper) openProjectAt(sharedWork, { instant: true, push: false });
   $("#stage").inert = false;
   $(".mobile-entry").inert = false;
   loading.classList.add("loaded");

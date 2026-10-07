@@ -12,6 +12,12 @@ export interface ArchiveRecord {
   abstract: string;
   findings: string[];
   source: string;
+  tags?: string[];
+  cover?: string;
+  gallery?: { src: string; caption?: string }[];
+  video?: string;
+  unity?: string;
+  links?: { label: string; url: string }[];
 }
 
 export const records: ArchiveRecord[] = content.records;

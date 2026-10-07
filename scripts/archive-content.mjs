@@ -13,6 +13,30 @@ const requiredFields = [
   "source",
 ];
 const isText = (value) => typeof value === "string" && value.trim().length > 0;
+const isWebUrl = (value) => {
+  try {
+    return ["https:", "http:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+};
+// Media may live in public/ (site-relative path) or on another HTTPS host.
+const isMediaPath = (value) =>
+  isText(value) && (isWebUrl(value) || /^(?!\/\/)[\w\-./]+$/.test(value.replace(/^\//, "")) && !value.includes(".."));
+
+function validateMedia(record, label, errors) {
+  if (record.tags !== undefined && (!Array.isArray(record.tags) || !record.tags.every(isText)))
+    errors.push(`${label}.tags：必须是非空文本数组`);
+  for (const key of ["cover", "video", "unity"])
+    if (record[key] !== undefined && !isMediaPath(record[key]))
+      errors.push(`${label}.${key}：必须是 public 目录内的路径或 HTTP(S) 链接`);
+  if (record.gallery !== undefined && (!Array.isArray(record.gallery) ||
+    !record.gallery.every((item) => item && isMediaPath(item.src) && (item.caption === undefined || isText(item.caption)))))
+    errors.push(`${label}.gallery：每项需要有效的 src，caption 可选`);
+  if (record.links !== undefined && (!Array.isArray(record.links) ||
+    !record.links.every((item) => item && isText(item.label) && isWebUrl(item.url))))
+    errors.push(`${label}.links：每项需要 label 和 HTTP(S) url`);
+}
 
 export function validateContent(content) {
   const errors = [];
@@ -63,12 +87,9 @@ export function validateContent(content) {
     ) {
       errors.push(`${label}.findings：必须包含至少一条非空研究记录`);
     }
-    try {
-      const url = new URL(record.source);
-      if (!["https:", "http:"].includes(url.protocol)) throw new Error();
-    } catch {
+    if (!isWebUrl(record.source))
       errors.push(`${label}.source：必须是有效的 HTTP 或 HTTPS 链接`);
-    }
+    validateMedia(record, label, errors);
   });
   for (const name of columns) {
     if (records.filter((record) => record?.category === name).length !== 8) {

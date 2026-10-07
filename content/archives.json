@@ -29,7 +29,18 @@
         "阵列支持自由平面拖动、持续惯性与无尽循环。",
         "模型通过 Blender 脚本生成，保留可复现源文件。"
       ],
-      "source": "https://github.com/LBEILC/RhineLabUI"
+      "source": "https://github.com/LBEILC/RhineLabUI",
+      "tags": ["TypeScript", "Three.js", "Vite", "Blender"],
+      "cover": "works/x-001/cover.jpg",
+      "gallery": [
+        { "src": "works/x-001/detail.jpg", "caption": "卡片抽出与解密过渡" },
+        { "src": "works/x-001/boot.jpg", "caption": "开场标志描边" },
+        { "src": "works/x-001/welcome.jpg", "caption": "欢迎画面" }
+      ],
+      "links": [
+        { "label": "GitHub", "url": "https://github.com/LBEILC/RhineLabUI" },
+        { "label": "在线访问", "url": "https://rhine.lubeiluchen.cc/" }
+      ]
     },
     {
       "id": "X-002",
