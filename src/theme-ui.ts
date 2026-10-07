@@ -1,8 +1,8 @@
 import "./theme.css";
 const palette = {
-  ink: ["#080a08", "#e0e3dc"], muted: ["#77756d", "#a6b0b1"], line: ["#aaa59a", "#536166"],
-  paper: ["#eae5e1", "#11181b"], panel: ["#edebe4", "#202a2f"], field: ["#e7e3d9", "#2a363b"],
-  accent: ["#9b7247", "#c5a16b"],
+  ink: ["#080a08", "#eef3ff"], muted: ["#77756d", "#9fb2d4"], line: ["#aaa59a", "#3c5488"],
+  paper: ["#eae5e1", "#08142e"], panel: ["#edebe4", "#12234d"], field: ["#e7e3d9", "#1a2f60"],
+  accent: ["#9b7247", "#6fa8ff"],
 } as const;
 let previous = -1;
 export let themeAmount = 0;

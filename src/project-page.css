@@ -184,7 +184,7 @@
   display: flex;
   align-items: flex-end;
   overflow: hidden;
-  background: #050607;
+  background: #08142e;
   color: #f1f3f0;
 }
 .pp-hub-art { position: absolute; inset: 0; }
@@ -193,7 +193,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(5, 6, 7, 0) 35%, rgba(5, 6, 7, 0.55) 70%, rgba(5, 6, 7, 0.92) 100%), linear-gradient(90deg, rgba(5, 6, 7, 0.65), rgba(5, 6, 7, 0) 60%);
+  background: linear-gradient(180deg, rgba(8, 20, 46, 0) 35%, rgba(8, 20, 46, 0.55) 70%, rgba(8, 20, 46, 0.92) 100%), linear-gradient(90deg, rgba(8, 20, 46, 0.65), rgba(8, 20, 46, 0) 60%);
   pointer-events: none;
 }
 .pp-hub-content { position: relative; z-index: 1; padding: 0 var(--pp-edge) clamp(40px, 8vh, 96px); max-width: 980px; }
@@ -238,30 +238,6 @@
 @media (prefers-reduced-motion: reduce) {
   .pp-hub-art img, .project-page.intro * { animation: none !important; }
 }
-/* Console loading screen between reading the disc and the hub. */
-.pp-loading { display: none; }
-.project-page.loading { overflow: hidden; }
-.project-page.loading .pp-loading {
-  position: fixed;
-  inset: 0;
-  z-index: 5;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 18px;
-  background: #050607;
-  color: #e8ebe6;
-  animation: pp-fade 0.4s both;
-}
-.pp-loading-mark svg { width: 150px; color: #e8ebe6; }
-.pp-loading-title { font-size: 20px; letter-spacing: 0.08em; opacity: 0.85; }
-.pp-loading-bar { width: min(320px, 70vw); height: 2px; background: rgba(232, 235, 230, 0.15); overflow: hidden; }
-.pp-loading-bar i { display: block; height: 100%; background: #7aa8ff; transform-origin: left; animation: pp-progress 1.45s cubic-bezier(0.4, 0, 0.2, 1) both; }
-.pp-loading-status { position: fixed; right: 40px; bottom: 34px; display: flex; align-items: center; gap: 12px; font-size: 12px; letter-spacing: 0.14em; color: rgba(232, 235, 230, 0.6); }
-.pp-loading-disc { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(232, 235, 230, 0.25); border-top-color: #7aa8ff; animation: pp-spin 0.8s linear infinite; }
-@keyframes pp-progress { from { transform: scaleX(0); } 60% { transform: scaleX(0.72); } to { transform: scaleX(1); } }
-@keyframes pp-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .pp-loading-bar i, .pp-loading-disc { animation: none; } }
 /* Player profile */
 .profile-hero { display: grid; grid-template-columns: minmax(140px, 240px) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); align-items: center; padding: clamp(36px, 6vw, 88px) 0; }
 .profile-avatar { aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: var(--pp-accent); display: grid; place-items: center; box-shadow: 0 0 0 1px var(--pp-line), 0 18px 60px rgba(0, 0, 0, 0.25); }
@@ -274,3 +250,6 @@
 .profile-skills .pp-tags { margin-top: 0; }
 .profile-page .pp-highlights li > div { flex: 1; }
 @media (max-width: 860px) { .profile-hero { grid-template-columns: 1fr; justify-items: start; } .profile-avatar { width: 140px; } }
+/* Grown out of the monitor screen after a disc is read. */
+.project-page.from-screen { opacity: 1; transform: none; transition: clip-path 0.75s cubic-bezier(0.65, 0, 0.35, 1); }
+@media (prefers-reduced-motion: reduce) { .project-page.from-screen { transition: none; } }

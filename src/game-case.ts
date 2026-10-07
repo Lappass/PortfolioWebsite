@@ -118,18 +118,19 @@ export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number):
 }
 
 const DISC_RADIUS = 0.6 * SCALE;
-const DEFAULT_SLOT = new THREE.Vector3(3.35, 1, 0.55);
+const DEFAULT_SLOT = new THREE.Vector3(8.75, 0.475, 0.7);
 
 /**
  * Lid swings open on the spine hinge, then the disc rises and spins. `insert`
- * carries the disc over the console slit (`slotTop`, case-local) and sinks it,
- * where the console body hides it.
+ * lays the disc flat in front of the console slot (`slotTop`, case-local) and
+ * pushes it in, where the console body hides it.
  */
 export function poseCase(group: THREE.Object3D, open: number, time: number, insert = 0, slotTop?: THREE.Vector3) {
   const lid = THREE.MathUtils.smoothstep(open, 0, 0.7);
   const lift = THREE.MathUtils.smoothstep(open, 0.45, 1);
-  const travel = THREE.MathUtils.smoothstep(insert, 0.05, 0.42);
-  const sink = THREE.MathUtils.smoothstep(insert, 0.42, 0.82);
+  const travel = THREE.MathUtils.smoothstep(insert, 0.1, 0.36);
+  const push = THREE.MathUtils.smoothstep(insert, 0.38, 0.54);
+  const slot = slotTop ?? DEFAULT_SLOT;
   for (const child of group.children) {
     const part = child.userData.casePart;
     if (!part) continue;
@@ -138,18 +139,16 @@ export function poseCase(group: THREE.Object3D, open: number, time: number, inse
     if (part === "lid") child.rotation.y = -1.25 * lid;
     else {
       const outX = x + 1.35 * lift, outY = y + 0.2 * lift, outZ = z + 0.55 * lift;
-      const slot = slotTop ?? DEFAULT_SLOT;
-      const aboveY = slot.y + DISC_RADIUS + 0.08;
       child.position.set(
         THREE.MathUtils.lerp(outX, slot.x, travel),
-        THREE.MathUtils.lerp(outY, aboveY, travel) - sink * (2 * DISC_RADIUS + 0.2),
-        THREE.MathUtils.lerp(outZ, slot.z, travel),
+        THREE.MathUtils.lerp(outY, slot.y, travel),
+        THREE.MathUtils.lerp(outZ, slot.z + DISC_RADIUS + 0.2, travel) - push * (2 * DISC_RADIUS + 0.5),
       );
-      child.rotation.z = time * 1.4 * lift + insert * 22;
+      child.rotation.x = -Math.PI / 2 * travel;
+      child.rotation.z = time * 1.4 * lift + insert * 18;
     }
   }
 }
-
 export const isSharedMap = (map: THREE.Texture | null | undefined) => Boolean(map?.userData.shared);
 
 function setMap(mat: THREE.MeshPhysicalMaterial, map: THREE.Texture | null) {

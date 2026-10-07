@@ -10,6 +10,7 @@ import { themeMaterial, themeEnvironment } from "./theme-material";
 import { RhythmMotion, rhythmDisplacement, quietBands, type MusicBands, type RhythmStyle } from "./archive-play-motion";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { buildGameCase, poseCase, printCase, transferPrint } from "./game-case";
+import { ConsoleSetup } from "./console-setup";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -21,7 +22,7 @@ import { applyTextureQuality, resizeQuality } from "./quality-renderer";
 import { CardAppearance } from "./appearance";
 import { configureInternalOptics } from "./internal-optics";
 import { DecryptionController } from "./decryption";
-import { fileAtSlot, fileLocation } from "./data";
+import { fileAtSlot, fileLocation, records } from "./data";
 import {
   cellKey,
   sameCell,
@@ -516,93 +517,55 @@ export class ArchiveScene {
 
   private caseMode = false;
   private printTimer = 0;
-  // Disc insertion: 0 = in the open case, 1 = seated in the slot bar and read.
+  // Disc insertion: 0 = in the open case, 1 = read by the console, camera at the monitor.
   private insert = { value: 0, target: 0 };
   private insertDone?: () => void;
-  private slot?: THREE.Group;
-  private slotLight?: THREE.MeshPhysicalMaterial;
+  private setup = new ConsoleSetup();
   get insertProgress() { return this.insert.value; }
-  /** Resolves once the disc is seated and the slot has finished reading. */
+  /** Resolves once the disc is read and the monitor fills the frame. */
   insertDisc(immediate = false) {
     this.insert.target = 1;
+    this.targetRotation = 0;
     if (immediate || !this.caseMode) this.insert.value = 1;
     return new Promise<void>((resolve) => {
       if (this.insert.value >= 1) resolve();
       else this.insertDone = resolve;
     });
   }
+  /** The monitor screen's bounds in container pixels, for the page to grow from. */
+  screenRect() {
+    const rect = this.container.getBoundingClientRect();
+    const points = this.setup.screenCorners().map((corner) => corner.project(this.camera));
+    if (!points.length) return null;
+    const xs = points.map((p) => rect.left + (p.x + 1) / 2 * rect.width);
+    const ys = points.map((p) => rect.top + (1 - p.y) / 2 * rect.height);
+    return { left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys) };
+  }
   ejectDisc(immediate = false) {
     this.insert.target = 0;
     this.insertDone = undefined;
     if (immediate) this.insert.value = 0;
   }
-  private async loadSlot() {
-    const gltf = await new GLTFLoader().loadAsync(publicAsset("assets/console-slot.glb"));
-    const slot = new THREE.Group();
-    gltf.scene.traverse((o) => {
-      if (!(o instanceof THREE.Mesh)) return;
-      const source = o.material as THREE.MeshStandardMaterial;
-      const mat = new THREE.MeshPhysicalMaterial({ color: source.color, roughness: source.roughness, clearcoat: 0.4, clearcoatRoughness: 0.3 });
-      if (o.name === "Slot_Light") {
-        mat.emissive.set("#7aa8ff");
-        this.slotLight = mat;
-      }
-      const mesh = new THREE.Mesh(o.geometry, mat);
-      mesh.applyMatrix4(o.matrixWorld);
-      mesh.castShadow = true;
-      slot.add(mesh);
-    });
-    slot.matrixAutoUpdate = false;
-    slot.visible = false;
-    this.slot = slot;
-    this.scene.add(slot);
-  }
   private updateInsert(dt: number) {
     const { insert } = this;
-    // Linear time; poseCase applies the easing. Inserting reads slower than ejecting.
-    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 1.7 : -dt / 0.9), 0, 1);
+    // Linear time; poseCase and the camera apply the easing.
+    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 4.4 : -dt / 1.6), 0, 1);
     if (insert.value >= 1 && this.insertDone) {
       this.insertDone();
       this.insertDone = undefined;
     }
   }
-  // The console sits just below the frame, bottom right; only its slit and strip show.
-  // It lowers out of the detail text's way and rises while a disc goes in.
-  private slotHeight = -0.8;
-  private slotTime = 0;
-  /** The slit's top centre in case-local units, for the disc path. */
-  private slotLocal = new THREE.Vector3(3.35, 1, 0.55);
-  private placeSlot(time: number, cinematic: boolean) {
-    if (!this.slot) return;
+  /** Camera takeover while inserting: case → console → monitor screen. */
+  private insertShot(detailAim: THREE.Vector3, detailSpan: number) {
     const p = this.insert.value;
-    const dt = Math.min(0.1, Math.max(0, time - this.slotTime));
-    this.slotTime = time;
-    this.slot.visible = !cinematic && this.presence > 0.01;
-    const target = p > 0
-      ? THREE.MathUtils.lerp(-1.02, -0.32, THREE.MathUtils.smoothstep(p, 0, 0.3))
-      : this.targetDetail > 0 ? -0.97 : -0.8;
-    this.slotHeight = THREE.MathUtils.damp(this.slotHeight, target - 1.2 * (1 - this.presence), 6, dt);
-    const camera = this.camera;
-    const forward = camera.getWorldDirection(new THREE.Vector3());
-    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
-    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
     this.model.updateMatrixWorld();
-    const centre = new THREE.Vector3(0, 1.85, 0).applyMatrix4(this.model.matrixWorld);
-    // While browsing it stands well in front of the line (scaled to keep its apparent size);
-    // with a file open it sits just nearer than the case, so its body hides a sinking disc.
-    const caseDepth = centre.sub(camera.position).dot(forward);
-    const depth = caseDepth - THREE.MathUtils.lerp(30, 0.8, THREE.MathUtils.clamp(this.detail, 0, 1));
-    const scale = depth / caseDepth;
-    const halfHeight = depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const top = camera.position.clone()
-      .addScaledVector(forward, depth)
-      .addScaledVector(right, 0.42 * halfHeight * camera.aspect)
-      .addScaledVector(up, this.slotHeight * halfHeight);
-    this.slot.matrix.compose(top.clone().addScaledVector(up, -2.9 * scale), camera.quaternion, new THREE.Vector3(scale, scale, scale));
-    this.slot.matrixWorldNeedsUpdate = true;
-    this.slotLocal.copy(this.model.worldToLocal(top));
-    const reading = THREE.MathUtils.smoothstep(p, 0.8, 0.86);
-    if (this.slotLight) this.slotLight.emissiveIntensity = 0.5 + reading * (1.6 + 1.4 * Math.sin(time * 18));
+    const local = (v: THREE.Vector3) => v.clone().applyMatrix4(this.model.matrixWorld);
+    const toConsole = THREE.MathUtils.smoothstep(p, 0, 0.2);
+    const toScreen = THREE.MathUtils.smoothstep(p, 0.58, 0.92);
+    const consoleAim = local(new THREE.Vector3(0, 1.85, 0).lerp(this.setup.slotLocal, 0.5).add(new THREE.Vector3(0, 0.5, 0)));
+    const aim = detailAim.clone().lerp(consoleAim, toConsole).lerp(local(this.setup.screenLocal), toScreen);
+    const span = THREE.MathUtils.lerp(THREE.MathUtils.lerp(detailSpan, 8.2, toConsole), this.setup.screenHeight * 1.5, toScreen);
+    return { aim, span };
   }
 
   private coverAttribute?: THREE.InstancedBufferAttribute;
@@ -630,7 +593,8 @@ export class ArchiveScene {
     this.appearance.prepare(this.model);
     this.appearance.apply(this.model, 0);
     printCase(this.model, fileAtCell(this.selectedCell), anisotropy, true);
-    void this.loadSlot().catch((error) => console.warn("Slot bar unavailable", error));
+    this.scene.add(this.setup.group);
+    void this.setup.load(publicAsset("assets/console-setup.glb")).catch((error) => console.warn("Console setup unavailable", error));
     this.scene.add(this.model);
     this.model.position.copy(this.cellPosition(poolCell(this.selectedSlot)));
     this.loaded = true;
@@ -1586,7 +1550,7 @@ export class ArchiveScene {
     this.appearance.setClarity(this.model, this.modelClarity());
     if (this.caseMode) {
       this.updateInsert(dt);
-      poseCase(this.model, this.modelClarity(), time, this.insert.value, this.slotLocal);
+      poseCase(this.model, this.modelClarity(), time, this.insert.value, this.setup.slotLocal);
     }
     // Reference 26.92–27.76: the array travels horizontally into a white field.
     const entry = cinematic ? ease((shot - 21.9) / 0.86) : this.reveal;
@@ -1799,6 +1763,12 @@ export class ArchiveScene {
       detailAim.addScaledVector(up, (framing.detailY - 0.5) * height / pixelScale);
       cameraAim.lerp(detailAim, detail);
     }
+    let viewSpan = framing.span;
+    if (this.caseMode && !cinematic && this.insert.value > 0) {
+      const shot = this.insertShot(cameraAim.clone(), framing.span);
+      cameraAim.copy(shot.aim);
+      viewSpan = shot.span;
+    }
     const cameraPosition = cameraAim
       .clone()
       .addScaledVector(viewDirection, distance);
@@ -1816,7 +1786,7 @@ export class ArchiveScene {
     this.camera.fov = THREE.MathUtils.lerp(
       this.camera.fov,
       THREE.MathUtils.radToDeg(
-        2 * Math.atan((cinematic ? openingSpan(THREE.MathUtils.lerp(span, 5.9, detail)) : framing.span) / (2 * distance)),
+        2 * Math.atan((cinematic ? openingSpan(THREE.MathUtils.lerp(span, 5.9, detail)) : viewSpan) / (2 * distance)),
       ),
       cameraBlend,
     );
@@ -1911,9 +1881,8 @@ export class ArchiveScene {
           : this.targetDetail
             ? "lifting"
             : "preview";
-    const focalPoint = this.model.position
-      .clone()
-      .add(new THREE.Vector3(0, 2, 0))
+    // While inserting, focus follows the camera to the console and the monitor.
+    const focalPoint = (this.insert.value > 0 ? this.cameraAim.clone() : this.model.position.clone().add(new THREE.Vector3(0, 2, 0)))
       .applyMatrix4(this.camera.matrixWorldInverse);
     const bokehUniforms = this.bokeh.uniforms as Record<
       string,
@@ -1927,7 +1896,10 @@ export class ArchiveScene {
     this.renderer.info.reset();
     // Keep all simulation and picking current. Reuse the composited canvas only
     // when its actual inputs are identical, including late textures and materials.
-    if (this.caseMode) this.placeSlot(time, Boolean(cinematic));
+    if (this.caseMode) {
+      this.model.updateMatrixWorld();
+      this.setup.update(this.model.matrixWorld, this.camera.position, !cinematic && this.detail > 0.02 && this.presence > 0.01, this.insert.value, time, records[fileAtCell(this.selectedCell)].title);
+    }
     const state = this.renderState;
     this.scene.updateMatrixWorld();
     // A changed instance buffer already proves the image changed. Avoid a

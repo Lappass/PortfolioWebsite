@@ -273,11 +273,12 @@ function projectNeighbours(index: number) {
   const at = (offset: number) => records[projectOrder[wrap(position + offset, projectOrder.length)]];
   return { previous: at(-1), next: at(1), position: position + 1, total: projectOrder.length };
 }
-function showProjectPage(options: { instant?: boolean; push?: boolean; intro?: boolean } = {}) {
+function showProjectPage(options: { instant?: boolean; push?: boolean; intro?: boolean; from?: { left: number; top: number; right: number; bottom: number } | null } = {}) {
   projectPage.open(records[selected], projectNeighbours(selected), {
     instant: options.instant ?? !motionActive("surfaceTransitions"),
     push: options.push,
     intro: options.intro,
+    from: options.from,
   });
 }
 // The disc goes into the slot bar first; the hub opens once it has been read.
@@ -299,7 +300,7 @@ async function insertDiscAndOpen() {
   // Ejected or left the detail view while the disc was going in.
   if (mode !== "detail" || $("#stage").dataset.inserting !== "true") return;
   audio.play("disc-read");
-  showProjectPage({ intro: true });
+  showProjectPage({ intro: true, from: scene.screenRect() });
 }
 function ejectDisc(sound = true) {
   discInserting = false;
@@ -1114,7 +1115,7 @@ function frame(ms: number) {
   const time = ms / 1000;
   const theme = scene?.themeAmount ?? (prefs.colorTheme === "dark" ? 1 : 0);
   paintTheme(theme);
-  particles.update(ms, mode === "archive" && !projectPage.isOpen && !profilePage.isOpen && !modal, motionIsReduced(), theme > 0.5 ? "214, 226, 232" : "52, 50, 44");
+  particles.update(ms, mode === "archive" && !projectPage.isOpen && !profilePage.isOpen && !modal, motionIsReduced(), theme > 0.5 ? "190, 214, 255" : "52, 50, 44");
   viewer?.setTheme(theme);
   playground?.tick(time);
   const cinema =

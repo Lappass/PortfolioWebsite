@@ -71,7 +71,7 @@ export class ProjectPage {
   get covering() { return this.state === "open"; }
   get currentId() { return this.record?.id ?? null; }
 
-  open(record: ArchiveRecord, neighbours: Neighbours, options: { instant?: boolean; push?: boolean; intro?: boolean } = {}) {
+  open(record: ArchiveRecord, neighbours: Neighbours, options: { instant?: boolean; push?: boolean; intro?: boolean; from?: { left: number; top: number; right: number; bottom: number } | null } = {}) {
     if (this.isOpen) { this.render(record, neighbours); return; }
     this.render(record, neighbours);
     if (options.push !== false && location.hash !== workHash(record.id)) {
@@ -82,23 +82,22 @@ export class ProjectPage {
     clearTimeout(this.timer);
     this.root.hidden = false;
     this.root.classList.toggle("instant", Boolean(options.instant));
-    // After a disc is read: a short console loading screen, then the key art reveal.
+    // The monitor has shown the loading; the key art comes up out of its screen.
     clearTimeout(this.introTimer);
-    this.root.classList.remove("intro");
-    this.root.classList.toggle("loading", Boolean(options.intro));
-    if (options.intro) {
-      this.introTimer = window.setTimeout(() => {
-        this.root.classList.replace("loading", "intro");
-        this.introTimer = window.setTimeout(() => this.root.classList.remove("intro"), 2600);
-      }, 1600);
-    }
+    this.root.classList.toggle("intro", Boolean(options.intro));
+    if (options.intro) this.introTimer = window.setTimeout(() => this.root.classList.remove("intro"), 2600);
     this.state = "opening";
+    // From the monitor: start clipped to its screen, then grow to fill the window.
+    const from = options.from;
+    this.root.classList.toggle("from-screen", Boolean(from));
+    if (from) this.root.style.clipPath = `inset(${from.top}px ${innerWidth - from.right}px ${innerHeight - from.bottom}px ${from.left}px round 6px)`;
     // Commit the hidden state first so the fade actually runs.
     void this.root.offsetWidth;
     this.root.classList.add("visible");
+    if (from) requestAnimationFrame(() => { this.root.style.clipPath = "inset(0 0 0 0 round 0px)"; });
     this.root.scrollTop = 0;
     this.root.querySelector<HTMLElement>("#pp-title")?.focus({ preventScroll: true });
-    this.timer = window.setTimeout(() => { this.state = "open"; }, options.instant ? 0 : 340);
+    this.timer = window.setTimeout(() => { this.state = "open"; }, options.instant ? 0 : from ? 760 : 340);
   }
 
   /** Replace the content in place, e.g. for previous/next. */
@@ -121,12 +120,6 @@ export class ProjectPage {
         <span class="pp-brand" aria-hidden="true">LAPPAS</span>
         <nav aria-label="切换作品"><button type="button" data-page="prev" aria-label="上一个作品：${e(previous.title)}">← <span>上一个</span></button><span class="pp-count">${pad(position)} / ${pad(total)}</span><button type="button" data-page="next" aria-label="下一个作品：${e(next.title)}"><span>下一个</span> →</button></nav>
       </header>
-      <div class="pp-loading" aria-hidden="true">
-        <div class="pp-loading-mark">${logo}</div>
-        <div class="pp-loading-title">${e(r.title)}</div>
-        <div class="pp-loading-bar"><i></i></div>
-        <div class="pp-loading-status"><span class="pp-loading-disc"></span>正在读取光盘</div>
-      </div>
       <section class="pp-hub">
         <div class="pp-hub-art"><img src="${heroSource(r)}" alt="" decoding="async"></div>
         <div class="pp-hub-content">
@@ -172,7 +165,8 @@ export class ProjectPage {
     if (!this.isOpen) return false;
     clearTimeout(this.timer);
     clearTimeout(this.introTimer);
-    this.root.classList.remove("loading", "intro");
+    this.root.classList.remove("intro", "from-screen");
+    this.root.style.clipPath = "";
     this.state = "closing";
     this.root.classList.remove("visible");
     if (options.syncHistory !== false && workIdFromHash()) {
