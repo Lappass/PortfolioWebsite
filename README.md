@@ -281,6 +281,7 @@ node scripts/check-quality.mjs
 - **Rolling Number**：用于编号和文字滚动，许可见 [`public/licenses/rolling-number.txt`](public/licenses/rolling-number.txt)。
 - **声音**：三轨配乐为本项目程序编配；逐字输入使用原 PV 的三个 38ms 短音，来源与处理记录见 [音频说明](public/audio/README.md)。原片短音及其衍生片段不纳入原创配乐的 MIT 授权声明。
 - **其他依赖**：各自遵循其原有许可。源码公开不改变第三方资源的权利。
+- **手柄模型**：采用 Taohid Animation 的 [PS5 Controller](https://sketchfab.com/3d-models/ps5-controller-b7bb9c5102a04cb0b1966c6d02bad7d6)，经 dualsense-studio 拆分整理，按 CC BY 4.0 使用。源文件和上游署名见 `art/vendor/dualsense/`，本站调整比例、材质、摆放和灯光动作，完整署名见 [模型来源](public/model-credits.html)。手柄及其在组合 GLB、Blender 工程中的部分不属于本项目的原创 MIT 资产。
 
 源码包包含运行代码、模型、Blender 工程、说明与验证脚本，不包含依赖目录、本机缓存、原 PV 或完整录制素材。
 

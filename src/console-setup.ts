@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { profile } from "./profile";
+import { drawIdentity, prepareIdentity } from "./profile-particles";
 
 /**
  * Shared terminal: open case at left, monitor at centre, upright drive at right,
@@ -22,7 +23,8 @@ export class ConsoleSetup {
   private monitor = new THREE.Group();
   private controller = new THREE.Group();
   private controllerPivot = new THREE.Vector3(-.2, .36, .75);
-  private playerLight?: THREE.MeshStandardMaterial;
+  private playerLights: THREE.MeshStandardMaterial[] = [];
+  get playerLightIntensity() { return this.playerLights[0]?.emissiveIntensity ?? 0; }
   private lamp = new THREE.PointLight("#ffe2bd", 0, 24, 0);
   private screenGeometry?: THREE.BufferGeometry;
   /** Monitor foot centre in setup units (art/console_setup.py: MX, foot y). */
@@ -35,6 +37,7 @@ export class ConsoleSetup {
   loaded = false;
 
   constructor() {
+    void prepareIdentity(profile.name);
     this.group.matrixAutoUpdate = false;
     this.group.visible = false;
     this.texture.colorSpace = THREE.SRGBColorSpace;
@@ -65,14 +68,16 @@ export class ConsoleSetup {
         this.screenLocal.copy(box.getCenter(new THREE.Vector3())).add(SETUP_ORIGIN);
         this.screenHeight = box.max.y - box.min.y;
       } else {
-        const standard = new THREE.MeshStandardMaterial({ color: source.color, roughness: source.roughness, metalness: source.metalness });
+        const standard = o.name.startsWith('Controller_') ? source.clone() : new THREE.MeshStandardMaterial({ color: source.color, roughness: source.roughness, metalness: source.metalness });
         if (o.name === "Slot_Light") {
           standard.emissive.set("#ffd9a0");
           this.light = standard;
         }
-        if (o.name === "Controller_Player_Light") {
-          standard.emissive.set("#ffd9a0");
-          this.playerLight = standard;
+        if (o.name.startsWith("Controller_Player_Light")) {
+          standard.emissive.set("#ffb43b");
+          standard.toneMapped = false;
+          standard.emissiveIntensity = 0;
+          this.playerLights.push(standard);
         }
         material = standard;
       }
@@ -98,7 +103,7 @@ export class ConsoleSetup {
   }
 
   /** Follow the case; `insert` drives the slot light and the loading screen. */
-  update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, title: string, workspace = 0) {
+  update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, title: string, workspace = 0, viewportAspect = 16 / 9) {
     const presence = Math.max(THREE.MathUtils.smoothstep(insert, 0.18, 0.28), THREE.MathUtils.smoothstep(workspace, .02, .18));
     this.group.visible = visible && this.loaded && presence > 0;
     if (!this.group.visible) return;
@@ -109,16 +114,18 @@ export class ConsoleSetup {
     this.group.matrixWorldNeedsUpdate = true;
     // One assembled terminal: screen and drive share a fixed forward direction.
     this.monitor.rotation.y = 0;
-    const lift = THREE.MathUtils.smoothstep(workspace, .20, .48);
+    const lift = THREE.MathUtils.smoothstep(workspace, .18, .36);
     this.controller.position.copy(this.controllerPivot);
     this.controller.position.y += lift * .78;
+    this.controller.position.z += lift * .30;
     this.controller.rotation.x = lift * .95;
-    if (this.playerLight) this.playerLight.emissiveIntensity = 3 * THREE.MathUtils.smoothstep(workspace, .43, .53);
+    // One acknowledgement pulse after the controller is fully lifted.
+    for (const light of this.playerLights) light.emissiveIntensity = 4 * THREE.MathUtils.smoothstep(workspace, .38, .41) * (1 - THREE.MathUtils.smoothstep(workspace, .48, .53));
     const power = THREE.MathUtils.smoothstep(insert, 0.06, 0.18);
     const reading = THREE.MathUtils.smoothstep(insert, 0.46, 0.55) * (1 - THREE.MathUtils.smoothstep(insert, 0.94, 0.99));
     if (this.light) this.light.emissiveIntensity = power * (0.7 + reading * (1.5 + 1.2 * Math.sin(insert * 110)));
     this.lamp.intensity = Math.max(2.4 * THREE.MathUtils.smoothstep(insert, 0.02, 0.2) * (1 - THREE.MathUtils.smoothstep(insert, 0.85, 1)), 1.6 * presence * lift);
-    if (workspace > .001) this.drawPlayer(workspace);
+    if (workspace > .001) this.drawPlayer(workspace, viewportAspect);
     else this.draw(insert, title);
   }
 
@@ -194,9 +201,9 @@ export class ConsoleSetup {
     this.texture.needsUpdate = true;
   }
 
-  private drawPlayer(progress: number) {
+  private drawPlayer(progress: number, viewportAspect: number) {
     progress = Math.round(progress * 120) / 120;
-    const key = `player|${progress}|${profile.name}`;
+    const key = `player|${progress}|${profile.name}|${viewportAspect}`;
     if (key === this.drawn) return;
     this.drawn = key;
     const c = this.canvas.getContext("2d")!, w = this.canvas.width, h = this.canvas.height;
@@ -204,17 +211,17 @@ export class ConsoleSetup {
     c.fillRect(0, 0, w, h);
     c.save();
     c.globalAlpha = THREE.MathUtils.smoothstep(progress, .48, .62);
-    c.strokeStyle = "#dac39b";
-    c.lineWidth = 2;
-    c.beginPath(); c.arc(w / 2, h * .30, 36, 0, Math.PI * 2); c.stroke();
-    c.beginPath(); c.arc(w / 2, h * .30 + 66, 55, Math.PI, Math.PI * 2); c.stroke();
+    const wake = c.globalAlpha;
+    drawIdentity(c, { x:w/2, y:h*.46, size:h*.8*Math.min(1, viewportAspect*.88), morph:0 });
+    // drawIdentity resets alpha; retain screen wake and fade labels before entering.
+    c.globalAlpha = wake * (1 - THREE.MathUtils.smoothstep(progress,.67,.80));
     c.textAlign = "center";
     c.fillStyle = "#dac39b"; c.font = "500 20px MiSans, sans-serif";
-    c.fillText("P L A Y E R   0 1", w / 2, h * .53);
-    c.fillStyle = "#edeae4"; c.font = "600 64px MiSans, sans-serif";
-    c.fillText(profile.name, w / 2, h * .66);
+    c.fillText("P L A Y E R   0 1", w / 2, h * .12);
+    c.fillStyle = "#edeae4"; c.font = "600 34px MiSans, sans-serif";
+    c.fillText(profile.name, w / 2, h * .82);
     c.fillStyle = "#95958e"; c.font = "400 20px MiSans, sans-serif";
-    c.fillText(progress < .8 ? "CONTROLLER CONNECTED / 玩家已连接" : "BEHIND THE WORKS / 创作幕后", w / 2, h * .77);
+    c.fillText("CONTROLLER CONNECTED / 玩家已连接", w / 2, h * .89);
     c.restore();
     this.texture.needsUpdate = true;
   }

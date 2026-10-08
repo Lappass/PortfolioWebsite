@@ -3,6 +3,8 @@ import { escapeHtml as e } from "./html";
 import { profile } from "./profile";
 import { PageChapters } from "./page-chapters";
 import { ProfileOrb } from "./profile-orb";
+import { ProfileEntry } from "./profile-entry";
+import { prepareIdentity } from "./profile-particles";
 import "./profile-workspace.css";
 
 const isWeb = (value: string) => /^(https?:|mailto:)/i.test(value);
@@ -19,6 +21,7 @@ export class ProfilePage {
   private chapters = new PageChapters(this.root);
   private orb?: ProfileOrb;
   private entryFrame = 0;
+  private entry?: ProfileEntry;
 
   constructor(private onClose: () => void, private workspace: (active: boolean, instant: boolean) => void = () => {}, private terminal: () => { ready: boolean; from: { top: number; right: number; bottom: number; left: number } | null } = () => ({ ready: true, from: null })) {
     this.root.className = "project-page profile-page";
@@ -40,11 +43,13 @@ export class ProfilePage {
   }
 
   get isOpen() { return this.state === "open"; }
-  get covering() { return false; } // The workspace camera continues behind the page.
+  get covering() { return this.isOpen && this.root.classList.contains('visible') && !this.root.classList.contains('entering'); }
 
   open(options: { instant?: boolean; push?: boolean } = {}) {
     if (this.isOpen) return;
     cancelAnimationFrame(this.entryFrame);
+    this.entry?.dispose();
+    void prepareIdentity(profile.name);
     this.orb?.dispose();
     this.render();
     if (options.push !== false && location.hash !== PROFILE_HASH) {
@@ -67,14 +72,10 @@ export class ProfilePage {
       if (!this.isOpen) return;
       const { ready, from } = this.terminal();
       if (!reduced && !ready) { this.entryFrame = requestAnimationFrame(reveal); return; }
-      if (!reduced && from) {
-        this.root.classList.add("from-screen");
-        this.root.style.clipPath = `inset(${Math.max(0, from.top)}px ${Math.max(0, innerWidth-from.right)}px ${Math.max(0, innerHeight-from.bottom)}px ${Math.max(0, from.left)}px round 6px)`;
-      }
+      if (!reduced) this.entry = new ProfileEntry(this.root, from, startOrb);
       void this.root.offsetWidth;
       this.root.classList.add("visible");
-      this.entryFrame = requestAnimationFrame(() => { this.root.style.clipPath = "inset(0 0 0 0 round 0px)"; });
-      startOrb();
+      if (reduced) startOrb();
       this.root.querySelector<HTMLElement>("#profile-title")?.focus({ preventScroll: true });
     };
     // Capture keyboard focus while the physical terminal performs the entrance.
@@ -86,6 +87,7 @@ export class ProfilePage {
     if (!this.isOpen) return false;
     this.state = "closing";
     cancelAnimationFrame(this.entryFrame);
+    this.entry?.dispose();
     this.workspace(false, this.root.classList.contains('instant'));
     this.orb?.dispose();
     this.root.classList.remove("visible");
@@ -128,7 +130,7 @@ export class ProfilePage {
             <p class="pp-abstract">${e(p.tagline)}</p>
             <div class="pp-links">${links.map((link) => `<a href="${asset(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} <span>↗</span></a>`).join("")}</div>
           </div>
-          <figure class="profile-orb-study"><div class="profile-orb-meta"><span>STUDY / 001</span><span>PARTICLE FIELD</span></div><canvas aria-label="可随鼠标扰动、在球体和文字之间变换的粒子实验"></canvas><figcaption><span>FORM → MOTION → PLAY</span><span>移动鼠标，扰动粒子</span></figcaption></figure>
+          <figure class="profile-orb-study"><div class="profile-orb-meta"><span>PLAYER / 001</span><span>PARTICLE FIELD</span></div><canvas aria-label="Shuhang Chen 的粒子名字，可随鼠标扰动并变换为球体"></canvas><figcaption><span>SHUHANG CHEN / IN PARTICLES</span><span>移动鼠标，扰动粒子</span></figcaption></figure>
           <div class="profile-signature"><div class="profile-avatar">${avatar}</div><span>${e(p.alias.toUpperCase())} / SC—001</span><span>SCROLL TO EXPLORE ↓</span></div>
         </section>
         <section class="pp-section pp-highlights" data-section="about" tabindex="-1" aria-label="关于我">
@@ -143,6 +145,7 @@ export class ProfilePage {
           <div class="pp-label"><span class="pp-section-number">04</span>EXPERIENCE / 经历</div>
           <ol>${p.experience.map((x) => `<li><span>${e(x.time)}</span><div><strong>${e(x.title)}</strong><br>${e(x.detail)}</div></li>`).join("")}</ol>
         </section>
-      </article>`;
+      </article>
+      <footer class="profile-model-credit"><a href="${import.meta.env.BASE_URL}model-credits.html" target="_blank" rel="noopener noreferrer">3D MODEL CREDITS ↗</a></footer>`;
   }
 }

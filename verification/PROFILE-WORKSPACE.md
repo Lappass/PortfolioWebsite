@@ -1,72 +1,50 @@
-# Creator workspace — 2026-10-07
+# Controller and profile entrance — 2026-10-07
 
-## Controller entrance revision
+The About entrance establishes a level front view of the terminal, lifts the
+controller over 540ms, then briefly illuminates its two touchpad light strips.
+The pulse starts after pickup and is fully off before the camera enters the
+screen. It is a single acknowledgement, not a constant glow or repeating blink.
 
-About now runs a 2.4-second physical terminal sequence: establish the shared
-desk, lift and tilt the controller, illuminate its player indicator, display
-PLAYER 01 / Shuhang Chen, then expand the profile from the projected monitor
-bounds over 480ms. The particle study inside the profile remains intact; the
-previous full-screen particle-name entrance is no longer invoked.
+The camera holds during pickup and the pulse, aligns with the monitor normal,
+then dollies from the overview distance to 7 scene units while reframing the
+screen to cover the entire viewport. The controller and desk are outside the
+final visible frame. The 3-second physical sequence hands the same deterministic
+particle sphere to a full-screen canvas. It forms Shuhang Chen, then settles
+into the profile's particle study. The profile uses the same fully opaque paper
+background as project details; the scene stops updating while covered.
 
-The selected case stays closed during this sequence. Background cases fade out
-before the controller lifts. Esc cancels the pending reveal and reverses the
-workspace movement from its current position. Direct links and reduced motion
-show the profile immediately. Selection and project insertion timing are preserved.
+The user withdrew the portrait request: no photo or portrait sampling is shipped.
+The 3,600 particles alternate between the name and sphere, retaining pointer
+repulsion. Both the physical screen and the entry canvas constrain the field on
+narrow viewports. Reduced motion displays the name immediately. Direct links
+skip the physical sequence. Esc cancels either stage without a late reveal.
 
-The original controller and desk are generated with `art/console_setup.py`;
-editable parts are retained in `art/console-setup.blend`. Controller parts are
-batched separately from the drive, with the player light kept independent.
-The desk now has a matte grey top, recessed graphite frame, metal front inlay,
-two sled supports and a rubber controller pad. Monitor height is unchanged.
+## Model and attribution
 
-Edge runtime checks: 1600×900 and 390×844 normal entrances, 320×740 reduced
-motion; correct name, live particle canvas, no horizontal overflow, section
-navigation, full return and interrupted entrance with no delayed reopening.
-Disc insertion regression: 1600×900, 390×844 and 844×390; screen remains inside
-the viewport, its top edge stays level, and returning restores the shelf.
-These are Chromium viewport checks, not physical iPhone validation.
+The user rejected the procedural controller and explicitly authorized downloaded
+models. The replacement is Taohid Animation's PS5 Controller (CC BY 4.0), using
+the named-part adaptation distributed by SafaElmali/dualsense-studio. Source GLB,
+SHA-256, upstream credit and modification notes live in art/vendor/dualsense/.
 
-The original workspace revision used a side view of the existing terminal.
-The controller entrance above replaces that side view and its page transition.
-Closing or interrupting restores the original scene without changing selection.
-Reduced motion skips the camera and page transitions.
+art/console_setup.py imports, orients, scales and adjusts the source, then saves
+editable parts in art/console-setup.blend. The web GLB batches ordinary controller
+parts by material, retains source maps, and keeps light strips independently
+animated. Public credit and license links are available through the profile
+footer at public/model-credits.html. The desk/monitor proportions are preserved.
 
-The first page pairs a large Shuhang Chen identity with an interactive particle
-study. Its supporting signature and metadata stay small. The biography uses
-large paragraphs beside section annotations; skills use numbered rows instead
-of tag boxes; experience follows a vertical timeline. Existing profile placeholders
-are preserved. Personal name, alias and boot identity are unified in
-`content/profile.json`; site brand remains LAPPAS.
+Emissive color and intensity are now part of the renderer's reuse-state snapshot,
+so a stationary camera cannot freeze the acknowledgement light.
 
-The native TypeScript canvas adapts the supplied Wix sample's gather/scatter/morph
-idea. 720 reused particles form a rotating sphere, ring, HELLO and the profile
-name, with local pointer repulsion. Colours follow the site theme. Canvas DPR
-is capped at 2, offscreen and hidden-document animation pauses, and closing
-disposes observers, listeners and animation frames. Reduced motion renders a
-static sphere. No Wix embed, remote script or new model asset is required.
+## Verification
 
-Validation: production build passed. Headless Edge at 1600×900, 390×844 and
-320×740 (reduced motion) checked identity, canvas sizing, no horizontal overflow,
-workspace camera progress, chapter navigation, Escape and interrupted entry.
-No page errors. Screenshots in `verification/profile-workspace/` were inspected.
-These are browser viewport checks, not physical mobile-device validation.
-
-## Particle entry follow-up
-
-The entry now runs for 1.5 seconds: central sphere, brief dispersion, particles
-forming the exact `Shuhang Chen` heading, then movement to the real heading and
-a crossfade into the text. Supporting content reveals at the same time; the
-small interactive orb starts after completion. Heading sampling includes font,
-letter spacing and wrapping, and caches the mask until its dimensions change.
-The entry canvas is removed on completion or interruption. Reduced motion
-skips it. Desktop clock-controlled screenshots at 250ms, 750ms and 1600ms
-verify the sphere, complete name and final page; viewport/escape checks and
-production build passed.
-
-The user's subsequent choice supersedes the particle-name entry: personal
-information now opens with an identity card from the prominent creator button.
-The particle sphere remains inside the page. Current behaviour and verification
-are documented in `PORTFOLIO-HIERARCHY.md`.
-
-Latest correction restores the particle-name entry and original About button;
-the identity-card experiment is withdrawn. Four featured projects remain.
+- Production TypeScript/Vite/PWA build passes.
+- Edge at 1600x900 and 390x844: pickup, active pulse intensity 4, pulse off before
+  push-in, projected display covering the viewport, name formation, solid page
+  background, no photo elements, and no horizontal overflow.
+- 320x740 reduced motion: direct profile with a static particle name.
+- Esc during pickup and during particle formation: no orphan canvas or delayed
+  reopening; returning restores the shelf.
+- Existing disc insertion: 1600x900, 390x844, 844x390. Display remains level and
+  within the project shot, and ejection restores array visibility.
+- Reviewed screenshots in art/.cache/name-*.png. These are desktop Chromium
+  viewport checks, not physical iPhone validation.

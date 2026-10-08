@@ -1,5 +1,5 @@
-"""Generic living-room setup: a low stand, an upright console with a vertical
-disc slot, and a 16:9 monitor. No brand marks.
+"""Shared terminal: a low stand, an upright console with a vertical disc slot,
+a 16:9 monitor, and a licensed DualSense controller (see art/vendor/dualsense).
 
 Run: blender --background --factory-startup --python art/console_setup.py
 Outputs art/console-setup.blend, art/console-setup-studio.png and public/assets/console-setup.glb.
@@ -81,47 +81,48 @@ CP = Vector((-.2, -.75, .36))
 bpy.ops.object.empty_add(location=CP)
 bpy.context.object.name = "Controller_Pivot"
 
-def oval(name, location, scale, mat):
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, location=location)
-    obj = bpy.context.object
-    obj.name = name
-    obj.scale = scale
-    bpy.ops.object.transform_apply(scale=True)
-    obj.data.materials.append(mat)
-    for poly in obj.data.polygons:
-        poly.use_smooth = True
-    return obj
-
-def control(name, x, y, z, radius, depth, mat):
-    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=radius, depth=depth, location=CP+Vector((x,y,z)))
-    obj = bpy.context.object
-    obj.name = "Controller_"+name
-    obj.data.materials.append(mat)
-    bevel = obj.modifiers.new("Soft control rim", "BEVEL")
-    bevel.width, bevel.segments = .015, 3
-    obj.modifiers.new("Control normals", "WEIGHTED_NORMAL")
-
-oval("Controller_Chassis", CP, (1.43,.66,.28), CORE)
-oval("Controller_Face", CP+Vector((0,.05,.10)), (1.42,.64,.25), SHELL)
-for x in [-1.02,1.02]:
-    grip = oval("Controller_Grip", CP+Vector((x,-.40,-.01)), (.47,.76,.29), SHELL)
-    grip.rotation_euler.z = -.22 if x < 0 else .22
-    oval("Controller_Grip_Insert", CP+Vector((x,-.49,-.11)), (.40,.67,.22), RUBBER)
-    box("Controller_Shoulder", (.65,.20,.14), CP+Vector((x,.56,.12)), CORE, .065, 5)
-box("Controller_Touch_Surface", (.94,.49,.055), CP+Vector((0,.23,.345)), CORE, .07, 5)
-box("Controller_Player_Light", (.65,.035,.025), CP+Vector((0,-.06,.40)), LIGHT, .01, 4)
-for x in [-.53,.53]:
-    control("Stick_Well", x,-.32,.285,.27,.045, CORE)
-    control("Stick_Stem", x,-.32,.36,.105,.16, RUBBER)
-    control("Stick_Cap", x,-.32,.465,.215,.07, RUBBER)
-    control("Stick_Top", x,-.32,.508,.17,.018, CORE)
-for dx,dy in [(-.19,0),(.19,0),(0,-.19),(0,.19)]:
-    box("Controller_Dpad", (.18,.18,.06), CP+Vector((-.98+dx,.15+dy,.325)), CORE, .035, 4)
-    control("Action", .98+dx,.15+dy,.325,.09,.065, CORE)
-    control("Action_Engraving", .98+dx,.15+dy,.361,.024,.006, SHELL)
-control("Player_Button", 0,-.34,.295,.085,.055, METAL)
-for x in [-.61,.61]:
-    box("Controller_Menu", (.10,.065,.035), CP+Vector((x,.32,.315)), CORE, .02, 4)
+# CC BY 4.0: PS5 Controller by Taohid Animation, adapted by dualsense-studio.
+# Source, mirror, license and modifications: art/vendor/dualsense/ATTRIBUTION.md.
+before=set(scene.objects)
+bpy.ops.import_scene.gltf(filepath=str(ROOT/'art/vendor/dualsense/source.glb'))
+imported=[o for o in scene.objects if o not in before and o.type=='MESH']
+# The source faces -Y after glTF import. Lay its front face upward on the desk.
+turn=Matrix.Rotation(-pi/2,4,'X')
+world=[]
+for obj in imported:
+    matrix=turn @ obj.matrix_world
+    obj.parent=None
+    obj.matrix_world=matrix
+    world.extend(matrix @ Vector(corner) for corner in obj.bound_box)
+low=Vector(tuple(min(v[i] for v in world) for i in range(3)))
+high=Vector(tuple(max(v[i] for v in world) for i in range(3)))
+factor=3.1/(high.x-low.x)
+centre=(low+high)/2
+# Float just above the soft pad; preserve the original, accurate proportions.
+place=Matrix.Translation(Vector((CP.x,CP.y,.055))-Vector((centre.x,centre.y,low.z))*factor) @ Matrix.Scale(factor,4)
+for obj in imported:
+    original=obj.name
+    obj.matrix_world=place @ obj.matrix_world
+    mats=[m for m in obj.data.materials if m]
+    is_light=any(m.name=='Material.008' for m in mats)
+    obj.name=('Controller_Player_Light_' if is_light else 'Controller_')+original
+    for mat in mats:
+        bsdf=mat.node_tree.nodes.get('Principled BSDF')
+        if not bsdf: continue
+        bsdf.inputs['Metallic'].default_value=0
+        bsdf.inputs['Roughness'].default_value=.48
+        dark_detail=original.startswith(('ps-mount','mute-mount','white-shell-detail'))
+        if mat.name in ['front_body','VRayMtl55'] and not dark_detail:
+            bsdf.inputs['Base Color'].default_value=(.72,.74,.76,1)
+        if mat.name in ['VRayMtl33','front_body.001','front_body.002','VRayMtl37']:
+            bsdf.inputs['Base Color'].default_value=(.014,.017,.023,1)
+        if is_light:
+            bsdf.inputs['Base Color'].default_value=(.15,.10,.04,1)
+            bsdf.inputs['Emission Color'].default_value=(1,.55,.12,1)
+            bsdf.inputs['Emission Strength'].default_value=2
+# Remove the imported empty container while retaining its baked world transforms.
+for obj in list(scene.objects):
+    if obj not in before and obj.type=='EMPTY': bpy.data.objects.remove(obj,do_unlink=True)
 
 def shell(name, levels):
     # Rounded perimeter rings, with tapered side walls rather than stacked cubes.
@@ -294,7 +295,7 @@ bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "art/console-setup.blend"))
 for prefix in ["Console_", "Controller_"]:
     for mat in list(bpy.data.materials):
-        pieces = [o for o in scene.objects if o.type == "MESH" and o.name.startswith(prefix) and o.name != "Controller_Player_Light"
+        pieces = [o for o in scene.objects if o.type == "MESH" and o.name.startswith(prefix) and not o.name.startswith("Controller_Player_Light")
                   and o.data.materials and o.data.materials[0] == mat]
         if len(pieces) < 2:
             continue

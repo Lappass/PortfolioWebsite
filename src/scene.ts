@@ -1349,7 +1349,7 @@ export class ArchiveScene {
   ) {
     const elapsed = Math.max(0, time - this.last || 0.016);
     const dt = Math.min(elapsed, 0.05);
-    this.workspace.value = this.reduced ? this.workspace.target : THREE.MathUtils.clamp(this.workspace.value + (this.workspace.target ? 1 : -1) * Math.min(elapsed, .1) / (this.workspace.target ? 2.4 : .85), 0, 1);
+    this.workspace.value = this.reduced ? this.workspace.target : THREE.MathUtils.clamp(this.workspace.value + (this.workspace.target ? 1 : -1) * Math.min(elapsed, .1) / (this.workspace.target ? 3 : .85), 0, 1);
     this.last = time;
     this.clock = time;
     if (!this.loaded) return;
@@ -1797,6 +1797,7 @@ export class ArchiveScene {
       cameraAim.lerp(detailAim, detail);
     }
     let viewSpan = framing.span;
+    let cameraDistance = distance;
     if (this.caseMode && !cinematic && this.insert.value > 0) {
       const shot = this.insertShot(cameraAim.clone(), framing.span);
       cameraAim.copy(shot.aim);
@@ -1809,17 +1810,20 @@ export class ArchiveScene {
     if (!cinematic && this.workspace.value > .001) {
       const p = this.workspace.value;
       const approach = THREE.MathUtils.smoothstep(p, 0, .3);
-      const screen = THREE.MathUtils.smoothstep(p, .62, 1);
+      const screen = THREE.MathUtils.smoothstep(p, .57, .92);
       const aim = new THREE.Vector3(4, 1.7, -.1).lerp(this.setup.screenLocal, screen).applyMatrix4(this.model.matrixWorld);
       cameraAim.lerp(aim, approach);
-      const direction = new THREE.Vector3(.25, .46, 1).lerp(new THREE.Vector3(0, .08, 1), screen).normalize().transformDirection(this.model.matrixWorld);
+      const direction = new THREE.Vector3(0, .42, 1).lerp(new THREE.Vector3(0, 0, 1), screen).normalize().transformDirection(this.model.matrixWorld);
       viewDirection.lerp(direction, approach).normalize();
-      const span = THREE.MathUtils.lerp(Math.max(8.6, 13.6 / this.camera.aspect), Math.max(this.setup.screenHeight * 1.95, 7.5 / this.camera.aspect), screen);
+      // Let the actual display cover the viewport before handing its particles to DOM.
+      const fillScreen = Math.min(this.setup.screenHeight, this.setup.screenHeight * 16 / 9 / this.camera.aspect) * .88;
+      const span = THREE.MathUtils.lerp(Math.max(8.6, 13.6 / this.camera.aspect), fillScreen, screen);
       viewSpan = THREE.MathUtils.lerp(viewSpan, span, approach);
+      cameraDistance = THREE.MathUtils.lerp(distance, 7, screen);
     }
     const cameraPosition = cameraAim
       .clone()
-      .addScaledVector(viewDirection, distance);
+      .addScaledVector(viewDirection, cameraDistance);
     if (!cinematic && this.motion.pointerParallax && !this.uiOnlyParallax) {
       cameraPosition.x += this.pointer.x * 0.12;
       cameraPosition.y -= this.pointer.y * 0.12;
@@ -1827,14 +1831,14 @@ export class ArchiveScene {
     const cameraTransition = this.targetDetail || this.detail > 0.01
       ? this.motion.detailTransition
       : this.motion.selectionTransition;
-    const cameraBlend = cinematic ? 1 : this.workspace.value > .001 ? (this.reduced ? 1 : 1 - Math.exp(-Math.min(elapsed, .25) * 5)) : cameraTransition ? 1 - Math.exp(-dt * 5) : 1;
+    const cameraBlend = cinematic ? 1 : this.workspace.value > .001 ? (this.reduced ? 1 : 1 - Math.exp(-Math.min(elapsed, .25) * (this.workspace.value > .57 ? 15 : 7))) : cameraTransition ? 1 - Math.exp(-dt * 5) : 1;
     this.camera.position.lerp(cameraPosition, cameraBlend);
     this.cameraAim.lerp(cameraAim, cameraBlend);
     this.camera.lookAt(this.cameraAim);
     this.camera.fov = THREE.MathUtils.lerp(
       this.camera.fov,
       THREE.MathUtils.radToDeg(
-        2 * Math.atan((cinematic ? openingSpan(THREE.MathUtils.lerp(span, 5.9, detail)) : viewSpan) / (2 * distance)),
+        2 * Math.atan((cinematic ? openingSpan(THREE.MathUtils.lerp(span, 5.9, detail)) : viewSpan) / (2 * cameraDistance)),
       ),
       cameraBlend,
     );
@@ -1953,7 +1957,7 @@ export class ArchiveScene {
       if (this.shadowCoverage) this.shadowCoverage.mesh.visible = arrayVisibility === 1;
       for (const outgoing of this.outgoing) outgoing.group.visible = arrayVisibility === 1;
       this.model.updateMatrixWorld();
-      this.setup.update(this.model.matrixWorld, this.camera.position, !cinematic && (this.detail > 0.02 || this.workspace.value > .01) && this.presence > 0.01, this.insert.value, time, records[fileAtCell(this.selectedCell)].title, this.workspace.value);
+      this.setup.update(this.model.matrixWorld, this.camera.position, !cinematic && (this.detail > 0.02 || this.workspace.value > .01) && this.presence > 0.01, this.insert.value, time, records[fileAtCell(this.selectedCell)].title, this.workspace.value, this.camera.aspect);
     }
     const state = this.renderState;
     this.scene.updateMatrixWorld();
@@ -1986,6 +1990,7 @@ export class ArchiveScene {
           mat.opacity, mat.roughness, mat.metalness, mat.transmission, mat.thickness,
           mat.attenuationDistance, mat.clearcoat, mat.clearcoatRoughness,
           mat.color.r, mat.color.g, mat.color.b,
+          mat.emissiveIntensity, mat.emissive?.r ?? 0, mat.emissive?.g ?? 0, mat.emissive?.b ?? 0,
           mat.attenuationColor?.r ?? 0, mat.attenuationColor?.g ?? 0, mat.attenuationColor?.b ?? 0);
         for (const name of ['appearance', 'glassClarity', 'themeAmount', 'subduedIndex'])
           state.floats(object.userData[name]?.value ?? 0);
@@ -2050,6 +2055,7 @@ export class ArchiveScene {
       presentation: this.presence,
       terminal: {
         workspace: this.workspace.value,
+        playerLight: this.setup.playerLightIntensity,
         visible: this.setup.group.visible,
         arrayVisibility: this.terminalArrayVisibility.value,
         progress: this.insert.value,
