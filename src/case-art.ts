@@ -18,7 +18,7 @@ export function paletteOf(r: ArchiveRecord) {
     contrast: `hsl(${hue + 160} ${sat}% ${light + 10}%)`,
   };
 }
-const accentOf = (r: ArchiveRecord) => paletteOf(r).base;
+const CASE_PAPER = "#c9c9c4", CASE_INK = "#272a28", CASE_MUTED = "#6d6f69";
 
 /** One of several generated compositions, so neighbouring cases never match. */
 export function paintArtwork(c: CanvasRenderingContext2D, r: ArchiveRecord, x: number, w: number, h: number) {
@@ -80,56 +80,56 @@ function wrapLines(c: CanvasRenderingContext2D, text: string, width: number) {
 export function paintInsert(c: CanvasRenderingContext2D, r: ArchiveRecord, number: number, x: number, y: number, width: number) {
   const px = width / (CASE_W * 2 + CASE_SPINE), h = CASE_H * px;
   const bx = x, bw = CASE_W * px, sx = x + bw, sw = CASE_SPINE * px, fx = sx + sw, fw = bw;
-  const accent = accentOf(r);
   c.save();
   c.beginPath();
   c.rect(x, y, width, h);
   c.clip();
   c.translate(0, y);
   // Front cover.
-  paintArtwork(c, r, fx, fw, h);
-  c.fillStyle = "#e9ecea";
+  c.fillStyle = CASE_PAPER;
+  c.fillRect(fx, 0, fw, h);
+  c.fillStyle = CASE_MUTED;
+  c.textAlign = "left";
+  c.font = `500 ${h * 0.026}px MiSans`;
+  c.fillText(r.category, fx + fw * 0.07, h * 0.09);
+  c.textAlign = "right";
+  c.fillText(r.id, fx + fw * 0.93, h * 0.09);
+  c.fillStyle = CASE_INK;
   c.textAlign = "left";
   c.font = `700 ${h * 0.075}px MiSans`;
   wrapLines(c, r.title, fw * 0.86).slice(0, 3).forEach((line, i) => c.fillText(line, fx + fw * 0.07, h * 0.72 + i * h * 0.085));
   c.font = `500 ${h * 0.024}px MiSans`;
-  c.fillStyle = "rgba(255,255,255,.7)";
+  c.fillStyle = CASE_MUTED;
   c.fillText(r.en, fx + fw * 0.07, h * 0.94, fw * 0.6);
   c.textAlign = "right";
   c.fillText(r.id, fx + fw * 0.93, h * 0.94);
   c.textAlign = "left";
   // Spine.
-  c.fillStyle = "#0e1113";
+  c.fillStyle = CASE_PAPER;
   c.fillRect(sx, 0, sw, h);
-  c.fillStyle = accent;
-  c.fillRect(sx, 0, sw, h * 0.075);
   c.save();
   c.translate(sx + sw * 0.66, h * 0.12);
   c.rotate(Math.PI / 2);
-  c.fillStyle = "#e9ecea";
+  c.fillStyle = CASE_INK;
   c.font = `700 ${sw * 0.42}px MiSans`;
   c.fillText(r.title, 0, 0, h * 0.7);
   c.restore();
-  c.fillStyle = "#8c979a";
+  c.fillStyle = CASE_MUTED;
   c.font = `500 ${sw * 0.3}px MiSans`;
   c.textAlign = "center";
   c.fillText(String(number).padStart(2, "0"), sx + sw / 2, h * 0.96);
   c.textAlign = "left";
   // Back.
-  c.fillStyle = "#1b2024";
+  c.fillStyle = CASE_PAPER;
   c.fillRect(bx, 0, bw, h);
-  for (let i = 0; i < 3; i++) {
-    c.fillStyle = i === 0 ? accent : "#2a3237";
-    c.fillRect(bx + bw * (0.07 + i * 0.3), h * 0.08, bw * 0.26, h * 0.17);
-  }
-  c.fillStyle = "#e9ecea";
+  c.fillStyle = CASE_INK;
   c.font = `700 ${h * 0.034}px MiSans`;
-  c.fillText(r.title, bx + bw * 0.07, h * 0.33, bw * 0.86);
-  c.fillStyle = "#aab3b5";
+  c.fillText(r.title, bx + bw * 0.07, h * 0.15, bw * 0.86);
+  c.fillStyle = CASE_MUTED;
   c.font = `400 ${h * 0.022}px MiSans`;
-  wrapLines(c, r.abstract, bw * 0.86).slice(0, 6).forEach((line, i) => c.fillText(line, bx + bw * 0.07, h * 0.39 + i * h * 0.036));
+  wrapLines(c, r.abstract, bw * 0.86).slice(0, 6).forEach((line, i) => c.fillText(line, bx + bw * 0.07, h * 0.22 + i * h * 0.036));
   r.findings.slice(0, 3).forEach((f, i) => c.fillText(`· ${f}`, bx + bw * 0.07, h * 0.66 + i * h * 0.04, bw * 0.86));
-  c.fillStyle = "#8c979a";
+  c.fillStyle = CASE_MUTED;
   c.font = `500 ${h * 0.02}px MiSans`;
   c.fillText(`${r.category} · ${r.lead}`, bx + bw * 0.07, h * 0.93, bw * 0.86);
   c.restore();
@@ -143,18 +143,15 @@ export function insertCanvas(r: ArchiveRecord, number: number, width = 2400) {
 
 export function paintDiscLabel(c: CanvasRenderingContext2D, r: ArchiveRecord, size = 1024) {
   const k = size / 1024;
-  c.fillStyle = accentOf(r);
+  c.fillStyle = CASE_PAPER;
   c.fillRect(0, 0, size, size);
-  c.fillStyle = "#0e1113";
-  c.beginPath();
-  c.arc(512 * k, 512 * k, 380 * k, Math.PI * 0.15, Math.PI * 0.85);
-  c.fill();
-  c.fillStyle = "#e9ecea";
+  c.fillStyle = CASE_INK;
   c.textAlign = "center";
   c.font = `700 ${64 * k}px MiSans`;
   c.fillText(r.title, 512 * k, 790 * k, 560 * k);
   c.font = `500 ${34 * k}px MiSans`;
-  c.fillText(`LAPPAS WORKS · ${r.id}`, 512 * k, 850 * k);
+  c.fillStyle = CASE_MUTED;
+  c.fillText(r.id, 512 * k, 850 * k);
   c.textAlign = "left";
 }
 
