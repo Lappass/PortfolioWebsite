@@ -1,8 +1,33 @@
 # Creator workspace — 2026-10-07
 
-About now enters a side view of the existing terminal rather than playing the
-project disc insertion again. Archive HUD fades away, the camera moves toward
-the equipment, and the profile comes in from the side after a short delay.
+## Controller entrance revision
+
+About now runs a 2.4-second physical terminal sequence: establish the shared
+desk, lift and tilt the controller, illuminate its player indicator, display
+PLAYER 01 / Shuhang Chen, then expand the profile from the projected monitor
+bounds over 480ms. The particle study inside the profile remains intact; the
+previous full-screen particle-name entrance is no longer invoked.
+
+The selected case stays closed during this sequence. Background cases fade out
+before the controller lifts. Esc cancels the pending reveal and reverses the
+workspace movement from its current position. Direct links and reduced motion
+show the profile immediately. Selection and project insertion timing are preserved.
+
+The original controller and desk are generated with `art/console_setup.py`;
+editable parts are retained in `art/console-setup.blend`. Controller parts are
+batched separately from the drive, with the player light kept independent.
+The desk now has a matte grey top, recessed graphite frame, metal front inlay,
+two sled supports and a rubber controller pad. Monitor height is unchanged.
+
+Edge runtime checks: 1600×900 and 390×844 normal entrances, 320×740 reduced
+motion; correct name, live particle canvas, no horizontal overflow, section
+navigation, full return and interrupted entrance with no delayed reopening.
+Disc insertion regression: 1600×900, 390×844 and 844×390; screen remains inside
+the viewport, its top edge stays level, and returning restores the shelf.
+These are Chromium viewport checks, not physical iPhone validation.
+
+The original workspace revision used a side view of the existing terminal.
+The controller entrance above replaces that side view and its page transition.
 Closing or interrupting restores the original scene without changing selection.
 Reduced motion skips the camera and page transitions.
 

@@ -3,7 +3,6 @@ import { escapeHtml as e } from "./html";
 import { profile } from "./profile";
 import { PageChapters } from "./page-chapters";
 import { ProfileOrb } from "./profile-orb";
-import { ProfileEntry } from "./profile-entry";
 import "./profile-workspace.css";
 
 const isWeb = (value: string) => /^(https?:|mailto:)/i.test(value);
@@ -19,9 +18,9 @@ export class ProfilePage {
   private returnFocus: HTMLElement | null = null;
   private chapters = new PageChapters(this.root);
   private orb?: ProfileOrb;
-  private entry?: ProfileEntry;
+  private entryFrame = 0;
 
-  constructor(private onClose: () => void, private workspace: (active: boolean, instant: boolean) => void = () => {}) {
+  constructor(private onClose: () => void, private workspace: (active: boolean, instant: boolean) => void = () => {}, private terminal: () => { ready: boolean; from: { top: number; right: number; bottom: number; left: number } | null } = () => ({ ready: true, from: null })) {
     this.root.className = "project-page profile-page";
     this.root.setAttribute("role", "dialog");
     this.root.setAttribute("aria-modal", "true");
@@ -45,7 +44,7 @@ export class ProfilePage {
 
   open(options: { instant?: boolean; push?: boolean } = {}) {
     if (this.isOpen) return;
-    this.entry?.dispose();
+    cancelAnimationFrame(this.entryFrame);
     this.orb?.dispose();
     this.render();
     if (options.push !== false && location.hash !== PROFILE_HASH) {
@@ -56,23 +55,37 @@ export class ProfilePage {
     clearTimeout(this.timer);
     this.root.hidden = false;
     this.root.classList.toggle("instant", Boolean(options.instant));
+    this.root.classList.remove("visible", "from-screen");
+    this.root.style.clipPath = "";
     this.state = "open";
     this.workspace(true, Boolean(options.instant));
-    void this.root.offsetWidth;
-    this.root.classList.add("visible");
     this.root.scrollTop = 0;
     this.chapters.sync();
     const reduced = Boolean(options.instant) || matchMedia('(prefers-reduced-motion: reduce)').matches;
     const startOrb = () => { if(this.isOpen) this.orb = new ProfileOrb(this.root.querySelector('.profile-orb-study canvas')!, reduced, profile.name); };
-    if(reduced) startOrb();
-    else this.entry = new ProfileEntry(this.root, startOrb);
+    const reveal = () => {
+      if (!this.isOpen) return;
+      const { ready, from } = this.terminal();
+      if (!reduced && !ready) { this.entryFrame = requestAnimationFrame(reveal); return; }
+      if (!reduced && from) {
+        this.root.classList.add("from-screen");
+        this.root.style.clipPath = `inset(${Math.max(0, from.top)}px ${Math.max(0, innerWidth-from.right)}px ${Math.max(0, innerHeight-from.bottom)}px ${Math.max(0, from.left)}px round 6px)`;
+      }
+      void this.root.offsetWidth;
+      this.root.classList.add("visible");
+      this.entryFrame = requestAnimationFrame(() => { this.root.style.clipPath = "inset(0 0 0 0 round 0px)"; });
+      startOrb();
+      this.root.querySelector<HTMLElement>("#profile-title")?.focus({ preventScroll: true });
+    };
+    // Capture keyboard focus while the physical terminal performs the entrance.
     this.root.querySelector<HTMLElement>("#profile-title")?.focus({ preventScroll: true });
+    reveal();
   }
 
   close(options: { syncHistory?: boolean } = {}) {
     if (!this.isOpen) return false;
     this.state = "closing";
-    this.entry?.dispose();
+    cancelAnimationFrame(this.entryFrame);
     this.workspace(false, this.root.classList.contains('instant'));
     this.orb?.dispose();
     this.root.classList.remove("visible");

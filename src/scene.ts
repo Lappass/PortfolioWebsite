@@ -528,6 +528,7 @@ export class ArchiveScene {
   // Disc insertion: 0 = in the open case, 1 = read by the console, camera at the monitor.
   private insert = { value: 0, target: 0 };
   private workspace = { value: 0, target: 0 };
+  get workspaceProgress() { return this.workspace.value; }
   setWorkspace(active: boolean, instant = false) {
     this.workspace.target = active ? 1 : 0;
     if (instant) this.workspace.value = this.workspace.target;
@@ -1348,7 +1349,7 @@ export class ArchiveScene {
   ) {
     const elapsed = Math.max(0, time - this.last || 0.016);
     const dt = Math.min(elapsed, 0.05);
-    this.workspace.value += (this.workspace.target - this.workspace.value) * (this.reduced ? 1 : 1 - Math.exp(-Math.min(elapsed, .25) * 4));
+    this.workspace.value = this.reduced ? this.workspace.target : THREE.MathUtils.clamp(this.workspace.value + (this.workspace.target ? 1 : -1) * Math.min(elapsed, .1) / (this.workspace.target ? 2.4 : .85), 0, 1);
     this.last = time;
     this.clock = time;
     if (!this.loaded) return;
@@ -1582,7 +1583,7 @@ export class ArchiveScene {
     this.appearance.setClarity(this.model, this.modelClarity());
     if (this.caseMode) {
       this.updateInsert(dt);
-      poseCase(this.model, this.modelClarity(), time, this.insert.value, this.setup.slotLocal);
+      poseCase(this.model, this.modelClarity() * (1 - THREE.MathUtils.smoothstep(this.workspace.value, 0, .2)), time, this.insert.value, this.setup.slotLocal);
     }
     // Reference 26.92–27.76: the array travels horizontally into a white field.
     const entry = cinematic ? ease((shot - 21.9) / 0.86) : this.reveal;
@@ -1807,11 +1808,14 @@ export class ArchiveScene {
     }
     if (!cinematic && this.workspace.value > .001) {
       const p = this.workspace.value;
-      const aim = new THREE.Vector3(4.2, 2.1, -1.8).applyMatrix4(this.model.matrixWorld);
-      cameraAim.lerp(aim, p);
-      const side = new THREE.Vector3(.68, .22, .72).normalize().transformDirection(this.model.matrixWorld);
-      viewDirection.lerp(side, p).normalize();
-      viewSpan = THREE.MathUtils.lerp(viewSpan, Math.max(9, 14 / this.camera.aspect), p);
+      const approach = THREE.MathUtils.smoothstep(p, 0, .3);
+      const screen = THREE.MathUtils.smoothstep(p, .62, 1);
+      const aim = new THREE.Vector3(4, 1.7, -.1).lerp(this.setup.screenLocal, screen).applyMatrix4(this.model.matrixWorld);
+      cameraAim.lerp(aim, approach);
+      const direction = new THREE.Vector3(.25, .46, 1).lerp(new THREE.Vector3(0, .08, 1), screen).normalize().transformDirection(this.model.matrixWorld);
+      viewDirection.lerp(direction, approach).normalize();
+      const span = THREE.MathUtils.lerp(Math.max(8.6, 13.6 / this.camera.aspect), Math.max(this.setup.screenHeight * 1.95, 7.5 / this.camera.aspect), screen);
+      viewSpan = THREE.MathUtils.lerp(viewSpan, span, approach);
     }
     const cameraPosition = cameraAim
       .clone()
@@ -1943,7 +1947,7 @@ export class ArchiveScene {
     // Keep all simulation and picking current. Reuse the composited canvas only
     // when its actual inputs are identical, including late textures and materials.
     if (this.caseMode) {
-      const arrayVisibility = cinematic ? 1 : 1 - THREE.MathUtils.smoothstep(Math.max(this.insert.value, this.workspace.value * .16), 0, 0.10);
+      const arrayVisibility = cinematic ? 1 : 1 - THREE.MathUtils.smoothstep(Math.max(this.insert.value, this.workspace.value * .6), 0, 0.10);
       this.terminalArrayVisibility.value = arrayVisibility;
       for (const inst of this.instances) inst.visible = arrayVisibility > 0;
       if (this.shadowCoverage) this.shadowCoverage.mesh.visible = arrayVisibility === 1;

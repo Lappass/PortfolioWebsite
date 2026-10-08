@@ -1,6 +1,7 @@
 #stage[data-workspace="true"] > :not(#three-scene):not(#modal-root):not(#toast) { opacity: 0 !important; pointer-events: none !important; transition: opacity 250ms; }
 .profile-page { background: rgba(var(--theme-paper-rgb,234,229,225),.94); transform: none; }
 .profile-page.visible { transition: opacity 280ms; }
+.profile-page.from-screen.visible { transition: opacity 180ms, clip-path 480ms cubic-bezier(.2,.75,.2,1); }
 .profile-entry-field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
 .profile-page.entering { overflow-y: hidden; }
 .profile-page.entering :is(.pp-bar,.pp-chapters,.profile-introduction > :not(h1),.profile-orb-study,.profile-signature,.pp-section) { opacity: var(--profile-reveal,0); pointer-events: none; }

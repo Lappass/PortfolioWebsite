@@ -40,7 +40,7 @@ def material(name, color, roughness, metallic=0.0, emission=None, strength=4.0):
 SHELL = material("Console_Shell", (0.68, 0.70, 0.69), 0.43)
 CORE = material("Console_Core", (0.02, 0.022, 0.026), 0.3)
 LIGHT = material("Slot_Light", (0.8, 0.57, 0.27), 0.3, emission=(1.0, 0.66, 0.27))
-STAND = material("Stand_Wood", (0.045, 0.05, 0.06), 0.55)
+STAND = material("Stand_Surface", (0.19, 0.21, 0.22), 0.72)
 BEZEL = material("Monitor_Bezel", (0.015, 0.016, 0.018), 0.25, metallic=0.4)
 SCREEN = material("Monitor_Screen", (0.01, 0.015, 0.03), 0.15, emission=(0.02, 0.05, 0.12), strength=1.0)
 
@@ -60,7 +60,7 @@ def box(name, size, location, mat, bevel=0.03, segments=3):
 
 # Stand under everything, its top at z = 0, slightly behind the console front.
 box("Stand", (SW, SD, SH), (-0.1, 0.65, -SH / 2), STAND, bevel=0.08)
-box("Stand_Edge", (SW-.16, .025, .02), (-.1, -2.36, -.07), LIGHT, bevel=.008)
+box("Stand_Underframe", (SW-.32, SD-.32, .12), (-.1, .65, -.28), BEZEL, bevel=.065)
 
 # Moulded enclosure with a recessed graphite chassis, floating top and rubber feet.
 # A real open mouth between the upper/lower chassis rails receives the animated disc.
@@ -68,6 +68,60 @@ RUBBER = material("Rubber", (0.009, 0.012, 0.014), 0.86)
 METAL = material("Port_Metal", (0.25, 0.28, 0.30), 0.28, metallic=0.8)
 INK = material("Printed_Legends", (0.32, 0.35, 0.36), 0.6)
 SHADOW = material("Recess_Shadow", (0.004, 0.006, 0.008), 0.8)
+
+# Recessed metal sled feet and a soft equipment pad, rather than a floating slab.
+for x in [-4.65, 4.65]:
+    box("Stand_Support", (.16, 3.8, .65), (x, .7, -.6), BEZEL, .04)
+    box("Stand_Foot", (.65, 4.1, .10), (x, .7, -.95), BEZEL, .045)
+box("Stand_Controller_Pad", (3.8, 2.4, .035), (-.2, -.75, .02), RUBBER, .14, 6)
+box("Stand_Front_Inlay", (SW-.4, .016, .014), (-.1, -2.354, -.12), METAL, .004)
+
+# Original dual-stick controller; all controls face +Z on the desk.
+CP = Vector((-.2, -.75, .36))
+bpy.ops.object.empty_add(location=CP)
+bpy.context.object.name = "Controller_Pivot"
+
+def oval(name, location, scale, mat):
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, location=location)
+    obj = bpy.context.object
+    obj.name = name
+    obj.scale = scale
+    bpy.ops.object.transform_apply(scale=True)
+    obj.data.materials.append(mat)
+    for poly in obj.data.polygons:
+        poly.use_smooth = True
+    return obj
+
+def control(name, x, y, z, radius, depth, mat):
+    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=radius, depth=depth, location=CP+Vector((x,y,z)))
+    obj = bpy.context.object
+    obj.name = "Controller_"+name
+    obj.data.materials.append(mat)
+    bevel = obj.modifiers.new("Soft control rim", "BEVEL")
+    bevel.width, bevel.segments = .015, 3
+    obj.modifiers.new("Control normals", "WEIGHTED_NORMAL")
+
+oval("Controller_Chassis", CP, (1.43,.66,.28), CORE)
+oval("Controller_Face", CP+Vector((0,.05,.10)), (1.42,.64,.25), SHELL)
+for x in [-1.02,1.02]:
+    grip = oval("Controller_Grip", CP+Vector((x,-.40,-.01)), (.47,.76,.29), SHELL)
+    grip.rotation_euler.z = -.22 if x < 0 else .22
+    oval("Controller_Grip_Insert", CP+Vector((x,-.49,-.11)), (.40,.67,.22), RUBBER)
+    box("Controller_Shoulder", (.65,.20,.14), CP+Vector((x,.56,.12)), CORE, .065, 5)
+box("Controller_Touch_Surface", (.94,.49,.055), CP+Vector((0,.23,.345)), CORE, .07, 5)
+box("Controller_Player_Light", (.65,.035,.025), CP+Vector((0,-.06,.40)), LIGHT, .01, 4)
+for x in [-.53,.53]:
+    control("Stick_Well", x,-.32,.285,.27,.045, CORE)
+    control("Stick_Stem", x,-.32,.36,.105,.16, RUBBER)
+    control("Stick_Cap", x,-.32,.465,.215,.07, RUBBER)
+    control("Stick_Top", x,-.32,.508,.17,.018, CORE)
+for dx,dy in [(-.19,0),(.19,0),(0,-.19),(0,.19)]:
+    box("Controller_Dpad", (.18,.18,.06), CP+Vector((-.98+dx,.15+dy,.325)), CORE, .035, 4)
+    control("Action", .98+dx,.15+dy,.325,.09,.065, CORE)
+    control("Action_Engraving", .98+dx,.15+dy,.361,.024,.006, SHELL)
+control("Player_Button", 0,-.34,.295,.085,.055, METAL)
+for x in [-.61,.61]:
+    box("Controller_Menu", (.10,.065,.035), CP+Vector((x,.32,.315)), CORE, .02, 4)
 
 def shell(name, levels):
     # Rounded perimeter rings, with tapered side walls rather than stacked cubes.
@@ -238,20 +292,21 @@ bpy.ops.render.render(write_still=True)
 # Batch static details by material; keep the animated light and screen independent.
 # This retains editable part names in the .blend and avoids hundreds of web draw calls.
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "art/console-setup.blend"))
-for mat in list(bpy.data.materials):
-    pieces = [o for o in scene.objects if o.type == "MESH" and o.name.startswith("Console_")
-              and o.data.materials and o.data.materials[0] == mat]
-    if len(pieces) < 2:
-        continue
-    bpy.ops.object.select_all(action="DESELECT")
-    for obj in pieces:
-        obj.select_set(True)
-        bpy.context.view_layer.objects.active = obj
-        for modifier in list(obj.modifiers):
-            bpy.ops.object.modifier_apply(modifier=modifier.name)
-    bpy.context.view_layer.objects.active = pieces[0]
-    bpy.ops.object.join()
-    pieces[0].name = "Console_Batch_" + mat.name
+for prefix in ["Console_", "Controller_"]:
+    for mat in list(bpy.data.materials):
+        pieces = [o for o in scene.objects if o.type == "MESH" and o.name.startswith(prefix) and o.name != "Controller_Player_Light"
+                  and o.data.materials and o.data.materials[0] == mat]
+        if len(pieces) < 2:
+            continue
+        bpy.ops.object.select_all(action="DESELECT")
+        for obj in pieces:
+            obj.select_set(True)
+            bpy.context.view_layer.objects.active = obj
+            for modifier in list(obj.modifiers):
+                bpy.ops.object.modifier_apply(modifier=modifier.name)
+        bpy.context.view_layer.objects.active = pieces[0]
+        bpy.ops.object.join()
+        pieces[0].name = prefix + "Batch_" + mat.name
 for obj in scene.objects:
     obj.select_set(obj.type in {"MESH", "EMPTY"})
 bpy.ops.export_scene.gltf(

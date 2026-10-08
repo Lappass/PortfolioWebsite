@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { profile } from "./profile";
 
 /**
  * Shared terminal: open case at left, monitor at centre, upright drive at right,
@@ -19,6 +20,9 @@ export class ConsoleSetup {
   readonly screenLocal = new THREE.Vector3(4.2, 2.75, -3.035);
   screenHeight = 3.6;
   private monitor = new THREE.Group();
+  private controller = new THREE.Group();
+  private controllerPivot = new THREE.Vector3(-.2, .36, .75);
+  private playerLight?: THREE.MeshStandardMaterial;
   private lamp = new THREE.PointLight("#ffe2bd", 0, 24, 0);
   private screenGeometry?: THREE.BufferGeometry;
   /** Monitor foot centre in setup units (art/console_setup.py: MX, foot y). */
@@ -38,6 +42,8 @@ export class ConsoleSetup {
     this.texture.flipY = false;
     this.monitor.position.copy(this.monitorPivot);
     this.group.add(this.monitor);
+    this.controller.position.copy(this.controllerPivot);
+    this.group.add(this.controller);
     // A local warm key light, lit only while the camera is at the console (decay 0, range 24).
     this.lamp.position.set(-2, 6.5, 5);
     this.group.add(this.lamp);
@@ -64,6 +70,10 @@ export class ConsoleSetup {
           standard.emissive.set("#ffd9a0");
           this.light = standard;
         }
+        if (o.name === "Controller_Player_Light") {
+          standard.emissive.set("#ffd9a0");
+          this.playerLight = standard;
+        }
         material = standard;
       }
       const mesh = new THREE.Mesh(o.geometry, material);
@@ -78,6 +88,9 @@ export class ConsoleSetup {
         // The monitor turns on its foot; keep its pieces relative to that pivot.
         mesh.position.sub(this.monitorPivot);
         this.monitor.add(mesh);
+      } else if (o.name.startsWith("Controller_")) {
+        mesh.position.sub(this.controllerPivot);
+        this.controller.add(mesh);
       } else this.group.add(mesh);
     });
     this.draw(0, "");
@@ -86,7 +99,7 @@ export class ConsoleSetup {
 
   /** Follow the case; `insert` drives the slot light and the loading screen. */
   update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, title: string, workspace = 0) {
-    const presence = Math.max(THREE.MathUtils.smoothstep(insert, 0.18, 0.28), THREE.MathUtils.smoothstep(workspace, .3, .8));
+    const presence = Math.max(THREE.MathUtils.smoothstep(insert, 0.18, 0.28), THREE.MathUtils.smoothstep(workspace, .02, .18));
     this.group.visible = visible && this.loaded && presence > 0;
     if (!this.group.visible) return;
     for (const surface of this.surfaces) {
@@ -96,11 +109,17 @@ export class ConsoleSetup {
     this.group.matrixWorldNeedsUpdate = true;
     // One assembled terminal: screen and drive share a fixed forward direction.
     this.monitor.rotation.y = 0;
+    const lift = THREE.MathUtils.smoothstep(workspace, .20, .48);
+    this.controller.position.copy(this.controllerPivot);
+    this.controller.position.y += lift * .78;
+    this.controller.rotation.x = lift * .95;
+    if (this.playerLight) this.playerLight.emissiveIntensity = 3 * THREE.MathUtils.smoothstep(workspace, .43, .53);
     const power = THREE.MathUtils.smoothstep(insert, 0.06, 0.18);
     const reading = THREE.MathUtils.smoothstep(insert, 0.46, 0.55) * (1 - THREE.MathUtils.smoothstep(insert, 0.94, 0.99));
     if (this.light) this.light.emissiveIntensity = power * (0.7 + reading * (1.5 + 1.2 * Math.sin(insert * 110)));
-    this.lamp.intensity = 2.4 * THREE.MathUtils.smoothstep(insert, 0.02, 0.2) * (1 - THREE.MathUtils.smoothstep(insert, 0.85, 1));
-    this.draw(insert, title);
+    this.lamp.intensity = Math.max(2.4 * THREE.MathUtils.smoothstep(insert, 0.02, 0.2) * (1 - THREE.MathUtils.smoothstep(insert, 0.85, 1)), 1.6 * presence * lift);
+    if (workspace > .001) this.drawPlayer(workspace);
+    else this.draw(insert, title);
   }
 
   /** World-space corners of the screen, for handing over to the page. */
@@ -171,6 +190,31 @@ export class ConsoleSetup {
       c.fillStyle = "rgba(238, 243, 255, 0.55)";
       c.fillText(progress < 0.85 ? "BOOT / 初始化系统…" : progress < 0.98 ? "DISC / 正在读取作品…" : "READY / 准备就绪", w / 2, h * 0.73);
     }
+    c.restore();
+    this.texture.needsUpdate = true;
+  }
+
+  private drawPlayer(progress: number) {
+    progress = Math.round(progress * 120) / 120;
+    const key = `player|${progress}|${profile.name}`;
+    if (key === this.drawn) return;
+    this.drawn = key;
+    const c = this.canvas.getContext("2d")!, w = this.canvas.width, h = this.canvas.height;
+    c.fillStyle = "#07090c";
+    c.fillRect(0, 0, w, h);
+    c.save();
+    c.globalAlpha = THREE.MathUtils.smoothstep(progress, .48, .62);
+    c.strokeStyle = "#dac39b";
+    c.lineWidth = 2;
+    c.beginPath(); c.arc(w / 2, h * .30, 36, 0, Math.PI * 2); c.stroke();
+    c.beginPath(); c.arc(w / 2, h * .30 + 66, 55, Math.PI, Math.PI * 2); c.stroke();
+    c.textAlign = "center";
+    c.fillStyle = "#dac39b"; c.font = "500 20px MiSans, sans-serif";
+    c.fillText("P L A Y E R   0 1", w / 2, h * .53);
+    c.fillStyle = "#edeae4"; c.font = "600 64px MiSans, sans-serif";
+    c.fillText(profile.name, w / 2, h * .66);
+    c.fillStyle = "#95958e"; c.font = "400 20px MiSans, sans-serif";
+    c.fillText(progress < .8 ? "CONTROLLER CONNECTED / 玩家已连接" : "BEHIND THE WORKS / 创作幕后", w / 2, h * .77);
     c.restore();
     this.texture.needsUpdate = true;
   }

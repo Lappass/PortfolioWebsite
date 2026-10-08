@@ -336,7 +336,7 @@ function openProjectAt(index: number, options: { instant?: boolean; push?: boole
 const profilePage = new ProfilePage(() => { if (profilePage.close()) audio.play("page-close"); }, (active, instant) => {
   scene?.setWorkspace(active, instant);
   $("#stage").dataset.workspace = String(active);
-});
+}, () => ({ ready: !scene || scene.workspaceProgress >= 1, from: scene?.screenRect() ?? null }));
 const projectPage = new ProjectPage({
   close: closeProjectPage,
   navigate: (direction) => {
