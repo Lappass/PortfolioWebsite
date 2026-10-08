@@ -8,6 +8,8 @@ import { drawIdentity, prepareIdentity } from "./profile-particles";
  * with a continuous base beneath the assembly.
  */
 const SETUP_ORIGIN = new THREE.Vector3(4.2, 0, -1);
+/** Shared cue: the pickup completes, then light and camera wake together. */
+export const PLAYER_WAKE_START = .38;
 
 /**
  * The console and monitor beside the open case (art/console_setup.py). The disc
@@ -120,7 +122,7 @@ export class ConsoleSetup {
     this.controller.position.z += lift * .30;
     this.controller.rotation.x = lift * .95;
     // One acknowledgement pulse after the controller is fully lifted.
-    for (const light of this.playerLights) light.emissiveIntensity = 4 * THREE.MathUtils.smoothstep(workspace, .38, .41) * (1 - THREE.MathUtils.smoothstep(workspace, .48, .53));
+    for (const light of this.playerLights) light.emissiveIntensity = 4 * THREE.MathUtils.smoothstep(workspace, PLAYER_WAKE_START, PLAYER_WAKE_START + .03) * (1 - THREE.MathUtils.smoothstep(workspace, .48, .53));
     const power = THREE.MathUtils.smoothstep(insert, 0.06, 0.18);
     const reading = THREE.MathUtils.smoothstep(insert, 0.46, 0.55) * (1 - THREE.MathUtils.smoothstep(insert, 0.94, 0.99));
     if (this.light) this.light.emissiveIntensity = power * (0.7 + reading * (1.5 + 1.2 * Math.sin(insert * 110)));
@@ -210,7 +212,7 @@ export class ConsoleSetup {
     c.fillStyle = "#07090c";
     c.fillRect(0, 0, w, h);
     c.save();
-    c.globalAlpha = THREE.MathUtils.smoothstep(progress, .48, .62);
+    c.globalAlpha = THREE.MathUtils.smoothstep(progress, PLAYER_WAKE_START, .50);
     const wake = c.globalAlpha;
     drawIdentity(c, { x:w/2, y:h*.46, size:h*.8*Math.min(1, viewportAspect*.88), morph:0 });
     // drawIdentity resets alpha; retain screen wake and fade labels before entering.

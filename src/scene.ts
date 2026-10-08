@@ -10,7 +10,7 @@ import { themeMaterial, themeEnvironment } from "./theme-material";
 import { RhythmMotion, rhythmDisplacement, quietBands, type MusicBands, type RhythmStyle } from "./archive-play-motion";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { buildGameCase, poseCase, printCase, transferPrint } from "./game-case";
-import { ConsoleSetup } from "./console-setup";
+import { ConsoleSetup, PLAYER_WAKE_START } from "./console-setup";
 import { ParticleField } from "./particles";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -1810,7 +1810,7 @@ export class ArchiveScene {
     if (!cinematic && this.workspace.value > .001) {
       const p = this.workspace.value;
       const approach = THREE.MathUtils.smoothstep(p, 0, .3);
-      const screen = THREE.MathUtils.smoothstep(p, .57, .92);
+      const screen = THREE.MathUtils.smoothstep(p, PLAYER_WAKE_START, .92);
       const aim = new THREE.Vector3(4, 1.7, -.1).lerp(this.setup.screenLocal, screen).applyMatrix4(this.model.matrixWorld);
       cameraAim.lerp(aim, approach);
       const direction = new THREE.Vector3(0, .42, 1).lerp(new THREE.Vector3(0, 0, 1), screen).normalize().transformDirection(this.model.matrixWorld);
@@ -1831,7 +1831,7 @@ export class ArchiveScene {
     const cameraTransition = this.targetDetail || this.detail > 0.01
       ? this.motion.detailTransition
       : this.motion.selectionTransition;
-    const cameraBlend = cinematic ? 1 : this.workspace.value > .001 ? (this.reduced ? 1 : 1 - Math.exp(-Math.min(elapsed, .25) * (this.workspace.value > .57 ? 15 : 7))) : cameraTransition ? 1 - Math.exp(-dt * 5) : 1;
+    const cameraBlend = cinematic ? 1 : this.workspace.value > .001 ? (this.reduced ? 1 : 1 - Math.exp(-Math.min(elapsed, .25) * (this.workspace.value > PLAYER_WAKE_START ? 15 : 7))) : cameraTransition ? 1 - Math.exp(-dt * 5) : 1;
     this.camera.position.lerp(cameraPosition, cameraBlend);
     this.cameraAim.lerp(cameraAim, cameraBlend);
     this.camera.lookAt(this.cameraAim);

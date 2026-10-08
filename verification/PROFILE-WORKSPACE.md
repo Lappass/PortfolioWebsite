@@ -2,10 +2,10 @@
 
 The About entrance establishes a level front view of the terminal, lifts the
 controller over 540ms, then briefly illuminates its two touchpad light strips.
-The pulse starts after pickup and is fully off before the camera enters the
-screen. It is a single acknowledgement, not a constant glow or repeating blink.
+The pulse starts after pickup, on the same shared cue as camera push-in and
+screen wake (workspace progress 0.38). It is a single acknowledgement pulse.
 
-The camera holds during pickup and the pulse, aligns with the monitor normal,
+The camera holds during pickup, then aligns with the monitor normal as the light turns on,
 then dollies from the overview distance to 7 scene units while reframing the
 screen to cover the entire viewport. The controller and desk are outside the
 final visible frame. The 3-second physical sequence hands the same deterministic
@@ -44,7 +44,7 @@ so a stationary camera cannot freeze the acknowledgement light.
 
 - Production TypeScript/Vite/PWA build passes.
 - Edge at 1600x900 and 390x844: pickup, active pulse intensity 4, pulse off before
-  push-in, projected display covering the viewport, name formation, solid page
+  the end of push-in, projected display covering the viewport, name formation, solid page
   background, no photo elements, and no horizontal overflow.
 - 320x740 reduced motion: direct profile with a static particle name.
 - Esc during pickup and during particle formation: no orphan canvas or delayed
