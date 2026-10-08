@@ -67,7 +67,7 @@ export class ProfilePage {
     this.root.scrollTop = 0;
     this.chapters.sync();
     const reduced = Boolean(options.instant) || matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const startOrb = () => { if(this.isOpen) this.orb = new ProfileOrb(this.root.querySelector('.profile-orb-study canvas')!, reduced, profile.name); };
+    const startOrb = () => { if(this.isOpen) this.orb = new ProfileOrb(this.root.querySelector('.profile-orb-study canvas')!, reduced); };
     const reveal = () => {
       if (!this.isOpen) return;
       const { ready, from } = this.terminal();
@@ -106,46 +106,40 @@ export class ProfilePage {
 
   private render() {
     const p = profile;
-    const avatar = p.avatar
-      ? `<img src="${asset(p.avatar)}" alt="${e(p.name)}">`
-      : `<span>${e(p.alias.slice(0, 1).toUpperCase())}</span>`;
     const links = [...p.contact, ...(p.resume ? [{ label: "简历", url: p.resume }] : [])];
     this.root.innerHTML = `
       <header class="pp-bar">
         <button type="button" data-profile="back">← <span>返回作品</span><small>ESC</small></button>
-        <span class="pp-brand" aria-hidden="true">${e(p.name.toUpperCase())}</span>
-        <span class="pp-count">BEHIND THE WORKS / 创作幕后</span>
+        <span class="pp-brand">关于我</span>
+        <span class="pp-count" aria-hidden="true"></span>
       </header>
       <nav class="pp-chapters" aria-label="个人档案章节">
-        <span class="pp-index-label">PERSONNEL / 01</span>
-        ${[["identity", "身份"], ["about", "关于"], ["skills", "技能"], ["experience", "经历"]].map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>0${i + 1}</small>${label}</button>`).join("")}
+        ${[["identity", "介绍"], ["about", "关于"], ["skills", "技能"], ["experience", "经历"]].map(([id, label]) => `<button type="button" data-chapter="${id}">${label}</button>`).join("")}
       </nav>
       <article class="pp-body">
         <section class="profile-hero" data-section="identity" tabindex="-1" aria-label="身份">
           <div class="profile-introduction">
-            <div class="pp-label">01 / THE PERSON BEHIND THE WORKS</div>
-            <div class="pp-kicker"><i></i>${e(p.roleEn)} <span>·</span> ${e(p.role)}</div>
+            <div class="pp-kicker">${e(p.role)}</div>
             <h1 id="profile-title" tabindex="-1">${e(p.name)}</h1>
-            <div class="pp-en">${e(p.alias)} / CREATOR PROFILE</div>
             <p class="pp-abstract">${e(p.tagline)}</p>
             <div class="pp-links">${links.map((link) => `<a href="${asset(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} <span>↗</span></a>`).join("")}</div>
           </div>
-          <figure class="profile-orb-study"><div class="profile-orb-meta"><span>PLAYER / 001</span><span>PARTICLE FIELD</span></div><canvas aria-label="Shuhang Chen 的粒子名字，可随鼠标扰动并变换为球体"></canvas><figcaption><span>SHUHANG CHEN / IN PARTICLES</span><span>移动鼠标，扰动粒子</span></figcaption></figure>
-          <div class="profile-signature"><div class="profile-avatar">${avatar}</div><span>${e(p.alias.toUpperCase())} / SC—001</span><span>SCROLL TO EXPLORE ↓</span></div>
+          <figure class="profile-orb-study"><canvas aria-label="可随鼠标扰动的粒子小球"></canvas><figcaption>移动鼠标，扰动粒子</figcaption></figure>
+          <div class="profile-signature"><span>向下了解更多 ↓</span></div>
         </section>
         <section class="pp-section pp-highlights" data-section="about" tabindex="-1" aria-label="关于我">
-          <div class="pp-label"><span class="pp-section-number">02</span>ABOUT / 关于我</div>
+          <div class="pp-label">关于我</div>
           <div class="profile-bio">${p.bio.map((paragraph) => `<p>${e(paragraph)}</p>`).join("")}</div>
         </section>
         <section class="pp-section pp-highlights" data-section="skills" tabindex="-1" aria-label="技能">
-          <div class="pp-label"><span class="pp-section-number">03</span>SKILLS / 技能</div>
-          <div class="profile-skills">${p.skills.map((s, i) => `<div><span class="profile-tool-number">0${i + 1}</span><div><h3>${e(s.group)}</h3><p>${s.items.map(e).join(" / ")}</p></div></div>`).join("")}</div>
+          <div class="pp-label">技能</div>
+          <div class="profile-skills">${p.skills.map(s => `<div><div><h3>${e(s.group)}</h3><p>${s.items.map(e).join(" / ")}</p></div></div>`).join("")}</div>
         </section>
         <section class="pp-section pp-highlights" data-section="experience" tabindex="-1" aria-label="经历">
-          <div class="pp-label"><span class="pp-section-number">04</span>EXPERIENCE / 经历</div>
+          <div class="pp-label">经历</div>
           <ol>${p.experience.map((x) => `<li><span>${e(x.time)}</span><div><strong>${e(x.title)}</strong><br>${e(x.detail)}</div></li>`).join("")}</ol>
         </section>
       </article>
-      <footer class="profile-model-credit"><a href="${import.meta.env.BASE_URL}model-credits.html" target="_blank" rel="noopener noreferrer">3D MODEL CREDITS ↗</a></footer>`;
+      <footer class="profile-model-credit"><a href="${import.meta.env.BASE_URL}model-credits.html" target="_blank" rel="noopener noreferrer">模型来源与署名 ↗</a></footer>`;
   }
 }

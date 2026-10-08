@@ -217,11 +217,10 @@ export class ConsoleSetup {
     c.globalAlpha = wake * (1 - THREE.MathUtils.smoothstep(progress,.67,.80));
     c.textAlign = "center";
     c.fillStyle = "#dac39b"; c.font = "500 20px MiSans, sans-serif";
-    c.fillText("P L A Y E R   0 1", w / 2, h * .12);
     c.fillStyle = "#edeae4"; c.font = "600 34px MiSans, sans-serif";
     c.fillText(profile.name, w / 2, h * .82);
     c.fillStyle = "#95958e"; c.font = "400 20px MiSans, sans-serif";
-    c.fillText("CONTROLLER CONNECTED / 玩家已连接", w / 2, h * .89);
+    c.fillText("已连接", w / 2, h * .89);
     c.restore();
     this.texture.needsUpdate = true;
   }

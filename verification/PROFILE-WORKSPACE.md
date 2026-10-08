@@ -9,15 +9,20 @@ The camera holds during pickup and the pulse, aligns with the monitor normal,
 then dollies from the overview distance to 7 scene units while reframing the
 screen to cover the entire viewport. The controller and desk are outside the
 final visible frame. The 3-second physical sequence hands the same deterministic
-particle sphere to a full-screen canvas. It forms Shuhang Chen, then settles
-into the profile's particle study. The profile uses the same fully opaque paper
+particle sphere to a full-screen canvas. It forms Shuhang Chen once, then unfolds
+back into a sphere as it settles into the profile's particle study. The profile uses the same fully opaque paper
 background as project details; the scene stops updating while covered.
 
 The user withdrew the portrait request: no photo or portrait sampling is shipped.
-The 3,600 particles alternate between the name and sphere, retaining pointer
+The 3,600 particles remain a slowly rotating sphere on the profile, retaining pointer
 repulsion. Both the physical screen and the entry canvas constrain the field on
-narrow viewports. Reduced motion displays the name immediately. Direct links
+narrow viewports. Reduced motion displays a static sphere immediately. Direct links
 skip the physical sequence. Esc cancels either stage without a late reveal.
+
+Decorative PLAYER, PERSONNEL, PARTICLE FIELD, CREATOR PROFILE and section
+numbers are removed from the profile. Navigation and section headings use plain
+Chinese labels; the name appears once in the page heading. Required model
+attribution remains linked in the footer.
 
 ## Model and attribution
 

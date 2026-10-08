@@ -32,7 +32,9 @@ export class ProfileEntry {
     // Match the final page's ink in either theme as the paper fades in.
     const match = ink.match(/[\d.]+/g), rgb = match?.slice(0,3).map(Number) || [8,10,8];
     const color = `rgb(${[232,228,220].map((v,i)=>Math.round(v+(rgb[i]-v)*reveal)).join(',')})`;
-    drawIdentity(c,{x,y,size,morph:particleEase(.15,1.4,t),ink:color,accent:color});
+    // Form the name once, then unfold it into the sphere as it settles on the page.
+    const morph = particleEase(.15,1.4,t) * (1-particleEase(1.65,2.65,t));
+    drawIdentity(c,{x,y,size,morph,ink:color,accent:color});
     this.root.style.setProperty('--profile-reveal',String(reveal));
     this.root.style.setProperty('--profile-heading',String(reveal));
     if(t<2.68)this.frame=requestAnimationFrame(this.tick);

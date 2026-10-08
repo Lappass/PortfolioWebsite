@@ -14,23 +14,18 @@
 .profile-page .pp-body { max-width: 1440px; }
 .profile-page .profile-hero { grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 30px; min-height: calc(100svh - 260px); padding: 48px 0 28px; align-content: center; }
 .profile-page .profile-hero h1 { font-size: clamp(48px,6.6vw,100px); font-weight: 600; letter-spacing: -.045em; margin: 32px 0 18px; }
-.profile-introduction .pp-kicker { margin-top: 30px; }
+.profile-introduction .pp-kicker { margin-top: 30px; font-size: 14px; letter-spacing: 0; }
 .profile-introduction .pp-abstract { max-width: 460px; font-size: 18px; line-height: 1.9; }
 .profile-orb-study { margin: 0; align-self: center; }
 .profile-orb-study canvas { display: block; width: 100%; height: clamp(250px,32vw,430px); color: var(--pp-ink); }
-.profile-orb-meta,.profile-orb-study figcaption { display: flex; justify-content: space-between; gap: 12px; font-size: 10px; letter-spacing: .12em; color: var(--pp-muted); }
-.profile-orb-meta { border-top: 1px solid var(--pp-line); padding-top: 12px; }
-.profile-orb-study figcaption { border-bottom: 1px solid var(--pp-line); padding-bottom: 12px; }
+.profile-orb-study figcaption { font-size: 11px; color: var(--pp-muted); text-align: center; }
 .profile-signature { grid-column: 1/-1; display: flex; align-items: center; gap: 18px; margin-top: 20px; font-size: 10px; letter-spacing: .12em; color: var(--pp-muted); }
 .profile-signature > :last-child { margin-left: auto; }
-.profile-page .profile-signature .profile-avatar { width: 48px; height: 48px; flex: none; }
-.profile-signature .profile-avatar span { font-size: 26px; }
 .profile-page .pp-section { display: grid; grid-template-columns: minmax(150px,.36fr) minmax(0,1fr); gap: 40px; padding: 64px 0; }
 .profile-page .profile-bio { max-width: 730px; }
 .profile-page .profile-bio p { font-size: clamp(18px,2vw,26px); line-height: 1.85; margin-bottom: 28px; }
 .profile-page .profile-skills { display: block; }
 .profile-page .profile-skills > div { display: flex; gap: 30px; padding: 22px 0; }
-.profile-tool-number { font-size: 40px; font-weight: 300; color: var(--pp-muted); }
 .profile-skills h3 { margin: 0 0 12px; font-size: 22px; font-weight: 500; }
 .profile-skills p { margin: 0; font-size: 14px; line-height: 1.8; color: var(--pp-muted); }
 .profile-page .pp-highlights ol { border-left: 1px solid var(--pp-line); padding-left: 28px; }
