@@ -17,40 +17,41 @@ function add(name, start, seconds, pan, synth) {
     for (let c = 0; c < 2; c++) stems[name][c][index] += x * gains[c];
   }
 }
-// Cmaj9 / Am9 / Fmaj9 / G6, with a second phrase answering the first.
-const chords = [[48,55,59,62,64], [45,52,55,59,60], [41,48,52,55,57], [43,50,55,57,59]];
+// Eight two-bar phrases: warmer inversions, a short hook and a spacious answer.
+const chords = [[48,55,59,62,64], [47,55,59,62,67], [45,52,55,59,60], [43,52,55,59,62],
+  [41,48,52,55,57], [40,48,52,55,59], [43,50,55,57,59], [43,50,55,59,62]];
 const phrases = [
-  [[0,72],[1.5,76],[3,79],[5,76],[6.5,74]],
-  [[.5,72],[2,71],[4,69],[6,72]],
-  [[0,69],[1.5,72],[3,76],[5.5,74]],
-  [[1,71],[3,74],[5,67],[7,71]],
-  [[0,76],[2,79],[3.5,81],[5,79],[6.5,76]],
-  [[1,76],[2.5,72],[4.5,71],[6,69]],
-  [[0,72],[2,69],[4,67],[6,69]],
-  [[0,71],[2,74],[4,72],[6.5,67]],
+  [[.5,67],[1.5,72],[3,76],[5.5,74]],
+  [[.5,71],[2,67],[5,74]],
+  [[.5,64],[1.5,69],[3,72],[5.5,71]],
+  [[1,67],[3,64],[6,62]],
+  [[.5,65],[1.5,69],[3,72],[5.5,76]],
+  [[.5,71],[2,67],[5,64]],
+  [[.5,67],[2,71],[3.5,74],[5.5,72]],
+  [[1,71],[3,69],[5,67]],
 ];
 for (let section = 0; section < 8; section++) {
-  const chord = chords[section % 4];
+  const chord = chords[section];
   chord.forEach((note, voice) => add('atmosphere', (section * 8 - .5) * beat, beat * 9, (voice - 2) * .25, (t,p) => {
     const f = hz(note);
-    return .055 * Math.sin(Math.PI * p) ** 2 * (Math.sin(tau*f*t) + .12*Math.sin(tau*f*2*t));
+    return .065 * Math.sin(Math.PI * p) ** 2 * (Math.sin(tau*f*t) + .09*Math.sin(tau*f*2*t));
   }));
   // Rounded bass and softly brushed drum accents leave room for UI sounds.
-  for (const [b,n] of [[0,chord[0]],[2.5,chord[0]],[4,chord[0]+7],[6,chord[0]]]) {
+  for (const [b,n] of [[0,chord[0]],[3,chord[1]],[4.5,chord[0]],[6.5,chord[1]]]) {
     add('pulse', (section*8+b)*beat, .48, 0, (t,p) => .17*(1-Math.exp(-t*110))*Math.exp(-t*6)*(1-p)*Math.sin(tau*hz(n-12)*t));
-    add('pulse', (section*8+b)*beat, .16, 0, (t,p) => .13*Math.sin(Math.PI*p)*Math.exp(-t*22)*Math.sin(tau*(55*t+2*(1-Math.exp(-t*25)))));
+    add('pulse', (section*8+b)*beat, .16, 0, (t,p) => .08*Math.sin(Math.PI*p)*Math.exp(-t*22)*Math.sin(tau*(55*t+2*(1-Math.exp(-t*25)))));
   }
-  for (const b of [1,3,5,7]) add('pulse',(section*8+b)*beat,.09,b%3?.18:-.18,(t,p)=>.025*Math.sin(Math.PI*p)*Math.exp(-t*42)*noise());
+  for (const b of [1,3,5,7]) add('pulse',(section*8+b)*beat,.09,b%3?.18:-.18,(t,p)=>.018*Math.sin(Math.PI*p)*Math.exp(-t*42)*noise());
   // A quiet repeating mallet accompaniment, alternating across the stereo field.
-  for (let b=0;b<8;b++) {
-    const f=hz(chord[1+b%4]+12);
-    add('motif',(section*8+b+.5)*beat,.65,b%2?.3:-.3,(t,p)=>.036*(1-Math.exp(-t*100))*Math.exp(-t*8)*(1-p)*Math.sin(tau*f*t));
+  for (const b of [0,2,4,6]) {
+    const f=hz(chord[1+(b/2)%4]);
+    add('motif',(section*8+b+.75)*beat,.85,b%4?.3:-.3,(t,p)=>.042*(1-Math.exp(-t*90))*Math.exp(-t*5)*(1-p)*Math.sin(tau*f*t));
   }
   for (const [b,n] of phrases[section]) for (let echo=0;echo<3;echo++) {
     const f=hz(n);
     add('motif',(section*8+b+echo*.75)*beat,1.8,echo%2?.22:-.22,(t,p)=>
-      .15*.24**echo*(1-Math.exp(-t*130))*Math.exp(-t*2.8)*Math.min(1,(1-p)*8)*
-      (Math.sin(tau*f*t+.45*Math.exp(-t*8)*Math.sin(tau*f*2*t))+.12*Math.exp(-t*6)*Math.sin(tau*f*3*t)));
+      .19*.19**echo*(1-Math.exp(-t*85))*Math.exp(-t*2.5)*Math.min(1,(1-p)*8)*
+      (Math.sin(tau*f*t+.23*Math.exp(-t*8)*Math.sin(tau*f*2*t))+.07*Math.exp(-t*6)*Math.sin(tau*f*3*t)));
   }
 }
 // Wrap note tails and reflections around the loop, rather than cutting them off.
@@ -77,9 +78,9 @@ for(const [name,channels] of Object.entries(stems)) {
   if(!Number.isFinite(square)||peak>=.95||peak<.01) throw Error(`Invalid stem ${name}: ${peak}`);
   metrics[name]={peakDb:20*Math.log10(peak),rmsDb:10*Math.log10(square/(length*2)),seamDelta:Math.max(...channels.map(c=>Math.abs(c[0]-c[length-1])))};
   const file=`${temp}/menu-${name}.wav`;wav(channels,file);
-  if(process.argv[2])execFileSync(process.argv[2],['-y','-v','error','-i',file,'-c:a','libvorbis','-q:a','5',`${folder}/menu-${name}.ogg`]);
+  if(process.argv[2])execFileSync(process.argv[2],['-y','-v','error','-i',file,'-c:a','libvorbis','-q:a','5',`${folder}/${name}.ogg`]);
 }
 wav(mix,`${temp}/menu-preview.wav`);
 if(process.argv[2])execFileSync(process.argv[2],['-y','-v','error','-i',`${temp}/menu-preview.wav`,'-af','afade=t=in:d=0.6,afade=t=out:st=38:d=2','-c:a','libmp3lame','-b:a','192k',`${folder}/menu-preview.mp3`]);
-fs.writeFileSync(`${folder}/menu-score.json`,JSON.stringify({title:'待机乐园 / Menu Garden',bpm,duration,rate,seed:100926,metrics},null,2)+'\n');
+fs.writeFileSync(`${folder}/score.json`,JSON.stringify({title:'待机乐园 / Menu Garden',revision:2,bpm,duration,rate,seed:100926,metrics},null,2)+'\n');
 console.log(JSON.stringify({duration,metrics},null,2));
