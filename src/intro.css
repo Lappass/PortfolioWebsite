@@ -1,0 +1,56 @@
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: radial-gradient(ellipse 90% 70% at 50% 46%, #121318, #06070a 70%);
+  color: #f2ece4;
+  font-family: MiSans, system-ui, sans-serif;
+  cursor: pointer;
+  overflow: hidden;
+  --cone: 0;
+}
+.intro canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.intro-cone {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--cone);
+  background:
+    radial-gradient(ellipse 30% 55% at 24% -8%, rgba(232, 190, 150, 0.42), rgba(232, 190, 150, 0.1) 45%, transparent 75%),
+    radial-gradient(ellipse 85% 22% at 45% 108%, rgba(110, 130, 160, 0.22), transparent 75%);
+}
+.intro-content {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  translate: -50% -50%;
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+  pointer-events: none;
+  will-change: transform, opacity, filter;
+}
+.intro-mark { color: #f2ece4; will-change: transform; }
+.intro-mark svg { display: block; width: clamp(150px, 15vw, 230px); overflow: visible; }
+.intro-mark svg text { display: none; }
+.intro-mark path { stroke-linecap: round; stroke-linejoin: round; }
+.intro-name { display: flex; font-size: clamp(30px, 3.6vw, 56px); font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; }
+.intro-name span { display: inline-block; opacity: 0; will-change: transform, opacity, filter; }
+.intro-role { display: flex; align-items: center; gap: 0.9em; font-size: clamp(11px, 0.85vw, 13px); color: #b9b1a6; opacity: 0; text-transform: uppercase; white-space: nowrap; }
+.intro-role i { width: 4px; height: 4px; border-radius: 50%; background: #e0b878; }
+.intro-start {
+  position: absolute;
+  left: 50%;
+  bottom: 13%;
+  translate: -50% 0;
+  padding: 12px 22px;
+  border: 0;
+  background: none;
+  color: #f2ece4;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.4em;
+  opacity: 0;
+  cursor: pointer;
+}
+.intro-start:focus-visible { outline: 1px solid rgba(224, 184, 120, 0.6); outline-offset: 6px; }

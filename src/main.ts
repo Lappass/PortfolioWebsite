@@ -5,6 +5,7 @@ import "./document-decryption.css";
 import "./decryption.css";
 import { escapeHtml } from "./html";
 import { ProjectPage, workIdFromHash } from "./project-page";
+import { Intro } from "./intro";
 
 import { ProfilePage, PROFILE_HASH } from "./profile-page";
 import "./portfolio-hierarchy.css";
@@ -595,11 +596,26 @@ function updateSelection(navigation?: ArchiveNavigation) {
   });
   $("#saved-count").textContent = String(saved.size).padStart(2, "0");
 }
+/** The console-style opening: the archive waits hidden underneath, then rises in. */
+function playIntro() {
+  scene?.setPresentationVisible(false, true);
+  setMode("archive");
+  new Intro(
+    (cue) => audio.play(`intro-${cue}`),
+    () => scene?.setPresentationVisible(true),
+    () => $(".read-file").focus({ preventScroll: true }),
+  ).start();
+}
+const introWanted = () => motionActive("boot") && !isWallpaper && !reviewParams.has("time") && !reviewParams.has("scene");
 function replayBoot(forcePreview = false) {
   if (!ready) return;
   closeModal(() => replayBootAfterModal(forcePreview));
 }
 function replayBootAfterModal(forcePreview: boolean) {
+  if (introWanted() && !forcePreview) {
+    playIntro();
+    return;
+  }
   bootStart = performance.now() / 1000 - 1.76;
   frozenTime = null;
   lastStep = "";
@@ -1328,11 +1344,13 @@ function completeStartup(silent: boolean) {
     saveAudioPrefs();
   }
   audio.releaseEntry();
-  audio.restartBoot();
+  const intro = introWanted() && !location.hash;
+  if (!intro) audio.restartBoot();
   const fade = motionActive("boot") ? 600 : 0;
   bootStart = performance.now() / 1000 - (reviewParams.has("time") ? Number(reviewParams.get("time")) : 1.76);
   if (!reviewParams.has("time")) bootStart += fade / 1000;
-  setMode("boot");
+  if (intro) playIntro();
+  else setMode("boot");
   if (reviewParams.get("scene") === "archive" || (!motionActive("boot") && !reviewParams.has("time"))) setMode("archive");
   if (reviewParams.get("scene") === "detail") setMode("detail");
   if (isWallpaper && wallpaperHost()?.properties.boot?.value === false) setMode("archive");

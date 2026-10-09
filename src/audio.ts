@@ -20,7 +20,11 @@ export type Sound =
   | "assemble"
   | "disc-insert"
   | "disc-read"
-  | "disc-eject";
+  | "disc-eject"
+  | "intro-seed"
+  | "intro-burst"
+  | "intro-mark"
+  | "intro-exit";
 export type SoundScene = "boot" | "archive" | "detail" | "viewer";
 export type AudioPreferences = {
   sound: boolean;
@@ -264,6 +268,26 @@ export function synthesizeSound(
       tone(784, 784, 0.02, 0.55, 0.13, 0.01);
       tone(1046, 1046, 0.018, 0.8, 0.26, 0.01);
       air(5200, 7000, 0.012, 0.6, 0.26, 0.05);
+      break;
+    // Opening: a low swell, a bright burst, a soft chime, a rush of air.
+    case "intro-seed":
+      tone(55, 82, 0.05, 0.9, 0, 0.5);
+      tone(110, 164, 0.018, 0.8, 0.1, 0.45);
+      break;
+    case "intro-burst":
+      tone(70, 38, 0.07, 0.9, 0, 0.004);
+      air(1800, 7200, 0.04, 1.4, 0, 0.01);
+      glass(1760, 0.03, 0.9, 0.02);
+      glass(2640, 0.018, 0.7, 0.09);
+      break;
+    case "intro-mark":
+      tone(392, 392, 0.022, 1.4, 0, 0.02);
+      tone(587, 587, 0.016, 1.3, 0.12, 0.02);
+      tone(784, 784, 0.012, 1.6, 0.24, 0.02);
+      break;
+    case "intro-exit":
+      air(600, 4800, 0.05, 1.0, 0, 0.25);
+      tone(98, 196, 0.03, 0.9, 0.05, 0.3);
       break;
     case "disc-eject":
       tone(240, 90, 0.026, 0.6, 0, 0.03);
