@@ -250,26 +250,12 @@ export class Intro {
     const sway = Math.sin((t - T.caseIn) * 0.7) * 6;
     // Exit: the case flies onto the selected case of the archive, matching its size,
     // and hands over to the real 3D case in the last third.
-    const fly = inOutCubic(span(x, 0.08, 0.82));
-    const goal = x > 0 && this.from ? this.target() : null;
-    let dx = 0, dy = 0, grow = 1;
-    if (goal && this.from) {
-      dx = ((goal.left + goal.right) / 2 - this.from.x) * fly;
-      dy = ((goal.top + goal.bottom) / 2 - this.from.y) * fly;
-      grow = 1 + ((goal.bottom - goal.top) / this.from.h - 1) * fly;
-    }
-    this.stage.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${grow.toFixed(4)})`;
-    this.stage.style.opacity = (Math.min(1, rise * 1.4) * (1 - inOutCubic(span(x, 0.62, 0.95)))).toFixed(3);
-    const settleTurn = 1 - fly;
-    this.box.style.transform = `translateY(${((1 - rise) * 60).toFixed(1)}px) rotateX(${((8 - 4 * rise) * settleTurn).toFixed(2)}deg) rotateY(${((-34 + 12 * rise + sway + this.pointer.x * 10) * settleTurn + 48 * fly).toFixed(2)}deg)`;
-    this.box.style.filter = `brightness(${(0.15 + 0.85 * rise).toFixed(3)})`;
+    // The case itself is the real 3D model behind this overlay; the 2D stage stays hidden.
     this.root.style.setProperty("--sheen", ((t * 0.18) % 1.6 - 0.3).toFixed(3));
 
     // Beat 4: a ring of light around the case asks for input.
     const ask = span(t, T.prompt, T.prompt + 0.7);
     const pulse = 0.5 + 0.5 * Math.sin((t - T.prompt) * 3.1);
-    this.ring.style.opacity = (outCubic(ask) * (0.35 + 0.65 * pulse) * (1 - x)).toFixed(3);
-    this.ring.style.transform = `translate(-50%, -50%) scale(${(0.92 + 0.08 * outBack(ask) + 0.03 * pulse).toFixed(3)})`;
     this.prompt.style.opacity = (outCubic(ask) * (1 - outExpo(x))).toFixed(3);
     this.prompt.style.transform = `translate(-50%, ${((1 - outCubic(ask)) * 10).toFixed(1)}px)`;
 
@@ -277,7 +263,9 @@ export class Intro {
     this.head.style.opacity = (1 - outExpo(span(x, 0, 0.5))).toFixed(3);
     this.head.style.filter = `blur(${(8 * inQuart(x)).toFixed(2)}px)`;
     // The black backdrop clears first so the archive appears behind the flying case.
-    this.root.style.setProperty("--backdrop", (1 - inOutCubic(span(x, 0.05, 0.5))).toFixed(3));
+    // The black opens onto the 3D scene when the case is revealed; only the top light stays.
+    this.root.style.setProperty("--backdrop", (1 - inOutCubic(span(t, T.caseIn - 0.2, T.caseIn + 1.3))).toFixed(3));
+    this.root.style.opacity = (1 - inOutCubic(span(x, 0.25, 0.9))).toFixed(3);
     this.root.style.setProperty("--cone", (0.95 * inOutCubic(span(t, T.cone, T.cone + 1.4)) * (1 - inOutCubic(span(x, 0, 0.6)))).toFixed(3));
     this.drawDust(t, dt, x);
     if (x >= 1) this.finish();

@@ -73,6 +73,20 @@ export class ArchiveScene {
   private presenceTarget = 1;
   /** While true, the selected case stays in place as the rest of the array rises. */
   private presentHold = false;
+  /** Opening close-up: 1 = the selected case alone under the camera, 0 = normal framing. */
+  private intro = { value: 0, target: 0 };
+  /** Show only the selected case, framed close, for the opening. */
+  beginIntro() {
+    this.intro.value = this.intro.target = 1;
+    this.presence = this.presenceTarget = 0;
+    this.presentHold = true;
+    this.cancelPointer();
+  }
+  /** Pull back to the archive while the other cases rise around the selected one. */
+  endIntro() {
+    this.intro.target = 0;
+    this.presenceTarget = 1;
+  }
   setPresentationVisible(visible: boolean, immediate = false, holdSelected = false) {
     this.presentHold = visible && holdSelected;
     this.presenceTarget = Number(visible);
@@ -1361,7 +1375,9 @@ export class ArchiveScene {
     const step = !this.motion.surfaceTransitions ? 1 : Math.min(elapsed, .25) / 1.1;
     this.presence += Math.sign(this.presenceTarget - this.presence) * Math.min(step, Math.abs(this.presenceTarget - this.presence));
     if (this.presence >= 1) this.presentHold = false;
-    this.renderer.domElement.style.opacity = String(THREE.MathUtils.clamp(this.presence / .16, 0, 1));
+    this.renderer.domElement.style.opacity = String(this.presentHold ? 1 : THREE.MathUtils.clamp(this.presence / .16, 0, 1));
+    // Slow, eased pull-back from the opening close-up.
+    this.intro.value = this.intro.target ? 1 : Math.max(0, this.intro.value - Math.min(elapsed, .1) / 1.9);
     this.theme.beginFrame();
     themeEnvironment(this.scene, this.renderer, this.themeAmount);
     const blend = 1 - Math.exp(-dt * (this.motion.selectionTransition ? 2.8 : 35));
@@ -1826,6 +1842,18 @@ export class ArchiveScene {
       viewSpan = THREE.MathUtils.lerp(viewSpan, span, approach);
       cameraDistance = THREE.MathUtils.lerp(distance, 7, screen);
     }
+    if (!cinematic && this.intro.value > 0) {
+      // Opening: a three-quarter close-up of the selected case, turning slowly, set low in
+      // frame under the name. The pull-back eases out of it into the normal framing.
+      const k = this.intro.value * this.intro.value * (3 - 2 * this.intro.value);
+      const swing = Math.sin(this.clock * 0.35) * 0.18;
+      const front = new THREE.Vector3(0.55 + swing, 0.22, 1).normalize().transformDirection(this.model.matrixWorld);
+      viewDirection.lerp(front, k).normalize();
+      const up = new THREE.Vector3(0, 1, 0);
+      const aim = this.model.localToWorld(new THREE.Vector3(0, 1.85, 0)).addScaledVector(up, 0.75);
+      cameraAim.lerp(aim, k);
+      viewSpan = THREE.MathUtils.lerp(viewSpan, 7.4, k);
+    }
     const cameraPosition = cameraAim
       .clone()
       .addScaledVector(viewDirection, cameraDistance);
@@ -1836,7 +1864,8 @@ export class ArchiveScene {
     const cameraTransition = this.targetDetail || this.detail > 0.01
       ? this.motion.detailTransition
       : this.motion.selectionTransition;
-    const cameraBlend = cinematic ? 1 : this.workspace.value > .001 ? (this.reduced ? 1 : 1 - Math.exp(-Math.min(elapsed, .25) * (this.workspace.value > PLAYER_WAKE_START ? 15 : 7))) : cameraTransition ? 1 - Math.exp(-dt * 5) : 1;
+    // During the opening the shot is authored directly; damping would lag the pull-back.
+    const cameraBlend = cinematic || this.intro.value > 0 ? 1 : this.workspace.value > .001 ? (this.reduced ? 1 : 1 - Math.exp(-Math.min(elapsed, .25) * (this.workspace.value > PLAYER_WAKE_START ? 15 : 7))) : cameraTransition ? 1 - Math.exp(-dt * 5) : 1;
     this.camera.position.lerp(cameraPosition, cameraBlend);
     this.cameraAim.lerp(cameraAim, cameraBlend);
     this.camera.lookAt(this.cameraAim);
@@ -1969,7 +1998,7 @@ export class ArchiveScene {
     // A changed instance buffer already proves the image changed. Avoid a
     // material/matrix snapshot on those busy frames; capture when it settles.
     const bufferWidth = this.renderer.getDrawingBufferSize(new THREE.Vector2()).x;
-    this.dust.update(time, this.dustVisible && !cinematic, this.reduced, this.themeAmount > 0.5, bufferWidth / Math.max(1, this.renderer.domElement.clientWidth));
+    this.dust.update(time, this.dustVisible && !cinematic && this.intro.value < 0.5, this.reduced, this.themeAmount > 0.5, bufferWidth / Math.max(1, this.renderer.domElement.clientWidth));
     const inserting = this.insert.value > 0 && this.insert.value < 1 || (this.insert.value === 1 && this.insert.target === 1);
     // The dust moves every frame, so a reused composite would freeze it.
     const dustMoving = this.dust.active;

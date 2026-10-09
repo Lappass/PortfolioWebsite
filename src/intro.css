@@ -111,7 +111,7 @@
 .intro-prompt {
   position: absolute;
   left: 50%;
-  bottom: 9%;
+  bottom: 3.5%;
   display: grid;
   justify-items: center;
   gap: 8px;
@@ -128,3 +128,11 @@
 .intro-prompt i { display: none; }
 .intro-prompt small { font-size: 11px; letter-spacing: 0.2em; color: #a9a39b; }
 .intro-prompt:focus-visible { outline: none; }
+
+.intro-stage { display: none; }
+/* Let the archive's own dark backdrop show the case; keep only a soft vignette. */
+.intro { pointer-events: auto; }
+
+/* The archive interface waits until the opening hands over. */
+#stage :is(.brand, .archive-ui, .system-nav, .system-footer, .powered, .experiments-entry) { transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+#stage[data-intro="true"] :is(.brand, .archive-ui, .system-nav, .system-footer, .powered, .experiments-entry) { opacity: 0 !important; pointer-events: none; transition: none; }

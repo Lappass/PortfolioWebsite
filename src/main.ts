@@ -598,11 +598,16 @@ function updateSelection(navigation?: ArchiveNavigation) {
 }
 /** The console-style opening: the archive waits hidden underneath, then rises in. */
 function playIntro() {
-  scene?.setPresentationVisible(false, true);
   setMode("archive");
+  scene?.beginIntro();
+  $("#stage").dataset.intro = "true";
   new Intro(
     (cue) => audio.play(`intro-${cue}`),
-    () => scene?.setPresentationVisible(true, false, true),
+    () => {
+      scene?.endIntro();
+      // The interface returns once the camera is well into its pull-back.
+      setTimeout(() => delete $("#stage").dataset.intro, 900);
+    },
     () => scene?.selectedCaseRect() ?? null,
     () => $(".read-file").focus({ preventScroll: true }),
   ).start();
