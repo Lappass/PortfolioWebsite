@@ -27,8 +27,8 @@ export function pwaSettingsMarkup() {
     : !window.isSecureContext ? "使用 HTTPS 地址后可保存离线副本。"
     : !("serviceWorker" in navigator) ? "当前浏览器支持在线使用。"
     : failed ? "离线副本未能保存，可联网后重试。"
-    : ready ? "离线资源已就绪，可离线浏览档案与模型。"
-    : "正在准备离线资源，首次需要保持联网。";
+    : ready ? "基础页面已保存；已加载的字体、模型和音乐可离线使用，未加载内容需联网。"
+    : "正在保存基础页面，其他资源会在使用时缓存。";
   const guidance = installed() ? "已从主屏幕打开。"
     : ios() ? "在 Safari 中轻点“分享”→“添加到主屏幕”，然后从主屏幕图标打开。"
     : installPrompt ? "安装后可在独立窗口中打开档案。"
@@ -83,7 +83,10 @@ export async function initPwa(notify: (message: string) => void) {
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("controllerchange", () => {
   if (reloading) location.reload();
-  else refresh();
+  else {
+    refresh();
+    navigator.serviceWorker.controller?.postMessage({ type: "RHINE_CACHE_USED", urls: [...new Set(performance.getEntriesByType("resource").map(entry => entry.name))] });
+  }
 });
 document.addEventListener("click", async event => {
   const button = (event.target as Element).closest<HTMLButtonElement>("[data-pwa-action]");
