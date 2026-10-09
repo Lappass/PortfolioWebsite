@@ -22,6 +22,7 @@ export type Sound =
   | "disc-read"
   | "disc-eject"
   | "intro-seed"
+  | "intro-snap"
   | "intro-burst"
   | "intro-mark"
   | "intro-exit";
@@ -273,6 +274,13 @@ export function synthesizeSound(
     case "intro-seed":
       tone(55, 82, 0.05, 0.9, 0, 0.5);
       tone(110, 164, 0.018, 0.8, 0.1, 0.45);
+      break;
+    // Two parts locking together: a sharp high transient, then a short body.
+    case "intro-snap":
+      air(6000, 3000, 0.06, 0.03, 0, 0.0005);
+      glass(2200, 0.05, 0.12);
+      tone(180, 120, 0.05, 0.09, 0.008, 0.001);
+      glass(1450, 0.03, 0.1, 0.045);
       break;
     case "intro-burst":
       tone(70, 38, 0.07, 0.9, 0, 0.004);

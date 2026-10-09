@@ -16,8 +16,9 @@ export class StartupGate {
     const { root } = options;
     root.setAttribute("role", "dialog");
     root.setAttribute("aria-modal", "true");
-    root.setAttribute("aria-label", "进入 Lappas 作品档案");
-    root.insertAdjacentHTML("beforeend", '<div class="entry-controls"><button class="entry-start" disabled>正在准备终端…</button><button class="entry-silent" hidden>关闭声音并进入</button><p class="entry-status" role="status">资源就绪后即可进入</p></div>');
+    root.setAttribute("aria-label", "开机");
+    root.classList.add("power-gate");
+    root.insertAdjacentHTML("beforeend", '<div class="entry-controls"><button class="entry-start" disabled aria-label="开机"><svg class="power-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M16 13a15 15 0 1 0 16 0" /><path d="M24 6v17" /></svg><span>正在准备…</span></button><button class="entry-silent" hidden>关闭声音并进入</button><p class="entry-status" role="status">资源就绪后即可进入</p></div>');
     this.button = root.querySelector<HTMLButtonElement>(".entry-start")!;
     this.silent = root.querySelector<HTMLButtonElement>(".entry-silent")!;
     this.status = root.querySelector<HTMLElement>(".entry-status")!;
@@ -38,18 +39,21 @@ export class StartupGate {
         event.preventDefault();
         buttons[(index + (event.shiftKey ? buttons.length - 1 : 1)) % buttons.length].focus();
       }
-      // Let native buttons activate on Enter/Space, and never leak this event
-      // to the terminal's Enter-to-skip handler.
+      // Like a console's power button: any key turns it on.
+      else if (event.key !== "Shift" && (this.state === "waiting" || this.state === "error") && !(event.target as Element).closest(".entry-silent")) {
+        event.preventDefault();
+        void this.enter();
+      }
     });
   }
   get phase() { return this.state; }
+  private label(text: string) { this.button.querySelector("span")!.textContent = text; }
   ready() {
     this.state = "waiting";
     this.options.root.dataset.entry = "waiting";
     this.button.disabled = false;
-    this.button.textContent = "点击进入 →";
-    this.options.root.querySelector(":scope > span")!.textContent = "INTERNAL DATABASE / READY";
-    this.status.textContent = "轻触屏幕或按 Enter 开始";
+    this.label("按任意键开机");
+    this.status.textContent = "";
     this.button.focus({ preventScroll: true });
   }
   private async enter() {
@@ -58,7 +62,7 @@ export class StartupGate {
     this.options.root.dataset.entry = "starting";
     // aria-disabled preserves keyboard focus while repeated input is ignored.
     this.button.setAttribute("aria-disabled", "true");
-    this.button.textContent = "正在准备声音…";
+    this.label("正在开机…");
     this.status.textContent = "准备完成后开始播放";
     this.silent.hidden = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -74,7 +78,7 @@ export class StartupGate {
         this.state = "error";
         this.options.root.dataset.entry = "error";
         this.button.removeAttribute("aria-disabled");
-        this.button.textContent = "重试声音并进入 →";
+        this.label("再试一次");
         this.status.textContent = "声音暂未就绪，请重试或无声进入";
       }
     } catch {
@@ -83,7 +87,7 @@ export class StartupGate {
       this.state = "error";
       this.options.root.dataset.entry = "error";
       this.button.removeAttribute("aria-disabled");
-      this.button.textContent = "重试声音并进入 →";
+      this.label("再试一次");
       this.status.textContent = "声音暂未就绪，请重试或无声进入";
     } finally { clearTimeout(timer); }
   }

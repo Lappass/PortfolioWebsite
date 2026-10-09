@@ -10,3 +10,19 @@
   .loading-mark { width: 125px; margin-bottom: 32px; }
   .loading > span { font-size: 9px; letter-spacing: 1.3px; }
 }
+
+/* Power-on gate: the first beat of the opening, on the same near-black. */
+#viewport > .loading.power-gate { background: radial-gradient(ellipse 90% 70% at 50% 46%, #121318, #06070a 70%); color: #f2ece4; cursor: pointer; }
+.power-gate > :is(.loading-mark, span, i) { display: none; }
+.power-gate .entry-controls { margin: 0; position: absolute; left: 50%; top: 46%; translate: -50% -50%; }
+.power-gate .entry-start { display: grid; justify-items: center; gap: 22px; border: 0; padding: 0; min-height: 0; color: inherit; font-size: 13px; letter-spacing: 0.38em; background: none; }
+.power-gate .entry-start:disabled, .power-gate .entry-start[aria-disabled="true"] { color: #6f6a63; }
+.power-icon { width: 54px; height: 54px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; padding: 22px; border-radius: 50%; box-sizing: content-box; box-shadow: 0 0 0 1px rgba(224, 184, 120, 0.4); animation: power-breathe 2.6s ease-in-out infinite; }
+.power-gate[data-entry="waiting"] .power-icon { color: #f2ece4; }
+.power-gate[data-entry="starting"] .power-icon { animation: none; color: #e0b878; box-shadow: 0 0 0 1px rgba(224, 184, 120, 0.9), 0 0 40px rgba(224, 184, 120, 0.4); }
+.power-gate .entry-status { color: #8f8a82; }
+.power-gate .entry-silent { color: #8f8a82; }
+.power-gate .entry-start:focus-visible { outline: none; }
+.power-gate .entry-start:focus-visible .power-icon { box-shadow: 0 0 0 1px rgba(224, 184, 120, 0.9); }
+@keyframes power-breathe { 0%, 100% { box-shadow: 0 0 0 1px rgba(224, 184, 120, 0.25), 0 0 0 rgba(224, 184, 120, 0); } 50% { box-shadow: 0 0 0 1px rgba(224, 184, 120, 0.6), 0 0 34px rgba(224, 184, 120, 0.18); } }
+@media (prefers-reduced-motion: reduce) { .power-icon { animation: none; } }
