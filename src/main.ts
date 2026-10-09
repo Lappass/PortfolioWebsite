@@ -602,7 +602,8 @@ function playIntro() {
   setMode("archive");
   new Intro(
     (cue) => audio.play(`intro-${cue}`),
-    () => scene?.setPresentationVisible(true),
+    () => scene?.setPresentationVisible(true, false, true),
+    () => scene?.selectedCaseRect() ?? null,
     () => $(".read-file").focus({ preventScroll: true }),
   ).start();
 }

@@ -14,7 +14,7 @@ import { CASE_SPINE, CASE_W, insertCanvas } from "./case-art";
  * 4. a ring around the case asks for any key; the case sinks, the dust rushes past
  *    and the archive rises underneath.
  */
-const T = { gather: 0.1, slide: 0.55, snap: 1.05, symbols: 1.12, cone: 1.15, name: 1.45, role: 1.85, lift: 3.0, caseIn: 3.15, prompt: 4.1, auto: 7.2, exit: 1.2 };
+const T = { gather: 0.1, slide: 0.55, snap: 1.05, symbols: 1.12, cone: 1.15, name: 1.45, role: 1.85, lift: 3.0, caseIn: 3.15, prompt: 4.1, auto: 7.2, exit: 1.7 };
 const clamp = (v: number) => Math.min(1, Math.max(0, v));
 const span = (t: number, a: number, b: number) => clamp((t - a) / (b - a));
 const outExpo = (x: number) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
@@ -25,6 +25,7 @@ const outBack = (x: number, s = 1.7) => 1 + (s + 1) * Math.pow(x - 1, 3) + s * M
 const inQuart = (x: number) => x * x * x * x;
 
 interface Mote { x: number; y: number; vx: number; vy: number; r: number; depth: number; phase: number; big: boolean; orbit: number; angle: number; spin: number }
+type Rect = { left: number; top: number; right: number; bottom: number };
 type Cue = "seed" | "snap" | "burst" | "mark" | "exit";
 
 const sprites = new Map<string, HTMLCanvasElement>();
@@ -80,8 +81,10 @@ export class Intro {
   private cues = new Set<Cue>();
   private pointer = { x: 0, y: 0 };
   private burstAt = -1;
+  /** Where the case starts its flight on exit, in viewport pixels. */
+  private from: { x: number; y: number; h: number } | null = null;
 
-  constructor(private sound: (cue: Cue) => void, private onExitStart: () => void, private onDone: () => void) {
+  constructor(private sound: (cue: Cue) => void, private onExitStart: () => void, private target: () => Rect | null, private onDone: () => void) {
     const name = profile.name;
     const index = featuredFiles.find((i) => i >= 0) ?? 0;
     const cover = frontCover(index);
@@ -146,6 +149,8 @@ export class Intro {
   leave() {
     if (this.exitAt >= 0) return;
     this.exitAt = this.now();
+    const box = this.box.getBoundingClientRect();
+    this.from = { x: box.left + box.width / 2, y: box.top + box.height / 2, h: box.height };
     if (this.burstAt < 0) this.blowApart();
     this.sound("exit");
     this.onExitStart();
@@ -243,9 +248,20 @@ export class Intro {
     // Beat 3b: the case surfaces from darkness and turns slowly in the cone.
     const rise = outCubic(span(t, T.caseIn, T.caseIn + 1.3));
     const sway = Math.sin((t - T.caseIn) * 0.7) * 6;
-    const sink = inExpo(span(x, 0, 0.75));
-    this.stage.style.opacity = (Math.min(1, rise * 1.4) * (1 - inOutCubic(span(x, 0.3, 0.8)))).toFixed(3);
-    this.box.style.transform = `translateY(${((1 - rise) * 60 + sink * 140).toFixed(1)}px) rotateX(${(8 - 4 * rise).toFixed(2)}deg) rotateY(${(-34 + 12 * rise + sway + this.pointer.x * 10).toFixed(2)}deg) scale(${(0.92 + 0.08 * rise - 0.25 * sink).toFixed(3)})`;
+    // Exit: the case flies onto the selected case of the archive, matching its size,
+    // and hands over to the real 3D case in the last third.
+    const fly = inOutCubic(span(x, 0.08, 0.82));
+    const goal = x > 0 && this.from ? this.target() : null;
+    let dx = 0, dy = 0, grow = 1;
+    if (goal && this.from) {
+      dx = ((goal.left + goal.right) / 2 - this.from.x) * fly;
+      dy = ((goal.top + goal.bottom) / 2 - this.from.y) * fly;
+      grow = 1 + ((goal.bottom - goal.top) / this.from.h - 1) * fly;
+    }
+    this.stage.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${grow.toFixed(4)})`;
+    this.stage.style.opacity = (Math.min(1, rise * 1.4) * (1 - inOutCubic(span(x, 0.62, 0.95)))).toFixed(3);
+    const settleTurn = 1 - fly;
+    this.box.style.transform = `translateY(${((1 - rise) * 60).toFixed(1)}px) rotateX(${((8 - 4 * rise) * settleTurn).toFixed(2)}deg) rotateY(${((-34 + 12 * rise + sway + this.pointer.x * 10) * settleTurn + 48 * fly).toFixed(2)}deg)`;
     this.box.style.filter = `brightness(${(0.15 + 0.85 * rise).toFixed(3)})`;
     this.root.style.setProperty("--sheen", ((t * 0.18) % 1.6 - 0.3).toFixed(3));
 
@@ -260,7 +276,9 @@ export class Intro {
     // Exit: the heading dissolves upward, the overlay fades as the dust rushes past.
     this.head.style.opacity = (1 - outExpo(span(x, 0, 0.5))).toFixed(3);
     this.head.style.filter = `blur(${(8 * inQuart(x)).toFixed(2)}px)`;
-    this.root.style.opacity = (1 - inOutCubic(span(x, 0.4, 1))).toFixed(3);
+    // The black backdrop clears first so the archive appears behind the flying case.
+    this.root.style.setProperty("--backdrop", (1 - inOutCubic(span(x, 0.05, 0.5))).toFixed(3));
+    this.root.style.setProperty("--cone", (0.95 * inOutCubic(span(t, T.cone, T.cone + 1.4)) * (1 - inOutCubic(span(x, 0, 0.6)))).toFixed(3));
     this.drawDust(t, dt, x);
     if (x >= 1) this.finish();
   }
@@ -285,16 +303,17 @@ export class Intro {
         const drag = Math.exp(-dt * 1.7);
         m.vx *= drag;
         m.vy = m.vy * drag - dt * 6 * m.depth;
+        // On exit the dust eases outward and thins; the archive's own dust takes over.
         if (x > 0) {
-          m.vx += (m.x - cx) * dt * 26 * (0.15 + rush) * m.depth;
-          m.vy += (m.y - cy) * dt * 26 * (0.15 + rush) * m.depth;
+          m.vx += (m.x - cx) * dt * 1.6 * m.depth;
+          m.vy += (m.y - cy) * dt * 1.6 * m.depth;
         }
         m.x += m.vx * dt;
         m.y += m.vy * dt;
       }
       const twinkle = 0.55 + 0.45 * Math.sin(t * 1.4 + m.phase);
-      const r = m.r * (1 + rush * 2.2 * m.depth) * (this.burstAt < 0 ? 0.7 : 1);
-      const alpha = (m.big ? 0.09 : 0.25 + 0.5 * twinkle * m.depth) * gathered;
+      const r = m.r * (1 + rush * 0.6 * m.depth) * (this.burstAt < 0 ? 0.7 : 1);
+      const alpha = (m.big ? 0.09 : 0.25 + 0.5 * twinkle * m.depth) * gathered * (1 - inOutCubic(span(x, 0.1, 0.7)));
       const px = m.x + this.pointer.x * 18 * m.depth, py = m.y + this.pointer.y * 12 * m.depth;
       const soft = m.big ? 0.55 : 0.2;
       if (warm < 1) {

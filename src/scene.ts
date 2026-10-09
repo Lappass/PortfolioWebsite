@@ -71,13 +71,17 @@ export class ArchiveScene {
   private inputEvents = new AbortController();
   private presence = 1;
   private presenceTarget = 1;
-  setPresentationVisible(visible: boolean, immediate = false) {
+  /** While true, the selected case stays in place as the rest of the array rises. */
+  private presentHold = false;
+  setPresentationVisible(visible: boolean, immediate = false, holdSelected = false) {
+    this.presentHold = visible && holdSelected;
     this.presenceTarget = Number(visible);
     if (immediate) this.presence = this.presenceTarget;
     if (!visible) this.cancelPointer();
   }
   get presentationHidden() { return this.presenceTarget === 0 && this.presence === 0; }
   private presentationDrop(cell: ArchiveCell) {
+    if (this.presentHold && sameCell(cell, this.selectedCell)) return 0;
     const delay = .15 * (1 + Math.tanh((cell.row - this.selectedCell.row) * .1 + (cell.lane - this.selectedCell.lane) * .25));
     return 35 * Math.pow(THREE.MathUtils.clamp((1 - this.presence - delay) / .7, 0, 1), 2);
   }
@@ -1356,6 +1360,7 @@ export class ArchiveScene {
     this.flushHover();
     const step = !this.motion.surfaceTransitions ? 1 : Math.min(elapsed, .25) / 1.1;
     this.presence += Math.sign(this.presenceTarget - this.presence) * Math.min(step, Math.abs(this.presenceTarget - this.presence));
+    if (this.presence >= 1) this.presentHold = false;
     this.renderer.domElement.style.opacity = String(THREE.MathUtils.clamp(this.presence / .16, 0, 1));
     this.theme.beginFrame();
     themeEnvironment(this.scene, this.renderer, this.themeAmount);
@@ -2013,6 +2018,20 @@ export class ArchiveScene {
     this.renderer.shadowMap.needsUpdate = shadow.end() || this.light.shadow.needsUpdate;
     if (this.superPerformance) this.renderer.render(this.scene, this.camera);
     else this.composer.render();
+  }
+  /** The selected case's front in container pixels (for the opening hand-off). */
+  selectedCaseRect() {
+    if (!this.loaded) return null;
+    // Centre of the face and the length of its vertical edge: the case stands at an angle,
+    // so its bounding box would be far larger than what the eye reads as the case.
+    const [cx, cy] = this.projectCard(0, 1.85);
+    const [bx, by] = this.projectCard(0, 0), [tx, ty] = this.projectCard(0, 3.7);
+    // projectCard is in the container's own pixels; the stage may be offset or scaled.
+    const box = this.container.getBoundingClientRect();
+    const k = box.width / Math.max(1, this.container.clientWidth);
+    const h = Math.hypot(tx - bx, ty - by) * k;
+    const sx = box.left + cx * k, sy = box.top + cy * (box.height / Math.max(1, this.container.clientHeight));
+    return { left: sx - h * 0.4, right: sx + h * 0.4, top: sy - h / 2, bottom: sy + h / 2 };
   }
   projectCard(x: number, y: number) {
     this.model.updateMatrixWorld(true);
