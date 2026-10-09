@@ -116,7 +116,9 @@ export class ConsoleSetup {
     this.group.matrixWorldNeedsUpdate = true;
     // One assembled terminal: screen and drive share a fixed forward direction.
     this.monitor.rotation.y = 0;
-    const lift = THREE.MathUtils.smoothstep(workspace, .18, .36);
+    // Put the controller back after acknowledgement, before the screen close-up.
+    // Keeping it raised leaves it between the camera and the profile display.
+    const lift = THREE.MathUtils.smoothstep(workspace, .18, .36) * (1 - THREE.MathUtils.smoothstep(workspace, .48, .64));
     this.controller.position.copy(this.controllerPivot);
     this.controller.position.y += lift * .78;
     this.controller.position.z += lift * .30;
