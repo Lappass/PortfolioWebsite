@@ -32,6 +32,7 @@ export type AudioPreferences = {
   music: boolean;
   soundVolume: number;
   musicVolume: number;
+  musicTrack?: "observatory" | "menu";
 };
 const STEMS = ["atmosphere", "motif", "pulse"] as const;
 const LOOP_SECONDS = 160 / 3;
@@ -368,9 +369,8 @@ export class TerminalAudio {
   private duck?: GainNode;
   private stemGains: GainNode[] = [];
   private buffers?: AudioBuffer[];
-  private loading?: Promise<void>;
-  private fetching?: Promise<ArrayBuffer[]>;
-  private musicData?: ArrayBuffer[];
+  private musicLoads = new Map<string, Promise<AudioBuffer[]>>();
+  private musicFetches = new Map<string, Promise<ArrayBuffer[]>>();
   private tracks: AudioBufferSourceNode[] = [];
   private voices: ReturnType<typeof synthesizeSound>[] = [];
   private lastSound = new Map<Sound, number>();
@@ -421,17 +421,20 @@ export class TerminalAudio {
   // Fetch compressed tracks while the entry screen is visible; create/resume
   // the audio device only from a real click or keyboard activation.
   prepareMusic() {
-    if (this.musicData) return Promise.resolve(this.musicData);
-    this.fetching ??= Promise.all(STEMS.map(async name => {
+    const track = this.prefs.musicTrack ?? "observatory";
+    const cached = this.musicFetches.get(track);
+    if (cached) return cached;
+    const fetching = Promise.all(STEMS.map(async name => {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);
       try {
-        const response = await fetch(assetUrl(`audio/${name}.ogg`), { signal: controller.signal });
+        const response = await fetch(assetUrl(`audio/${track === "menu" ? "menu-" : ""}${name}.ogg`), { signal: controller.signal });
         if (!response.ok) throw new Error(`Music ${name}: ${response.status}`);
         return await response.arrayBuffer();
       } finally { clearTimeout(timeout); }
-    })).then(data => this.musicData = data).finally(() => { this.fetching = undefined; });
-    return this.fetching;
+    })).catch(error => { this.musicFetches.delete(track); throw error; });
+    this.musicFetches.set(track, fetching);
+    return fetching;
   }
   restartBoot() {
     this.stopEffects();
@@ -451,11 +454,19 @@ export class TerminalAudio {
     else if (this.unlocked && !this.entryPending) void this.activate();
   };
   configure(prefs: AudioPreferences) {
+    const musicTrack = prefs.musicTrack === "menu" ? "menu" : "observatory";
+    if (musicTrack !== (this.prefs.musicTrack ?? "observatory")) {
+      this.requestId++;
+      this.stopMusic();
+      this.offset = 0;
+      this.buffers = undefined;
+    }
     this.prefs = {
       sound: !!prefs.sound,
       music: !!prefs.music,
       soundVolume: clamp(prefs.soundVolume),
       musicVolume: clamp(prefs.musicVolume),
+      musicTrack,
     };
     if (this.context) {
       level(
@@ -533,16 +544,20 @@ export class TerminalAudio {
   }
   private loadMusic(c: AudioContext) {
     if (this.buffers) return Promise.resolve();
-    this.loading ??= this.prepareMusic()
-      .then(data => Promise.all(data.map(bytes => c.decodeAudioData(bytes.slice(0)))))
-      .then((buffers) => {
+    const track = this.prefs.musicTrack ?? "observatory";
+    let loading = this.musicLoads.get(track);
+    if (!loading) {
+      loading = this.prepareMusic()
+        .then(data => Promise.all(data.map(bytes => c.decodeAudioData(bytes.slice(0)))))
+        .catch(error => { this.musicLoads.delete(track); throw error; });
+      this.musicLoads.set(track, loading);
+    }
+    return loading.then((buffers) => {
+      if (track === (this.prefs.musicTrack ?? "observatory")) {
         this.buffers = buffers;
         this.error = "";
-      })
-      .finally(() => {
-        this.loading = undefined;
-      });
-    return this.loading;
+      }
+    });
   }
   private startMusic() {
     const c = this.context;
@@ -563,7 +578,7 @@ export class TerminalAudio {
       src.buffer = buffer;
       src.loop = true;
       src.loopStart = 0;
-      src.loopEnd = Math.min(LOOP_SECONDS, buffer.duration);
+      src.loopEnd = Math.min(this.prefs.musicTrack === "menu" ? 40 : LOOP_SECONDS, buffer.duration);
       src.connect(this.stemGains[i]);
       src.start(this.startedAt, this.offset % src.loopEnd);
       return src;
@@ -580,7 +595,7 @@ export class TerminalAudio {
     if (!c || !this.tracks.length) return;
     this.offset =
       (this.offset + Math.max(0, c.currentTime - this.startedAt)) %
-      LOOP_SECONDS;
+      (this.tracks[0].loopEnd || LOOP_SECONDS);
     this.tracks.forEach((track, i) => {
       const fade = c.createGain();
       track.disconnect();

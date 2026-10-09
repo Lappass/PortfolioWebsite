@@ -163,7 +163,7 @@ function readLocal<T>(key: string, fallback: T): T {
   }
 }
 const saved = new Set<string>(readLocal<string[]>("rhine-saved", []));
-const storedPrefs = readLocal<Partial<{ sound: boolean; music: boolean; soundVolume: number; musicVolume: number; reduced: boolean; quality: boolean; rendering: RenderQuality; superPerformance: boolean; colorTheme: "light" | "dark"; themeChosen: boolean; motion: StoredMotion; motionPreset: MotionPreset }>>("rhine-settings", {});
+const storedPrefs = readLocal<Partial<{ sound: boolean; music: boolean; soundVolume: number; musicVolume: number; musicTrack: "observatory" | "menu"; reduced: boolean; quality: boolean; rendering: RenderQuality; superPerformance: boolean; colorTheme: "light" | "dark"; themeChosen: boolean; motion: StoredMotion; motionPreset: MotionPreset }>>("rhine-settings", {});
 const initialMotion = createMotionPreferences(
   storedPrefs.motion,
   storedPrefs.reduced ?? (storedPrefs.motion === undefined
@@ -176,6 +176,7 @@ const prefs = {
   music: storedPrefs.music ?? storedPrefs.sound ?? true,
   soundVolume: storedPrefs.soundVolume ?? .55,
   musicVolume: storedPrefs.musicVolume ?? .5,
+  musicTrack: (storedPrefs.musicTrack === "menu" ? "menu" : "observatory") as "menu" | "observatory",
   motion: initialMotion,
   motionPreset: initialMotionPreset,
   quality: storedPrefs.quality ?? true,
@@ -859,8 +860,9 @@ document.addEventListener("change", (e) => {
   }
   if (el.dataset.pref) {
     const key = el.dataset.pref;
+    if (key === "musicTrack") prefs.musicTrack = el.value === "menu" ? "menu" : "observatory";
     if (key === "sound" || key === "music" || key === "quality" || key === "superPerformance") prefs[key] = el.checked;
-    if (key === "sound" || key === "music") saveAudioPrefs(); else savePrefs();
+    if (key === "sound" || key === "music" || key === "musicTrack") saveAudioPrefs(); else savePrefs();
     audio.play("confirm");
   }
   if (el.dataset.motion) {
