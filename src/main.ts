@@ -88,14 +88,12 @@ $("#stage").innerHTML = `
     <div class="object-caption"><span id="object-id">NO.001</span><small>拖动旋转 <span>↔</span></small></div>
     <article id="detail-content" class="detail-content"></article>
   </section>
-  <button class="experiments-entry" data-action="experiments"><svg class="experiment-stack" viewBox="0 0 40 34" aria-hidden="true"><path d="M3 28h34M5 26V12h24v14M10 12V7h24v19M15 7V2h24v24"/></svg><span><strong>EXPERIMENTS</strong><small>实验合集 · ${String(experimentFiles.length).padStart(2,"0")}</small></span><span>↗</span></button>
   <footer class="system-footer"><span><i class="status-light"></i> SHUHANG CHEN · PORTFOLIO${isWallpaper ? '<button type="button" class="three-toggle" data-action="toggle-three" aria-pressed="true" title="卸载三维模型，保留 2D 界面">3D 开启</button>' : ''}</span><span><span id="clock">00:00:00</span></span><button data-action="replay" title="重播开场">重播开场 ↻</button></footer>
   <div id="pwa-update-notice" class="pwa-update-notice" role="status" hidden><span>新版本已就绪</span><button data-pwa-action="update">更新并重启 ↻</button></div>
   <div id="modal-root"></div><div id="toast" class="toast" role="status"></div>
   <div id="loading" class="loading"><div class="loading-mark">${logo}</div><span>LOADING</span><i></i></div>
 `;
 
-$(".system-footer").insertAdjacentHTML("beforeend", '<button class="footer-preferences" data-action="settings" aria-label="画面与声音设置">偏好设置</button>');
 
 type Mode = "boot" | "archive" | "detail";
 let mode: Mode = "boot",
