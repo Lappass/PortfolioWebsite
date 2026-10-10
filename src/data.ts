@@ -17,6 +17,8 @@ export interface ArchiveRecord {
   /** Optional spine strip (148×1700) and disc label (square) art for the game case. */
   spine?: string;
   disc?: string;
+  /** Optional back-cover art, same size as the cover. */
+  back?: string;
   hero?: string;
   gallery?: { src: string; caption?: string; note?: string }[];
   video?: string;

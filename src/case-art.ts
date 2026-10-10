@@ -8,7 +8,7 @@ const HUES: Record<string, number> = { Games: 32, Web: 215, "3D Graphics": 24, I
 /** Cover art supplied per work (content/archives.json `cover`), decoded before cases are printed. */
 const coverImages = new Map<string, HTMLImageElement>();
 export async function preloadCovers(works: ArchiveRecord[], url: (path: string) => string) {
-  await Promise.all(works.flatMap((r) => (["cover", "spine", "disc"] as const).filter((k) => r[k]).map(async (k) => {
+  await Promise.all(works.flatMap((r) => (["cover", "spine", "disc", "back"] as const).filter((k) => r[k]).map(async (k) => {
     const key = `${r.id}:${k}`;
     if (coverImages.has(key)) return;
     const image = new Image();
@@ -146,6 +146,8 @@ export function paintInsert(c: CanvasRenderingContext2D, r: ArchiveRecord, numbe
   c.textAlign = "left";
   }
   // Back.
+  const backArt = coverImages.get(`${r.id}:back`);
+  if (backArt) { drawCover(c, backArt, bx, 0, bw, h); c.restore(); return; }
   c.fillStyle = CASE_PAPER;
   c.fillRect(bx, 0, bw, h);
   c.fillStyle = CASE_INK;

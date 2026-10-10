@@ -330,12 +330,44 @@ function discBlock() {
   return { svg: s, W, H: W };
 }
 
+/** Back cover, 1350×1700: pitch, a screenshot strip, features, and a taped footer. */
+function back() {
+  const W = 1350, H = 1700, M = 96;
+  const shot = (name) => "data:image/jpeg;base64," + readFileSync(new URL(name, OUT)).toString("base64");
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W * 0 + H}" viewBox="0 0 ${W} ${H}">${defs}`;
+  s += `<rect width="${W}" height="${H}" fill="url(#sky)"/>`;
+  // Faint window lattice behind everything, as on the disc.
+  for (let y = 0; y < H; y += 128) for (let x = 0; x < W; x += 128) s += `<rect x="${x + 16}" y="${y + 16}" width="96" height="96" fill="#20272a"/>`;
+  s += `<rect width="${W}" height="${H}" fill="${C.night}" opacity=".55"/>`;
+  // Pitch.
+  s += text(M, 170, 30, "STAY HOME. KEEP EVERYONE FED.", 'letter-spacing="6" font-weight="700"', C.warm);
+  const pitch = ["The city has gone quiet. Every day the delivery arrives,", "the family group chat fills up, and the news gets worse.", "Fit what you have into the pan, and make it last."];
+  pitch.forEach((l, i) => { s += text(M, 240 + i * 46, 30, l, "", C.ink); });
+  // Screenshot strip: one wide, two below.
+  const frame = (img, x, y, w, h) => `<rect x="${x - 6}" y="${y - 6}" width="${w + 12}" height="${h + 12}" fill="${C.frame}"/><image href="${shot(img)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice"/>`;
+  const fw = W - M * 2;
+  s += frame("kitchen.jpg", M, 420, fw, 470);
+  const sw = (fw - 24) / 2, sh = Math.round(sw * 9 / 16), sy = 420 + 470 + 26;
+  s += frame("prep.jpg", M, sy, sw, sh) + frame("fridge.jpg", M + sw + 24, sy, sw, sh);
+  // Features, each marked with a small ingredient cell.
+  const feats = ["Cook by fitting ingredient pieces into the pan", "Keep the fridge in order before food spoils", "Deliveries, messages and news shape each day"];
+  const cols = [C.pork, C.green, C.tan];
+  feats.forEach((t, i) => { const y = sy + sh + 84 + i * 54; s += `<rect x="${M}" y="${y - 24}" width="26" height="26" rx="3" fill="${cols[i]}"/>`; s += text(M + 50, y - 2, 30, t, "", C.ink); });
+  // Footer: a strip of caution tape, then billing.
+  s += `<rect x="0" y="1500" width="${W}" height="44" fill="#e9c443"/>`;
+  for (let x = -40; x < W + 40; x += 44) s += `<polygon points="${x},1500 ${x + 22},1500 ${x + 2},1544 ${x - 20},1544" fill="#151a1c"/>`;
+  s += text(M, 1620, 24, "UNITY · 2026 · SOLO DEVELOPER", 'letter-spacing="6"', C.muted);
+  s += text(W - M, 1620, 24, "SHUHANG CHEN", 'text-anchor="end" letter-spacing="6"', C.ink);
+  s += `<rect width="${W}" height="${H}" filter="url(#grain)"/></svg>`;
+  return { svg: s, W, H };
+}
+
 if (process.env.DISC_ONLY) {
   for (const [name, make] of [["disc-e", discBlock]])
     await sharp(Buffer.from(make().svg)).jpeg({ quality: 88 }).toFile(resolve(process.env.DISC_ONLY, name + ".jpg"));
   process.exit(0);
 }
-for (const [name, make, size] of [["cover", cover, 1350], ["hero", hero, 1920], ["spine", spine, 148], ["disc", discBlock, 1024]]) {
+for (const [name, make, size] of [["cover", cover, 1350], ["hero", hero, 1920], ["spine", spine, 148], ["disc", discBlock, 1024], ["back", back, 1350]]) {
   const { svg } = make();
   await sharp(Buffer.from(svg)).resize(size).jpeg({ quality: 88, mozjpeg: true }).toFile(new URL(`${name}.jpg`, OUT).pathname.replace(/^\//, ""));
   console.log("wrote", name);
