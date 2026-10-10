@@ -86,6 +86,8 @@ export class ConsoleSetup {
         }
         if (o.name.startsWith("Controller_Player_Light")) {
           standard.emissive.set("#ffb43b");
+          // The home button glows through its own artwork: the crescent lights, the surround stays dark.
+          standard.emissiveMap = standard.map;
           standard.toneMapped = false;
           standard.emissiveIntensity = 0;
           this.playerLights.push(standard);

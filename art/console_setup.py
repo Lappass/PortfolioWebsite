@@ -1,5 +1,5 @@
 """Shared terminal: a low stand, an upright console with a vertical disc slot,
-a 16:9 monitor, and a licensed DualSense controller (see art/vendor/dualsense).
+a 16:9 monitor, and Shuhang's own controller (see art/vendor/gamepad).
 
 Run: blender --background --factory-startup --python art/console_setup.py
 Outputs art/console-setup.blend, art/console-setup-studio.png and public/assets/console-setup.glb.
@@ -77,15 +77,15 @@ for x in [-4.65, 4.65]:
 box("Stand_Controller_Pad", (3.8, 2.4, .035), (-.2, -.75, .02), RUBBER, .14, 6)
 box("Stand_Front_Inlay", (SW-.4, .016, .014), (-.1, -2.354, -.12), METAL, .004)
 
-# Original dual-stick controller; all controls face +Z on the desk.
+# Controller; all controls face +Z on the desk.
 CP = Vector((-.2, -.75, .36))
 bpy.ops.object.empty_add(location=CP)
 bpy.context.object.name = "Controller_Pivot"
 
-# CC BY 4.0: PS5 Controller by Taohid Animation, adapted by dualsense-studio.
-# Source, mirror, license and modifications: art/vendor/dualsense/ATTRIBUTION.md.
+# Shuhang's own controller, generated with Meshy from art/controller-design.svg.
+# Source and modifications: art/vendor/gamepad/NOTES.md.
 before=set(scene.objects)
-bpy.ops.import_scene.gltf(filepath=str(ROOT/'art/vendor/dualsense/source.glb'))
+bpy.ops.import_scene.gltf(filepath=str(ROOT/'art/vendor/gamepad/source.glb'))
 imported=[o for o in scene.objects if o not in before and o.type=='MESH']
 # The source faces -Y after glTF import. Lay its front face upward on the desk.
 turn=Matrix.Rotation(-pi/2,4,'X')
@@ -94,34 +94,34 @@ for obj in imported:
     matrix=turn @ obj.matrix_world
     obj.parent=None
     obj.matrix_world=matrix
+    # The generated mesh is far denser than the web needs; UVs survive the collapse.
+    reduce=obj.modifiers.new('Web budget','DECIMATE')
+    reduce.ratio=60000/max(1,sum(len(p.vertices)-2 for p in obj.data.polygons))
+    bpy.context.view_layer.objects.active=obj
+    bpy.ops.object.modifier_apply(modifier=reduce.name)
     world.extend(matrix @ Vector(corner) for corner in obj.bound_box)
 low=Vector(tuple(min(v[i] for v in world) for i in range(3)))
 high=Vector(tuple(max(v[i] for v in world) for i in range(3)))
 factor=3.1/(high.x-low.x)
 centre=(low+high)/2
-# Float just above the soft pad; preserve the original, accurate proportions.
+# Float just above the soft pad; preserve the source proportions.
 place=Matrix.Translation(Vector((CP.x,CP.y,.055))-Vector((centre.x,centre.y,low.z))*factor) @ Matrix.Scale(factor,4)
+# Home button, as a fraction of the controller's width from its centre (measured on the source).
+HOME=Vector((0,.170)); HOME_R=.047
 for obj in imported:
-    original=obj.name
     obj.matrix_world=place @ obj.matrix_world
-    mats=[m for m in obj.data.materials if m]
-    is_light=any(m.name=='Material.008' for m in mats)
-    obj.name=('Controller_Player_Light_' if is_light else 'Controller_')+original
-    for mat in mats:
-        bsdf=mat.node_tree.nodes.get('Principled BSDF')
-        if not bsdf: continue
-        bsdf.inputs['Metallic'].default_value=0
-        bsdf.inputs['Roughness'].default_value=.48
-        dark_detail=original.startswith(('ps-mount','mute-mount','white-shell-detail'))
-        if mat.name in ['front_body','VRayMtl55'] and not dark_detail:
-            bsdf.inputs['Base Color'].default_value=(.72,.74,.76,1)
-        if mat.name in ['VRayMtl33','front_body.001','front_body.002','VRayMtl37']:
-            bsdf.inputs['Base Color'].default_value=(.014,.017,.023,1)
-        if is_light:
-            bsdf.inputs['Base Color'].default_value=(.15,.10,.04,1)
-            bsdf.inputs['Emission Color'].default_value=(1,.55,.12,1)
-            bsdf.inputs['Emission Strength'].default_value=2
-# Remove the imported empty container while retaining its baked world transforms.
+    obj.name='Controller_Body'
+    # Lift the home button's faces into their own mesh: the site lights it as the player light.
+    light=obj.copy(); light.data=obj.data.copy(); light.name='Controller_Player_Light_Home'
+    scene.collection.objects.link(light)
+    for part,keep_home in [(obj,False),(light,True)]:
+        bm=bmesh.new(); bm.from_mesh(part.data)
+        def is_home(face):
+            c=part.matrix_world @ face.calc_center_median()
+            return c.z>.055+(high.z-low.z)*factor*.5 and (Vector((c.x-CP.x,c.y-CP.y))/3.1-HOME).length<HOME_R
+        bmesh.ops.delete(bm,geom=[f for f in bm.faces if is_home(f)!=keep_home],context='FACES')
+        bm.to_mesh(part.data); bm.free()
+    print('home light faces',len(light.data.polygons),'body faces',len(obj.data.polygons))
 for obj in list(scene.objects):
     if obj not in before and obj.type=='EMPTY': bpy.data.objects.remove(obj,do_unlink=True)
 

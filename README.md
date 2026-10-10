@@ -48,6 +48,6 @@ npm run preview    # 预览生产构建
 - 原项目 [LBEILC/RhineLabUI](https://github.com/LBEILC/RhineLabUI)，MIT 协议，版权声明见 [LICENSE](LICENSE)。
 - 原项目 PR #15 的渲染优化，贡献者 PacificSauryMan，见 [PR15-ATTRIBUTION.md](PR15-ATTRIBUTION.md)。
 - 内容数据分离的建议来自 [@Tomahawkd](https://github.com/LBEILC/RhineLabUI/pull/3)。
-- 手柄模型「PS5 Controller」by Taohid Animation，CC BY 4.0，见 [public/model-credits.html](public/model-credits.html)。
+- 手柄模型为自有设计（[art/controller-design.svg](art/controller-design.svg)），由 Meshy 生成，见 [public/model-credits.html](public/model-credits.html)。
 - 字体 MiSans（小米），使用 `misans-webfont` 分包，许可见 `public/fonts`。
 - 滚动数字 [@kitlangton/rolling-number](https://github.com/kitlangton/rolling-number)，许可见 [public/licenses/rolling-number.txt](public/licenses/rolling-number.txt)。
