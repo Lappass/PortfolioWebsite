@@ -156,28 +156,44 @@ function spine() {
 }
 
 /** Disc label, 1024 square mapped onto a ring (hub hole ≈ 36% of the radius).
- *  A pan seen from above: the ingredients fitted round the ring like a tangram. */
+ *  The disc face is a solved tangram: the seven classic pieces, each an
+ *  ingredient colour, fitted into a square pan around the hub. */
 function disc() {
   const W = 1024, R = 512, hole = 196;
+  // Classic seven-piece tangram on a 4×4 grid.
+  const pieces = [
+    [[0, 0], [4, 0], [2, 2], C.pork],
+    [[0, 0], [2, 2], [0, 4], C.green],
+    [[4, 2], [4, 4], [2, 4], C.tan],
+    [[2, 2], [3, 1], [4, 2], [3, 3], C.tofu],
+    [[3, 1], [4, 0], [4, 2], C.warm],
+    [[2, 2], [3, 3], [1, 3], C.pork],
+    [[0, 4], [1, 3], [3, 3], [2, 4], C.green],
+  ];
   let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">${defs}`;
   s += `<rect width="${W}" height="${W}" fill="${C.night}"/>`;
   s += `<circle cx="${R}" cy="${R}" r="${R}" fill="${C.wall}"/>`;
-  // Warm pan-glow ring.
   s += `<circle cx="${R}" cy="${R}" r="${R - 14}" fill="none" stroke="${C.glow}" stroke-width="4" opacity=".7"/>`;
-  // Upper half: the cover's apartment wall, clipped to the ring, one kitchen lit.
-  s += `<clipPath id="ring"><circle cx="${R}" cy="${R}" r="${R - 20}"/></clipPath><mask id="hub"><rect width="${W}" height="${W}" fill="#fff"/><circle cx="${R}" cy="${R}" r="${hole + 22}" fill="#000"/></mask>`;
-  seed = 20200323;
-  s += `<g clip-path="url(#ring)" mask="url(#hub)"><g transform="rotate(-5 ${R} ${R})"><rect x="-60" y="-60" width="${W + 120}" height="${R + 80}" fill="${C.wallLit}"/>`;
-  s += facade(-40, -30, 9, 4, 96, 100, 30, 30, { r: 1, c: 4 });
-  s += litWindow(-40 + 4 * 126, -30 + 1 * 130, 96, 100).replace(/<polygon[^>]*\/>/, "");
-  s += `</g></g>`;
-  // Title across the lower band, cell-built like the cover.
-  const cell = 13, tw = wordWidth("LOCKDOWN", cell);
-  s += blockWord("LOCKDOWN", R - tw / 2, R + hole + 40, cell, 1, C.ink).svg;
-  s += text(R, R + hole + 160, 24, "A HOUSEHOLD SURVIVAL GAME", 'text-anchor="middle" letter-spacing="6"', C.muted);
-  s += text(R, R + hole + 205, 20, "UNITY · 2026 · X-002", 'text-anchor="middle" letter-spacing="5"', C.warm);
-  // Hub shadow ring.
+  // A solved tangram in the band above the hub, in a dark pan; the warm
+  // small triangle is lifted out, mid-move, so it reads as a puzzle being played.
+  const u = 56, ox = R - 2 * u, oy = 66;
+  s += `<rect x="${ox - 14}" y="${oy - 14}" width="${4 * u + 28}" height="${4 * u + 28}" rx="8" fill="${C.frame}" stroke="${C.glow}" stroke-width="3" stroke-opacity=".6"/>`;
+  pieces.forEach((p, i) => {
+    const fill = p[p.length - 1], pts = p.slice(0, -1).map(([x, y]) => [ox + x * u, oy + y * u]);
+    const cx = pts.reduce((t, q) => t + q[0], 0) / pts.length, cy = pts.reduce((t, q) => t + q[1], 0) / pts.length;
+    const inset = pts.map(([x, y]) => { const dx = cx - x, dy = cy - y, d = Math.hypot(dx, dy); return [x + dx / d * 4, y + dy / d * 4]; });
+    const moved = i === 4 ? ` transform="translate(50 18) rotate(16 ${cx} ${cy})"` : "";
+    if (i === 4) s += `<polygon points="${inset.map((q) => q.join(",")).join(" ")}" fill="none" stroke="${C.warm}" stroke-width="2" stroke-dasharray="6 6" opacity=".7"/>`;
+    s += `<polygon${moved} points="${inset.map((q) => q.map((v) => v.toFixed(1)).join(",")).join(" ")}" fill="${fill}" stroke="${fill}" stroke-width="4" stroke-linejoin="round"/>`;
+  });
+  // Hub shadow, so the hole reads as cut through the pieces.
   s += `<circle cx="${R}" cy="${R}" r="${hole + 10}" fill="none" stroke="${C.frame}" stroke-width="20"/>`;
+  // Centre hole: punched through, as on a real disc.
+  s += `<circle cx="${R}" cy="${R}" r="${hole}" fill="${C.night}"/><circle cx="${R}" cy="${R}" r="${hole - 60}" fill="none" stroke="#3a4246" stroke-width="2"/><circle cx="${R}" cy="${R}" r="56" fill="#0c0f10"/>`;
+  // Billing: year across the top segment, the cell-built title across the bottom.
+  s += text(R, 800, 22, "UNITY · 2026 · X-002", 'text-anchor="middle" letter-spacing="6"', C.warm);
+  const cell = 10, tw = wordWidth("LOCKDOWN", cell);
+  s += blockWord("LOCKDOWN", R - tw / 2, 880, cell, 1, C.ink).svg;
   s += `<rect width="${W}" height="${W}" filter="url(#grain)"/></svg>`;
   return { svg: s, W, H: W };
 }
