@@ -33,6 +33,20 @@ export class ConsoleSetup {
   private playerLights: THREE.MeshStandardMaterial[] = [];
   get playerLightIntensity() { return this.playerLights[0]?.emissiveIntensity ?? 0; }
   private lamp = new THREE.PointLight("#ffe2bd", 0, 24, 0);
+  /** The picture on the screen lights the desk in its own average colour. */
+  private glow = new THREE.PointLight("#000000", 0, 13, 1.1);
+  private probe = Object.assign(document.createElement("canvas"), { width: 1, height: 1 }).getContext("2d", { willReadFrequently: true })!;
+  private glowLevel = 0;
+  /** Live input mirrored on the desk controller: axes in -1..1 (up is +1), buttons 0..1. */
+  readonly pad = { lx: 0, ly: 0, rx: 0, ry: 0, dx: 0, dy: 0, a: 0, b: 0, x: 0, y: 0, home: 0 };
+  private padShown = { ...this.pad };
+  private parts = new Map<string, THREE.Group>();
+  private confirm?: THREE.MeshStandardMaterial;
+  /** Where the figure stands on the desk, in case-local units: front-left of the monitor. */
+  static readonly FIGURE_SPOT = SETUP_ORIGIN.clone().add(new THREE.Vector3(-2.15, .02, -.85));
+  /** How present the desk is: 0 hidden, 1 fully there. */
+  presence = 0;
+  private last = 0;
   private screenGeometry?: THREE.BufferGeometry;
   /** Monitor foot centre in setup units (art/console_setup.py: MX, foot y). */
   private monitorPivot = new THREE.Vector3(0, 0, -2.35);
@@ -42,7 +56,6 @@ export class ConsoleSetup {
   private texture = new THREE.CanvasTexture(this.canvas);
   private drawn = "";
   loaded = false;
-  private portraitRequested = false;
   private disposed = false;
 
   constructor() {
@@ -59,6 +72,8 @@ export class ConsoleSetup {
     // A local warm key light, lit only while the camera is at the console (decay 0, range 24).
     this.lamp.position.set(-2, 6.5, 5);
     this.group.add(this.lamp);
+    this.glow.position.set(0, 2.5, -.7);
+    this.group.add(this.glow);
   }
 
   async load(url: string) {
@@ -92,6 +107,13 @@ export class ConsoleSetup {
           standard.emissiveIntensity = 0;
           this.playerLights.push(standard);
         }
+        if (o.name === "Controller_Button_A") {
+          // The confirm button answers a press through its own printed ring.
+          standard.emissive.set("#ffb43b");
+          standard.emissiveMap = standard.map;
+          standard.emissiveIntensity = 0;
+          this.confirm = standard;
+        }
         material = standard;
       }
       const mesh = new THREE.Mesh(o.geometry, material);
@@ -108,45 +130,49 @@ export class ConsoleSetup {
         this.monitor.add(mesh);
       } else if (o.name.startsWith("Controller_")) {
         mesh.position.sub(this.controllerPivot);
-        this.controller.add(mesh);
+        if (/Stick|Dpad|Button/.test(o.name)) {
+          // Each moving part hangs from its own centre; sticks pivot below the cap.
+          const centre = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()).sub(this.controllerPivot);
+          if (o.name.includes("Stick")) centre.y -= .12;
+          const node = new THREE.Group();
+          node.position.copy(centre);
+          node.userData.rest = centre.y;
+          mesh.position.sub(centre);
+          node.add(mesh);
+          this.controller.add(node);
+          this.parts.set(o.name.slice("Controller_".length), node);
+        } else this.controller.add(mesh);
       } else this.group.add(mesh);
     });
     this.draw(0);
     this.loaded = true;
   }
 
-  private async loadDeskPortrait() {
-    this.portraitRequested = true;
-    try {
-      const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder)
-        .loadAsync(`${import.meta.env.BASE_URL}assets/desk-portrait.glb`);
-      if (this.disposed) { disposeThreeTree(gltf.scene); return; }
-      const bounds = new THREE.Box3().setFromObject(gltf.scene), center = bounds.getCenter(new THREE.Vector3());
-      const scale = 1.25 / (bounds.max.y - bounds.min.y);
-      gltf.scene.scale.multiplyScalar(scale);
-      gltf.scene.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
-      const stand = new THREE.Group(); stand.name = 'Desk_Portrait';
-      // On the front-left of the monitor, clear of the controller and disc path.
-      stand.position.set(-2.15, .02, -.85); stand.rotation.y = .12;
-      gltf.scene.traverse(object => {
-        if (!(object instanceof THREE.Mesh)) return;
-        object.castShadow = object.receiveShadow = true;
-        for (const material of [object.material].flat()) {
-          material.alphaHash = true; this.surfaces.push(material);
-        }
-      });
-      stand.add(gltf.scene); this.group.add(stand);
-    } catch (error) { console.warn('Desk portrait unavailable', error); }
-  }
-
   dispose() { this.disposed = true; }
+
+  private animateDesk(time: number, lift: number) {
+    const dt = THREE.MathUtils.clamp(time - this.last, 0, .1);
+    this.last = time;
+    const shown = this.padShown, follow = 1 - Math.exp(-dt * 24);
+    for (const key of Object.keys(shown) as (keyof typeof shown)[]) shown[key] += (this.pad[key] - shown[key]) * follow;
+    const tilt = (name: string, x: number, y: number, amount: number) => this.parts.get(name)?.rotation.set(-y * amount, 0, -x * amount);
+    tilt("Stick_L", shown.lx, shown.ly, .34);
+    tilt("Stick_R", shown.rx, shown.ry, .34);
+    tilt("Dpad", shown.dx, shown.dy, .075);
+    for (const key of ["a", "b", "x", "y"] as const) {
+      const node = this.parts.get(`Button_${key.toUpperCase()}`);
+      if (node) node.position.y = node.userData.rest - shown[key] * .022;
+    }
+    if (this.confirm) this.confirm.emissiveIntensity = shown.a * 3;
+    for (const light of this.playerLights) light.emissiveIntensity = Math.max(light.emissiveIntensity, 1.6 * shown.home * (1 - lift));
+  }
 
   /** Follow the case; `insert` drives the slot light and the loading screen. */
   update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, record: ArchiveRecord, workspace = 0, viewportAspect = 16 / 9) {
     const presence = Math.max(THREE.MathUtils.smoothstep(insert, 0.18, 0.28), THREE.MathUtils.smoothstep(workspace, .02, .18));
     this.group.visible = visible && this.loaded && presence > 0;
+    this.presence = this.group.visible ? presence : 0;
     if (!this.group.visible) return;
-    if (!this.portraitRequested) void this.loadDeskPortrait();
     for (const surface of this.surfaces) {
       surface.opacity = presence;
     }
@@ -166,9 +192,22 @@ export class ConsoleSetup {
     const power = THREE.MathUtils.smoothstep(insert, 0.06, 0.18);
     const reading = THREE.MathUtils.smoothstep(insert, 0.46, 0.55) * (1 - THREE.MathUtils.smoothstep(insert, 0.94, 0.99));
     if (this.light) this.light.emissiveIntensity = power * (0.7 + reading * (1.5 + 1.2 * Math.sin(insert * 110)));
+    this.animateDesk(time, lift);
     this.lamp.intensity = Math.max(2.4 * THREE.MathUtils.smoothstep(insert, 0.02, 0.2) * (1 - THREE.MathUtils.smoothstep(insert, 0.85, 1)), 1.6 * presence * lift);
     if (workspace > .001) this.drawPlayer(workspace, viewportAspect);
     else this.draw(insert, record);
+    this.glow.intensity = this.glowLevel * presence;
+  }
+
+  /** Sample the finished frame once; the light follows what the screen shows. */
+  private readGlow() {
+    this.probe.drawImage(this.canvas, 0, 0, 1, 1);
+    const [r, g, b] = this.probe.getImageData(0, 0, 1, 1).data;
+    const peak = Math.max(r, g, b, 1);
+    // Keep the hue, lift dim pictures a little so a dark cover still tints the desk.
+    this.glow.color.setRGB(r / peak, g / peak, b / peak, THREE.SRGBColorSpace);
+    this.glowLevel = 7 * Math.pow((r + g + b) / 765, .6);
+    this.texture.needsUpdate = true;
   }
 
   /** World-space corners of the screen, for handing over to the page. */
@@ -194,7 +233,7 @@ export class ConsoleSetup {
     const ease = THREE.MathUtils.smoothstep;
     const wake = ease(progress, 0.54, 0.62);
     if (!wake) {
-      this.texture.needsUpdate = true;
+      this.readGlow();
       return;
     }
     c.save();
@@ -253,7 +292,7 @@ export class ConsoleSetup {
       drawCover(c, art, 0, 0, w, h);
     }
     c.restore();
-    this.texture.needsUpdate = true;
+    this.readGlow();
   }
 
   private drawPlayer(progress: number, viewportAspect: number) {
@@ -277,6 +316,6 @@ export class ConsoleSetup {
     c.fillStyle = "#95958e"; c.font = "400 20px MiSans, sans-serif";
     c.fillText("Connected", w / 2, h * .89);
     c.restore();
-    this.texture.needsUpdate = true;
+    this.readGlow();
   }
 }

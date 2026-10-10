@@ -84,44 +84,61 @@ bpy.context.object.name = "Controller_Pivot"
 
 # Shuhang's own controller, generated with Meshy from art/controller-design.svg.
 # Source and modifications: art/vendor/gamepad/NOTES.md.
+import numpy as np
 before=set(scene.objects)
 bpy.ops.import_scene.gltf(filepath=str(ROOT/'art/vendor/gamepad/source.glb'))
-imported=[o for o in scene.objects if o not in before and o.type=='MESH']
-# The source faces -Y after glTF import. Lay its front face upward on the desk.
-turn=Matrix.Rotation(-pi/2,4,'X')
-world=[]
-for obj in imported:
-    matrix=turn @ obj.matrix_world
-    obj.parent=None
-    obj.matrix_world=matrix
-    # The generated mesh is far denser than the web needs; UVs survive the collapse.
-    reduce=obj.modifiers.new('Web budget','DECIMATE')
-    reduce.ratio=60000/max(1,sum(len(p.vertices)-2 for p in obj.data.polygons))
-    bpy.context.view_layer.objects.active=obj
-    bpy.ops.object.modifier_apply(modifier=reduce.name)
-    world.extend(matrix @ Vector(corner) for corner in obj.bound_box)
+body=next(o for o in scene.objects if o not in before and o.type=='MESH')
+# The source faces -Y after glTF import. Lay its front face upward on the desk,
+# normalise the width and float it just above the soft pad.
+body.parent=None
+body.matrix_world=Matrix.Rotation(-pi/2,4,'X') @ body.matrix_world
+world=[body.matrix_world @ Vector(corner) for corner in body.bound_box]
 low=Vector(tuple(min(v[i] for v in world) for i in range(3)))
 high=Vector(tuple(max(v[i] for v in world) for i in range(3)))
 factor=3.1/(high.x-low.x)
 centre=(low+high)/2
-# Float just above the soft pad; preserve the source proportions.
-place=Matrix.Translation(Vector((CP.x,CP.y,.055))-Vector((centre.x,centre.y,low.z))*factor) @ Matrix.Scale(factor,4)
-# Home button, as a fraction of the controller's width from its centre (measured on the source).
-HOME=Vector((0,.170)); HOME_R=.047
-for obj in imported:
-    obj.matrix_world=place @ obj.matrix_world
-    obj.name='Controller_Body'
-    # Lift the home button's faces into their own mesh: the site lights it as the player light.
-    light=obj.copy(); light.data=obj.data.copy(); light.name='Controller_Player_Light_Home'
-    scene.collection.objects.link(light)
-    for part,keep_home in [(obj,False),(light,True)]:
-        bm=bmesh.new(); bm.from_mesh(part.data)
-        def is_home(face):
-            c=part.matrix_world @ face.calc_center_median()
-            return c.z>.055+(high.z-low.z)*factor*.5 and (Vector((c.x-CP.x,c.y-CP.y))/3.1-HOME).length<HOME_R
-        bmesh.ops.delete(bm,geom=[f for f in bm.faces if is_home(f)!=keep_home],context='FACES')
-        bm.to_mesh(part.data); bm.free()
-    print('home light faces',len(light.data.polygons),'body faces',len(obj.data.polygons))
+body.matrix_world=Matrix.Translation(Vector((CP.x,CP.y,.055))-Vector((centre.x,centre.y,low.z))*factor) @ Matrix.Scale(factor,4) @ body.matrix_world
+body.name='Controller_Body'
+# Moving parts, measured on the source: centre and radius as fractions of the width,
+# and the height (in desk units above the pad) below which the shell is left alone.
+# The site tilts the sticks and d-pad, presses the buttons and lights the home button.
+MID=.055+(high.z-low.z)*factor*.5
+PARTS=[('Controller_Stick_L',(-.2796,.1524),.068,1.120),('Controller_Stick_R',(.1387,.0032),.068,1.186),
+       ('Controller_Dpad',(-.1282,.0105),.072,MID),('Controller_Button_X',(.2796,.1913),.039,MID),
+       ('Controller_Button_Y',(.2218,.1303),.039,MID),('Controller_Button_B',(.3458,.1335),.039,MID),
+       ('Controller_Button_A',(.2848,.0704),.039,MID),('Controller_Player_Light_Home',(-.002,.170),.047,MID)]
+bpy.ops.object.select_all(action='DESELECT')
+body.select_set(True)
+bpy.context.view_layer.objects.active=body
+for name,(nx,ny),radius,floor in PARTS:
+    mesh=body.data
+    centres=np.empty(len(mesh.polygons)*3,dtype=np.float32)
+    mesh.polygons.foreach_get('center',centres)
+    c=centres.reshape(-1,3) @ np.array(body.matrix_world.to_3x3()).T + np.array(body.matrix_world.translation)
+    inside=(np.hypot((c[:,0]-CP.x)/3.1-nx,(c[:,1]-CP.y)/3.1-ny)<radius) & (c[:,2]>floor)
+    known=set(scene.objects)
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_mode(type='FACE')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    edit=bmesh.from_edit_mesh(mesh)
+    edit.faces.ensure_lookup_table()
+    for index in np.flatnonzero(inside): edit.faces[index].select_set(True)
+    bmesh.update_edit_mesh(mesh)
+    bpy.ops.mesh.separate(type='SELECTED')
+    bpy.ops.object.mode_set(mode='OBJECT')
+    part=next(o for o in scene.objects if o not in known)
+    part.name=part.data.name=name
+    part.select_set(False)
+    print(name,int(inside.sum()),'faces')
+# The generated mesh is far denser than the web needs; UVs survive the collapse.
+# Splitting first keeps the seams between the parts fine.
+for obj in [o for o in scene.objects if o not in before and o.type=='MESH']:
+    tris=sum(len(p.vertices)-2 for p in obj.data.polygons)
+    reduce=obj.modifiers.new('Web budget','DECIMATE')
+    reduce.ratio=min(1,(56000 if obj is body else 1400)/max(1,tris))
+    bpy.context.view_layer.objects.active=obj
+    bpy.ops.object.modifier_apply(modifier=reduce.name)
+bpy.ops.object.select_all(action='DESELECT')
 for obj in list(scene.objects):
     if obj not in before and obj.type=='EMPTY': bpy.data.objects.remove(obj,do_unlink=True)
 
@@ -294,7 +311,7 @@ bpy.ops.render.render(write_still=True)
 # Batch static details by material; keep the animated light and screen independent.
 # This retains editable part names in the .blend and avoids hundreds of web draw calls.
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "art/console-setup.blend"))
-for prefix in ["Console_", "Controller_"]:
+for prefix in ["Console_"]:
     for mat in list(bpy.data.materials):
         pieces = [o for o in scene.objects if o.type == "MESH" and o.name.startswith(prefix) and not o.name.startswith("Controller_Player_Light")
                   and o.data.materials and o.data.materials[0] == mat]

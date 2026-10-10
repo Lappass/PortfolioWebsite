@@ -12,6 +12,7 @@ import { RhythmMotion, rhythmDisplacement, quietBands, type MusicBands, type Rhy
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { buildGameCase, poseCase, printCase, transferPrint } from "./game-case";
 import { ConsoleSetup, PLAYER_WAKE_START } from "./console-setup";
+import { Figure } from "./figure";
 import { ParticleField } from "./particles";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -105,6 +106,7 @@ export class ArchiveScene {
     this.inputEvents.abort();
     this.cancelPointer();
     this.setup.dispose();
+    this.figure.dispose();
     disposeThreeTree(this.scene);
     this.appearance.disposeSources();
     this.model.clear();
@@ -558,6 +560,71 @@ export class ArchiveScene {
   }
   private insertDone?: () => void;
   private setup = new ConsoleSetup();
+  private figure = new Figure();
+  /** Where the figure last sat, and when it left for a newly selected case. */
+  private figureFrom = new THREE.Vector3();
+  private figureHome = new THREE.Vector3();
+  private figureMoved = -10;
+  private figureCell = "";
+  private figureWaved = false;
+  /**
+   * One figure for the whole visit: it waits beside the shelf, hops next to the case
+   * as it opens, and ends on the desk in front of the monitor once the disc goes in.
+   */
+  private placeFigure(time: number, cinematic: boolean) {
+    const open = THREE.MathUtils.smoothstep(this.detail, 0, 1);
+    const opening = this.intro.value * this.intro.value * (3 - 2 * this.intro.value);
+    const desk = Math.max(this.setup.presence, THREE.MathUtils.smoothstep(this.insert.value, .1, .26));
+    const near = Math.max(open, opening);
+    // Home: seated on the top edge of the selected case, legs over its cover. The seat is
+    // the case as drawn, lift and lean included, so the figure never sinks into it.
+    const seat = new THREE.Vector3(.45, 3.7 - .29, .1).applyMatrix4(this.model.matrixWorld);
+    const key = cellKey(this.selectedCell);
+    if (key !== this.figureCell) {
+      // A new selection: hop across to it from wherever the figure was sitting.
+      if (this.figureCell) { this.figureFrom.copy(this.figureHome); this.figureMoved = time; }
+      this.figureCell = key;
+    }
+    const move = this.reduced ? 1 : THREE.MathUtils.clamp((time - this.figureMoved) / .55, 0, 1);
+    const home = this.figureFrom.clone().lerp(seat, THREE.MathUtils.smoothstep(move, 0, 1));
+    home.y += Math.sin(move * Math.PI) * .8;
+    this.figureHome.copy(home);
+    const lean = new THREE.Quaternion().setFromRotationMatrix(this.model.matrixWorld).slerp(new THREE.Quaternion(), Math.max(near, desk));
+    // Opening and opened case: at the case's foot, below and to the right of the disc.
+    const beside = this.model.position.clone().add(new THREE.Vector3(2.35, -.1, .7));
+    const onDesk = ConsoleSetup.FIGURE_SPOT.clone().applyMatrix4(this.model.matrixWorld);
+    // Each move is a hop, not a slide. The climb comes first and the drop last, so the
+    // figure crosses above the cases' tops instead of through the shelf.
+    const across = 1 - (1 - near) ** 3, down = near ** 3;
+    const position = home.clone().lerp(beside, across);
+    position.y = THREE.MathUtils.lerp(home.y, beside.y, down) + Math.sin(near * Math.PI) * 1.2;
+    position.lerp(onDesk, desk);
+    position.y += Math.sin(desk * Math.PI) * .7;
+    const towards = (from: THREE.Vector3, to: THREE.Vector3) => Math.atan2(to.x - from.x, to.z - from.z);
+    const lerpYaw = (a: number, b: number, t: number) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a)) * t;
+    const cameraYaw = towards(position, this.camera.position);
+    const disc = this.model.position.clone().add(new THREE.Vector3(1.35, 2, .55));
+    const screen = towards(onDesk, this.setup.screenLocal.clone().applyMatrix4(this.model.matrixWorld));
+    const reading = THREE.MathUtils.smoothstep(this.insert.value, .28, .45);
+    // Body: legs over the cover and turned a little to the visitor while seated, half turned to the visitor by the case, on the
+    // desk towards the visitor and then round to the screen while the disc is read.
+    let yaw = lerpYaw(-.5, lerpYaw(cameraYaw, towards(position, disc), .2), near);
+    yaw = lerpYaw(yaw, lerpYaw(.12, screen, reading), desk);
+    // Head: the pointer by default, the disc from the case's foot.
+    let lookYaw = lerpYaw(cameraYaw + this.pointer.x * .7, towards(position, disc), near);
+    lookYaw = lerpYaw(lookYaw, lerpYaw(.12 + this.pointer.x * .7, screen, reading), desk);
+    const lookUp = (near + this.pointer.y * -.3 * (1 - near)) * (1 - desk);
+    const hop = near > .03 && near < .97 ? near : desk > .03 && desk < .97 ? desk : move < 1 ? move : undefined;
+    // The first frame of the opening: a wave to whoever just arrived.
+    if (this.intro.value > .98 && !this.figureWaved) { this.figureWaved = true; this.figure.gestureOnce("wave"); }
+    if (this.intro.value === 0) this.figureWaved = false;
+    this.figure.state.still = this.reduced;
+    this.figure.update(time, {
+      position, yaw, lookYaw, lookUp, hop, lean,
+      opacity: cinematic ? 0 : Math.max(THREE.MathUtils.clamp(this.presence / .3, 0, 1), opening),
+      clip: near < .5 && desk < .5 ? "sit" : "idle",
+    });
+  }
   private terminalArrayVisibility = { value: 1 };
   get insertProgress() { return this.insert.value; }
   /** Resolves once the disc is read and the monitor fills the frame. */
@@ -597,6 +664,17 @@ export class ArchiveScene {
       this.insertDone = undefined;
     }
   }
+  /** Mirror live keyboard or gamepad input on the desk controller. */
+  setPad(state: Partial<ConsoleSetup["pad"]>) { Object.assign(this.setup.pad, state); }
+  /** The desk figure dozes while the shelf cycles on its own. */
+  setAttract(asleep: boolean) { this.figure.state.asleep = asleep; }
+  /** Cheat code: the figure hops and a wave runs through the shelf. */
+  celebrate() {
+    this.figure.gestureOnce("cheer");
+    if (!this.reduced) this.emitPulse(this.selectedCell);
+  }
+  /** Lean of the shelf's cases while it slides, in radians. */
+  private caseSway = 0;
   private insertFocus: THREE.Vector3 | null = null;
   /** Camera takeover while inserting: case → console → monitor screen. */
   private insertShot(detailAim: THREE.Vector3, detailSpan: number) {
@@ -610,7 +688,11 @@ export class ArchiveScene {
     const aim = detailAim.clone().lerp(consoleAim, toConsole).lerp(local(this.setup.screenLocal), toScreen);
     const assemblySpan = Math.max(8.6, 13.6 / this.camera.aspect);
     const screenSpan = Math.max(this.setup.screenHeight * 1.95, 7.5 / this.camera.aspect);
-    const span = THREE.MathUtils.lerp(THREE.MathUtils.lerp(detailSpan, assemblySpan, toConsole), screenSpan, toScreen);
+    // While the disc is read the camera keeps closing in until the screen nearly fills
+    // the view, so the page opens from the display instead of jumping out of a small frame.
+    const fillSpan = Math.max(this.setup.screenHeight, this.setup.screenHeight * 16 / 9 / this.camera.aspect) * 1.12;
+    const toFill = THREE.MathUtils.smoothstep(p, 0.78, 1);
+    const span = THREE.MathUtils.lerp(THREE.MathUtils.lerp(THREE.MathUtils.lerp(detailSpan, assemblySpan, toConsole), screenSpan, toScreen), fillSpan, toFill);
     // Focus is exact, not damped: first the case, then the slot itself, then the screen.
     this.insertFocus = local(new THREE.Vector3(0, 1.85, 0)).lerp(local(this.setup.slotLocal), toConsole).lerp(local(this.setup.screenLocal), toScreen);
     return { aim, span };
@@ -642,6 +724,8 @@ export class ArchiveScene {
     this.appearance.apply(this.model, 0);
     printCase(this.model, fileAtCell(this.selectedCell), anisotropy, true);
     this.scene.add(this.setup.group);
+    this.scene.add(this.figure.group);
+    void this.figure.load(publicAsset("assets/figure.glb")).catch((error) => console.warn("Figure unavailable", error));
     void this.setup.load(publicAsset("assets/console-setup.glb")).catch((error) => console.warn("Console setup unavailable", error));
     this.scene.add(this.model);
     this.model.position.copy(this.cellPosition(poolCell(this.selectedSlot)));
@@ -1610,9 +1694,10 @@ export class ArchiveScene {
     this.appearance.setTheme(this.model, this.theme.sample(this.selectedCell, time), indexDim(this.lift.value));
     this.model.position.set(
       chosen.x - trackX,
-      chosen.y + field(selectedRow, selectedLane) + this.lift.value + hoverLift(this.selectedCell) - this.presentationDrop(this.selectedCell),
+      chosen.y + field(selectedRow, selectedLane) + this.lift.value + hoverLift(this.selectedCell) - this.presentationDrop(this.selectedCell) + (!cinematic ? .65 * (1 - detail) * this.targetReveal : 0),
       chosen.z + entryZ + this.rail.value,
     );
+    this.caseSway += ((this.reduced || cinematic ? 0 : THREE.MathUtils.clamp(-this.rail.velocity * .014, -.16, .16)) - this.caseSway) * (1 - Math.exp(-dt * 9));
     // Extraction only changes elevation. Reframing belongs to the camera.
     this.model.rotation.set(
       (field(selectedRow + 0.5, selectedLane) -
@@ -1623,7 +1708,7 @@ export class ArchiveScene {
       cinematic ? 0 : this.rotation + (hoverLift(this.selectedCell) / 0.28) * this.pointer.x * .5 * (1 - detail),
       0,
     );
-    this.model.rotation.x += (hoverLift(this.selectedCell) / 0.28) * this.pointer.y * .22 * (1 - detail);
+    this.model.rotation.x += (hoverLift(this.selectedCell) / 0.28) * this.pointer.y * .22 * (1 - detail) + this.caseSway * (1 - detail);
     // A small light sweeps across the hovered case with the cursor: the glint.
     const glintCell = this.hoverCell && !cinematic ? this.hoverCell : null;
     const glintTarget = glintCell ? hoverLift(glintCell) / 0.28 : 0;
@@ -1754,6 +1839,12 @@ export class ArchiveScene {
         .normalize();
       const width = this.container.clientWidth, height = this.container.clientHeight;
       const pixelScale = height / framing.span;
+      if (!framing.portrait && this.container.closest<HTMLElement>("[data-layout]")?.dataset.layout === "desktop") {
+        // Give the shelf the left half and reserve the right for text above the desk.
+        // Low enough that the figure seated on the selected case clears the site title.
+        cameraAim.addScaledVector(right, .14 * width / pixelScale * (1 - detail));
+        cameraAim.addScaledVector(up, .105 * framing.span * (1 - detail));
+      }
       if (framing.portrait) {
         // Keep the preview camera independent of the live lift, wave and rail.
         // Following model.position here would visually cancel those motions.
@@ -1870,7 +1961,9 @@ export class ArchiveScene {
       this.dummy.position.set(x, y, z);
       // Hovered cases lean toward the cursor so the shrink-wrap catches the light.
       const lean = hoverLift(cell) / 0.28;
-      this.dummy.rotation.set(slope * .024 * (1 - detail) + lean * this.pointer.y * .22, lean * this.pointer.x * .5, 0);
+      // Sliding cases lean back against their travel, the far ones a beat later, then settle upright.
+      const sway = this.caseSway * (1 + .35 * Math.sin((row - selectedRow) * 1.1)) * (1 - detail);
+      this.dummy.rotation.set(slope * .024 * (1 - detail) + lean * this.pointer.y * .22 + sway, lean * this.pointer.x * .5, 0);
       this.dummy.scale.setScalar(1);
       this.dummy.updateMatrix();
       if (play.enabled) this.relayPoints.set(cellKey(cell), { cell: { ...cell }, point: new THREE.Vector3(0, 3.5, 0).applyMatrix4(this.dummy.matrix) });
@@ -1944,6 +2037,7 @@ export class ArchiveScene {
       if (this.shadowCoverage) this.shadowCoverage.mesh.visible = arrayVisibility === 1;
       for (const outgoing of this.outgoing) outgoing.group.visible = arrayVisibility === 1;
       this.model.updateMatrixWorld();
+      this.placeFigure(time, Boolean(cinematic));
       this.setup.update(this.model.matrixWorld, this.camera.position, !cinematic && (this.detail > 0.02 || this.workspace.value > .01) && this.presence > 0.01, this.insert.value, time, records[fileAtCell(this.selectedCell)], this.workspace.value, this.camera.aspect);
     }
     const state = this.renderState;

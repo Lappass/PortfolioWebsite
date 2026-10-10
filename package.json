@@ -17,7 +17,7 @@
     "format": "prettier --write src scripts index.html package.json tsconfig.json",
     "preview": "vite preview --host 127.0.0.1",
     "compress:console": "npx -y @gltf-transform/cli@4 optimize public/assets/console-setup.glb public/assets/console-setup.glb --compress meshopt --texture-compress webp --texture-size 1024 --simplify false --join false --instance false --flatten false --palette false --prune false",
-    "compress:portrait": "npx -y @gltf-transform/cli@4 optimize public/assets/self-portrait.glb public/assets/desk-portrait.glb --compress meshopt --texture-compress webp --texture-size 1024 --simplify false --join false --instance false --flatten false --palette false --prune false"
+    "compress:figure": "npx -y @gltf-transform/cli@4 optimize art/figure-rig.glb public/assets/figure.glb --compress meshopt --texture-compress webp --texture-size 512 --simplify false --join false --instance false --flatten false --palette false --prune false"
   },
   "dependencies": {
     "@kitlangton/rolling-number": "0.4.1",

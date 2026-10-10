@@ -1,3 +1,4 @@
+import { attachPadInput } from "./pad-input";
 import { createRollingClock } from "./rolling-clock";
 import { InspectionOverlay } from "./inspection-overlay";
 import { DocumentDecryption } from "./document-decryption";
@@ -505,12 +506,13 @@ function stepColumn(direction: number) {
 const ATTRACT_AFTER = 20000, ATTRACT_EVERY = 6000;
 let lastInput = performance.now(), lastAttract = 0;
 for (const type of ["pointermove", "pointerdown", "keydown", "wheel", "touchstart"])
-  addEventListener(type, () => { lastInput = performance.now(); }, { passive: true, capture: true });
+  addEventListener(type, () => { lastInput = performance.now(); scene?.setAttract(false); }, { passive: true, capture: true });
 setInterval(() => {
   const now = performance.now();
   if (mode !== "archive" || modal || location.hash || document.hidden || !ready) return;
   if (now - lastInput < ATTRACT_AFTER || now - lastAttract < ATTRACT_EVERY) return;
   lastAttract = now;
+  scene?.setAttract(true);
   const files = columnFiles(fileLocation(selected).lane);
   if (files.length < 2) return;
   const at = files.indexOf(selected);
@@ -779,7 +781,7 @@ function renderResults() {
             `<button class="result-row" data-result="${i}"><span class="result-name"><b>${r.id}</b><span>${escapeHtml(r.title)}<small>${escapeHtml(r.en)}</small></span>${saved.has(r.id) ? "<i>＋</i>" : ""}</span><span>${escapeHtml(r.department)}</span><span>${r.clearance === "RESTRICTED" ? "In progress" : "View"} <i>↗</i></span></button>`,
         )
         .join("")
-    : `<div class="empty-results"><span>∅</span><strong>${modal === "saved" && !searchQuery ? "No saved works yet" : "No matching works"}</strong><p>${modal === "saved" && !searchQuery ? "Press SAVE on a work's details and it will appear here." : "Try another title or ID, or switch the category."}</p><button data-action="reset-search">${modal === "saved" ? "View all works →" : "Reset search →"}</button></div>`;
+    : `<div class="empty-results"><img src="${import.meta.env.BASE_URL}assets/figure.webp" alt="" width="145" height="320"><strong>${modal === "saved" && !searchQuery ? "No saved works yet" : "No matching works"}</strong><p>${modal === "saved" && !searchQuery ? "Press SAVE on a work's details and it will appear here." : "Try another title or ID, or switch the category."}</p><button data-action="reset-search">${modal === "saved" ? "View all works →" : "Reset search →"}</button></div>`;
   $("#result-count").textContent =
     `${results.length} ${results.length === 1 ? "work" : "works"}`;
 }
@@ -945,6 +947,29 @@ document.addEventListener("click", (e) => {
         .requestFullscreen()
         .catch(() => notify("Use your browser's full-screen shortcut (F11)"));
   }
+});
+// The desk controller mirrors the keys; a real gamepad drives the same actions.
+const padKey = (key: string) => document.body.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+let cheatLight = 0;
+attachPadInput({
+  show: (state) => scene?.setPad(state),
+  step: (key) => { lastInput = performance.now(); scene?.setAttract(false); padKey(key); },
+  confirm() {
+    lastInput = performance.now();
+    if (!started || $("#stage").dataset.intro || mode === "boot") padKey("Enter");
+    else if (projectPage.isOpen || profilePage.isOpen || modal) return;
+    else if (mode === "archive") openFile();
+    else if (mode === "detail") void insertDiscAndOpen();
+  },
+  back: () => { lastInput = performance.now(); padKey("Escape"); },
+  connected: () => notify("Controller connected"),
+  cheat() {
+    scene?.celebrate();
+    scene?.setPad({ home: 1 });
+    clearTimeout(cheatLight);
+    cheatLight = window.setTimeout(() => scene?.setPad({ home: 0 }), 1600);
+    notify("Cheat code accepted. Thanks for playing.");
+  },
 });
 document.addEventListener("keydown", (e) => {
   if (!started) return;

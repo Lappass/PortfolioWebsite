@@ -17,9 +17,13 @@
   pointer-events: auto;
 }
 #stage[data-mode="archive"]:is([data-layout="desktop"], [data-layout="opening"]) .archive-callout {
-  left: 56%;
-  top: 30%;
+  left: 53%;
+  top: 16%;
   width: min(540px, 34%);
+}
+#stage[data-mode="archive"][data-layout="desktop"] .archive-navigation {
+  left: var(--edge);
+  bottom: 54px;
 }
 #stage[data-mode="archive"] .eyebrow {
   grid-area: 1 / 2;

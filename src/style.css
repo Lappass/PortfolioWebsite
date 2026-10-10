@@ -1236,6 +1236,12 @@ button {
   align-items: center;
   justify-content: center;
 }
+/* The figure keeps an empty list company. */
+.empty-results > img {
+  width: auto;
+  height: 112px;
+  margin-bottom: 14px;
+}
 .empty-results > span {
   font-size: 44px;
   font-weight: 300;

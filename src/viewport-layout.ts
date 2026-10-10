@@ -22,7 +22,8 @@ export function viewportLayout(width: number, height: number, coarse: boolean, c
 export function archiveFraming(width: number, height: number, span: number, detail: number, compact: boolean) {
   const aspect = width / height;
   const portrait = aspect < 1.05;
-  const baseSpan = span + (5.9 - span) * detail;
+  const homeSpan = !portrait && !compact ? span * 1.18 : span;
+  const baseSpan = homeSpan + (5.9 - homeSpan) * detail;
   const portraitDetailSpan = Math.max(6.3 / aspect, 3.7 * height / Math.max(100, 0.54 * height - 156));
   const viewSpan = portrait
     ? Math.max(baseSpan, 8.4 / aspect + (portraitDetailSpan - 8.4 / aspect) * detail)
