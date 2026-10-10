@@ -2,16 +2,16 @@
 FILE X-011 / Experiments Work 01
 EXPERIMENTS WORK 01
 
-角色：Placeholder: your role
-时间：Placeholder: year
-技术与协作：Placeholder: stack / collaborators
-状态：PUBLIC
+Role: Placeholder: your role
+Date: Placeholder: year
+Stack: Placeholder: stack / collaborators
+Status: PUBLIC
 
 Placeholder. Describe what this project is, what problem it solves, and how it turned out.
 
-项目要点
+Highlights
 1. Highlight one: placeholder
 2. Highlight two: placeholder
 3. Highlight three: placeholder
 
-项目链接：https://github.com/Lappass
+Link: https://github.com/Lappass

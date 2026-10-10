@@ -3,7 +3,7 @@
   "name": "Lappas · Portfolio",
   "short_name": "Lappas",
   "description": "A 3D archive-style portfolio by Shuhang Chen (Lappas)",
-  "lang": "zh-CN",
+  "lang": "en",
   "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",

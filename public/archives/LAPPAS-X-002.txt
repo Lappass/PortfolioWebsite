@@ -2,16 +2,16 @@
 FILE X-002 / LOCKDOWN
 A HOUSEHOLD SURVIVAL GAME
 
-角色：Placeholder: your role
-时间：Placeholder: year
-技术与协作：Placeholder: engine / tools / team
-状态：PUBLIC
+Role: Placeholder: your role
+Date: Placeholder: year
+Stack: Placeholder: engine / tools / team
+Status: PUBLIC
 
 A household survival game set during a pandemic lockdown. Each day you open the delivery, read messages from family and the news, keep the fridge in order, and cook for everyone at home. Cooking is a spatial puzzle: cut ingredients into shapes and fit them into the pan, tangram style.
 
-项目要点
+Highlights
 1. Cooking as a tangram-like puzzle: cut, rotate and fit ingredient pieces into the pan.
 2. Fridge storage as a grid inventory where food spoils if left too long.
 3. Daily loop of deliveries, family messages and news that shape what the household needs.
 
-项目链接：https://github.com/Lappass
+Link: https://github.com/Lappass

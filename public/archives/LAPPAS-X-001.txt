@@ -2,16 +2,16 @@
 FILE X-001 / Portfolio Archive
 PORTFOLIO ARCHIVE
 
-角色：Derivative work (based on RhineLabUI)
-时间：2026
-技术与协作：TypeScript / Three.js / Vite / Blender
-状态：PUBLIC
+Role: Derivative work (based on RhineLabUI)
+Date: 2026
+Stack: TypeScript / Three.js / Vite / Blender
+Status: PUBLIC
 
 An open-source 3D archive terminal, RhineLabUI, rebuilt as a game developer portfolio: works stand on a shelf as game cases, the disc goes into a console and loads on a monitor, and an original console-style boot sequence opens the site.
 
-项目要点
+Highlights
 1. Built on the upstream project's 3D array, glass materials and drag interaction.
 2. Added game case, console and monitor models generated from Blender scripts, the disc insert and loading flow, and the boot sequence.
 3. Reworked the palette, particles, profile and project pages, and removed all third-party IP content.
 
-项目链接：https://github.com/Lappass/PortfolioWebsite
+Link: https://github.com/Lappass/PortfolioWebsite

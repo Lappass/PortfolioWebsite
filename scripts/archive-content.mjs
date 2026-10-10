@@ -99,5 +99,5 @@ export async function loadContent() {
 }
 
 export function archiveText(r) {
-  return `\uFEFFLAPPAS · PORTFOLIO ARCHIVE\nFILE ${r.id} / ${r.title}\n${r.en}\n\n角色：${r.department}\n时间：${r.date}\n技术与协作：${r.lead}\n状态：${r.clearance}\n\n${r.abstract}\n\n项目要点\n${r.findings.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n\n项目链接：${r.source}\n`;
+  return `\uFEFFLAPPAS · PORTFOLIO ARCHIVE\nFILE ${r.id} / ${r.title}\n${r.en}\n\nRole: ${r.department}\nDate: ${r.date}\nStack: ${r.lead}\nStatus: ${r.clearance}\n\n${r.abstract}\n\nHighlights\n${r.findings.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n\nLink: ${r.source}\n`;
 }
