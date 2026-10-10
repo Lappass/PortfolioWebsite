@@ -76,7 +76,7 @@
 }
 .pp-frame > video { object-fit: contain; background: #000; }
 .pp-mark { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px; color: var(--pp-ink); }
-.pp-mark svg { width: clamp(120px, 22vw, 260px); }
+.pp-mark svg { width: clamp(60px, 9vw, 110px); }
 .pp-mark span { font-size: 11px; letter-spacing: 0.16em; color: var(--pp-muted); }
 .pp-play {
   position: absolute;

@@ -39,7 +39,7 @@ import {
   type ArchiveCell,
   type ArchiveNavigation,
 } from "./archive-loop";
-import { labelMarkSvg } from "./brand";
+import { MARK_ASPECT, labelMarkSvg } from "./brand";
 // The baked assets still carry the former company inscription on the shell edge.
 function removeLegacyLettering(root: THREE.Object3D) {
   const found: THREE.Object3D[] = [];
@@ -892,7 +892,9 @@ export class ArchiveScene {
     c.fillStyle = "#171713";
     c.font = "bold 64px MiSans";
     c.fillText("INFO", 830, 143);
-    c.drawImage(this.labelMark, 790, 242, 210, 98);
+    // Keep the mark's own proportions inside the old 210×98 slot.
+    const markW = 98 * MARK_ASPECT;
+    c.drawImage(this.labelMark, 790 + (210 - markW) / 2, 242, markW, 98);
     this.labelTexture.needsUpdate = true;
   }
   private ensureInstanceCapacity(required: number) {

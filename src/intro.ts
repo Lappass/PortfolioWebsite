@@ -96,7 +96,7 @@ export class Intro {
       <div class="intro-head">
         <div class="intro-mark"><div class="intro-half left">${logo}</div><div class="intro-half right">${logo}</div><div class="intro-half intro-symbols">${logo}</div></div>
         <div class="intro-name" aria-hidden="true">${[...name].map((ch) => `<span>${ch === " " ? "&nbsp;" : e(ch)}</span>`).join("")}</div>
-        <div class="intro-role">${e(profile.roleEn)} <i></i> ${e(profile.role)}</div>
+        <div class="intro-role">${e(profile.roleEn)}</div>
       </div>
       <div class="intro-stage">
         <div class="intro-ring"></div>

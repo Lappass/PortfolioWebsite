@@ -102,6 +102,9 @@ button {
   width: 270px;
   white-space: nowrap;
 }
+.brand-mark { position: absolute; left: -2px; top: 0; height: 66px; color: currentColor; }
+.brand-mark svg { height: 100%; width: auto; display: block; }
+.brand:has(.brand-mark) { padding-left: 56px; }
 .brand h1 {
   font-size: 44px;
   letter-spacing: 2.324px;
@@ -1527,8 +1530,8 @@ button {
   pointer-events: none;
 }
 .loading-mark {
-  width: 150px;
-  height: 90px;
+  width: 64px;
+  height: 100px;
   margin-bottom: 49px;
 }
 .loading-mark svg {

@@ -43,12 +43,12 @@
   pointer-events: none;
   will-change: transform, opacity, filter;
 }
-.intro-mark { position: relative; width: clamp(150px, 15vw, 230px); aspect-ratio: 310 / 150; }
+.intro-mark { position: relative; width: clamp(70px, 7vw, 110px); aspect-ratio: 840 / 1320; }
 .intro-half { position: absolute; inset: 0; color: #f2ece4; opacity: 0; will-change: transform; }
 .intro-half.left { clip-path: inset(-20% calc(var(--seam, 50%) - 1px) -20% -20%); }
 .intro-half.right { clip-path: inset(-20% -20% -20% var(--seam, 50%)); }
 .intro-half.right { mix-blend-mode: normal; }
-.intro-symbols path:first-child { display: none; }
+.intro-symbols { display: none; }
 .intro-half svg { display: block; width: 100%; overflow: visible; }
 .intro-half svg text { display: none; }
 .intro-half path { stroke-linecap: round; stroke-linejoin: round; }
