@@ -8,11 +8,13 @@ const HUES: Record<string, number> = { Games: 32, Web: 215, "3D Graphics": 24, I
 /** Cover art supplied per work (content/archives.json `cover`), decoded before cases are printed. */
 const coverImages = new Map<string, HTMLImageElement>();
 export async function preloadCovers(works: ArchiveRecord[], url: (path: string) => string) {
-  await Promise.all(works.filter((r) => r.cover && !coverImages.has(r.id)).map(async (r) => {
+  await Promise.all(works.flatMap((r) => (["cover", "spine", "disc"] as const).filter((k) => r[k]).map(async (k) => {
+    const key = `${r.id}:${k}`;
+    if (coverImages.has(key)) return;
     const image = new Image();
-    image.src = url(r.cover!);
-    try { await image.decode(); coverImages.set(r.id, image); } catch { /* Fall back to the printed cover. */ }
-  }));
+    image.src = url(r[k]!);
+    try { await image.decode(); coverImages.set(key, image); } catch { /* Fall back to the printed art. */ }
+  })));
 }
 /** Draw an image to fill a box, cropping the overflow (CSS object-fit: cover). */
 function drawCover(c: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, w: number, h: number) {
@@ -102,7 +104,7 @@ export function paintInsert(c: CanvasRenderingContext2D, r: ArchiveRecord, numbe
   c.clip();
   c.translate(0, y);
   // Front cover: the work's own art when it has one, otherwise a printed title card.
-  const art = coverImages.get(r.id);
+  const art = coverImages.get(`${r.id}:cover`);
   if (art) drawCover(c, art, fx, 0, fw, h);
   else {
   c.fillStyle = CASE_PAPER;
@@ -125,6 +127,9 @@ export function paintInsert(c: CanvasRenderingContext2D, r: ArchiveRecord, numbe
   c.textAlign = "left";
   }
   // Spine.
+  const spineArt = coverImages.get(`${r.id}:spine`);
+  if (spineArt) drawCover(c, spineArt, sx, 0, sw, h);
+  else {
   c.fillStyle = CASE_PAPER;
   c.fillRect(sx, 0, sw, h);
   c.save();
@@ -139,6 +144,7 @@ export function paintInsert(c: CanvasRenderingContext2D, r: ArchiveRecord, numbe
   c.textAlign = "center";
   c.fillText(String(number).padStart(2, "0"), sx + sw / 2, h * 0.96);
   c.textAlign = "left";
+  }
   // Back.
   c.fillStyle = CASE_PAPER;
   c.fillRect(bx, 0, bw, h);
@@ -163,6 +169,8 @@ export function insertCanvas(r: ArchiveRecord, number: number, width = 2400) {
 
 export function paintDiscLabel(c: CanvasRenderingContext2D, r: ArchiveRecord, size = 1024) {
   const k = size / 1024;
+  const discArt = coverImages.get(`${r.id}:disc`);
+  if (discArt) { c.drawImage(discArt, 0, 0, size, size); return; }
   c.fillStyle = CASE_PAPER;
   c.fillRect(0, 0, size, size);
   c.fillStyle = CASE_INK;

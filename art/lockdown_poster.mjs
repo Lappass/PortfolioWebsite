@@ -133,7 +133,58 @@ function hero() {
   return { svg: s, W, H };
 }
 
-for (const [name, make, size] of [["cover", cover, 1350], ["hero", hero, 1920]]) {
+/** Spine strip, 148×1700 (the case spine is 0.148 × 1.7 units): night sky,
+ *  the lit window at the head, the cell-built title running down, engine and year at the foot. */
+function spine() {
+  const W = 148, H = 1700;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${defs}`;
+  s += `<rect width="${W}" height="${H}" fill="url(#sky)"/>`;
+  // Head: the lit window, cropped small, with its glow.
+  s += `<rect x="0" y="0" width="${W}" height="250" fill="${C.wall}"/>`;
+  s += litWindow(24, 60, 100, 104).replace(/<polygon[^>]*\/>/, "").replace(/<path[^>]*\/>/, "");
+  s += `<rect x="0" y="250" width="${W}" height="6" fill="${C.frame}"/>`;
+  // Title down the spine, letters stacked top to bottom (read by tilting the head right).
+  const cell = 15, tw = wordWidth("LOCKDOWN", cell);
+  s += `<g transform="translate(${W / 2 + 3.5 * cell} ${330}) rotate(90)">${blockWord("LOCKDOWN", 0, 0, cell, 1, C.ink).svg}</g>`;
+  const foot = 330 + tw + 70;
+  s += `<rect x="${W / 2 - 22}" y="${foot}" width="44" height="4" fill="${C.warm}"/>`;
+  s += `<g transform="translate(${W / 2 + 8} ${foot + 40}) rotate(90)">${text(0, 0, 22, "SHUHANG CHEN", 'letter-spacing="5"', C.muted)}</g>`;
+  s += text(W / 2, H - 120, 22, "UNITY", 'text-anchor="middle" letter-spacing="3"', C.muted);
+  s += text(W / 2, H - 70, 30, "2026", 'text-anchor="middle" font-weight="700" letter-spacing="2"', C.warm);
+  s += `<rect width="${W}" height="${H}" filter="url(#grain)"/></svg>`;
+  return { svg: s, W, H };
+}
+
+/** Disc label, 1024 square mapped onto a ring (hub hole ≈ 36% of the radius).
+ *  A pan seen from above: the ingredients fitted round the ring like a tangram. */
+function disc() {
+  const W = 1024, R = 512, hole = 196;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">${defs}`;
+  s += `<rect width="${W}" height="${W}" fill="${C.night}"/>`;
+  s += `<circle cx="${R}" cy="${R}" r="${R}" fill="${C.wall}"/>`;
+  // Warm pan-glow ring.
+  s += `<circle cx="${R}" cy="${R}" r="${R - 14}" fill="none" stroke="${C.glow}" stroke-width="4" opacity=".7"/>`;
+  // Upper half: the cover's apartment wall, clipped to the ring, one kitchen lit.
+  s += `<clipPath id="ring"><circle cx="${R}" cy="${R}" r="${R - 20}"/></clipPath><mask id="hub"><rect width="${W}" height="${W}" fill="#fff"/><circle cx="${R}" cy="${R}" r="${hole + 22}" fill="#000"/></mask>`;
+  seed = 20200323;
+  s += `<g clip-path="url(#ring)" mask="url(#hub)"><g transform="rotate(-5 ${R} ${R})"><rect x="-60" y="-60" width="${W + 120}" height="${R + 80}" fill="${C.wallLit}"/>`;
+  s += facade(-40, -30, 9, 4, 96, 100, 30, 30, { r: 1, c: 4 });
+  s += litWindow(-40 + 4 * 126, -30 + 1 * 130, 96, 100).replace(/<polygon[^>]*\/>/, "");
+  s += `</g></g>`;
+  // Horizon line where the wall meets the night, echoing the cover's billing block.
+  s += `<rect x="0" y="${R + 40}" width="${W}" height="6" fill="${C.frame}" clip-path="url(#ring)"/>`;
+  // Title across the lower band, cell-built like the cover.
+  const cell = 13, tw = wordWidth("LOCKDOWN", cell);
+  s += blockWord("LOCKDOWN", R - tw / 2, R + hole + 40, cell, 1, C.ink).svg;
+  s += text(R, R + hole + 160, 24, "A HOUSEHOLD SURVIVAL GAME", 'text-anchor="middle" letter-spacing="6"', C.muted);
+  s += text(R, R + hole + 205, 20, "UNITY · 2026 · X-002", 'text-anchor="middle" letter-spacing="5"', C.warm);
+  // Hub shadow ring.
+  s += `<circle cx="${R}" cy="${R}" r="${hole + 10}" fill="none" stroke="${C.frame}" stroke-width="20"/>`;
+  s += `<rect width="${W}" height="${W}" filter="url(#grain)"/></svg>`;
+  return { svg: s, W, H: W };
+}
+
+for (const [name, make, size] of [["cover", cover, 1350], ["hero", hero, 1920], ["spine", spine, 148], ["disc", disc, 1024]]) {
   const { svg } = make();
   await sharp(Buffer.from(svg)).resize(size).jpeg({ quality: 88, mozjpeg: true }).toFile(new URL(`${name}.jpg`, OUT).pathname.replace(/^\//, ""));
   console.log("wrote", name);

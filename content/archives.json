@@ -70,10 +70,10 @@
       "id": "X-002",
       "title": "LOCKDOWN",
       "en": "A HOUSEHOLD SURVIVAL GAME",
-      "department": "Placeholder: your role",
+      "department": "Solo developer · Indie",
       "category": "Games",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: engine / tools / team",
+      "date": "2026",
+      "lead": "Unity · C#",
       "clearance": "PUBLIC",
       "abstract": "A household survival game set during a pandemic lockdown. Each day you open the delivery, read messages from family and the news, keep the fridge in order, and cook for everyone at home. Cooking is a spatial puzzle: cut ingredients into shapes and fit them into the pan, tangram style.",
       "findings": [
@@ -88,6 +88,8 @@
         "Isometric"
       ],
       "cover": "works/x-002/cover.jpg",
+      "spine": "works/x-002/spine.jpg",
+      "disc": "works/x-002/disc.jpg",
       "hero": "works/x-002/hero.jpg",
       "video": "works/x-002/demo.mp4",
       "gallery": [

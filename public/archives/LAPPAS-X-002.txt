@@ -2,9 +2,9 @@
 FILE X-002 / LOCKDOWN
 A HOUSEHOLD SURVIVAL GAME
 
-Role: Placeholder: your role
-Date: Placeholder: year
-Stack: Placeholder: engine / tools / team
+Role: Solo developer · Indie
+Date: 2026
+Stack: Unity · C#
 Status: PUBLIC
 
 A household survival game set during a pandemic lockdown. Each day you open the delivery, read messages from family and the news, keep the fridge in order, and cook for everyone at home. Cooking is a spatial puzzle: cut ingredients into shapes and fit them into the pan, tangram style.
