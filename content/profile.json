@@ -10,9 +10,9 @@
     "Placeholder: second paragraph about how you work, the genres you love, or the tech you are exploring."
   ],
   "skills": [
-    { "group": "Engines", "items": ["Unity", "TBD"] },
-    { "group": "Languages", "items": ["C#", "TypeScript", "TBD"] },
-    { "group": "Tools", "items": ["Blender", "TBD"] }
+    { "group": "Engines", "items": ["Unity", "UE"] },
+    { "group": "Languages", "items": ["C#", "Java", "C++"] },
+    { "group": "Tools", "items": [] }
   ],
   "experience": [
     { "time": "TBD", "title": "School / Major", "detail": "Placeholder: education." },

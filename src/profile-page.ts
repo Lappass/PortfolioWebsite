@@ -67,7 +67,11 @@ export class ProfilePage {
     this.root.scrollTop = 0;
     this.chapters.sync();
     const reduced = Boolean(options.instant) || matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const startOrb = () => { if(this.isOpen) this.orb = new ProfileOrb(this.root.querySelector('.profile-orb-study canvas')!, reduced); };
+    const startOrb = () => {
+      if (!this.isOpen) return;
+      this.orb = new ProfileOrb(this.root.querySelector('.profile-particle-canvas')!, this.root,
+        matchMedia('(prefers-reduced-motion: reduce)').matches || Boolean(options.instant && options.push !== false));
+    };
     const reveal = () => {
       if (!this.isOpen) return;
       const { ready, from } = this.terminal();
@@ -116,7 +120,8 @@ export class ProfilePage {
       <nav class="pp-chapters" aria-label="Profile sections">
         ${[["identity", "Intro"], ["about", "About"], ["skills", "Skills"], ["experience", "Experience"]].map(([id, label]) => `<button type="button" data-chapter="${id}">${label}</button>`).join("")}
       </nav>
-      <article class="pp-body">
+      <article class="pp-body profile-layout">
+        <div class="profile-reading">
         <section class="profile-hero" data-section="identity" tabindex="-1" aria-label="Identity">
           <div class="profile-introduction">
             <div class="pp-kicker">${e(p.role)}</div>
@@ -124,7 +129,6 @@ export class ProfilePage {
             <p class="pp-abstract">${e(p.tagline)}</p>
             <div class="pp-links">${links.map((link) => `<a href="${asset(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} <span>↗</span></a>`).join("")}</div>
           </div>
-          <figure class="profile-orb-study"><canvas aria-label="Particle sphere that reacts to the mouse"></canvas><figcaption>Move the mouse to stir the particles</figcaption></figure>
           <div class="profile-signature"><span>Scroll for more ↓</span></div>
         </section>
         <section class="pp-section pp-highlights" data-section="about" tabindex="-1" aria-label="About me">
@@ -133,12 +137,20 @@ export class ProfilePage {
         </section>
         <section class="pp-section pp-highlights" data-section="skills" tabindex="-1" aria-label="Skills">
           <div class="pp-label">SKILLS</div>
-          <div class="profile-skills">${p.skills.map(s => `<div><div><h3>${e(s.group)}</h3><p>${s.items.map(e).join(" / ")}</p></div></div>`).join("")}</div>
+          <div class="profile-skills">${p.skills.map((s, index) => `<div data-skill-group="${index}"><div><h3>${e(s.group)}</h3><p>${s.items.map(e).join(" / ")}</p></div></div>`).join("")}</div>
         </section>
         <section class="pp-section pp-highlights" data-section="experience" tabindex="-1" aria-label="Experience">
           <div class="pp-label">EXPERIENCE</div>
           <ol>${p.experience.map((x) => `<li><span>${e(x.time)}</span><div><strong>${e(x.title)}</strong><br>${e(x.detail)}</div></li>`).join("")}</ol>
         </section>
+        </div>
+        <figure class="profile-orb-study" aria-label="Identity particles following the profile sections">
+          <div class="profile-orb-stage">
+            <canvas class="profile-particle-canvas" tabindex="0" role="img" aria-label="Interactive particles. In About, drag or use arrow keys to rotate the portrait; click or press Space to scatter and regroup."></canvas>
+            <div class="profile-orb-labels" aria-hidden="true"></div>
+          </div>
+          <figcaption><span class="profile-orb-index">01 / IDENTITY</span><p class="profile-orb-caption">A mark of my own.</p><small>Scroll to explore · Move to interact</small></figcaption>
+        </figure>
       </article>
       <footer class="profile-model-credit"><a href="${import.meta.env.BASE_URL}model-credits.html" target="_blank" rel="noopener noreferrer">3D model credits ↗</a></footer>`;
   }

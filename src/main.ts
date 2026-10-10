@@ -64,6 +64,7 @@ let wallpaperEffects: WallpaperEffects | undefined;
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
   document.querySelector<T>(selector)!;
 import { logo, brandHeading } from "./brand";
+import { attachLogoHover } from "./logo-hover";
 
 $("#stage").innerHTML = `
   <div id="three-scene" class="three-scene"></div>
@@ -145,6 +146,12 @@ const prefs = {
 };
 const motionActive = (key: MotionKey) => motionEnabled(prefs.motion, key);
 const motionIsReduced = () => Object.values(prefs.motion).every((value) => !value);
+const interactiveLogo = document.querySelector<HTMLElement>(".brand-mark")!;
+interactiveLogo.removeAttribute("aria-hidden");
+interactiveLogo.tabIndex = 0;
+interactiveLogo.setAttribute("role", "img");
+interactiveLogo.setAttribute("aria-label", "Shuhang Chen logo");
+attachLogoHover(interactiveLogo, () => motionActive("boot"));
 paintTheme(prefs.colorTheme === "dark" ? 1 : 0);
 const rollingMotion = {
   duration: 460,

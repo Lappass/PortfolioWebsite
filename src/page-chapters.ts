@@ -18,7 +18,8 @@ export class PageChapters {
   }
   sync() {
     const sections = [...this.root.querySelectorAll<HTMLElement>("[data-section]")];
-    const edge = this.root.getBoundingClientRect().top + 170;
+    const edge = this.root.getBoundingClientRect().top +
+      (parseFloat(getComputedStyle(this.root).getPropertyValue("--chapter-edge")) || 170);
     const current = sections.filter(section => section.getBoundingClientRect().top <= edge).at(-1) ?? sections[0];
     for (const button of this.root.querySelectorAll<HTMLElement>("[data-chapter]")) {
       if (button.dataset.chapter === current?.dataset.section) button.setAttribute("aria-current", "location");

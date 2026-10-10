@@ -16,15 +16,15 @@ export class ProfileEntry {
   }
   private tick = () => {
     const t = (performance.now()-this.started)/1000;
-    const target = this.root.querySelector<HTMLCanvasElement>('.profile-orb-study canvas')!;
+    const target = this.root.querySelector<HTMLCanvasElement>('.profile-particle-canvas')!;
     const rect = target.getBoundingClientRect(), w = innerWidth, h = innerHeight;
-    const move = particleEase(1.65,2.65,t), reveal = particleEase(1.85,2.65,t);
+    const move = particleEase(.6,2.65,t), reveal = particleEase(1.85,2.65,t);
     const source = this.from || {left:0,right:w,top:0,bottom:h};
     const sourceHeight = source.bottom-source.top;
     const initialX = (source.left+source.right)/2, initialY = source.top+sourceHeight*.46;
     const x = initialX+(rect.left+rect.width/2-initialX)*move;
     const y = initialY+(rect.top+rect.height/2-initialY)*move;
-    const size = Math.min(sourceHeight*.8,w*.8)*(1-move)+Math.min(rect.width*.94,rect.height*.98)*move;
+    const size = Math.min(sourceHeight*.8,w*.8)*(1-move)+Math.min(rect.width*.96,rect.height*.96)*move;
     const c=this.canvas.getContext('2d')!,dpr=Math.min(devicePixelRatio,2);
     c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
     c.fillStyle=`rgba(7,9,12,${1-reveal})`;c.fillRect(0,0,w,h);
@@ -32,9 +32,9 @@ export class ProfileEntry {
     // Match the final page's ink in either theme as the paper fades in.
     const match = ink.match(/[\d.]+/g), rgb = match?.slice(0,3).map(Number) || [8,10,8];
     const color = `rgb(${[232,228,220].map((v,i)=>Math.round(v+(rgb[i]-v)*reveal)).join(',')})`;
-    // Form the name once, then unfold it into the sphere as it settles on the page.
-    const morph = particleEase(.15,1.4,t) * (1-particleEase(1.65,2.65,t));
-    drawIdentity(c,{x,y,size,morph,ink:color,accent:color});
+    // The physical sphere travels into the reading field and resolves into the brand.
+    const morph = particleEase(.6,2.65,t);
+    drawIdentity(c,{x,y,size,morph,shape:'logo',ink:color,accent:color});
     this.root.style.setProperty('--profile-reveal',String(reveal));
     this.root.style.setProperty('--profile-heading',String(reveal));
     if(t<2.68)this.frame=requestAnimationFrame(this.tick);

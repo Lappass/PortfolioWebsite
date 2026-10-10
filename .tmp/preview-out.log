@@ -1,0 +1,17 @@
+
+  VITE v7.3.6  ready in 291 ms
+
+  ➜  Local:   http://127.0.0.1:5173/
+  ➜  press h + enter to show help
+23:27:08 [vite] (client) page reload src/profile-orb.ts
+23:33:24 [vite] (client) page reload src/profile-particles.ts
+23:33:25 [vite] (client) page reload src/profile-page.ts
+23:33:26 [vite] (client) hmr update /src/profile-workspace.css
+23:33:26 [vite] (client) page reload src/profile-orb.ts
+23:34:16 [vite] (client) page reload src/profile-orb.ts
+23:38:57 [vite] (client) page reload src/profile-orb.ts
+23:40:52 [vite] (client) page reload src/profile-orb.ts
+23:41:53 [vite] (client) page reload src/profile-orb.ts
+23:42:13 [vite] (client) page reload public/model-credits.html
+23:44:26 [vite] (client) page reload src/profile-orb.ts
+23:48:01 [vite] (client) page reload src/profile-orb.ts

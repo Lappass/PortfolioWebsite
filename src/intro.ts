@@ -1,5 +1,5 @@
 import "./intro.css";
-import { logo } from "./brand";
+import { MARK_PATH } from "./brand";
 import { escapeHtml as e } from "./html";
 import { profile } from "./profile";
 import { records, featuredFiles } from "./data";
@@ -8,13 +8,13 @@ import { CASE_SPINE, CASE_W, insertCanvas } from "./case-art";
 /**
  * Console-style opening, in four beats (seconds from power-on):
  * 1. a cold blue nebula gathers and swirls at the centre;
- * 2. the two halves of the mark slide in and snap together; the snap blows the
+ * 2. a falling drop grows into a leaf, then the fish and its eye emerge; this sends the
  *    nebula apart into warm dust under a top light;
  * 3. the name settles in, then lifts away while a game case appears in the light;
  * 4. a ring around the case asks for any key; the case sinks, the dust rushes past
  *    and the archive rises underneath.
  */
-const T = { gather: 0.1, slide: 0.55, snap: 1.05, symbols: 1.12, cone: 1.15, name: 1.45, role: 1.85, lift: 3.0, caseIn: 3.15, prompt: 4.1, auto: 7.2, exit: 1.7 };
+const T = { gather: 0.1, slide: 0.65, snap: 0.75, symbols: 2.8, cone: 3.0, name: 3.2, role: 3.65, lift: 4.7, caseIn: 4.85, prompt: 5.8, auto: 8.9, exit: 1.7 };
 const clamp = (v: number) => Math.min(1, Math.max(0, v));
 const span = (t: number, a: number, b: number) => clamp((t - a) / (b - a));
 const outExpo = (x: number) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
@@ -61,8 +61,12 @@ export class Intro {
   private root = document.createElement("div");
   private canvas = document.createElement("canvas");
   private c = this.canvas.getContext("2d")!;
-  private halves: HTMLElement[] = [];
-  private symbols?: SVGPathElement;
+  private leaf!: SVGPathElement;
+  private fish!: SVGGElement;
+  private lowerLeaf!: SVGPathElement;
+  private eye!: SVGPathElement;
+  private dropPoints: number[][] = [];
+  private leafPoints: number[][] = [];
   private letters: HTMLElement[] = [];
   private head: HTMLElement;
   private roleEl: HTMLElement;
@@ -81,6 +85,7 @@ export class Intro {
   private cues = new Set<Cue>();
   private pointer = { x: 0, y: 0 };
   private burstAt = -1;
+  private center = { x: 0, y: 0 };
   /** Where the case starts its flight on exit, in viewport pixels. */
   private from: { x: number; y: number; h: number } | null = null;
 
@@ -91,10 +96,11 @@ export class Intro {
     this.root.className = "intro";
     this.root.setAttribute("role", "dialog");
     this.root.setAttribute("aria-label", `${name} · ${profile.roleEn}`);
+    const parts = MARK_PATH.split(/(?=M )/).filter(Boolean);
     this.root.innerHTML = `
       <div class="intro-cone"></div>
       <div class="intro-head">
-        <div class="intro-mark"><div class="intro-half left">${logo}</div><div class="intro-half right">${logo}</div><div class="intro-half intro-symbols">${logo}</div></div>
+        <div class="intro-mark"><svg viewBox="0 0 840 1320" aria-hidden="true"><path class="intro-leaf" fill="currentColor"/><path class="intro-lower-leaf" fill="currentColor" d="${parts[3]}"/><g class="intro-fish"><path fill="currentColor" d="${parts[1]}"/><path class="intro-eye" fill="currentColor" d="${parts[2]}"/></g></svg></div>
         <div class="intro-name" aria-hidden="true">${[...name].map((ch) => `<span>${ch === " " ? "&nbsp;" : e(ch)}</span>`).join("")}</div>
         <div class="intro-role">${e(profile.roleEn)}</div>
       </div>
@@ -107,11 +113,23 @@ export class Intro {
       </div>
       <button class="intro-prompt" type="button"><i></i>${e(profile.boot.ready)}<small>Press any key to start</small></button>`;
     this.root.prepend(this.canvas);
-    this.halves = [...this.root.querySelectorAll<HTMLElement>(".intro-half.left, .intro-half.right")];
-    this.root.querySelector<HTMLElement>(".intro-symbols")!.style.opacity = "1";
-    // The prompt symbols live in a third, unclipped copy that pops in after the snap.
-    for (const half of this.halves) half.querySelectorAll("path")[1]?.remove();
-    this.symbols = this.root.querySelectorAll<SVGPathElement>(".intro-symbols path")[1];
+    this.leaf = this.root.querySelector(".intro-leaf")!;
+    this.fish = this.root.querySelector(".intro-fish")!;
+    this.lowerLeaf = this.root.querySelector(".intro-lower-leaf")!;
+    this.eye = this.root.querySelector(".intro-eye")!;
+    // Equal-length samples keep the drop-to-leaf transformation continuous.
+    const sample = (d: string) => {
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", d);
+      const length = path.getTotalLength();
+      return Array.from({ length: 180 }, (_, i) => {
+        const p = path.getPointAtLength(length * i / 180);
+        return [p.x, p.y];
+      });
+    };
+    this.dropPoints = sample("M 420 620 C 400 700 255 825 255 930 C 255 1120 585 1120 585 930 C 585 825 440 700 420 620 Z");
+    this.leafPoints = sample(parts[0] + " Z");
+    this.leaf.dataset.final = parts[0];
     this.letters = [...this.root.querySelectorAll<HTMLElement>(".intro-name span")];
     this.head = this.root.querySelector(".intro-head")!;
     this.roleEl = this.root.querySelector(".intro-role")!;
@@ -138,6 +156,7 @@ export class Intro {
     document.body.append(this.root);
     addEventListener("keydown", this.onKey, true);
     this.resize();
+    this.updateCenter();
     this.gather();
     this.t0 = performance.now() / 1000;
     this.prompt.focus({ preventScroll: true });
@@ -166,6 +185,11 @@ export class Intro {
     this.canvas.height = this.h * this.ratio;
   }
 
+  private updateCenter() {
+    const r = this.root.querySelector(".intro-mark")!.getBoundingClientRect();
+    this.center = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
   /** The cold nebula: motes on tilted orbits around the centre. */
   private gather() {
     const scale = Math.sqrt((this.w * this.h) / (1600 * 900));
@@ -173,7 +197,7 @@ export class Intro {
     this.motes = Array.from({ length: count }, (_, i) => {
       const big = i % 11 === 0, depth = big ? 0.9 + Math.random() * 0.1 : 0.2 + Math.random() * 0.7;
       return {
-        x: this.w / 2, y: this.h * 0.46, vx: 0, vy: 0, depth, big, phase: Math.random() * Math.PI * 2,
+        x: this.center.x, y: this.center.y, vx: 0, vy: 0, depth, big, phase: Math.random() * Math.PI * 2,
         r: (big ? 16 + Math.random() * 20 : 1.4 + Math.random() * 6.5 * depth) * (0.75 + scale * 0.25),
         orbit: (14 + 150 * Math.pow(Math.random(), 1.6)) * scale, angle: Math.random() * Math.PI * 2,
         spin: (0.6 + Math.random() * 1.2) * (Math.random() < 0.5 ? -1 : 1),
@@ -186,7 +210,7 @@ export class Intro {
     this.burstAt = this.now();
     const scale = Math.sqrt((this.w * this.h) / (1600 * 900));
     for (const m of this.motes) {
-      const dx = m.x - this.w / 2, dy = m.y - this.h * 0.46, d = Math.hypot(dx, dy) || 1;
+      const dx = m.x - this.center.x, dy = m.y - this.center.y, d = Math.hypot(dx, dy) || 1;
       const speed = (240 + 1500 * Math.pow(Math.random(), 1.5)) * (0.6 + m.depth * 0.6) * scale;
       m.vx = (dx / d) * speed - (dy / d) * m.spin * 120;
       m.vy = ((dy / d) * speed + (dx / d) * m.spin * 120) * 0.62;
@@ -201,6 +225,7 @@ export class Intro {
     if (innerWidth !== this.w || innerHeight !== this.h) this.resize();
     const t = this.now(), dt = Math.min(0.05, t - this.last || 0);
     this.last = t;
+    if (this.burstAt < 0) this.updateCenter();
     const x = this.exitAt < 0 ? 0 : clamp((t - this.exitAt) / T.exit);
     this.cue("seed", T.gather, t);
     this.cue("snap", T.snap, t);
@@ -209,26 +234,25 @@ export class Intro {
     if (t >= T.snap && this.burstAt < 0) this.blowApart();
     if (this.exitAt < 0 && t >= T.auto) this.leave();
 
-    // Beat 2: the halves race in with an exponential ease and lock with a tiny overshoot.
-    const slide = span(t, T.slide, T.snap);
-    // outBack overshoots past 1 just before the end: the halves meet, press in, settle.
-    const travel = (1 - outBack(slide, 0.8)) * innerWidth * 0.42;
-    const settle = span(t, T.snap, T.snap + 0.16);
-    const kick = Math.sin(settle * Math.PI) * 5 * (1 - settle);
-    this.halves[0].style.transform = `translateX(${(-travel - kick).toFixed(1)}px)`;
-    this.halves[1].style.transform = `translateX(${(travel + kick).toFixed(1)}px)`;
-    const shown = slide > 0 ? 1 : 0;
-    this.halves.forEach((half) => { half.style.opacity = String(shown); });
-    // Once locked, the clip seam closes so the frame reads as one piece.
-    this.root.style.setProperty("--seam", t >= T.snap + 0.05 ? "-20%" : "50%");
-    const flash = t >= T.snap ? Math.exp(-(t - T.snap) * 7) : 0;
-    this.root.style.setProperty("--flash", flash.toFixed(3));
-    const pop = span(t, T.symbols, T.symbols + 0.4);
-    if (this.symbols) {
-      this.symbols.style.opacity = pop > 0 ? "1" : "0";
-      this.symbols.style.transformOrigin = "162px 72px";
-      this.symbols.style.transform = `scale(${(0.4 + 0.6 * outBack(pop, 2.2)).toFixed(3)})`;
-    }
+    // Drop → grow → form → reveal: all driven by the same replay clock.
+    const fall = inOutCubic(span(t, 0.05, 0.65));
+    const grow = inOutCubic(span(t, 0.75, 1.85));
+    this.leaf.style.opacity = String(outCubic(span(t, 0.05, 0.25)));
+    this.leaf.style.transform = `translateY(${(-460 * (1 - fall)).toFixed(2)}px)`;
+    this.leaf.setAttribute("d", grow >= 1 ? this.leaf.dataset.final! : this.dropPoints.map((p, i) => {
+      const q = this.leafPoints[i];
+      return `${i ? "L" : "M"}${(p[0] + (q[0] - p[0]) * grow).toFixed(2)} ${(p[1] + (q[1] - p[1]) * grow).toFixed(2)}`;
+    }).join(" ") + " Z");
+    // The lower leaf sprouts upward from its fixed bottom tip.
+    const sprout = inOutCubic(span(t, 1.6, 2.5));
+    this.lowerLeaf.style.opacity = sprout > 0 ? "1" : "0";
+    this.lowerLeaf.style.transform = `scale(${(0.12 + 0.88 * sprout).toFixed(4)}, ${sprout.toFixed(4)})`;
+    const form = inOutCubic(span(t, 1.6, 2.5));
+    this.fish.style.opacity = String(outCubic(span(t, 1.6, 1.85)));
+    const swim = Math.sin(form * Math.PI * 2) * (1 - form);
+    this.fish.style.transform = `translate(${(380 * (1 - form)).toFixed(2)}px, ${(-90 * Math.sin(form * Math.PI) + 24 * swim).toFixed(2)}px) rotate(${(12 * swim).toFixed(2)}deg)`;
+    this.eye.style.opacity = String(outCubic(span(t, 1.65, 1.95)));
+    this.root.style.setProperty("--flash", "0");
     this.root.style.setProperty("--cone", (0.95 * inOutCubic(span(t, T.cone, T.cone + 1.4)) * (1 - x)).toFixed(3));
 
     // Beat 3: the name, letter by letter from blur; the role's tracking tightens.
@@ -272,7 +296,7 @@ export class Intro {
   }
 
   private drawDust(t: number, dt: number, x: number) {
-    const c = this.c, cx = this.w / 2, cy = this.h * 0.46;
+    const c = this.c, cx = this.center.x, cy = this.center.y;
     c.setTransform(this.ratio, 0, 0, this.ratio, 0, 0);
     c.clearRect(0, 0, this.w, this.h);
     c.globalCompositeOperation = "lighter";
