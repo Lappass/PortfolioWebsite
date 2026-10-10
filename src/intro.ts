@@ -105,7 +105,7 @@ export class Intro {
           <div class="intro-face spine"><span>${e(cover.record.title)}</span></div>
         </div>
       </div>
-      <button class="intro-prompt" type="button"><i></i>${e(profile.boot.ready)}<small>按任意键开始</small></button>`;
+      <button class="intro-prompt" type="button"><i></i>${e(profile.boot.ready)}<small>Press any key to start</small></button>`;
     this.root.prepend(this.canvas);
     this.halves = [...this.root.querySelectorAll<HTMLElement>(".intro-half.left, .intro-half.right")];
     this.root.querySelector<HTMLElement>(".intro-symbols")!.style.opacity = "1";

@@ -16,9 +16,9 @@ export class StartupGate {
     const { root } = options;
     root.setAttribute("role", "dialog");
     root.setAttribute("aria-modal", "true");
-    root.setAttribute("aria-label", "开机");
+    root.setAttribute("aria-label", "Power on");
     root.classList.add("power-gate");
-    root.insertAdjacentHTML("beforeend", '<div class="entry-controls"><button class="entry-start" disabled aria-label="开机"><svg class="power-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M16 13a15 15 0 1 0 16 0" /><path d="M24 6v17" /></svg><span>正在准备…</span></button><button class="entry-silent" hidden>关闭声音并进入</button><p class="entry-status" role="status">资源就绪后即可进入</p></div>');
+    root.insertAdjacentHTML("beforeend", '<div class="entry-controls"><button class="entry-start" disabled aria-label="Power on"><svg class="power-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M16 13a15 15 0 1 0 16 0" /><path d="M24 6v17" /></svg><span>Preparing…</span></button><button class="entry-silent" hidden>Enter without sound</button><p class="entry-status" role="status">You can enter once resources are ready</p></div>');
     this.button = root.querySelector<HTMLButtonElement>(".entry-start")!;
     this.silent = root.querySelector<HTMLButtonElement>(".entry-silent")!;
     this.status = root.querySelector<HTMLElement>(".entry-status")!;
@@ -52,7 +52,7 @@ export class StartupGate {
     this.state = "waiting";
     this.options.root.dataset.entry = "waiting";
     this.button.disabled = false;
-    this.label("按任意键开机");
+    this.label("Press any key to start");
     this.status.textContent = "";
     this.button.focus({ preventScroll: true });
   }
@@ -62,8 +62,8 @@ export class StartupGate {
     this.options.root.dataset.entry = "starting";
     // aria-disabled preserves keyboard focus while repeated input is ignored.
     this.button.setAttribute("aria-disabled", "true");
-    this.label("正在开机…");
-    this.status.textContent = "准备完成后开始播放";
+    this.label("Starting…");
+    this.status.textContent = "Playback begins when ready";
     this.silent.hidden = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
@@ -78,8 +78,8 @@ export class StartupGate {
         this.state = "error";
         this.options.root.dataset.entry = "error";
         this.button.removeAttribute("aria-disabled");
-        this.label("再试一次");
-        this.status.textContent = "声音暂未就绪，请重试或无声进入";
+        this.label("Try again");
+        this.status.textContent = "Sound is not ready yet. Retry or enter without sound.";
       }
     } catch {
       if (request !== this.request) return;
@@ -87,8 +87,8 @@ export class StartupGate {
       this.state = "error";
       this.options.root.dataset.entry = "error";
       this.button.removeAttribute("aria-disabled");
-      this.label("再试一次");
-      this.status.textContent = "声音暂未就绪，请重试或无声进入";
+      this.label("Try again");
+      this.status.textContent = "Sound is not ready yet. Retry or enter without sound.";
     } finally { clearTimeout(timer); }
   }
   private finish(silent: boolean) {

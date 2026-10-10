@@ -9,10 +9,10 @@ import { escapeHtml } from "./html";
 
 function choiceControl(attributes: string, label: string, value: string | number, choices: (readonly [string | number, string])[]) {
   if (isWallpaper) {
-    const text = choices.find(([key]) => key === value)?.[1] ?? "自定义";
-    return `<button type="button" ${attributes} class="quality-cycle" aria-label="${label}" title="点击切换${label}" value="${value}" data-quality-choices="${escapeHtml(JSON.stringify(choices))}"><span data-quality-label>${text}</span><span aria-hidden="true">↻</span></button>`;
+    const text = choices.find(([key]) => key === value)?.[1] ?? "Custom";
+    return `<button type="button" ${attributes} class="quality-cycle" aria-label="${label}" title="Click to change ${label}" value="${value}" data-quality-choices="${escapeHtml(JSON.stringify(choices))}"><span data-quality-label>${text}</span><span aria-hidden="true">↻</span></button>`;
   }
-  return `<select ${attributes} aria-label="${label}">${choices.map(([key, text]) => `<option value="${key}" ${key === value ? "selected" : ""}>${text}</option>`).join("")}${value === "custom" ? '<option value="custom" disabled selected>自定义</option>' : ""}</select>`;
+  return `<select ${attributes} aria-label="${label}">${choices.map(([key, text]) => `<option value="${key}" ${key === value ? "selected" : ""}>${text}</option>`).join("")}${value === "custom" ? '<option value="custom" disabled selected>Custom</option>' : ""}</select>`;
 }
 
 if (isWallpaper) document.addEventListener("click", event => {
@@ -47,43 +47,43 @@ function range(
 }
 export function qualityMarkup(quality: RenderQuality) {
   const preset = matchingPreset(quality);
-  return `<section class="quality-settings" aria-label="画质设置">
-    <div class="quality-heading"><h3>RENDER QUALITY <span>渲染画质</span></h3>${choiceControl('id="quality-preset"', "画质预设", preset, (Object.keys(presetLabels) as QualityPreset[]).map(key => [key, presetLabels[key]]))}</div>
+  return `<section class="quality-settings" aria-label="Quality settings">
+    <div class="quality-heading"><h3>RENDER QUALITY</h3>${choiceControl('id="quality-preset"', "Quality preset", preset, (Object.keys(presetLabels) as QualityPreset[]).map(key => [key, presetLabels[key]]))}</div>
     <p class="quality-summary" id="quality-summary" aria-live="polite"></p>
-    <details class="quality-advanced"><summary>精细设置 <span>清晰度 / 材质 / 阴影</span></summary><div class="quality-grid">
-    ${range(quality, "scale", "渲染比例", "相对屏幕像素，受密度上限限制；高比例改善细线", 50, 200)}
+    <details class="quality-advanced"><summary>Advanced <span>Sharpness / Materials / Shadows</span></summary><div class="quality-grid">
+    ${range(quality, "scale", "Render scale", "Relative to screen pixels, capped by the density limit; higher values sharpen fine lines", 50, 200)}
     ${select(
       quality,
       "pixelRatio",
-      "像素密度上限",
-      "控制高密度屏幕的原生像素倍率",
+      "Pixel density limit",
+      "Native pixel ratio cap for high-density screens",
       [1, 1.5, 2, 3].map((v) => [v, `${v}×`]),
     )}
-    ${select(quality, "antialias", "抗锯齿", "SMAA 平滑模型边缘与后处理结果", [
-      ["off", "原始"],
+    ${select(quality, "antialias", "Antialiasing", "SMAA smooths model edges and post-processing", [
+      ["off", "Native"],
       ["smaa", "SMAA"],
     ])}
     ${select(
       quality,
       "anisotropy",
-      "纹理过滤",
-      "改善倾斜视角下的标签细节",
+      "Texture filtering",
+      "Improves label detail at oblique angles",
       [1, 2, 4, 8, 16].map((v) => [v, `${v}×`]),
     )}
     ${select(
       quality,
       "transmission",
-      "透明材质分辨率",
-      "控制盖板折射画面的清晰度",
+      "Transparent material resolution",
+      "Sharpness of the refraction through cover panels",
       [0.25, 0.5, 0.75, 1].map((v) => [v, `${v * 100}%`]),
     )}
     ${select(
       quality,
       "shadows",
-      "阴影分辨率 · 阵列",
-      "更高分辨率保留更细的投影边缘",
+      "Shadow resolution · Array",
+      "Higher resolution keeps finer shadow edges",
       [
-        [0, "关闭"],
+        [0, "Off"],
         [1024, "1024"],
         [2048, "2048"],
         [4096, "4096"],
@@ -92,24 +92,24 @@ export function qualityMarkup(quality: RenderQuality) {
     ${select(
       quality,
       "aoSamples",
-      "环境遮蔽 · 阵列",
-      "采样越多，接缝暗部越细腻",
+      "Ambient occlusion · Array",
+      "More samples give finer shading in seams",
       [
-        [0, "关闭"],
-        [16, "16 采样"],
-        [32, "32 采样"],
-        [64, "64 采样"],
+        [0, "Off"],
+        [16, "16 samples"],
+        [32, "32 samples"],
+        [64, "64 samples"],
       ],
     )}
     ${select(
       quality,
       "aoResolution",
-      "遮蔽分辨率 · 阵列",
-      "降低可减轻环境遮蔽的渲染负担",
+      "Occlusion resolution · Array",
+      "Lower values reduce ambient occlusion cost",
       [0.5, 0.75, 1].map((v) => [v, `${v * 100}%`]),
     )}
-    ${range(quality, "depthOfField", "景深强度 · 阵列", "0% 关闭；100% 保留原始镜头虚化", 0, 150)}
-    </div></details><p class="quality-note">${isWallpaper ? "即时生效，仅限当前运行；长期设置请在 Wallpaper Engine 中调整。" : "即时生效并自动保存。"}高渲染比例更适合静态观察；缓冲上限为 829 万像素，硬件限制时自动收敛。</p>
+    ${range(quality, "depthOfField", "Depth of field · Array", "0% off; 100% keeps the original lens blur", 0, 150)}
+    </div></details><p class="quality-note">${isWallpaper ? "Applies instantly for this session only; set long-term values in Wallpaper Engine. " : "Applies instantly and saves automatically. "}High render scales suit still viewing; the buffer is capped at 8.29 MP and scales down automatically on hardware limits.</p>
   </section>`;
 }
 
@@ -120,7 +120,7 @@ export function syncQualityUI(quality: RenderQuality) {
   if (preset instanceof HTMLSelectElement) {
     let custom = preset.querySelector<HTMLOptionElement>('option[value="custom"]');
     if (value === "custom" && !custom) {
-      custom = new Option("自定义", "custom");
+      custom = new Option("Custom", "custom");
       custom.disabled = true;
       preset.add(custom);
     } else if (value !== "custom") {
@@ -137,7 +137,7 @@ export function syncQualityUI(quality: RenderQuality) {
     });
   document.querySelectorAll<HTMLButtonElement>("[data-quality-choices]").forEach(button => {
     const choices = JSON.parse(button.dataset.qualityChoices!) as [string | number, string][];
-    button.querySelector("[data-quality-label]")!.textContent = choices.find(([value]) => String(value) === button.value)?.[1] ?? "自定义";
+    button.querySelector("[data-quality-label]")!.textContent = choices.find(([value]) => String(value) === button.value)?.[1] ?? "Custom";
   });
   document
     .querySelectorAll<HTMLOutputElement>("[data-quality-output]")

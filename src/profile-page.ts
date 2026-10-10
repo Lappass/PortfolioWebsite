@@ -106,40 +106,40 @@ export class ProfilePage {
 
   private render() {
     const p = profile;
-    const links = [...p.contact, ...(p.resume ? [{ label: "简历", url: p.resume }] : [])];
+    const links = [...p.contact, ...(p.resume ? [{ label: "Résumé", url: p.resume }] : [])];
     this.root.innerHTML = `
       <header class="pp-bar">
-        <button type="button" data-profile="back">← <span>返回作品</span><small>ESC</small></button>
-        <span class="pp-brand">关于我</span>
+        <button type="button" data-profile="back">← <span>Back to works</span><small>ESC</small></button>
+        <span class="pp-brand">About me</span>
         <span class="pp-count" aria-hidden="true"></span>
       </header>
-      <nav class="pp-chapters" aria-label="个人页章节">
-        ${[["identity", "介绍"], ["about", "关于"], ["skills", "技能"], ["experience", "经历"]].map(([id, label]) => `<button type="button" data-chapter="${id}">${label}</button>`).join("")}
+      <nav class="pp-chapters" aria-label="Profile sections">
+        ${[["identity", "Intro"], ["about", "About"], ["skills", "Skills"], ["experience", "Experience"]].map(([id, label]) => `<button type="button" data-chapter="${id}">${label}</button>`).join("")}
       </nav>
       <article class="pp-body">
-        <section class="profile-hero" data-section="identity" tabindex="-1" aria-label="身份">
+        <section class="profile-hero" data-section="identity" tabindex="-1" aria-label="Identity">
           <div class="profile-introduction">
             <div class="pp-kicker">${e(p.role)}</div>
             <h1 id="profile-title" tabindex="-1">${e(p.name)}</h1>
             <p class="pp-abstract">${e(p.tagline)}</p>
             <div class="pp-links">${links.map((link) => `<a href="${asset(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} <span>↗</span></a>`).join("")}</div>
           </div>
-          <figure class="profile-orb-study"><canvas aria-label="可随鼠标扰动的粒子小球"></canvas><figcaption>移动鼠标，扰动粒子</figcaption></figure>
-          <div class="profile-signature"><span>向下了解更多 ↓</span></div>
+          <figure class="profile-orb-study"><canvas aria-label="Particle sphere that reacts to the mouse"></canvas><figcaption>Move the mouse to stir the particles</figcaption></figure>
+          <div class="profile-signature"><span>Scroll for more ↓</span></div>
         </section>
-        <section class="pp-section pp-highlights" data-section="about" tabindex="-1" aria-label="关于我">
-          <div class="pp-label">关于我</div>
+        <section class="pp-section pp-highlights" data-section="about" tabindex="-1" aria-label="About me">
+          <div class="pp-label">ABOUT</div>
           <div class="profile-bio">${p.bio.map((paragraph) => `<p>${e(paragraph)}</p>`).join("")}</div>
         </section>
-        <section class="pp-section pp-highlights" data-section="skills" tabindex="-1" aria-label="技能">
-          <div class="pp-label">技能</div>
+        <section class="pp-section pp-highlights" data-section="skills" tabindex="-1" aria-label="Skills">
+          <div class="pp-label">SKILLS</div>
           <div class="profile-skills">${p.skills.map(s => `<div><div><h3>${e(s.group)}</h3><p>${s.items.map(e).join(" / ")}</p></div></div>`).join("")}</div>
         </section>
-        <section class="pp-section pp-highlights" data-section="experience" tabindex="-1" aria-label="经历">
-          <div class="pp-label">经历</div>
+        <section class="pp-section pp-highlights" data-section="experience" tabindex="-1" aria-label="Experience">
+          <div class="pp-label">EXPERIENCE</div>
           <ol>${p.experience.map((x) => `<li><span>${e(x.time)}</span><div><strong>${e(x.title)}</strong><br>${e(x.detail)}</div></li>`).join("")}</ol>
         </section>
       </article>
-      <footer class="profile-model-credit"><a href="${import.meta.env.BASE_URL}model-credits.html" target="_blank" rel="noopener noreferrer">模型来源与署名 ↗</a></footer>`;
+      <footer class="profile-model-credit"><a href="${import.meta.env.BASE_URL}model-credits.html" target="_blank" rel="noopener noreferrer">3D model credits ↗</a></footer>`;
   }
 }

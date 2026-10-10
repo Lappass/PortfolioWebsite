@@ -69,27 +69,27 @@ $("#stage").innerHTML = `
   <div id="three-scene" class="three-scene"></div>
   <div class="scene-atmosphere archive-atmosphere"></div>
   <header class="brand">${brandHeading}</header>
-  <nav class="system-nav" aria-label="系统导航">
-    <button data-action="about" aria-label="关于我"><span aria-hidden="true">◉</span> 关于</button>
-    <button data-action="saved" aria-label="查看收藏的作品" title="收藏">＋ 收藏 <span id="saved-count">00</span></button>
+  <nav class="system-nav" aria-label="System navigation">
+    <button data-action="about" aria-label="About me"><span aria-hidden="true">◉</span> ABOUT</button>
+    <button data-action="saved" aria-label="View saved works" title="Saved">＋ SAVED <span id="saved-count">00</span></button>
   </nav>
   <svg id="inspection-marks" viewBox="0 0 1920 1080" aria-hidden="true"><path id="inspection-lines"/><g id="inspection-corners"></g><circle id="inspection-point" r="1.8"/></svg>
   <div id="inspection-text" aria-hidden="true"><strong></strong></div>
-  <section id="archive-ui" class="archive-ui" aria-label="作品选择">
-    <div class="archive-callout"><div class="eyebrow"><i aria-hidden="true"></i><span id="archive-category"></span></div><button class="file-title" data-action="open"><span id="selected-id">X-<span id="selected-code">001</span></span><span class="file-open">↗</span></button><div class="callout-rule"><i></i></div><div class="file-summary"><span id="selected-title">作品集</span><span id="selected-clearance"></span></div><p id="selected-abstract" class="callout-abstract"></p><ul id="selected-tags" class="callout-tags"></ul><button class="read-file" data-action="open">查看项目 <span>→</span></button></div>
+  <section id="archive-ui" class="archive-ui" aria-label="Work selection">
+    <div class="archive-callout"><div class="eyebrow"><i aria-hidden="true"></i><span id="archive-category"></span></div><button class="file-title" data-action="open"><span id="selected-id">X-<span id="selected-code">001</span></span><span class="file-open">↗</span></button><div class="callout-rule"><i></i></div><div class="file-summary"><span id="selected-title">Portfolio</span><span id="selected-clearance"></span></div><p id="selected-abstract" class="callout-abstract"></p><ul id="selected-tags" class="callout-tags"></ul><button class="read-file" data-action="open">VIEW PROJECT <span>→</span></button></div>
     <div id="hover-label" class="hover-label" hidden>X-<span id="hover-code">001</span> / <span id="hover-title"></span></div>
-    <div class="archive-counter"><span class="tiny-label">SELECTED WORKS / 精选项目</span><div><span id="selected-number">01</span><i>/</i><span class="count-total">04</span></div></div>
-    <div class="archive-navigation"><button data-action="prev" aria-label="上一个作品">↑</button><div id="file-ticks" class="file-ticks"></div><button data-action="next" aria-label="下一个作品">↓</button></div>
-    <div class="column-navigation"><button data-action="column-prev" aria-label="上一列">←</button><div><span id="column-number">COLUMN <span id="column-index">03</span> / 05</span><strong id="column-name"></strong></div><button data-action="column-next" aria-label="下一列">→</button></div>
-    <div class="archive-hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> 浏览作品 <span>／</span> 拖动滑行 <span>／</span> <kbd>ENTER</kbd> 打开</div>
+    <div class="archive-counter"><span class="tiny-label">SELECTED WORKS</span><div><span id="selected-number">01</span><i>/</i><span class="count-total">04</span></div></div>
+    <div class="archive-navigation"><button data-action="prev" aria-label="Previous work">↑</button><div id="file-ticks" class="file-ticks"></div><button data-action="next" aria-label="Next work">↓</button></div>
+    <div class="column-navigation"><button data-action="column-prev" aria-label="Previous column">←</button><div><span id="column-number">COLUMN <span id="column-index">03</span> / 05</span><strong id="column-name"></strong></div><button data-action="column-next" aria-label="Next column">→</button></div>
+    <div class="archive-hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> Browse <span>／</span> Drag to glide <span>／</span> <kbd>ENTER</kbd> Open</div>
   </section>
-  <section id="detail-ui" class="detail-ui" aria-label="作品详情" hidden>
-    <button class="back-button" data-action="back">← <span>返回作品</span><small>ESC</small></button>
-    <div class="object-caption"><span id="object-id">NO.001</span><small>拖动旋转 <span>↔</span></small></div>
+  <section id="detail-ui" class="detail-ui" aria-label="Work details" hidden>
+    <button class="back-button" data-action="back">← <span>Back to works</span><small>ESC</small></button>
+    <div class="object-caption"><span id="object-id">NO.001</span><small>Drag to rotate <span>↔</span></small></div>
     <article id="detail-content" class="detail-content"></article>
   </section>
-  <footer class="system-footer"><span><i class="status-light"></i> SHUHANG CHEN · PORTFOLIO${isWallpaper ? '<button type="button" class="three-toggle" data-action="toggle-three" aria-pressed="true" title="卸载三维模型，保留 2D 界面">3D 开启</button>' : ''}</span><span><span id="clock">00:00:00</span></span><button data-action="replay" title="重播开场">重播开场 ↻</button></footer>
-  <div id="pwa-update-notice" class="pwa-update-notice" role="status" hidden><span>新版本已就绪</span><button data-pwa-action="update">更新并重启 ↻</button></div>
+  <footer class="system-footer"><span><i class="status-light"></i> SHUHANG CHEN · PORTFOLIO${isWallpaper ? '<button type="button" class="three-toggle" data-action="toggle-three" aria-pressed="true" title="Unload 3D models, keep the 2D interface">3D ON</button>' : ''}</span><span><span id="clock">00:00:00</span></span><button data-action="replay" title="Replay intro">REPLAY INTRO ↻</button></footer>
+  <div id="pwa-update-notice" class="pwa-update-notice" role="status" hidden><span>New version ready</span><button data-pwa-action="update">Update and restart ↻</button></div>
   <div id="modal-root"></div><div id="toast" class="toast" role="status"></div>
   <div id="loading" class="loading"><div class="loading-mark">${logo}</div><span>LOADING</span><i></i></div>
 `;
@@ -101,7 +101,7 @@ let mode: Mode = "boot",
   ready = false;
 let modal: "search" | "saved" | "settings" | "experiments" | null = null,
   searchQuery = "",
-  filter = "全部作品";
+  filter = "All";
 let activeTab = "overview";
 const reviewParams = new URLSearchParams(location.search);
 const frozenTime: number | null = null;
@@ -539,7 +539,7 @@ function updateSelection(navigation?: ArchiveNavigation) {
   fileTicks.forEach((button, slot) => {
     const index = files[slot], record = records[index];
     button.dataset.select = String(index);
-    button.setAttribute("aria-label", `选择作品 ${record.id} ${record.title}`);
+    button.setAttribute("aria-label", `Select work ${record.id} ${record.title}`);
     button.title = `${record.id} · ${record.title}`;
     button.classList.toggle("selected", index === selected);
     button.setAttribute("aria-pressed", String(index === selected));
@@ -595,8 +595,8 @@ function toggleSaved() {
   $("#saved-count").textContent = String(saved.size).padStart(2, "0");
   const button = $<HTMLButtonElement>('[data-action="bookmark"]');
   const added = saved.has(id);
-  button.firstChild!.textContent = added ? "− 取消收藏" : "＋ 收藏";
-  button.querySelector("span")!.textContent = added ? "已收藏" : "";
+  button.firstChild!.textContent = added ? "− UNSAVE" : "＋ SAVE";
+  button.querySelector("span")!.textContent = "";
   button.setAttribute("aria-pressed", String(added));
   bookmarkFeedback?.cancel();
   if (motionActive("surfaceTransitions")) bookmarkFeedback = button.animate(
@@ -604,7 +604,7 @@ function toggleSaved() {
     { duration: 220, easing: "ease-out" },
   );
   audio.play("confirm");
-  notify(saved.has(id) ? "已加入收藏" : "已取消收藏");
+  notify(saved.has(id) ? "Saved" : "Removed from saved");
 }
 function renderDetail() {
   tabTransition.cancel();
@@ -614,19 +614,19 @@ function renderDetail() {
   <div class="detail-kicker"><span>${r.id}</span><span>${escapeHtml(r.clearance)}</span></div>
   <h2>${escapeHtml(r.en)}</h2><div class="detail-title-cn">${escapeHtml(r.title)}<span>${escapeHtml(r.category)}</span></div>
   <div class="detail-rule"></div>
-  <dl class="metadata"><div><dt>ROLE / 角色</dt><dd>${escapeHtml(r.department)}</dd></div><div><dt>TIMELINE / 时间</dt><dd>${escapeHtml(r.date)}</dd></div><div><dt>STACK / 技术与协作</dt><dd>${escapeHtml(r.lead)}</dd></div><div><dt>STATUS / 状态</dt><dd><i></i>${r.clearance === "RESTRICTED" ? "进行中" : "已完成 · 可查看"}</dd></div></dl>
-  <div class="detail-tabs" role="tablist"><button id="tab-overview" class="active" role="tab" aria-controls="tab-panel" aria-selected="true" data-tab="overview">01 <span>概述</span></button><button id="tab-notes" role="tab" aria-controls="tab-panel" aria-selected="false" data-tab="notes">02 <span>项目要点</span></button><i class="tab-indicator" aria-hidden="true"></i></div>
+  <dl class="metadata"><div><dt>ROLE</dt><dd>${escapeHtml(r.department)}</dd></div><div><dt>TIMELINE</dt><dd>${escapeHtml(r.date)}</dd></div><div><dt>STACK</dt><dd>${escapeHtml(r.lead)}</dd></div><div><dt>STATUS</dt><dd><i></i>${r.clearance === "RESTRICTED" ? "In progress" : "Completed"}</dd></div></dl>
+  <div class="detail-tabs" role="tablist"><button id="tab-overview" class="active" role="tab" aria-controls="tab-panel" aria-selected="true" data-tab="overview">01 <span>Overview</span></button><button id="tab-notes" role="tab" aria-controls="tab-panel" aria-selected="false" data-tab="notes">02 <span>Highlights</span></button><i class="tab-indicator" aria-hidden="true"></i></div>
   <div id="tab-panel" class="tab-panel" role="tabpanel">${overview()}</div>
-  <button class="detail-more" data-action="project-page">查看详细信息<span>→</span></button>
-  <div class="detail-actions"><button class="solid-button" data-action="bookmark">${saved.has(r.id) ? "− 取消收藏" : "＋ 收藏"}<span>${saved.has(r.id) ? "已收藏" : ""}</span></button></div>
-  <div class="detail-footnote"><a href="${escapeHtml(r.source)}" target="_blank" rel="noopener">项目链接 ↗</a><span>${String(selected + 1).padStart(3, "0")} / ${String(records.length).padStart(3, "0")}</span></div>`;
+  <button class="detail-more" data-action="project-page">MORE DETAILS<span>→</span></button>
+  <div class="detail-actions"><button class="solid-button" data-action="bookmark">${saved.has(r.id) ? "− UNSAVE" : "＋ SAVE"}<span>${""}</span></button></div>
+  <div class="detail-footnote"><a href="${escapeHtml(r.source)}" target="_blank" rel="noopener">Project link ↗</a><span>${String(selected + 1).padStart(3, "0")} / ${String(records.length).padStart(3, "0")}</span></div>`;
   $("#detail-content").setAttribute("tabindex", "-1");
   $('[data-action="bookmark"]').setAttribute("aria-pressed", String(saved.has(r.id)));
   documentDecryption.reset($("#detail-content"), !motionActive("documentReveal") || !scene || scene.decryptionFrame.phase === "clear");
   setTab(activeTab, false);
 }
 function overview() {
-  return `<div class="panel-label">ABSTRACT / 摘要</div><p>${escapeHtml(records[selected].abstract)}</p>`;
+  return `<div class="panel-label">ABSTRACT</div><p>${escapeHtml(records[selected].abstract)}</p>`;
 }
 function setTab(tab: string, sound = true) {
   if (sound && tab === activeTab) return;
@@ -647,8 +647,8 @@ function setTab(tab: string, sound = true) {
     tab === "overview"
       ? overview()
       : tab === "notes"
-        ? `<div class="panel-label">HIGHLIGHTS / 项目要点</div><ol class="research-notes">${r.findings.map((f, i) => `<li><span>${String(i + 1).padStart(2, "0")}</span>${escapeHtml(f)}</li>`).join("")}</ol>`
-        : `<div class="panel-label">ACCESS LOG / 本次访问</div>${accessLog
+        ? `<div class="panel-label">HIGHLIGHTS</div><ol class="research-notes">${r.findings.map((f, i) => `<li><span>${String(i + 1).padStart(2, "0")}</span>${escapeHtml(f)}</li>`).join("")}</ol>`
+        : `<div class="panel-label">ACCESS LOG</div>${accessLog
             .filter((entry) => entry.id === r.id)
             .slice(0, 4)
             .map(
@@ -657,7 +657,7 @@ function setTab(tab: string, sound = true) {
             )
             .join(
               "",
-            )}<p class="log-note">本次会话已通过身份验证。档案内容以当前终端可访问范围展示。</p>`;
+            )}<p class="log-note">Session verified. Showing everything available to this visitor.</p>`;
   $("#tab-panel").scrollTop = 0;
   documentDecryption.refresh();
   if (sound) {
@@ -684,7 +684,7 @@ function openModal(kind: NonNullable<typeof modal>) {
   modalClosing = false;
   modal = kind;
   searchQuery = "";
-  filter = "全部作品";
+  filter = "All";
   audio.play("page-open");
   renderModal();
 }
@@ -712,10 +712,10 @@ function closeModal(afterClose?: () => void) {
 function renderModal() {
   if (!modal) return;
   const directoryTitle = modal === "experiments" ? "EXPERIMENTS" : modal === "saved" ? "SAVED" : "SEARCH";
-  const directoryLabel = modal === "experiments" ? "实验合集 / 小项目与练习" : modal === "saved" ? "收藏的作品" : "检索作品";
+  const directoryLabel = modal === "experiments" ? "Experiments / small projects and practice" : modal === "saved" ? "Saved works" : "Search works";
   modalTransition?.dispose();
   $("#modal-root").innerHTML =
-    `<div class="modal-backdrop"><section class="terminal-modal ${modal === "settings" ? "settings-modal" : modal === "experiments" ? "experiments-modal" : ""}" role="dialog" aria-modal="true" aria-label="${modal === "settings" ? "系统设置" : directoryLabel}"><div class="modal-top"><span>LAPPAS / ${modal === "settings" ? "PREFERENCES" : "WORKS"}</span><button data-action="close-modal" aria-label="关闭窗口">CLOSE <span>×</span></button></div>${modal === "settings" ? settingsMarkup() : `<h2>${directoryTitle}<small>${directoryLabel}</small></h2><div class="search-field"><span>⌕</span><input id="archive-search" type="search" autocomplete="off" placeholder="输入作品编号、名称或角色" aria-label="检索作品"/><span class="key">ESC</span></div><div class="category-filters">${categories.map((c, i) => `<button data-filter="${escapeHtml(c)}" class="${i === 0 ? "active" : ""}">${escapeHtml(c)}</button>`).join("")}</div><div class="result-header"><span>作品</span><span>角色</span><span></span></div><div id="search-results" class="search-results"></div><div class="modal-bottom"><span id="result-count"></span><span></span></div>`}</section></div>`;
+    `<div class="modal-backdrop"><section class="terminal-modal ${modal === "settings" ? "settings-modal" : modal === "experiments" ? "experiments-modal" : ""}" role="dialog" aria-modal="true" aria-label="${modal === "settings" ? "Settings" : directoryLabel}"><div class="modal-top"><span>LAPPAS / ${modal === "settings" ? "PREFERENCES" : "WORKS"}</span><button data-action="close-modal" aria-label="Close window">CLOSE <span>×</span></button></div>${modal === "settings" ? settingsMarkup() : `<h2>${directoryTitle}<small>${directoryLabel}</small></h2><div class="search-field"><span>⌕</span><input id="archive-search" type="search" autocomplete="off" placeholder="Search by ID, title or role" aria-label="Search works"/><span class="key">ESC</span></div><div class="category-filters">${categories.map((c, i) => `<button data-filter="${escapeHtml(c)}" class="${i === 0 ? "active" : ""}">${escapeHtml(c)}</button>`).join("")}</div><div class="result-header"><span>Work</span><span>Role</span><span></span></div><div id="search-results" class="search-results"></div><div class="modal-bottom"><span id="result-count"></span><span></span></div>`}</section></div>`;
   const backdrop = $(".modal-backdrop");
   backdrop.hidden = true;
   modalTransition = new SurfaceTransition(backdrop, $(".terminal-modal"));
@@ -743,7 +743,7 @@ function renderResults() {
       ({ r, i }) =>
         (modal !== "experiments" || experimentFiles.includes(i)) &&
         (modal !== "saved" || saved.has(r.id)) &&
-        (filter === "全部作品" || r.category === filter) &&
+        (filter === "All" || r.category === filter) &&
         `${r.id} ${r.title} ${r.en} ${r.department} ${r.lead}`
           .toLowerCase()
           .includes(searchQuery.toLowerCase()),
@@ -752,28 +752,28 @@ function renderResults() {
     ? results
         .map(
           ({ r, i }) =>
-            `<button class="result-row" data-result="${i}"><span class="result-name"><b>${r.id}</b><span>${escapeHtml(r.title)}<small>${escapeHtml(r.en)}</small></span>${saved.has(r.id) ? "<i>＋</i>" : ""}</span><span>${escapeHtml(r.department)}</span><span>${r.clearance === "RESTRICTED" ? "进行中" : "查看"} <i>↗</i></span></button>`,
+            `<button class="result-row" data-result="${i}"><span class="result-name"><b>${r.id}</b><span>${escapeHtml(r.title)}<small>${escapeHtml(r.en)}</small></span>${saved.has(r.id) ? "<i>＋</i>" : ""}</span><span>${escapeHtml(r.department)}</span><span>${r.clearance === "RESTRICTED" ? "In progress" : "View"} <i>↗</i></span></button>`,
         )
         .join("")
-    : `<div class="empty-results"><span>∅</span><strong>${modal === "saved" && !searchQuery ? "还没有收藏作品" : "没有匹配的作品"}</strong><p>${modal === "saved" && !searchQuery ? "在作品详情中点「收藏」，作品会出现在这里。" : "换个名称、编号，或切换作品分类试试。"}</p><button data-action="reset-search">${modal === "saved" ? "查看全部作品 →" : "重置检索 →"}</button></div>`;
+    : `<div class="empty-results"><span>∅</span><strong>${modal === "saved" && !searchQuery ? "No saved works yet" : "No matching works"}</strong><p>${modal === "saved" && !searchQuery ? "Press SAVE on a work's details and it will appear here." : "Try another title or ID, or switch the category."}</p><button data-action="reset-search">${modal === "saved" ? "View all works →" : "Reset search →"}</button></div>`;
   $("#result-count").textContent =
-    `共 ${results.length} 个作品`;
+    `${results.length} ${results.length === 1 ? "work" : "works"}`;
 }
 function updateQualitySummary() {
   const summary = document.querySelector("#quality-summary");
   if (!summary) return;
-  if (!scene) { summary.textContent = "3D 已关闭 · 三维模型与渲染资源已释放"; return; }
+  if (!scene) { summary.textContent = "3D off · models and rendering resources released"; return; }
   const canvas = scene.renderer.domElement;
   const metrics = JSON.parse(canvas.parentElement?.dataset.renderQuality ?? "{}");
-  summary.textContent = `${superPerformanceEnabled() ? "超级性能模式已启用 · 画质设置暂被覆盖，关闭后恢复 · " : ""}实际渲染 ${canvas.width} × ${canvas.height} · ${effectiveRenderQuality().antialias === "smaa" ? "SMAA" : "原始抗锯齿"} · 纹理 ${metrics.anisotropy ?? 1}×${metrics.limited ? " · 已达到缓冲上限" : ""}`;
+  summary.textContent = `${superPerformanceEnabled() ? "Super performance on · quality settings overridden until it is turned off · " : ""}Rendering ${canvas.width} × ${canvas.height} · ${effectiveRenderQuality().antialias === "smaa" ? "SMAA" : "Native antialiasing"} · Texture ${metrics.anisotropy ?? 1}×${metrics.limited ? " · buffer limit reached" : ""}`;
 }
 function motionPreferenceNoteMarkup() {
   const preset = prefs.motionPreset;
   const allEnabled = Object.values(prefs.motion).every(Boolean);
-  return `<div id="motion-preference-note" class="motion-preference-note"><p>${motionSummary(prefs.motion)}</p><span>预设：${preset === "full" ? "完整动画" : preset === "reduced" ? "减少动画" : "自定义"} · 选择会保存在本站</span>${allEnabled ? "" : '<button data-action="enable-motion">启用完整动画并重播 ↻</button>'}</div>`;
+  return `<div id="motion-preference-note" class="motion-preference-note"><p>${motionSummary(prefs.motion)}</p><span>Preset: ${preset === "full" ? "Full motion" : preset === "reduced" ? "Reduced motion" : "Custom"} · saved on this site</span>${allEnabled ? "" : '<button data-action="enable-motion">Enable full motion and replay ↻</button>'}</div>`;
 }
 function settingsMarkup() {
-  return `<h2>PREFERENCES<small>画面与声音设置</small></h2>${isWallpaper ? '<p class="wallpaper-settings-note">每次启动都会读取 Wallpaper Engine 中的设置。在此修改仅对当前运行生效，无法持久保存；如需保留，请在 Wallpaper Engine 的壁纸属性中调整。</p>' : ""}<div class="settings-list">${themeSettingsMarkup(prefs.colorTheme === "dark")}${!isWallpaper ? `<label><div><strong>SUPER PERFORMANCE</strong><span>降低三维画质和渲染分辨率，保留完整动效；关闭后恢复原画质</span></div><input type="checkbox" data-pref="superPerformance" ${prefs.superPerformance ? "checked" : ""}/><i class="toggle"></i></label>` : ""}${workbench?.settingsMarkup() ?? ""}${audioSettingsMarkup(prefs)}</div>${motionPreferenceNoteMarkup()}${motionSettingsMarkup(prefs.motion, prefs.motionPreset)}${qualityMarkup(prefs.rendering)}${pwaSettingsMarkup()}<div class="settings-shortcuts">${isWallpaper ? '<span>DESKTOP CONTROLS</span><p>拖动或点击界面按钮浏览作品。桌面模式下，方向键与滚轮可能无法传入壁纸。</p>' : '<span>KEYBOARD CONTROLS</span><p><kbd>←</kbd><kbd>→</kbd> 切列 <kbd>↑</kbd><kbd>↓</kbd> 选档 <kbd>ENTER</kbd> 读取 <kbd>/</kbd> 检索 <kbd>ESC</kbd> 返回</p>'}</div><div class="settings-bottom">${!isWallpaper && document.fullscreenEnabled ? '<button data-action="fullscreen">FULLSCREEN <span>↗</span></button>' : ''}<button data-action="restart">重播开场 <span>↻</span></button></div><div class="modal-bottom"><span>ANALYSIS OS / 1.0 · 使用 MiSans 字体（小米） <a href="${assetUrl("fonts/MiSans-license.pdf")}" target="_blank" rel="noopener">字体许可</a></span><span>POWERED BY LAPPAS</span></div>`;
+  return `<h2>PREFERENCES<small>Display and sound</small></h2>${isWallpaper ? '<p class="wallpaper-settings-note">Settings are read from Wallpaper Engine on every launch. Changes here last only for this session; to keep them, adjust the wallpaper properties in Wallpaper Engine.</p>' : ""}<div class="settings-list">${themeSettingsMarkup(prefs.colorTheme === "dark")}${!isWallpaper ? `<label><div><strong>SUPER PERFORMANCE</strong><span>Lowers 3D quality and resolution while keeping full motion; turning it off restores your quality settings</span></div><input type="checkbox" data-pref="superPerformance" ${prefs.superPerformance ? "checked" : ""}/><i class="toggle"></i></label>` : ""}${workbench?.settingsMarkup() ?? ""}${audioSettingsMarkup(prefs)}</div>${motionPreferenceNoteMarkup()}${motionSettingsMarkup(prefs.motion, prefs.motionPreset)}${qualityMarkup(prefs.rendering)}${pwaSettingsMarkup()}<div class="settings-shortcuts">${isWallpaper ? '<span>DESKTOP CONTROLS</span><p>Drag or use the on-screen buttons to browse. On the desktop, arrow keys and the mouse wheel may not reach the wallpaper.</p>' : '<span>KEYBOARD CONTROLS</span><p><kbd>←</kbd><kbd>→</kbd> Column <kbd>↑</kbd><kbd>↓</kbd> Work <kbd>ENTER</kbd> Open <kbd>/</kbd> Search <kbd>ESC</kbd> Back</p>'}</div><div class="settings-bottom">${!isWallpaper && document.fullscreenEnabled ? '<button data-action="fullscreen">FULLSCREEN <span>↗</span></button>' : ''}<button data-action="restart">REPLAY INTRO <span>↻</span></button></div><div class="modal-bottom"><span>ANALYSIS OS / 1.0 · Set in MiSans (Xiaomi) <a href="${assetUrl("fonts/MiSans-license.pdf")}" target="_blank" rel="noopener">Font license</a></span><span>POWERED BY LAPPAS</span></div>`;
 }
 
 document.addEventListener("input", (e) => {
@@ -825,7 +825,7 @@ document.addEventListener("change", (e) => {
       if (settingsPanel) settingsPanel.scrollTop = scrollTop;
       document.querySelector<HTMLInputElement>(`[data-motion="${key}"]`)?.focus({ preventScroll: true });
     });
-    notify(key === "boot" ? "开场设置将在下次重播时生效" : el.checked ? "已启用此动画" : "已关闭此动画");
+    notify(key === "boot" ? "Intro setting applies on the next replay" : el.checked ? "Animation enabled" : "Animation disabled");
     audio.play("confirm");
   }
 });
@@ -902,7 +902,7 @@ document.addEventListener("click", (e) => {
   if (action === "reset-search") {
     modal = modal === "experiments" ? "experiments" : "search";
     searchQuery = "";
-    filter = "全部作品";
+    filter = "All";
     renderModal();
   }
   if (action === "replay" || action === "restart") {
@@ -919,7 +919,7 @@ document.addEventListener("click", (e) => {
     else
       void document.documentElement
         .requestFullscreen()
-        .catch(() => notify("请使用浏览器的全屏快捷键 F11"));
+        .catch(() => notify("Use your browser's full-screen shortcut (F11)"));
   }
 });
 document.addEventListener("keydown", (e) => {
@@ -1112,10 +1112,10 @@ function syncThreeButton() {
   syncWallpaperBackground();
   const button = document.querySelector<HTMLButtonElement>('[data-action="toggle-three"]');
   if (!button) return;
-  button.textContent = threeState === "loading" ? "3D 载入中…" : threeState === "closing" ? "3D 关闭中…" : threeState === "off" ? "3D 关闭" : "3D 开启";
+  button.textContent = threeState === "loading" ? "3D LOADING…" : threeState === "closing" ? "3D CLOSING…" : threeState === "off" ? "3D OFF" : "3D ON";
   button.disabled = threeState === "loading";
   button.setAttribute("aria-pressed", String(threeState === "on"));
-  button.title = threeState === "off" ? "重新载入三维模型" : threeState === "closing" ? "取消关闭，恢复三维画面" : "卸载三维模型，保留 2D 界面";
+  button.title = threeState === "off" ? "Reload 3D models" : threeState === "closing" ? "Cancel and restore the 3D view" : "Unload 3D models, keep the 2D interface";
 }
 function releaseThree() {
   if (!scene) return;
@@ -1164,7 +1164,7 @@ async function toggleThree() {
   } catch (error) {
     next?.dispose(); scene = undefined;
     threeState = "off"; syncThreeButton();
-    notify("三维模型载入失败，请点击 3D 关闭重试。");
+    notify("3D models failed to load. Click 3D OFF to retry.");
     console.error(error);
   }
 }
@@ -1185,7 +1185,7 @@ async function start() {
       // With unicode-range faces, preload the opening's actual characters,
       // not every font shard. Other archive text loads on demand.
       document.fonts.load("300 20px MiSans", "LOADING SHUHANG CHEN GAME DEVELOPER"),
-      document.fonts.load("400 20px MiSans", "身份信息确认请求已接收开始处理权限验证通过作品集精选项目实验合集收藏检索角色时间技术：0123456789"),
+      document.fonts.load("400 20px MiSans", "Identity request received processing access granted Portfolio Selected Works Saved Search Role Timeline Stack: 0123456789"),
       document.fonts.load("600 20px MiSans", "SYNTHESIZE INFORMATION ANALYSIS OS"),
       document.fonts.load("700 20px MiSans", "LAPPAS PRESS START"),
     ]);
@@ -1204,7 +1204,7 @@ async function start() {
   } catch (error) {
     console.error(error);
     $("#loading").innerHTML =
-      '<div class="error-state"><strong>加载失败</strong><p>三维资源未能载入。请确认浏览器已启用硬件加速，然后重新连接。</p><button onclick="location.reload()">RECONNECT →</button></div>';
+      '<div class="error-state"><strong>Loading failed</strong><p>3D resources could not be loaded. Make sure hardware acceleration is enabled in your browser, then reconnect.</p><button onclick="location.reload()">RECONNECT →</button></div>';
   }
 }
 function completeStartup(silent: boolean) {

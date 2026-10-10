@@ -24,9 +24,9 @@ export interface ArchiveRecord {
 export const records: ArchiveRecord[] = content.records;
 export const featuredFiles = content.featured.map(id => records.findIndex(record => record.id === id));
 export const experimentFiles = records.map((_, index) => index).filter(index => !featuredFiles.includes(index));
-export const categories = ["全部作品", ...content.categories];
+export const categories = ["All", ...content.categories];
 /** Four featured works share one line; the other records stay in Experiments. */
-export const archiveColumns = ["精选项目"];
+export const archiveColumns = ["Selected Works"];
 // The line runs down the centre lane of the original five, so the opening stays framed.
 export const LINE_LANE = 2;
 

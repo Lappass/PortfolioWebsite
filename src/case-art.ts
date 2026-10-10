@@ -3,7 +3,23 @@ import type { ArchiveRecord } from "./data";
 // Wraparound insert layout from art/game_case.py: [back][spine][front], in model units.
 export const CASE_W = 1.35, CASE_H = 1.7, CASE_SPINE = 0.13 + 0.018;
 export const INSERT_ASPECT = (CASE_W * 2 + CASE_SPINE) / CASE_H;
-const HUES: Record<string, number> = { 网页开发: 215, 三维图形: 24, 交互设计: 165, 视觉设计: 340, 实验项目: 265 };
+const HUES: Record<string, number> = { Games: 32, Web: 215, "3D Graphics": 24, Interaction: 165, "Visual Design": 340, Experiments: 265 };
+
+/** Cover art supplied per work (content/archives.json `cover`), decoded before cases are printed. */
+const coverImages = new Map<string, HTMLImageElement>();
+export async function preloadCovers(works: ArchiveRecord[], url: (path: string) => string) {
+  await Promise.all(works.filter((r) => r.cover && !coverImages.has(r.id)).map(async (r) => {
+    const image = new Image();
+    image.src = url(r.cover!);
+    try { await image.decode(); coverImages.set(r.id, image); } catch { /* Fall back to the printed cover. */ }
+  }));
+}
+/** Draw an image to fill a box, cropping the overflow (CSS object-fit: cover). */
+function drawCover(c: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, w: number, h: number) {
+  const k = Math.max(w / image.naturalWidth, h / image.naturalHeight);
+  const sw = w / k, sh = h / k;
+  c.drawImage(image, (image.naturalWidth - sw) / 2, (image.naturalHeight - sh) / 2, sw, sh, x, y, w, h);
+}
 const hash = (text: string) => [...text].reduce((h, ch) => Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0, 2166136261);
 /** Per-work palette: the category sets the hue family, each work shifts it. */
 export function paletteOf(r: ArchiveRecord) {
@@ -85,7 +101,10 @@ export function paintInsert(c: CanvasRenderingContext2D, r: ArchiveRecord, numbe
   c.rect(x, y, width, h);
   c.clip();
   c.translate(0, y);
-  // Front cover.
+  // Front cover: the work's own art when it has one, otherwise a printed title card.
+  const art = coverImages.get(r.id);
+  if (art) drawCover(c, art, fx, 0, fw, h);
+  else {
   c.fillStyle = CASE_PAPER;
   c.fillRect(fx, 0, fw, h);
   c.fillStyle = CASE_MUTED;
@@ -104,6 +123,7 @@ export function paintInsert(c: CanvasRenderingContext2D, r: ArchiveRecord, numbe
   c.textAlign = "right";
   c.fillText(r.id, fx + fw * 0.93, h * 0.94);
   c.textAlign = "left";
+  }
   // Spine.
   c.fillStyle = CASE_PAPER;
   c.fillRect(sx, 0, sw, h);

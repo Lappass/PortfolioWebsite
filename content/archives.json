@@ -1,32 +1,33 @@
 {
   "featured": [
     "X-001",
+    "X-002",
     "X-004",
-    "X-007",
-    "X-010"
+    "X-007"
   ],
   "categories": [
-    "网页开发",
-    "三维图形",
-    "交互设计",
-    "视觉设计",
-    "实验项目"
+    "Games",
+    "Web",
+    "3D Graphics",
+    "Interaction",
+    "Visual Design",
+    "Experiments"
   ],
   "records": [
     {
       "id": "X-001",
-      "title": "三维档案作品集",
+      "title": "Portfolio Archive",
       "en": "PORTFOLIO ARCHIVE",
-      "department": "二次开发（基于 RhineLabUI）",
-      "category": "网页开发",
+      "department": "Derivative work (based on RhineLabUI)",
+      "category": "Web",
       "date": "2026",
       "lead": "TypeScript / Three.js / Vite / Blender",
       "clearance": "PUBLIC",
-      "abstract": "把开源的三维档案终端 RhineLabUI 改造成游戏开发作品集：作品以游戏盒的形式陈列，打开后光盘插入主机、在显示器上加载并进入详情页，开场为原创的主机开机动画。",
+      "abstract": "An open-source 3D archive terminal, RhineLabUI, rebuilt as a game developer portfolio: works stand on a shelf as game cases, the disc goes into a console and loads on a monitor, and an original console-style boot sequence opens the site.",
       "findings": [
-        "在原项目的三维阵列、材质与拖动交互基础上二次开发。",
-        "新增游戏盒、主机与显示器模型（Blender 脚本生成）、插盘读盘流程与开机动画。",
-        "重做配色、粒子、个人页与作品详情页，并去除所有原 IP 内容。"
+        "Built on the upstream project's 3D array, glass materials and drag interaction.",
+        "Added game case, console and monitor models generated from Blender scripts, the disc insert and loading flow, and the boot sequence.",
+        "Reworked the palette, particles, profile and project pages, and removed all third-party IP content."
       ],
       "source": "https://github.com/Lappass/PortfolioWebsite",
       "tags": [
@@ -35,22 +36,22 @@
         "Vite",
         "Blender"
       ],
-      "cover": "works/x-001/cover.jpg",
       "gallery": [
         {
+          "src": "works/x-001/intro.jpg",
+          "caption": "Boot sequence: the first featured case under the top light"
+        },
+        {
+          "src": "works/x-001/home.jpg",
+          "caption": "Home: featured works on the shelf"
+        },
+        {
           "src": "works/x-001/detail.jpg",
-          "caption": "卡片抽出与解密过渡",
-          "note": "档案沿竖直方向抽出，由镜头完成特写构图。盖板从磨砂逐步变清晰，展示内部结构；返回时先转正，再下降归位。"
+          "caption": "Opening a case"
         },
         {
-          "src": "works/x-001/boot.jpg",
-          "caption": "开场标志描边",
-          "note": "标志由连续路径绘制，移动缺口和笔画首尾共同表现开场运动。标志、编号与文字由网页独立渲染。"
-        },
-        {
-          "src": "works/x-001/welcome.jpg",
-          "caption": "欢迎画面",
-          "note": "身份验证后进入欢迎画面，再衔接档案阵列。开场遵循声音和动态效果偏好，减少动态效果时可直接进入浏览。"
+          "src": "works/x-001/console.jpg",
+          "caption": "The console and monitor assemble before the disc goes in"
         }
       ],
       "links": [
@@ -59,195 +60,222 @@
           "url": "https://github.com/Lappass/PortfolioWebsite"
         },
         {
-          "label": "原项目",
+          "label": "Upstream project",
           "url": "https://github.com/LBEILC/RhineLabUI"
+        }
+      ],
+      "hero": "works/x-001/home.jpg"
+    },
+    {
+      "id": "X-002",
+      "title": "LOCKDOWN",
+      "en": "A HOUSEHOLD SURVIVAL GAME",
+      "department": "Placeholder: your role",
+      "category": "Games",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: engine / tools / team",
+      "clearance": "PUBLIC",
+      "abstract": "A household survival game set during a pandemic lockdown. Each day you open the delivery, read messages from family and the news, keep the fridge in order, and cook for everyone at home. Cooking is a spatial puzzle: cut ingredients into shapes and fit them into the pan, tangram style.",
+      "findings": [
+        "Cooking as a tangram-like puzzle: cut, rotate and fit ingredient pieces into the pan.",
+        "Fridge storage as a grid inventory where food spoils if left too long.",
+        "Daily loop of deliveries, family messages and news that shape what the household needs."
+      ],
+      "source": "https://github.com/Lappass",
+      "tags": [
+        "Puzzle",
+        "Narrative",
+        "Isometric"
+      ],
+      "cover": "works/x-002/cover.jpg",
+      "hero": "works/x-002/hero.jpg",
+      "video": "works/x-002/demo.mp4",
+      "gallery": [
+        {
+          "src": "works/x-002/kitchen.jpg",
+          "caption": "The apartment, day six"
+        },
+        {
+          "src": "works/x-002/prep.jpg",
+          "caption": "Meal preparation: fitting cut ingredients into the pan"
+        },
+        {
+          "src": "works/x-002/fridge.jpg",
+          "caption": "Fridge storage"
+        },
+        {
+          "src": "works/x-002/news.jpg",
+          "caption": "Daily news"
         }
       ]
     },
     {
-      "id": "X-002",
-      "title": "网页开发 · 作品 02",
-      "en": "WEB WORK 02",
-      "department": "待填写：你在项目中的角色",
-      "category": "网页开发",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
-      "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
-      "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
-      ],
-      "source": "https://github.com/Lappass"
-    },
-    {
       "id": "X-003",
-      "title": "网页开发 · 作品 03",
+      "title": "Web Work 03",
       "en": "WEB WORK 03",
-      "department": "待填写：你在项目中的角色",
-      "category": "网页开发",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
+      "department": "Placeholder: your role",
+      "category": "Web",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: stack / collaborators",
       "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
+      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
       "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
+        "Highlight one: placeholder",
+        "Highlight two: placeholder",
+        "Highlight three: placeholder"
       ],
       "source": "https://github.com/Lappass"
     },
     {
       "id": "X-004",
-      "title": "三维图形 · 作品 01",
+      "title": "3D Graphics Work 01",
       "en": "3D GRAPHICS WORK 01",
-      "department": "待填写：你在项目中的角色",
-      "category": "三维图形",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
+      "department": "Placeholder: your role",
+      "category": "3D Graphics",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: stack / collaborators",
       "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
+      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
       "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
+        "Highlight one: placeholder",
+        "Highlight two: placeholder",
+        "Highlight three: placeholder"
       ],
       "source": "https://github.com/Lappass"
     },
     {
       "id": "X-005",
-      "title": "三维图形 · 作品 02",
+      "title": "3D Graphics Work 02",
       "en": "3D GRAPHICS WORK 02",
-      "department": "待填写：你在项目中的角色",
-      "category": "三维图形",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
+      "department": "Placeholder: your role",
+      "category": "3D Graphics",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: stack / collaborators",
       "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
+      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
       "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
+        "Highlight one: placeholder",
+        "Highlight two: placeholder",
+        "Highlight three: placeholder"
       ],
       "source": "https://github.com/Lappass"
     },
     {
       "id": "X-006",
-      "title": "三维图形 · 作品 03",
+      "title": "3D Graphics Work 03",
       "en": "3D GRAPHICS WORK 03",
-      "department": "待填写：你在项目中的角色",
-      "category": "三维图形",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
+      "department": "Placeholder: your role",
+      "category": "3D Graphics",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: stack / collaborators",
       "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
+      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
       "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
+        "Highlight one: placeholder",
+        "Highlight two: placeholder",
+        "Highlight three: placeholder"
       ],
       "source": "https://github.com/Lappass"
     },
     {
       "id": "X-007",
-      "title": "交互设计 · 作品 01",
+      "title": "Interaction Work 01",
       "en": "INTERACTION WORK 01",
-      "department": "待填写：你在项目中的角色",
-      "category": "交互设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
+      "department": "Placeholder: your role",
+      "category": "Interaction",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: stack / collaborators",
       "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
+      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
       "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
+        "Highlight one: placeholder",
+        "Highlight two: placeholder",
+        "Highlight three: placeholder"
       ],
       "source": "https://github.com/Lappass"
     },
     {
       "id": "X-008",
-      "title": "交互设计 · 作品 02",
+      "title": "Interaction Work 02",
       "en": "INTERACTION WORK 02",
-      "department": "待填写：你在项目中的角色",
-      "category": "交互设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
+      "department": "Placeholder: your role",
+      "category": "Interaction",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: stack / collaborators",
       "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
+      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
       "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
+        "Highlight one: placeholder",
+        "Highlight two: placeholder",
+        "Highlight three: placeholder"
       ],
       "source": "https://github.com/Lappass"
     },
     {
       "id": "X-009",
-      "title": "视觉设计 · 作品 01",
-      "en": "VISUAL WORK 01",
-      "department": "待填写：你在项目中的角色",
-      "category": "视觉设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
+      "title": "Visual Design Work 01",
+      "en": "VISUAL DESIGN WORK 01",
+      "department": "Placeholder: your role",
+      "category": "Visual Design",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: stack / collaborators",
       "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
+      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
       "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
+        "Highlight one: placeholder",
+        "Highlight two: placeholder",
+        "Highlight three: placeholder"
       ],
       "source": "https://github.com/Lappass"
     },
     {
       "id": "X-010",
-      "title": "视觉设计 · 作品 02",
-      "en": "VISUAL WORK 02",
-      "department": "待填写：你在项目中的角色",
-      "category": "视觉设计",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
+      "title": "Visual Design Work 02",
+      "en": "VISUAL DESIGN WORK 02",
+      "department": "Placeholder: your role",
+      "category": "Visual Design",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: stack / collaborators",
       "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
+      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
       "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
+        "Highlight one: placeholder",
+        "Highlight two: placeholder",
+        "Highlight three: placeholder"
       ],
       "source": "https://github.com/Lappass"
     },
     {
       "id": "X-011",
-      "title": "实验项目 · 作品 01",
-      "en": "EXPERIMENT WORK 01",
-      "department": "待填写：你在项目中的角色",
-      "category": "实验项目",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
+      "title": "Experiments Work 01",
+      "en": "EXPERIMENTS WORK 01",
+      "department": "Placeholder: your role",
+      "category": "Experiments",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: stack / collaborators",
       "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
+      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
       "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
+        "Highlight one: placeholder",
+        "Highlight two: placeholder",
+        "Highlight three: placeholder"
       ],
       "source": "https://github.com/Lappass"
     },
     {
       "id": "X-012",
-      "title": "实验项目 · 作品 02",
-      "en": "EXPERIMENT WORK 02",
-      "department": "待填写：你在项目中的角色",
-      "category": "实验项目",
-      "date": "待填写：时间",
-      "lead": "待填写：技术栈 / 合作者",
+      "title": "Experiments Work 02",
+      "en": "EXPERIMENTS WORK 02",
+      "department": "Placeholder: your role",
+      "category": "Experiments",
+      "date": "Placeholder: year",
+      "lead": "Placeholder: stack / collaborators",
       "clearance": "PUBLIC",
-      "abstract": "作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。",
+      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
       "findings": [
-        "要点一：待填写",
-        "要点二：待填写",
-        "要点三：待填写"
+        "Highlight one: placeholder",
+        "Highlight two: placeholder",
+        "Highlight three: placeholder"
       ],
       "source": "https://github.com/Lappass"
     }

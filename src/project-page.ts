@@ -111,21 +111,21 @@ export class ProjectPage {
       history.replaceState({ work: record.id }, "", workHash(record.id));
     const r = record, e = escapeHtml;
     const tags = r.tags?.length ? `<ul class="pp-tags">${r.tags.map((tag) => `<li>${e(tag)}</li>`).join("")}</ul>` : "";
-    const links = [...(r.links ?? []), ...(r.links?.some((link) => link.url === r.source) ? [] : [{ label: "项目链接", url: r.source }])];
+    const links = [...(r.links ?? []), ...(r.links?.some((link) => link.url === r.source) ? [] : [{ label: "Project link", url: r.source }])];
     const gallery = r.gallery?.length
-      ? `<section class="pp-section" data-section="gallery" tabindex="-1" aria-label="画面记录"><div class="pp-label"><span class="pp-section-number">${r.unity && r.video ? "04" : "03"}</span>VISUAL RECORDS / 画面记录</div><div class="pp-gallery">${r.gallery.map((item, i) => `<figure><div class="pp-record-image"><img src="${media(item.src)}" alt="${e(item.caption ?? r.title)}" loading="lazy" decoding="async"><span class="pp-image-index" aria-hidden="true">${pad(i + 1)}</span></div><figcaption>${item.note ? `<details class="pp-image-note"><summary><span class="pp-note-number">${pad(i + 1)}</span><span>${e(item.caption ?? "画面说明")}</span><span class="pp-note-plus" aria-hidden="true">＋</span></summary><p>${e(item.note)}</p></details>` : `<span class="pp-note-number">${pad(i + 1)}</span>${e(item.caption ?? r.title)}`}</figcaption></figure>`).join("")}</div></section>`
+      ? `<section class="pp-section" data-section="gallery" tabindex="-1" aria-label="Visual records"><div class="pp-label"><span class="pp-section-number">${r.unity && r.video ? "04" : "03"}</span>VISUAL RECORDS</div><div class="pp-gallery">${r.gallery.map((item, i) => `<figure><div class="pp-record-image"><img src="${media(item.src)}" alt="${e(item.caption ?? r.title)}" loading="lazy" decoding="async"><span class="pp-image-index" aria-hidden="true">${pad(i + 1)}</span></div><figcaption>${item.note ? `<details class="pp-image-note"><summary><span class="pp-note-number">${pad(i + 1)}</span><span>${e(item.caption ?? "Image note")}</span><span class="pp-note-plus" aria-hidden="true">＋</span></summary><p>${e(item.note)}</p></details>` : `<span class="pp-note-number">${pad(i + 1)}</span>${e(item.caption ?? r.title)}`}</figcaption></figure>`).join("")}</div></section>`
       : "";
     const heroIsVideo = !r.unity && r.video;
-    const video = r.video && !heroIsVideo ? `<section class="pp-section" data-section="video" tabindex="-1" aria-label="演示视频"><div class="pp-label">VIDEO / 视频</div><div class="pp-frame">${this.videoMarkup(r)}</div></section>` : "";
-    const chapters = [["overview", "作品"], ["info", "概述"], ...(video ? [["video", "演示"]] : []), ...(gallery ? [["gallery", "画面"]] : []), ["findings", "要点"]];
+    const video = r.video && !heroIsVideo ? `<section class="pp-section" data-section="video" tabindex="-1" aria-label="Demo video"><div class="pp-label">VIDEO</div><div class="pp-frame">${this.videoMarkup(r)}</div></section>` : "";
+    const chapters = [["overview", "Work"], ["info", "Overview"], ...(video ? [["video", "Demo"]] : []), ...(gallery ? [["gallery", "Gallery"]] : []), ["findings", "Highlights"]];
     this.root.innerHTML = `
       <header class="pp-bar">
-        <button type="button" data-page="back">← <span>返回阵列</span><small>ESC</small></button>
+        <button type="button" data-page="back">← <span>Back to array</span><small>ESC</small></button>
         <span class="pp-brand" aria-hidden="true">LAPPAS</span>
-        <nav aria-label="切换作品"><button type="button" data-page="prev" aria-label="上一个作品：${e(previous.title)}">← <span>上一个</span></button><span class="pp-count">${pad(position)} / ${pad(total)}</span><button type="button" data-page="next" aria-label="下一个作品：${e(next.title)}"><span>下一个</span> →</button></nav>
+        <nav aria-label="Switch work"><button type="button" data-page="prev" aria-label="Previous work: ${e(previous.title)}">← <span>Prev</span></button><span class="pp-count">${pad(position)} / ${pad(total)}</span><button type="button" data-page="next" aria-label="Next work: ${e(next.title)}"><span>Next</span> →</button></nav>
       </header>
-      <nav class="pp-chapters" aria-label="项目章节"><span class="pp-index-label">WORK / ${e(r.id)}</span>${chapters.map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>${pad(i + 1)}</small>${label}</button>`).join("")}</nav>
-      <section class="pp-hub" data-section="overview" tabindex="-1" aria-label="作品封面">
+      <nav class="pp-chapters" aria-label="Project sections"><span class="pp-index-label">WORK / ${e(r.id)}</span>${chapters.map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>${pad(i + 1)}</small>${label}</button>`).join("")}</nav>
+      <section class="pp-hub" data-section="overview" tabindex="-1" aria-label="Work cover">
         <div class="pp-field-index" aria-hidden="true">SELECTED WORK / ${pad(position)}<span>${e(r.clearance)}</span></div>
         <div class="pp-hub-art"><img src="${heroSource(r)}" alt="" decoding="async"></div>
         <div class="pp-hub-content">
@@ -133,23 +133,23 @@ export class ProjectPage {
           <h1 id="pp-title" tabindex="-1">${e(r.title)}</h1>
           <div class="pp-en">${e(r.en)}</div>
           <div class="pp-hub-actions">
-            <button type="button" class="pp-start" data-page="start">▶ <span>${r.unity ? "开始试玩" : r.video ? "播放视频" : "访问项目"}</span></button>
-            <button type="button" data-page="more">项目信息 <span>↓</span></button>
+            <button type="button" class="pp-start" data-page="start">▶ <span>${r.unity ? "Play demo" : r.video ? "Play video" : "Visit project"}</span></button>
+            <button type="button" data-page="more">Project info <span>↓</span></button>
           </div>
         </div>
       </section>
       <article class="pp-body">
-        <section class="pp-hero" data-section="info" tabindex="-1" aria-label="项目概述">
-          <div><div class="pp-label"><span class="pp-section-number">02</span>PROJECT / 项目概述</div><div class="pp-frame pp-hero-media">${this.heroMarkup(r)}</div><div class="pp-media-caption"><span>FIG. 01</span>${e(r.unity ? "交互演示" : r.video ? "演示视频" : r.title)}</div></div>
+        <section class="pp-hero" data-section="info" tabindex="-1" aria-label="Project overview">
+          <div><div class="pp-label"><span class="pp-section-number">02</span>PROJECT</div><div class="pp-frame pp-hero-media">${this.heroMarkup(r)}</div><div class="pp-media-caption"><span>FIG. 01</span>${e(r.unity ? "Interactive demo" : r.video ? "Demo video" : r.title)}</div></div>
           <div class="pp-info">
             <div class="pp-kicker"><i></i>${e(r.category)} <span>·</span> ${e(r.id)}</div>
             <h2>${e(r.title)}</h2>
             <div class="pp-en">${e(r.en)}</div>
             <dl class="pp-meta">
-              <div><dt>角色</dt><dd>${e(r.department)}</dd></div>
-              <div><dt>时间</dt><dd>${e(r.date)}</dd></div>
-              <div><dt>技术与协作</dt><dd>${e(r.lead)}</dd></div>
-              <div><dt>状态</dt><dd>${e(r.clearance)}</dd></div>
+              <div><dt>Role</dt><dd>${e(r.department)}</dd></div>
+              <div><dt>Timeline</dt><dd>${e(r.date)}</dd></div>
+              <div><dt>Stack</dt><dd>${e(r.lead)}</dd></div>
+              <div><dt>Status</dt><dd>${e(r.clearance)}</dd></div>
             </dl>
             <p class="pp-abstract">${e(r.abstract)}</p>
             ${tags}
@@ -158,12 +158,12 @@ export class ProjectPage {
         </section>
         ${video}
         ${gallery}
-        <section class="pp-section pp-highlights" data-section="findings" tabindex="-1" aria-label="项目要点">
-          <div class="pp-label"><span class="pp-section-number">${pad(chapters.length)}</span>FIELD NOTES / 项目要点</div>
+        <section class="pp-section pp-highlights" data-section="findings" tabindex="-1" aria-label="Highlights">
+          <div class="pp-label"><span class="pp-section-number">${pad(chapters.length)}</span>FIELD NOTES</div>
           <ol>${r.findings.map((item, i) => `<li><span>${pad(i + 1)}</span>${e(item)}</li>`).join("")}</ol>
         </section>
       </article>
-      <footer class="pp-next"><button type="button" data-page="next"><span>NEXT PROJECT / 下一个</span><strong>${e(next.title)} →</strong></button></footer>`;
+      <footer class="pp-next"><button type="button" data-page="next"><span>NEXT PROJECT</span><strong>${e(next.title)} →</strong></button></footer>`;
     if (changed) this.root.scrollTop = 0;
     this.chapters.sync();
   }
@@ -199,17 +199,17 @@ export class ProjectPage {
     const e = escapeHtml;
     if (r.unity) {
       const poster = r.cover ? `<img src="${media(r.cover)}" alt="" decoding="async">` : `<div class="pp-mark">${logo}</div>`;
-      return `<div class="pp-unity" data-src="${media(r.unity)}">${poster}<button type="button" class="pp-play" data-page="unity">▶ <span>加载交互演示</span><small>Unity WebGL · 体积较大</small></button></div>`;
+      return `<div class="pp-unity" data-src="${media(r.unity)}">${poster}<button type="button" class="pp-play" data-page="unity">▶ <span>Load interactive demo</span><small>Unity WebGL · large download</small></button></div>`;
     }
     if (r.video) return this.videoMarkup(r);
-    if (r.cover) return `<img src="${media(r.cover)}" alt="${e(r.title)} 封面" decoding="async">`;
-    return `<div class="pp-mark">${logo}<span>封面待添加</span></div>`;
+    if (r.cover) return `<img src="${media(r.cover)}" alt="${e(r.title)} cover" decoding="async">`;
+    return `<div class="pp-mark">${logo}<span>Cover coming soon</span></div>`;
   }
 
   private videoMarkup(r: ArchiveRecord) {
     const src = r.video!;
     if (isFile(src)) return `<video controls playsinline preload="metadata"${r.cover ? ` poster="${media(r.cover)}"` : ""} src="${media(src)}"></video>`;
-    if (isWeb(src)) return `<iframe src="${escapeHtml(src)}" title="${escapeHtml(r.title)} 视频" loading="lazy" allow="fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe>`;
+    if (isWeb(src)) return `<iframe src="${escapeHtml(src)}" title="${escapeHtml(r.title)} video" loading="lazy" allow="fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe>`;
     return "";
   }
 
@@ -233,14 +233,14 @@ export class ProjectPage {
     const host = button.closest<HTMLElement>(".pp-unity")!;
     const frame = document.createElement("iframe");
     frame.src = host.dataset.src!;
-    frame.title = `${this.record?.title ?? ""} 交互演示`;
+    frame.title = `${this.record?.title ?? ""} interactive demo`;
     frame.allow = "fullscreen; autoplay; gamepad; xr-spatial-tracking";
     frame.allowFullscreen = true;
     const full = document.createElement("button");
     full.type = "button";
     full.className = "pp-fullscreen";
     full.dataset.page = "fullscreen";
-    full.textContent = "全屏 ⤢";
+    full.textContent = "Fullscreen ⤢";
     host.replaceChildren(frame, full);
     frame.focus();
   }

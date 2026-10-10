@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Lappas · Portfolio",
   "short_name": "Lappas",
-  "description": "陈澍航 Lappas 的三维档案式作品集",
+  "description": "A 3D archive-style portfolio by Shuhang Chen (Lappas)",
   "lang": "zh-CN",
   "start_url": "./?source=pwa",
   "scope": "./",

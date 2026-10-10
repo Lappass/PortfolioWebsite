@@ -1,3 +1,4 @@
+import { preloadCovers } from "./case-art";
 import * as THREE from "three";
 import { ArchiveVisibility } from "./archive-visibility";
 import { ArchiveDrawCoverage, ArchiveShadowCoverage } from "./archive-draw-coverage";
@@ -302,7 +303,7 @@ export class ArchiveScene {
     this.renderer.toneMappingExposure = 1.05;
     this.renderer.domElement.setAttribute(
       "aria-label",
-      "三维作品陈列，点击选择，拖动、方向键或滚轮切换作品",
+      "3D showcase of works. Click to select; drag, use arrow keys or the mouse wheel to switch.",
     );
     container.appendChild(this.renderer.domElement);
     this.renderer.domElement.addEventListener('webglcontextrestored', () => {
@@ -385,7 +386,10 @@ export class ArchiveScene {
       const cell = poolCell(index);
       this.cells.push(cell);
     }
-    if (/game-case/.test(assetUrl)) return this.loadGameCase(gltf, count);
+    if (/game-case/.test(assetUrl)) {
+      await preloadCovers(records, publicAsset);
+      return this.loadGameCase(gltf, count);
+    }
     for (const mesh of meshes) {
       const geom = mesh.geometry
         .clone()

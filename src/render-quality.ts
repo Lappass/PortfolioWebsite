@@ -59,10 +59,10 @@ export const qualityPresets = {
 } as const satisfies Record<string, RenderQuality>;
 export type QualityPreset = keyof typeof qualityPresets;
 export const presetLabels: Record<QualityPreset, string> = {
-  performance: "性能",
-  original: "原始",
-  high: "高",
-  ultra: "极高",
+  performance: "Performance",
+  original: "Original",
+  high: "High",
+  ultra: "Ultra",
 };
 
 const member = <T>(value: unknown, choices: readonly T[], fallback: T): T =>

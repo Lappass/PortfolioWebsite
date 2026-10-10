@@ -194,14 +194,14 @@ export class ConsoleSetup {
       c.textAlign = "center";
       c.font = "500 34px MiSans, sans-serif";
       c.fillStyle = "rgba(238, 243, 255, 0.85)";
-      c.fillText(progress < 0.85 ? "系统启动中" : title, w / 2, h * 0.57);
+      c.fillText(progress < 0.85 ? "Starting up" : title, w / 2, h * 0.57);
       c.fillStyle = "rgba(238, 243, 255, 0.18)";
       c.fillRect(w * 0.3, h * 0.65, w * 0.4, 4);
       c.fillStyle = "#e0b878";
       c.fillRect(w * 0.3, h * 0.65, w * 0.4 * (progress < 0.85 ? system * 0.12 : 0.12 + read * 0.88), 4);
       c.font = "500 22px MiSans, sans-serif";
       c.fillStyle = "rgba(238, 243, 255, 0.55)";
-      c.fillText(progress < 0.85 ? "BOOT / 初始化系统…" : progress < 0.98 ? "DISC / 正在读取作品…" : "READY / 准备就绪", w / 2, h * 0.73);
+      c.fillText(progress < 0.85 ? "BOOT / Initializing…" : progress < 0.98 ? "DISC / Reading works…" : "READY", w / 2, h * 0.73);
     }
     c.restore();
     this.texture.needsUpdate = true;
@@ -226,7 +226,7 @@ export class ConsoleSetup {
     c.fillStyle = "#edeae4"; c.font = "600 34px MiSans, sans-serif";
     c.fillText(profile.name, w / 2, h * .82);
     c.fillStyle = "#95958e"; c.font = "400 20px MiSans, sans-serif";
-    c.fillText("已连接", w / 2, h * .89);
+    c.fillText("Connected", w / 2, h * .89);
     c.restore();
     this.texture.needsUpdate = true;
   }

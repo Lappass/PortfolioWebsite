@@ -27,73 +27,73 @@ export const MOTION_LABELS: Record<
 > = {
   boot: {
     title: "BOOT SEQUENCE",
-    description: "开机标志、扫描与欢迎画面",
-    group: "开场",
+    description: "Boot logo, scan and welcome screen",
+    group: "Intro",
   },
   selectionWave: {
     title: "SELECTION WAVE",
-    description: "选档时向阵列传播的波浪",
-    group: "档案阵列",
+    description: "Wave that ripples through the array on selection",
+    group: "Array",
   },
   idleWave: {
     title: "IDLE MOTION",
-    description: "停止操作后的阵列起伏",
-    group: "档案阵列",
+    description: "Gentle array motion while idle",
+    group: "Array",
   },
   pointerParallax: {
     title: "POINTER PARALLAX",
-    description: "镜头随指针的轻微偏移",
-    group: "档案阵列",
+    description: "Slight camera drift following the pointer",
+    group: "Array",
   },
   dragMomentum: {
     title: "DRAG MOMENTUM",
-    description: "松手后按实际速度继续滑行",
-    group: "档案阵列",
+    description: "Keep gliding at release speed after a drag",
+    group: "Array",
   },
   selectionTransition: {
     title: "SELECTION TRANSITION",
-    description: "切列、切档时的轨道移动",
-    group: "档案阵列",
+    description: "Camera travel when switching works or columns",
+    group: "Array",
   },
   detailTransition: {
     title: "DETAIL TRANSITION",
-    description: "抽取、转正、归位与详情镜头",
-    group: "档案详情",
+    description: "Lift, turn, return and detail camera",
+    group: "Details",
   },
   modelDecryption: {
     title: "MODEL DECRYPTION",
-    description: "模型解密线与磨砂揭示",
-    group: "档案详情",
+    description: "Decrypt lines and frosted reveal",
+    group: "Details",
   },
   documentReveal: {
     title: "DOCUMENT REVEAL",
-    description: "正文的遮罩揭示",
-    group: "档案详情",
+    description: "Masked reveal of body text",
+    group: "Details",
   },
   rollingText: {
     title: "ROLLING TEXT",
-    description: "标题、分类与权限标签滚动",
-    group: "界面",
+    description: "Rolling titles, categories and status labels",
+    group: "Interface",
   },
   rollingNumbers: {
     title: "ROLLING NUMBERS",
-    description: "序号、列编号与档案编码滚动",
-    group: "界面",
+    description: "Rolling numbers and work IDs",
+    group: "Interface",
   },
   surfaceTransitions: {
     title: "SURFACE TRANSITIONS",
-    description: "详情、检索、收藏与设置窗口过渡",
-    group: "界面",
+    description: "Transitions for details, search, saved and settings",
+    group: "Interface",
   },
   viewerNavigation: {
     title: "VIEWER NAVIGATION",
-    description: "360° 旋转、平移、缩放与复位阻尼",
-    group: "360° 查看器",
+    description: "360° rotate, pan, zoom and reset easing",
+    group: "360° Viewer",
   },
   viewerModelTransition: {
     title: "VIEWER MODEL TRANSITION",
-    description: "拆解、重组与清晰度变化",
-    group: "360° 查看器",
+    description: "Explode, reassemble and clarity changes",
+    group: "360° Viewer",
   },
 };
 
@@ -173,15 +173,15 @@ export function motionEnabled(motion: MotionPreferences, key: MotionKey) {
 
 export function motionSummary(motion: MotionPreferences) {
   const enabled = Object.values(motion).filter(Boolean).length;
-  if (enabled === Object.keys(motion).length) return "当前使用完整动画。";
-  if (enabled === 0) return "当前已减少动画。";
+  if (enabled === Object.keys(motion).length) return "Using full motion.";
+  if (enabled === 0) return "Motion is reduced.";
   const highlights: string[] = [];
-  if (!motion.boot) highlights.push("开场已跳过");
+  if (!motion.boot) highlights.push("intro skipped");
   if (!motion.selectionWave && !motion.idleWave)
-    highlights.push("阵列波动已关闭");
+    highlights.push("array waves off");
   if (!motion.rollingText && !motion.rollingNumbers)
-    highlights.push("文字滚动已关闭");
-  return `当前使用自定义动画（${highlights.slice(0, 2).join("、") || `启用 ${enabled} 项`}）。`;
+    highlights.push("rolling text off");
+  return `Using custom motion (${highlights.slice(0, 2).join(", ") || `${enabled} enabled`}).`;
 }
 
 export function motionSettingsMarkup(
@@ -190,11 +190,11 @@ export function motionSettingsMarkup(
 ) {
   const groups = [
     ...new Set(Object.values(MOTION_LABELS).map((entry) => entry.group)),
-  ].filter((group) => group !== "360° 查看器");
+  ].filter((group) => group !== "360° Viewer");
   const selected = preset ?? motionPresetFor(motion);
   const presetButton = (value: "full" | "reduced" | "custom", label: string) =>
     `<button type="button" data-action="motion-preset" data-preset="${value}" aria-pressed="${selected === value}"${value === "custom" ? " disabled" : ""}>${label}</button>`;
-  return `<section id="motion-settings" class="motion-settings" aria-label="动效设置"><div class="motion-settings-head"><div><strong>ANIMATION CONTROLS</strong><span>完整、减少或按分项自定义；关闭后会立即收束当前动画（开场设置下次重播生效）</span></div>${presetButton("full", "完整")}${presetButton("reduced", "减少")}${presetButton("custom", "自定义")}</div><details class="motion-advanced"><summary>精细设置 <span>开场 / 阵列 / 详情 / 界面</span></summary><div class="motion-groups">${groups
+  return `<section id="motion-settings" class="motion-settings" aria-label="Motion settings"><div class="motion-settings-head"><div><strong>ANIMATION CONTROLS</strong><span>Full, reduced, or customize each item; disabled animations settle immediately (intro changes apply on the next replay)</span></div>${presetButton("full", "Full")}${presetButton("reduced", "Reduced")}${presetButton("custom", "Custom")}</div><details class="motion-advanced"><summary>Advanced <span>Intro / Array / Details / Interface</span></summary><div class="motion-groups">${groups
     .map(
       (group) =>
         `<fieldset><legend>${group}</legend>${(

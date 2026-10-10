@@ -23,17 +23,17 @@ matchMedia("(display-mode: standalone)").addEventListener("change", refresh);
 
 export function pwaSettingsMarkup() {
   if (isWallpaper) return "";
-  const status = !import.meta.env.PROD ? "开发预览不保存离线副本。"
-    : !window.isSecureContext ? "使用 HTTPS 地址后可保存离线副本。"
-    : !("serviceWorker" in navigator) ? "当前浏览器支持在线使用。"
-    : failed ? "离线副本未能保存，可联网后重试。"
-    : ready ? "基础页面已保存；已加载的字体、模型和音乐可离线使用，未加载内容需联网。"
-    : "正在保存基础页面，其他资源会在使用时缓存。";
-  const guidance = installed() ? "已从主屏幕打开。"
-    : ios() ? "在 Safari 中轻点“分享”→“添加到主屏幕”，然后从主屏幕图标打开。"
-    : installPrompt ? "安装后可在独立窗口中打开档案。"
-    : "可通过浏览器菜单安装或添加到主屏幕。";
-  return `<section id="pwa-settings" class="pwa-settings" aria-label="主屏幕与离线使用"><h3>APP / 主屏幕与离线</h3><p>${guidance}</p><p class="pwa-status" role="status">${status}</p><div class="pwa-actions">${installPrompt && !installed() ? '<button data-pwa-action="install">安装到设备 ↗</button>' : ""}${registration?.waiting ? '<span>新版本已准备好</span><button data-pwa-action="update">更新并重启 ↻</button>' : ""}${failed ? '<button data-pwa-action="retry">重试保存离线资源 ↻</button>' : ""}</div></section>`;
+  const status = !import.meta.env.PROD ? "Development previews are not saved for offline use."
+    : !window.isSecureContext ? "An offline copy can be saved when served over HTTPS."
+    : !("serviceWorker" in navigator) ? "This browser supports online use."
+    : failed ? "The offline copy could not be saved. Retry when online."
+    : ready ? "Core pages saved; loaded fonts, models and music work offline, anything else needs a connection."
+    : "Saving core pages; other resources are cached as you use them.";
+  const guidance = installed() ? "Opened from the home screen."
+    : ios() ? "In Safari, tap Share → Add to Home Screen, then open it from the home screen icon."
+    : installPrompt ? "Install to open the portfolio in its own window."
+    : "Install or add to the home screen from your browser menu.";
+  return `<section id="pwa-settings" class="pwa-settings" aria-label="Home screen and offline use"><h3>APP / HOME SCREEN & OFFLINE</h3><p>${guidance}</p><p class="pwa-status" role="status">${status}</p><div class="pwa-actions">${installPrompt && !installed() ? '<button data-pwa-action="install">Install on device ↗</button>' : ""}${registration?.waiting ? '<span>New version ready</span><button data-pwa-action="update">Update and restart ↻</button>' : ""}${failed ? '<button data-pwa-action="retry">Retry offline save ↻</button>' : ""}</div></section>`;
 }
 function refresh() {
   const current = document.querySelector("#pwa-settings");
@@ -93,7 +93,7 @@ document.addEventListener("click", async event => {
   if (!button) return;
   if (button.dataset.pwaAction === "install" && installPrompt) {
     const prompt = installPrompt; installPrompt = undefined;
-    try { await prompt.prompt(); await prompt.userChoice; } catch { tell("请通过浏览器菜单添加到主屏幕"); }
+    try { await prompt.prompt(); await prompt.userChoice; } catch { tell("Use the browser menu to add to the home screen"); }
     refresh();
   }
   if (button.dataset.pwaAction === "update" && registration?.waiting) {

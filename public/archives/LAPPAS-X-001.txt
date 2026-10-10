@@ -1,17 +1,17 @@
 ﻿LAPPAS · PORTFOLIO ARCHIVE
-FILE X-001 / 三维档案作品集
+FILE X-001 / Portfolio Archive
 PORTFOLIO ARCHIVE
 
-角色：二次开发（基于 RhineLabUI）
+角色：Derivative work (based on RhineLabUI)
 时间：2026
 技术与协作：TypeScript / Three.js / Vite / Blender
 状态：PUBLIC
 
-把开源的三维档案终端 RhineLabUI 改造成游戏开发作品集：作品以游戏盒的形式陈列，打开后光盘插入主机、在显示器上加载并进入详情页，开场为原创的主机开机动画。
+An open-source 3D archive terminal, RhineLabUI, rebuilt as a game developer portfolio: works stand on a shelf as game cases, the disc goes into a console and loads on a monitor, and an original console-style boot sequence opens the site.
 
 项目要点
-1. 在原项目的三维阵列、材质与拖动交互基础上二次开发。
-2. 新增游戏盒、主机与显示器模型（Blender 脚本生成）、插盘读盘流程与开机动画。
-3. 重做配色、粒子、个人页与作品详情页，并去除所有原 IP 内容。
+1. Built on the upstream project's 3D array, glass materials and drag interaction.
+2. Added game case, console and monitor models generated from Blender scripts, the disc insert and loading flow, and the boot sequence.
+3. Reworked the palette, particles, profile and project pages, and removed all third-party IP content.
 
 项目链接：https://github.com/Lappass/PortfolioWebsite

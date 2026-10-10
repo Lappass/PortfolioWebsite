@@ -1,17 +1,17 @@
 ﻿LAPPAS · PORTFOLIO ARCHIVE
-FILE X-005 / 三维图形 · 作品 02
+FILE X-005 / 3D Graphics Work 02
 3D GRAPHICS WORK 02
 
-角色：待填写：你在项目中的角色
-时间：待填写：时间
-技术与协作：待填写：技术栈 / 合作者
+角色：Placeholder: your role
+时间：Placeholder: year
+技术与协作：Placeholder: stack / collaborators
 状态：PUBLIC
 
-作品简介占位。替换为这个项目做了什么、解决了什么问题，以及最终的结果。
+Placeholder. Describe what this project is, what problem it solves, and how it turned out.
 
 项目要点
-1. 要点一：待填写
-2. 要点二：待填写
-3. 要点三：待填写
+1. Highlight one: placeholder
+2. Highlight two: placeholder
+3. Highlight three: placeholder
 
 项目链接：https://github.com/Lappass

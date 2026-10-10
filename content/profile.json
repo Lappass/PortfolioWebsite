@@ -1,27 +1,27 @@
 {
   "name": "Shuhang Chen",
   "alias": "Shuhang Chen",
-  "role": "游戏开发者",
+  "role": "Game Developer",
   "roleEn": "GAME DEVELOPER",
-  "tagline": "占位简介：一两句话介绍你做什么游戏、擅长什么、正在寻找怎样的机会。",
+  "tagline": "Placeholder: one or two sentences about what games you make, your strengths, and the role you are looking for.",
   "avatar": "",
   "bio": [
-    "占位：第一段，介绍你的方向和做游戏的理由。",
-    "占位：第二段，介绍你的工作方式、喜欢的游戏类型或正在钻研的技术。"
+    "Placeholder: first paragraph about your focus and why you make games.",
+    "Placeholder: second paragraph about how you work, the genres you love, or the tech you are exploring."
   ],
   "skills": [
-    { "group": "引擎", "items": ["Unity", "待填写"] },
-    { "group": "语言", "items": ["C#", "TypeScript", "待填写"] },
-    { "group": "工具", "items": ["Blender", "待填写"] }
+    { "group": "Engines", "items": ["Unity", "TBD"] },
+    { "group": "Languages", "items": ["C#", "TypeScript", "TBD"] },
+    { "group": "Tools", "items": ["Blender", "TBD"] }
   ],
   "experience": [
-    { "time": "待填写", "title": "学校 / 专业", "detail": "占位：学习经历。" },
-    { "time": "待填写", "title": "实习或项目经历", "detail": "占位：做了什么、负责什么。" },
-    { "time": "待填写", "title": "Game Jam / 比赛", "detail": "占位：作品与成绩。" }
+    { "time": "TBD", "title": "School / Major", "detail": "Placeholder: education." },
+    { "time": "TBD", "title": "Internship or project experience", "detail": "Placeholder: what you built and what you owned." },
+    { "time": "TBD", "title": "Game Jam / Competition", "detail": "Placeholder: entries and results." }
   ],
   "contact": [
     { "label": "GitHub", "url": "https://github.com/Lappass" },
-    { "label": "邮箱", "url": "mailto:you@example.com" }
+    { "label": "Email", "url": "mailto:you@example.com" }
   ],
   "resume": "",
   "boot": {
