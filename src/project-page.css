@@ -249,9 +249,10 @@
 .profile-page .pp-highlights li > div { flex: 1; }
 @media (max-width: 860px) { .profile-hero { grid-template-columns: 1fr; justify-items: start; } .profile-avatar { width: 140px; } }
 /* Grown out of the monitor screen after a disc is read. */
-.project-page.from-screen { opacity: 1; transform: none; transition: clip-path 0.75s cubic-bezier(0.65, 0, 0.35, 1); }
-.project-page.from-screen .pp-hub-art { animation: none; transform-origin: 50% 50%; transition: transform 0.75s cubic-bezier(0.65, 0, 0.35, 1); }
-@media (prefers-reduced-motion: reduce) { .project-page.from-screen { transition: none; } }
+
+/* Key art lifting off the monitor (ProjectPage.liftFromScreen). */
+.pp-lift { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; object-fit: cover; transform-origin: 0 0; z-index: 61; pointer-events: none; box-shadow: 0 0 60px rgba(255, 232, 192, .18); transition: opacity .4s ease; will-change: transform; }
+.pp-lift.out { opacity: 0; }
 
 /* Archive reading layout: fixed chapter rail and captions outside the imagery. */
 .pp-chapters { position: sticky; top: 76px; z-index: 2; min-height: 56px; display: flex; align-items: center; gap: 24px; padding: 0 var(--pp-edge); background: var(--pp-paper); border-bottom: 1px solid var(--pp-line); }

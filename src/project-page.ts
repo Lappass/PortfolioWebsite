@@ -6,6 +6,18 @@ import { paintArtwork } from "./case-art";
 import { PageChapters } from "./page-chapters";
 
 const heroArt = new Map<string, string>();
+type ScreenRect = { left: number; top: number; right: number; bottom: number; quad?: [number, number][] };
+const LIFT_MS = 900;
+/** CSS matrix3d taking the W×H box (origin top-left) onto quad tl, tr, br, bl. */
+function quadMatrix(W: number, H: number, q: [number, number][]) {
+  const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q;
+  const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3;
+  const dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+  const den = dx1 * dy2 - dx2 * dy1 || 1e-9;
+  const g = (dx3 * dy2 - dx2 * dy3) / den, h = (dx1 * dy3 - dx3 * dy1) / den;
+  const a = x1 - x0 + g * x1, b = x3 - x0 + h * x3, d = y1 - y0 + g * y1, e = y3 - y0 + h * y3;
+  return `matrix3d(${[a / W, d / W, 0, g / W, b / H, e / H, 0, h / H, 0, 0, 1, 0, x0, y0, 0, 1].join(",")})`;
+}
 /** Key art for the hub: the work's own image, or its generated cover art at screen size. */
 function heroSource(r: ArchiveRecord) {
   const own = r.hero ?? r.cover;
@@ -42,6 +54,7 @@ export class ProjectPage {
   private pushed = false;
   private returnFocus: HTMLElement | null = null;
   private introTimer = 0;
+  private lift?: HTMLImageElement;
   private chapters = new PageChapters(this.root);
 
   constructor(private handlers: { close: () => void; navigate: (direction: 1 | -1) => void }) {
@@ -73,7 +86,7 @@ export class ProjectPage {
   get covering() { return this.state === "open"; }
   get currentId() { return this.record?.id ?? null; }
 
-  open(record: ArchiveRecord, neighbours: Neighbours, options: { instant?: boolean; push?: boolean; intro?: boolean; from?: { left: number; top: number; right: number; bottom: number } | null } = {}) {
+  open(record: ArchiveRecord, neighbours: Neighbours, options: { instant?: boolean; push?: boolean; intro?: boolean; from?: ScreenRect | null } = {}) {
     if (this.isOpen) { this.render(record, neighbours); return; }
     this.render(record, neighbours);
     if (options.push !== false && location.hash !== workHash(record.id)) {
@@ -84,30 +97,23 @@ export class ProjectPage {
     clearTimeout(this.timer);
     this.root.hidden = false;
     this.root.classList.toggle("instant", Boolean(options.instant));
-    // The monitor has shown the loading; the key art comes up out of its screen.
+    // The monitor has shown the loading and ends on this work's key art.
     clearTimeout(this.introTimer);
-    this.root.classList.toggle("intro", Boolean(options.intro));
-    if (options.intro) this.introTimer = window.setTimeout(() => this.root.classList.remove("intro"), 2600);
     this.state = "opening";
-    // From the monitor: start clipped to its screen, then grow to fill the window.
-    const from = options.from;
-    this.root.classList.toggle("from-screen", Boolean(from));
-    const art = this.root.querySelector<HTMLElement>(".pp-hub-art");
-    if (from) {
-      this.root.style.clipPath = `inset(${from.top}px ${innerWidth - from.right}px ${innerHeight - from.bottom}px ${from.left}px round 6px)`;
-      // The monitor ends on this same image; start the art fitted to the screen so
-      // the two read as one picture growing out of it.
-      const s = Math.max((from.right - from.left) / innerWidth, (from.bottom - from.top) / innerHeight);
-      art?.style.setProperty("transform", `translate(${(from.left + from.right) / 2 - innerWidth / 2}px, ${(from.top + from.bottom) / 2 - innerHeight / 2}px) scale(${s})`);
-    }
-    // Commit the hidden state first so the fade actually runs.
-    void this.root.offsetWidth;
-    this.root.classList.add("visible");
-    if (from) requestAnimationFrame(() => { this.root.style.clipPath = "inset(0 0 0 0 round 0px)"; art?.style.removeProperty("transform"); });
+    const quad = !options.instant && options.from?.quad;
+    const reveal = () => {
+      this.root.classList.toggle("intro", Boolean(options.intro));
+      if (options.intro) this.introTimer = window.setTimeout(() => this.root.classList.remove("intro"), 2600);
+      // Commit the hidden state first so the fade actually runs.
+      void this.root.offsetWidth;
+      this.root.classList.add("visible");
+    };
+    if (quad) this.liftFromScreen(record, quad, reveal);
+    else reveal();
     this.root.scrollTop = 0;
     this.chapters.sync();
     this.root.querySelector<HTMLElement>("#pp-title")?.focus({ preventScroll: true });
-    this.timer = window.setTimeout(() => { this.state = "open"; }, options.instant ? 0 : from ? 760 : 340);
+    this.timer = window.setTimeout(() => { this.state = "open"; }, options.instant ? 0 : quad ? LIFT_MS + 340 : 340);
   }
 
   /** Replace the content in place, e.g. for previous/next. */
@@ -175,12 +181,42 @@ export class ProjectPage {
     this.chapters.sync();
   }
 
+  /**
+   * The key art lifts off the monitor: an image pinned to the screen's four
+   * projected corners (perspective included) eases out to the window corners,
+   * then hands over to the page, whose text rises in behind it.
+   */
+  private liftFromScreen(record: ArchiveRecord, quad: [number, number][], done: () => void) {
+    this.lift?.remove();
+    const img = Object.assign(document.createElement("img"), { src: heroSource(record), alt: "", className: "pp-lift" });
+    document.body.append(img);
+    this.lift = img;
+    const W = innerWidth, H = innerHeight, target: [number, number][] = [[0, 0], [W, 0], [W, H], [0, H]];
+    const start = performance.now();
+    const ease = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
+    const frame = (now: number) => {
+      if (this.lift !== img) return;
+      const t = Math.min(1, (now - start) / LIFT_MS), k = ease(t);
+      const q = quad.map(([x, y], i) => [x + (target[i][0] - x) * k, y + (target[i][1] - y) * k] as [number, number]);
+      img.style.transform = quadMatrix(W, H, q);
+      // A touch of screen glow that burns off as it reaches the window.
+      img.style.filter = `brightness(${1.25 - 0.25 * k})`;
+      if (t < 1) { requestAnimationFrame(frame); return; }
+      done();
+      img.classList.add("out");
+      window.setTimeout(() => { if (this.lift === img) { img.remove(); this.lift = undefined; } }, 420);
+    };
+    img.style.transform = quadMatrix(W, H, quad);
+    requestAnimationFrame(frame);
+  }
+
   close(options: { syncHistory?: boolean } = {}) {
+    this.lift?.remove();
+    this.lift = undefined;
     if (!this.isOpen) return false;
     clearTimeout(this.timer);
     clearTimeout(this.introTimer);
-    this.root.classList.remove("intro", "from-screen");
-    this.root.style.clipPath = "";
+    this.root.classList.remove("intro");
     this.state = "closing";
     this.root.classList.remove("visible");
     if (options.syncHistory !== false && workIdFromHash()) {

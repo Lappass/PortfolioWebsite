@@ -576,7 +576,11 @@ export class ArchiveScene {
     if (!points.length) return null;
     const xs = points.map((p) => rect.left + (p.x + 1) / 2 * rect.width);
     const ys = points.map((p) => rect.top + (1 - p.y) / 2 * rect.height);
-    return { left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys) };
+    const pts = xs.map((x, i) => [x, ys[i]] as [number, number]);
+    const pick = (score: (p: [number, number]) => number) => pts.reduce((a, b) => (score(b) > score(a) ? b : a));
+    // Top-left, top-right, bottom-right, bottom-left of the visible screen.
+    const quad: [number, number][] = [pick(([x, y]) => -x - y), pick(([x, y]) => x - y), pick(([x, y]) => x + y), pick(([x, y]) => y - x)];
+    return { left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys), quad };
   }
   ejectDisc(immediate = false) {
     this.insert.target = 0;
