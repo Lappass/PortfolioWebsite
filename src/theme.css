@@ -67,3 +67,6 @@
 [data-dark-surface="true"] .archive-atmosphere::before {
   background: linear-gradient(180deg, rgba(var(--theme-paper-rgb), .82), transparent 36%), linear-gradient(0deg, rgba(var(--theme-paper-rgb), .84), transparent 25%), radial-gradient(ellipse at 48% 48%, transparent 42%, rgba(var(--theme-paper-rgb), .48) 90%);
 }
+
+/* Dark theme: a subtle lift instead of the light paper highlight, so titles stay readable. */
+[data-dark-surface="true"] :is(.result-row:hover, .result-row:focus-visible) { background: rgba(224, 184, 120, 0.1); }

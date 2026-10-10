@@ -113,7 +113,7 @@ export class ProfilePage {
         <span class="pp-brand">关于我</span>
         <span class="pp-count" aria-hidden="true"></span>
       </header>
-      <nav class="pp-chapters" aria-label="个人档案章节">
+      <nav class="pp-chapters" aria-label="个人页章节">
         ${[["identity", "介绍"], ["about", "关于"], ["skills", "技能"], ["experience", "经历"]].map(([id, label]) => `<button type="button" data-chapter="${id}">${label}</button>`).join("")}
       </nav>
       <article class="pp-body">

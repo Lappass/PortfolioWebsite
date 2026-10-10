@@ -17,7 +17,7 @@
       "id": "X-001",
       "title": "三维档案作品集",
       "en": "PORTFOLIO ARCHIVE",
-      "department": "二次开发与改造（原项目：LBEILC/RhineLabUI）",
+      "department": "二次开发（基于 RhineLabUI）",
       "category": "网页开发",
       "date": "2026",
       "lead": "TypeScript / Three.js / Vite / Blender",

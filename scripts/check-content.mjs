@@ -114,9 +114,9 @@ const invalidCases = [
   [
     "reserved category",
     (c) => {
-      c.categories[0] = "全部档案";
+      c.categories[0] = "全部作品";
     },
-    /全部档案/,
+    /全部作品/,
   ],
 ];
 for (const [name, mutate, error] of invalidCases) {

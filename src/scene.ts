@@ -302,7 +302,7 @@ export class ArchiveScene {
     this.renderer.toneMappingExposure = 1.05;
     this.renderer.domElement.setAttribute(
       "aria-label",
-      "三维研究档案阵列，点击选择，左右拖动切列，上下拖动或滚轮切换列内档案",
+      "三维作品陈列，点击选择，拖动、方向键或滚轮切换作品",
     );
     container.appendChild(this.renderer.domElement);
     this.renderer.domElement.addEventListener('webglcontextrestored', () => {
@@ -871,7 +871,7 @@ export class ArchiveScene {
     c.fillText("LAPPAS.WORKS", 22, 116);
     c.font = "32px MiSans";
     c.fillStyle = "#878476";
-    c.fillText("INTERNAL DATABASE", 25, 174);
+    c.fillText("SELECTED WORKS", 25, 174);
     c.fillStyle = "#171713";
     c.font = "bold 130px MiSans";
     c.fillText("NO." + String(index + 1).padStart(3, "0"), 22, 360);

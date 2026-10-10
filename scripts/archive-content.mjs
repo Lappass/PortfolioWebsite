@@ -46,8 +46,8 @@ export function validateContent(content) {
   const names = content.categories;
   if (!Array.isArray(names) || names.length === 0 || !names.every(isText)) {
     errors.push("categories：至少需要一个非空分类名称");
-  } else if (new Set(names).size !== names.length || names.includes("全部档案")) {
-    errors.push("categories：分类名称不能重复，也不能使用“全部档案”");
+  } else if (new Set(names).size !== names.length || names.includes("全部作品")) {
+    errors.push("categories：分类名称不能重复，也不能使用“全部作品”");
   }
   const categories = Array.isArray(names) ? names : [];
   const records = Array.isArray(content.records) ? content.records : [];

@@ -9,5 +9,4 @@ export const bootMarkContour =
 export const bootPromptPath = "M52 62L69 79L86 62";
 export const bootCursorOffsetY = 25;
 
-const archivePositions = [2, 29, 55, 82, 110, 123, 150];
-export const brandHeading = `<h1>LAPPAS</h1><div>SELECTED WORKS · PORTFOLIO</div><p><span class="brand-analysis" role="img" aria-label="ARCHIVE">${[..."ARCHIVE"].map((letter, i) => `<span aria-hidden="true" style="left:${archivePositions[i]}px">${letter}</span>`).join("")}</span> <b>OS</b></p>`;
+export const brandHeading = `<h1>LAPPAS</h1><div>SHUHANG CHEN · GAME DEVELOPER</div>`;

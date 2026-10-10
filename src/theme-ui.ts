@@ -20,5 +20,5 @@ export function paintTheme(amount: number) {
   }
 }
 export function themeSettingsMarkup(dark: boolean) {
-  return `<div class="theme-settings"><div><strong>界面配色</strong><span>玻璃阵列随配色逐张过渡</span></div><div class="theme-choices" role="group" aria-label="界面配色"><button data-color-theme="light" aria-pressed="${!dark}">亮色</button><button data-color-theme="dark" aria-pressed="${dark}">暗色</button></div></div>`;
+  return `<div class="theme-settings"><div><strong>界面配色</strong><span>游戏盒与背景随配色逐个过渡</span></div><div class="theme-choices" role="group" aria-label="界面配色"><button data-color-theme="light" aria-pressed="${!dark}">亮色</button><button data-color-theme="dark" aria-pressed="${dark}">暗色</button></div></div>`;
 }

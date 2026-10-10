@@ -124,7 +124,7 @@ export class ProjectPage {
         <span class="pp-brand" aria-hidden="true">LAPPAS</span>
         <nav aria-label="切换作品"><button type="button" data-page="prev" aria-label="上一个作品：${e(previous.title)}">← <span>上一个</span></button><span class="pp-count">${pad(position)} / ${pad(total)}</span><button type="button" data-page="next" aria-label="下一个作品：${e(next.title)}"><span>下一个</span> →</button></nav>
       </header>
-      <nav class="pp-chapters" aria-label="项目章节"><span class="pp-index-label">ARCHIVE / ${e(r.id)}</span>${chapters.map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>${pad(i + 1)}</small>${label}</button>`).join("")}</nav>
+      <nav class="pp-chapters" aria-label="项目章节"><span class="pp-index-label">WORK / ${e(r.id)}</span>${chapters.map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>${pad(i + 1)}</small>${label}</button>`).join("")}</nav>
       <section class="pp-hub" data-section="overview" tabindex="-1" aria-label="作品封面">
         <div class="pp-field-index" aria-hidden="true">SELECTED WORK / ${pad(position)}<span>${e(r.clearance)}</span></div>
         <div class="pp-hub-art"><img src="${heroSource(r)}" alt="" decoding="async"></div>

@@ -2,7 +2,7 @@
 FILE X-001 / 三维档案作品集
 PORTFOLIO ARCHIVE
 
-角色：二次开发与改造（原项目：LBEILC/RhineLabUI）
+角色：二次开发（基于 RhineLabUI）
 时间：2026
 技术与协作：TypeScript / Three.js / Vite / Blender
 状态：PUBLIC
