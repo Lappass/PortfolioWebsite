@@ -171,8 +171,6 @@ function disc() {
   s += facade(-40, -30, 9, 4, 96, 100, 30, 30, { r: 1, c: 4 });
   s += litWindow(-40 + 4 * 126, -30 + 1 * 130, 96, 100).replace(/<polygon[^>]*\/>/, "");
   s += `</g></g>`;
-  // Horizon line where the wall meets the night, echoing the cover's billing block.
-  s += `<rect x="0" y="${R + 40}" width="${W}" height="6" fill="${C.frame}" clip-path="url(#ring)"/>`;
   // Title across the lower band, cell-built like the cover.
   const cell = 13, tw = wordWidth("LOCKDOWN", cell);
   s += blockWord("LOCKDOWN", R - tw / 2, R + hole + 40, cell, 1, C.ink).svg;
