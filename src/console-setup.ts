@@ -3,6 +3,9 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { profile } from "./profile";
 import { drawIdentity, prepareIdentity } from "./profile-particles";
+import type { ArchiveRecord } from "./data";
+import { loaderFor } from "./game-loaders";
+import { drawCover, workImage } from "./case-art";
 
 /**
  * Shared terminal: open case at left, monitor at centre, upright drive at right,
@@ -102,12 +105,12 @@ export class ConsoleSetup {
         this.controller.add(mesh);
       } else this.group.add(mesh);
     });
-    this.draw(0, "");
+    this.draw(0);
     this.loaded = true;
   }
 
   /** Follow the case; `insert` drives the slot light and the loading screen. */
-  update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, title: string, workspace = 0, viewportAspect = 16 / 9) {
+  update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, record: ArchiveRecord, workspace = 0, viewportAspect = 16 / 9) {
     const presence = Math.max(THREE.MathUtils.smoothstep(insert, 0.18, 0.28), THREE.MathUtils.smoothstep(workspace, .02, .18));
     this.group.visible = visible && this.loaded && presence > 0;
     if (!this.group.visible) return;
@@ -132,7 +135,7 @@ export class ConsoleSetup {
     if (this.light) this.light.emissiveIntensity = power * (0.7 + reading * (1.5 + 1.2 * Math.sin(insert * 110)));
     this.lamp.intensity = Math.max(2.4 * THREE.MathUtils.smoothstep(insert, 0.02, 0.2) * (1 - THREE.MathUtils.smoothstep(insert, 0.85, 1)), 1.6 * presence * lift);
     if (workspace > .001) this.drawPlayer(workspace, viewportAspect);
-    else this.draw(insert, title);
+    else this.draw(insert, record);
   }
 
   /** World-space corners of the screen, for handing over to the page. */
@@ -144,7 +147,8 @@ export class ConsoleSetup {
     return Array.from({ length: position.count }, (_, i) => new THREE.Vector3().fromBufferAttribute(position, i).applyMatrix4(screen.matrixWorld));
   }
 
-  private draw(progress: number, title: string) {
+  private draw(progress: number, record?: ArchiveRecord) {
+    const title = record?.title ?? "";
     // Every visual follows the insertion timeline, including interrupted ejection.
     // Quantise uploads to ~30 fps during the six-second sequence; idle screens reuse pixels.
     progress = Math.round(progress * 180) / 180;
@@ -187,7 +191,12 @@ export class ConsoleSetup {
     c.fillText("W O R K S   /   C O N S O L E", 0, 42);
     c.restore();
 
-    if (progress >= 0.75) {
+    const loader = record && loaderFor(record);
+    if (loader && progress >= 0.75) {
+      // The game's own loading screen takes over the monitor once the system wakes.
+      c.globalAlpha = ease(progress, 0.75, 0.8);
+      loader(c, w, h, THREE.MathUtils.clamp((progress - 0.76) / 0.22, 0, 1));
+    } else if (progress >= 0.75) {
       const system = ease(progress, 0.75, 0.83);
       const read = ease(progress, 0.85, 0.98);
       c.globalAlpha *= system;
@@ -202,6 +211,13 @@ export class ConsoleSetup {
       c.font = "500 22px MiSans, sans-serif";
       c.fillStyle = "rgba(238, 243, 255, 0.55)";
       c.fillText(progress < 0.85 ? "BOOT / Initializing…" : progress < 0.98 ? "DISC / Reading works…" : "READY", w / 2, h * 0.73);
+    }
+    // Last beat: the project's key art, so the page grows out of the same picture.
+    const art = record && workImage(record.id, record.hero ? "hero" : "cover");
+    const handoff = ease(progress, 0.95, 0.995);
+    if (art && handoff) {
+      c.globalAlpha = handoff;
+      drawCover(c, art, 0, 0, w, h);
     }
     c.restore();
     this.texture.needsUpdate = true;

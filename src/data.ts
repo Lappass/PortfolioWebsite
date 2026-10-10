@@ -19,6 +19,8 @@ export interface ArchiveRecord {
   disc?: string;
   /** Optional back-cover art, same size as the cover. */
   back?: string;
+  /** Optional monitor loading screen while the disc is read (src/game-loaders.ts). */
+  loader?: string;
   hero?: string;
   gallery?: { src: string; caption?: string; note?: string }[];
   video?: string;

@@ -124,11 +124,7 @@ function hero() {
   s += facade(1040, -250, 7, 9, 118, 122, 40, 38, { r: 4, c: 2 });
   s += litWindow(1040 + 2 * 158, -250 + 4 * 160, 118, 122);
   s += `</g>`;
-  const cell = 17, title = "LOCKDOWN";
-  s += blockWord(title, 122, 430, cell, 1, C.ink).svg;
-  s += text(122, 600, 28, "A HOUSEHOLD SURVIVAL GAME", `letter-spacing="9"`);
-  s += `<rect x="122" y="628" width="110" height="4" fill="${C.warm}"/>`;
-  s += text(122, 684, 20, "A GAME BY SHUHANG CHEN", `letter-spacing="7"`, C.muted);
+  // No billing here: the project page sets the title over this art.
   s += `<rect width="${W}" height="${H}" filter="url(#grain)"/></svg>`;
   return { svg: s, W, H };
 }

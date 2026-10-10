@@ -250,6 +250,7 @@
 @media (max-width: 860px) { .profile-hero { grid-template-columns: 1fr; justify-items: start; } .profile-avatar { width: 140px; } }
 /* Grown out of the monitor screen after a disc is read. */
 .project-page.from-screen { opacity: 1; transform: none; transition: clip-path 0.75s cubic-bezier(0.65, 0, 0.35, 1); }
+.project-page.from-screen .pp-hub-art { animation: none; transform-origin: 50% 50%; transition: transform 0.75s cubic-bezier(0.65, 0, 0.35, 1); }
 @media (prefers-reduced-motion: reduce) { .project-page.from-screen { transition: none; } }
 
 /* Archive reading layout: fixed chapter rail and captions outside the imagery. */

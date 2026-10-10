@@ -251,6 +251,7 @@ export class ArchiveScene {
   private dragging = false;
   private hoverCell: ArchiveCell | null = null;
   private hoverLifts = new Map<string, number>();
+  private glint = new THREE.PointLight("#fff4e2", 0, 7, 2);
   private archiveDrag = Object.assign(new ArchiveDrag(), { lockLane: true });
   private dragTrack: DragPosition | null = null;
   private navigatingDrag = false;
@@ -342,6 +343,7 @@ export class ArchiveScene {
     this.scene.add(floor);
     this.dust = new ParticleField(this.renderer.domElement);
     this.scene.add(this.dust.points);
+    this.scene.add(this.glint);
     this.camera.position.set(-62.26, 35.98, 43.28);
     this.cameraAim.set(-0.5, 1.1, 0.4);
     this.camera.fov = 6.15;
@@ -1611,9 +1613,18 @@ export class ArchiveScene {
         0.024 *
         (1 - detail) *
         (1 - ease(this.lift.value / 0.4)),
-      cinematic ? 0 : this.rotation,
+      cinematic ? 0 : this.rotation + (hoverLift(this.selectedCell) / 0.28) * this.pointer.x * .5 * (1 - detail),
       0,
     );
+    this.model.rotation.x += (hoverLift(this.selectedCell) / 0.28) * this.pointer.y * .22 * (1 - detail);
+    // A small light sweeps across the hovered case with the cursor: the glint.
+    const glintCell = this.hoverCell && !cinematic ? this.hoverCell : null;
+    const glintTarget = glintCell ? hoverLift(glintCell) / 0.28 : 0;
+    if (glintCell) {
+      const g = this.cellPosition(glintCell);
+      this.glint.position.set(g.x - trackX + this.pointer.x * 3, g.y + field(glintCell.row, glintCell.lane) + 1.6 - this.pointer.y * 2, g.z + entryZ + this.rail.value + 3);
+    }
+    this.glint.intensity = THREE.MathUtils.lerp(this.glint.intensity, glintTarget * 26, 1 - Math.exp(-dt * 10));
     // Measured from frame 787: X edge (382,-204), adjacent row (78,38).
     // The label vertical edge constrains height; the file base is occluded.
     // Do not calibrate field of view from the visible fragment of a file.
@@ -1850,7 +1861,9 @@ export class ArchiveScene {
 
       const slope = field(row + .5, lane) - field(row - .5, lane);
       this.dummy.position.set(x, y, z);
-      this.dummy.rotation.set(slope * .024 * (1 - detail), 0, 0);
+      // Hovered cases lean toward the cursor so the shrink-wrap catches the light.
+      const lean = hoverLift(cell) / 0.28;
+      this.dummy.rotation.set(slope * .024 * (1 - detail) + lean * this.pointer.y * .22, lean * this.pointer.x * .5, 0);
       this.dummy.scale.setScalar(1);
       this.dummy.updateMatrix();
       if (play.enabled) this.relayPoints.set(cellKey(cell), { cell: { ...cell }, point: new THREE.Vector3(0, 3.5, 0).applyMatrix4(this.dummy.matrix) });
@@ -1924,7 +1937,7 @@ export class ArchiveScene {
       if (this.shadowCoverage) this.shadowCoverage.mesh.visible = arrayVisibility === 1;
       for (const outgoing of this.outgoing) outgoing.group.visible = arrayVisibility === 1;
       this.model.updateMatrixWorld();
-      this.setup.update(this.model.matrixWorld, this.camera.position, !cinematic && (this.detail > 0.02 || this.workspace.value > .01) && this.presence > 0.01, this.insert.value, time, records[fileAtCell(this.selectedCell)].title, this.workspace.value, this.camera.aspect);
+      this.setup.update(this.model.matrixWorld, this.camera.position, !cinematic && (this.detail > 0.02 || this.workspace.value > .01) && this.presence > 0.01, this.insert.value, time, records[fileAtCell(this.selectedCell)], this.workspace.value, this.camera.aspect);
     }
     const state = this.renderState;
     this.scene.updateMatrixWorld();

@@ -92,11 +92,18 @@ export class ProjectPage {
     // From the monitor: start clipped to its screen, then grow to fill the window.
     const from = options.from;
     this.root.classList.toggle("from-screen", Boolean(from));
-    if (from) this.root.style.clipPath = `inset(${from.top}px ${innerWidth - from.right}px ${innerHeight - from.bottom}px ${from.left}px round 6px)`;
+    const art = this.root.querySelector<HTMLElement>(".pp-hub-art");
+    if (from) {
+      this.root.style.clipPath = `inset(${from.top}px ${innerWidth - from.right}px ${innerHeight - from.bottom}px ${from.left}px round 6px)`;
+      // The monitor ends on this same image; start the art fitted to the screen so
+      // the two read as one picture growing out of it.
+      const s = Math.max((from.right - from.left) / innerWidth, (from.bottom - from.top) / innerHeight);
+      art?.style.setProperty("transform", `translate(${(from.left + from.right) / 2 - innerWidth / 2}px, ${(from.top + from.bottom) / 2 - innerHeight / 2}px) scale(${s})`);
+    }
     // Commit the hidden state first so the fade actually runs.
     void this.root.offsetWidth;
     this.root.classList.add("visible");
-    if (from) requestAnimationFrame(() => { this.root.style.clipPath = "inset(0 0 0 0 round 0px)"; });
+    if (from) requestAnimationFrame(() => { this.root.style.clipPath = "inset(0 0 0 0 round 0px)"; art?.style.removeProperty("transform"); });
     this.root.scrollTop = 0;
     this.chapters.sync();
     this.root.querySelector<HTMLElement>("#pp-title")?.focus({ preventScroll: true });

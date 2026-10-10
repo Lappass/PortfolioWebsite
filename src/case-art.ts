@@ -8,7 +8,7 @@ const HUES: Record<string, number> = { Games: 32, Web: 215, "3D Graphics": 24, I
 /** Cover art supplied per work (content/archives.json `cover`), decoded before cases are printed. */
 const coverImages = new Map<string, HTMLImageElement>();
 export async function preloadCovers(works: ArchiveRecord[], url: (path: string) => string) {
-  await Promise.all(works.flatMap((r) => (["cover", "spine", "disc", "back"] as const).filter((k) => r[k]).map(async (k) => {
+  await Promise.all(works.flatMap((r) => (["cover", "spine", "disc", "back", "hero"] as const).filter((k) => r[k]).map(async (k) => {
     const key = `${r.id}:${k}`;
     if (coverImages.has(key)) return;
     const image = new Image();
@@ -16,8 +16,10 @@ export async function preloadCovers(works: ArchiveRecord[], url: (path: string) 
     try { await image.decode(); coverImages.set(key, image); } catch { /* Fall back to the printed art. */ }
   })));
 }
+/** A decoded per-work image (cover, hero …), if it loaded. */
+export const workImage = (id: string, key: string) => coverImages.get(`${id}:${key}`);
 /** Draw an image to fill a box, cropping the overflow (CSS object-fit: cover). */
-function drawCover(c: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, w: number, h: number) {
+export function drawCover(c: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, w: number, h: number) {
   const k = Math.max(w / image.naturalWidth, h / image.naturalHeight);
   const sw = w / k, sh = h / k;
   c.drawImage(image, (image.naturalWidth - sw) / 2, (image.naturalHeight - sh) / 2, sw, sh, x, y, w, h);

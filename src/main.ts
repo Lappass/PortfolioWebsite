@@ -493,6 +493,23 @@ function stepFile(direction: number) {
 function stepColumn(direction: number) {
   stepFile(direction);
 }
+// Idle attract mode: after 20 s without input on the home shelf, cycle through
+// the works every 6 s, like a console home screen. Any input stops it.
+const ATTRACT_AFTER = 20000, ATTRACT_EVERY = 6000;
+let lastInput = performance.now(), lastAttract = 0;
+for (const type of ["pointermove", "pointerdown", "keydown", "wheel", "touchstart"])
+  addEventListener(type, () => { lastInput = performance.now(); }, { passive: true, capture: true });
+setInterval(() => {
+  const now = performance.now();
+  if (mode !== "archive" || modal || location.hash || document.hidden || !ready) return;
+  if (now - lastInput < ATTRACT_AFTER || now - lastAttract < ATTRACT_EVERY) return;
+  lastAttract = now;
+  const files = columnFiles(fileLocation(selected).lane);
+  if (files.length < 2) return;
+  const at = files.indexOf(selected);
+  if (at < files.length - 1) stepFile(1);
+  else select(files[0], { axis: "row", direction: -1 });
+}, 500);
 function updateSelection(navigation?: ArchiveNavigation) {
   const r = records[selected];
   const { lane } = fileLocation(selected);

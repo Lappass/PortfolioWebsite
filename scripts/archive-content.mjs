@@ -30,6 +30,8 @@ function validateMedia(record, label, errors) {
   for (const key of ["cover", "spine", "disc", "back", "hero", "video", "unity"])
     if (record[key] !== undefined && !isMediaPath(record[key]))
       errors.push(`${label}.${key}：必须是 public 目录内的路径或 HTTP(S) 链接`);
+  if (record.loader !== undefined && !isText(record.loader))
+    errors.push(`${label}.loader: must be non-empty text`);
   if (record.gallery !== undefined && (!Array.isArray(record.gallery) ||
     !record.gallery.every((item) => item && isMediaPath(item.src) && (item.caption === undefined || isText(item.caption)) && (item.note === undefined || isText(item.note)))))
     errors.push(`${label}.gallery：每项需要有效的 src，caption 和 note 为可选纯文本`);

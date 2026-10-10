@@ -20,7 +20,9 @@ export const isCaseSurface = (name: string) => /^(Case_|Insert_|Disc|Hub_)/.test
 function materials() {
   const shell = new THREE.MeshPhysicalMaterial({ name: "Case_Shell", color: "#171a1d", roughness: 0.43, clearcoat: 0.35, clearcoatRoughness: 0.25 });
   const print = new THREE.MeshPhysicalMaterial({ name: "Insert_Print", color: "#ffffff", roughness: 0.45, clearcoat: 1, clearcoatRoughness: 0.06 });
-  const disc = new THREE.MeshPhysicalMaterial({ name: "Disc_Surface", color: "#d9d9d6", metalness: 1, roughness: 0.2 });
+  const disc = new THREE.MeshPhysicalMaterial({ name: "Disc_Surface", color: "#d9d9d6", metalness: 1, roughness: 0.14,
+    // Thin-film sheen: the rainbow that slides across a real disc as it turns.
+    iridescence: 1, iridescenceIOR: 1.8, iridescenceThicknessRange: [180, 620] });
   const label = new THREE.MeshPhysicalMaterial({ name: "Disc_Label", color: "#ffffff", roughness: 0.4 });
   const hub = new THREE.MeshPhysicalMaterial({ name: "Hub_Plastic", color: "#1d2226", roughness: 0.5 });
   return { Case_Shell: shell, Insert_Print: print, Disc_Surface: disc, Disc_Label: label, Hub_Plastic: hub } as Record<string, THREE.MeshPhysicalMaterial>;
