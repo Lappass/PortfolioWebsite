@@ -1,4 +1,3 @@
-import { hasTypingBetween } from "./typing-rhythm";
 import { assetUrl } from "./asset-url";
 export type Sound =
   | "page-open"
@@ -687,7 +686,6 @@ export class TerminalAudio {
     }
     for (const cue of BOOT_CUES)
       if (cue.time > previous && cue.time <= time) this.play(cue.sound);
-    if (hasTypingBetween(previous, time)) this.play("key");
   }
   stats() {
     return {

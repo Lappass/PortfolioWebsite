@@ -23,8 +23,6 @@ import { initPwa, pwaSettingsMarkup } from "./pwa";
 import { createRollingNumber, createRollingText } from "@kitlangton/rolling-number";
 import { ArchiveScene } from "./scene";
 import { ContentTransition, SurfaceTransition } from "./ui-transitions";
-import { BootSequence } from "./boot";
-import { loadBootWebfonts } from "./boot-lettering";
 import { wrap, type ArchiveNavigation } from "./archive-loop";
 import {
   records,
@@ -70,20 +68,11 @@ import { logo, brandHeading } from "./brand";
 $("#stage").innerHTML = `
   <div id="three-scene" class="three-scene"></div>
   <div class="scene-atmosphere archive-atmosphere"></div>
-  <div id="boot-background" class="boot-background"><svg viewBox="0 0 1920 1080" preserveAspectRatio="none"><g fill="none" stroke="#fff" stroke-width="3"><path d="M-210 705C-45 705 182 704 247 567C337 377 99 306 4 435S27 680 169 631C309 584 227 314 279 111S568-113 568-113"/><path d="M1560-80C1374 114 1671 168 1601 323S1371 367 1431 480S1692 666 1559 787S1329 886 1498 1130"/><circle cx="1450" cy="648" r="346"/><circle cx="1450" cy="648" r="348"/></g></svg></div>
   <header class="brand">${brandHeading}</header>
   <nav class="system-nav" aria-label="系统导航">
     <button data-action="about" aria-label="关于我"><span aria-hidden="true">◉</span> 关于</button>
     <button data-action="saved" aria-label="查看收藏档案" title="收藏档案">＋ SAVED <span id="saved-count">00</span></button>
   </nav>
-  <button id="skip" class="skip" data-action="skip">ENTER SYSTEM <span>↗</span></button>
-  <section id="boot" class="boot" aria-label="系统启动">
-    <div class="access-text">ACCESS</div>
-    <div class="boot-logo">${logo}</div>
-    <div class="auth-status"><span>▪</span> <span id="auth-message"></span><i></i></div>
-    <div class="scan"><svg viewBox="0 0 1920 1080" aria-hidden="true"><g fill="none" stroke="#080a08" stroke-width="2" stroke-linecap="round"><path/><path stroke="#fff"/><path/><path/><path/><path/><circle class="orbit-dot" r="8" fill="#ed821b" stroke="none"/><circle class="orbit-dot" r="8" fill="#ed821b" stroke="none"/><circle class="scan-core" cx="960" cy="540" r="5" fill="#080a08" stroke="none"/></g></svg><span>PERMISSION AUTHORIZED</span></div>
-    <div class="welcome"><div class="welcome-panel"></div><div class="welcome-heading">WELCOME TO</div><div class="welcome-company"><strong>LAPPAS.WORKS</strong><strong class="welcome-highlight" aria-hidden="true">LAPPAS.WORKS</strong></div><div class="welcome-database">INTERNAL DATABASE</div><div class="welcome-logo">${logo}</div></div>
-  </section>
   <svg id="inspection-marks" viewBox="0 0 1920 1080" aria-hidden="true"><path id="inspection-lines"/><g id="inspection-corners"></g><circle id="inspection-point" r="1.8"/></svg>
   <div id="inspection-text" aria-hidden="true">CONFIDENTIALITY:<strong>GENERAL BUSINESS USE</strong></div>
   <section id="archive-ui" class="archive-ui" aria-label="档案选择">
@@ -107,44 +96,18 @@ $("#stage").innerHTML = `
   <div id="loading" class="loading"><div class="loading-mark">${logo}</div><span>CONNECTING TO INTERNAL DATABASE</span><i></i></div>
 `;
 
-$("#boot-background").insertAdjacentHTML(
-  "beforeend",
-  '<div class="boot-white"></div>',
-);
 $(".system-footer").insertAdjacentHTML("beforeend", '<button class="footer-preferences" data-action="settings" aria-label="画面与声音设置">偏好设置</button>');
-const bootSequence = new BootSequence($("#stage"));
-$("#viewport").insertAdjacentHTML("beforeend", '<button class="mobile-entry" data-action="skip">进入档案 <span>→</span></button>');
 
 type Mode = "boot" | "archive" | "detail";
 let mode: Mode = "boot",
   selected = featuredFiles[0],
-  bootStart = 0,
-  lastStep = "",
   ready = false;
 let modal: "search" | "saved" | "settings" | "experiments" | null = null,
   searchQuery = "",
   filter = "全部档案";
 let activeTab = "overview";
 const reviewParams = new URLSearchParams(location.search);
-let frozenTime =
-  reviewParams.get("freeze") === "1"
-    ? Number(reviewParams.get("time") ?? 0)
-    : null;
-if (reviewParams.get("review") === "1") {
-  $("#stage").dataset.review = "true";
-  window.addEventListener("message", (event) => {
-    if (
-      event.origin !== location.origin ||
-      event.source !== window.parent ||
-      event.data?.type !== "rhine-review-frame"
-    )
-      return;
-    const t = Number(event.data.time);
-    if (!Number.isFinite(t) || t < 0 || t >= 35) return;
-    frozenTime = t;
-    if (ready && mode !== "boot") setMode("boot");
-  });
-}
+const frozenTime: number | null = null;
 let toastTimer: ReturnType<typeof setTimeout>;
 let previousFocus: HTMLElement | null = null;
 const detailTransition = new SurfaceTransition($("#detail-ui"), undefined, 180, 180);
@@ -247,7 +210,6 @@ const loading = $("#loading");
 // reference animation still uses its calibrated 1920 x 1080 stage.
 $("#viewport").append(loading);
 $("#stage").inert = true;
-$(".mobile-entry").inert = true;
 const entry = !isWallpaper && !reviewEntry && (prefs.sound || prefs.music) ? new StartupGate({
   root: loading,
   unlock: () => audio.unlock(),
@@ -482,8 +444,6 @@ function setMode(next: Mode) {
   $("#stage").dataset.mode = next;
   workbench?.syncVisibility();
   if (previousMode !== next) fit();
-  $("#boot").inert = next !== "boot";
-  $("#boot").setAttribute("aria-hidden", String(next !== "boot"));
   $("#archive-ui").inert = next !== "archive" || Boolean(modal) || Boolean(workbench?.enabled);
   $("#archive-ui").setAttribute("aria-hidden", String(next !== "archive" || Boolean(workbench?.enabled)));
   $(".system-nav").inert = next === "boot" || Boolean(modal);
@@ -499,7 +459,6 @@ function setMode(next: Mode) {
   $("#detail-ui").inert = next !== "detail" || Boolean(modal);
   scene?.setMode(next === "boot" ? "hidden" : next);
   if (next !== "boot") {
-    bootSequence.reset();
     $(".file-title").firstChild!.textContent = "";
     $("#stage").dataset.boot = "done";
   }
@@ -616,11 +575,7 @@ function replayBootAfterModal(forcePreview: boolean) {
     playIntro();
     return;
   }
-  bootStart = performance.now() / 1000 - 1.76;
-  frozenTime = null;
-  lastStep = "";
-  setMode(!motionActive("boot") && !forcePreview ? "archive" : "boot");
-  audio.restartBoot();
+  setMode("archive");
   scene?.select(featuredFiles[0]);
   selected = featuredFiles[0];
   updateSelection();
@@ -927,10 +882,6 @@ document.addEventListener("click", (e) => {
   const action = el.dataset.action;
   if (action === "toggle-three") { void toggleThree(); return; }
   if (action === "sound-preview") audio.play("confirm");
-  if (action === "skip") {
-    setMode("archive");
-    audio.play("confirm");
-  }
   if (action === "prev") stepFile(-1);
   if (action === "next") stepFile(1);
   if (action === "column-prev") stepColumn(-1);
@@ -1067,55 +1018,6 @@ const ease = (t: number) => {
   t = Math.max(0, Math.min(1, t));
   return t * t * (3 - 2 * t);
 };
-function bootFrame(t: number) {
-  if (isWallpaper && !scene && frozenTime === null && t >= 21.9) {
-    setMode("archive");
-    return undefined;
-  }
-  if (isWallpaper && frozenTime === null && t >= ARRAY_OPENING_END &&
-      !openingShowsDetail(wallpaperHost()?.properties.openingdetail?.value, !!workbench?.enabled)) {
-    setMode("archive");
-    return undefined;
-  }
-  audio.updateBoot(t, frozenTime !== null);
-  const motion = bootSequence.update(t);
-  if (workbench?.enabled && frozenTime === null) {
-    const end = openingShowsDetail(wallpaperHost()?.properties.openingdetail?.value, true) ? 35 : ARRAY_OPENING_END;
-    if (t > end - .35) $(".powered").style.opacity = String(1 - ease((t - end + .35) / .35));
-  }
-  let step: string = motion.step;
-  if (t >= 22) {
-    step = "array";
-  }
-  if (t >= 25.68) {
-    step = "select";
-  }
-  if (t >= 28.3) {
-    step = "inspect";
-  }
-  if (step !== lastStep) {
-    $("#stage").dataset.boot = step;
-    lastStep = step;
-  }
-  $(".file-title").firstChild!.textContent =
-    step === "array"
-      ? "SELECTING FILES...".slice(0, Math.max(0, Math.floor((t - 21.94) * 18)))
-      : "FILE NUMBER: ";
-  $("#stage").style.setProperty(
-    "--entry-opacity",
-    String(ease((t - 21.9) / 0.13)),
-  );
-  $(".callout-rule").style.transform = `scaleX(${ease((t - 22.08) / 0.9)})`;
-  const reveal = ease((t - 22) / 0.4),
-    lift = ease((t - 26) / 1.8),
-    zoom = 0.55 * ease((t - 27.3) / 1.65) + 0.45 * ease((t - 29.0) / 5.0);
-  if (t >= 35) {
-    setMode("detail");
-    return undefined;
-  }
-  return { reveal, lift, zoom, time: t };
-}
-
 const inspectionOverlay = new InspectionOverlay();
 const documentDecryption = new DocumentDecryption();
 // A newly opened archive can introduce another font shard. Re-measure its
@@ -1135,13 +1037,10 @@ function frame(ms: number) {
   paintTheme(theme);
   scene?.setDustVisible(mode === "archive" && !projectPage.isOpen && !profilePage.isOpen && !modal);
   playground?.tick(time);
-  const cinema =
-    mode === "boot" && ready
-      ? bootFrame(frozenTime ?? time - bootStart)
-      : undefined;
+  const cinema = undefined;
   wallpaperEffects?.update(time, motionIsReduced(), motionActive("pointerParallax"));
   // The calibrated 2D opening fully covers the scene until array entry.
-    if ((!projectPage.covering || profilePage.isOpen) && !profilePage.covering && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
+    if ((!projectPage.covering || profilePage.isOpen) && !profilePage.covering) scene?.update(time, cinema);
   if (discInserting && scene) {
     const progress = scene.insertProgress;
     if (consoleCueProgress < 0.63 && progress >= 0.63) audio.play("brand");
@@ -1286,7 +1185,6 @@ async function start() {
     }
     await Promise.all([
       scene?.load(),
-      loadBootWebfonts(),
       // With unicode-range faces, preload the opening's actual characters,
       // not every font shard. Other archive text loads on demand.
       document.fonts.load("300 20px MiSans", "ACCESS WELCOME TO INTERNAL DATABASE"),
@@ -1322,12 +1220,9 @@ function completeStartup(silent: boolean) {
   }
   audio.releaseEntry();
   const intro = introWanted() && !location.hash;
-  if (!intro) audio.restartBoot();
   const fade = motionActive("boot") ? 600 : 0;
-  bootStart = performance.now() / 1000 - (reviewParams.has("time") ? Number(reviewParams.get("time")) : 1.76);
-  if (!reviewParams.has("time")) bootStart += fade / 1000;
   if (intro) playIntro();
-  else setMode("boot");
+  else setMode("archive");
   if (reviewParams.get("scene") === "archive" || (!motionActive("boot") && !reviewParams.has("time"))) setMode("archive");
   if (reviewParams.get("scene") === "detail") setMode("detail");
   if (isWallpaper && wallpaperHost()?.properties.boot?.value === false) setMode("archive");
@@ -1338,15 +1233,13 @@ function completeStartup(silent: boolean) {
   const sharedWork = records.findIndex((record) => record.id === workIdFromHash());
   if (sharedWork >= 0 && !isWallpaper) openProjectAt(sharedWork, { instant: true, push: false });
   $("#stage").inert = false;
-  $(".mobile-entry").inert = false;
   loading.classList.add("loaded");
   loading.inert = true;
   setTimeout(() => {
     const restoreFocus = loading.contains(document.activeElement) || document.activeElement === document.body;
     loading.remove();
     if (entry && restoreFocus) {
-      const skip = $("#skip");
-      const target = mode === "boot" ? skip.getClientRects().length ? skip : $(".mobile-entry") : $(".read-file");
+      const target = $(".read-file");
       target.focus({ preventScroll: true });
     }
   }, fade);
@@ -1405,7 +1298,6 @@ if (isWallpaper) {
     const paused = wallpaperHost()?.paused ?? false;
     if (paused && pausedAt === undefined) pausedAt = performance.now();
     if (!paused && pausedAt !== undefined) {
-      if (started && mode === "boot") bootStart += (performance.now() - pausedAt) / 1000;
       pausedAt = undefined;
     }
     audio.setHostPaused(paused);
@@ -1435,26 +1327,6 @@ void start();
 Object.assign(window, {
   rhine: {
     // The review button supplies a real user activation. Preferences stay local to this preview.
-    playBootPreview: async (music = false) => {
-      if (!ready || !navigator.userActivation.isActive) return false;
-      const request = ++audioPreviewRequest;
-      audioPreview = true;
-      audio.configure({ ...prefs, sound: true, music });
-      const unlocked = await audio.unlock();
-      if (request !== audioPreviewRequest) return false;
-      if (!unlocked) {
-        audioPreview = false;
-        configureAudio();
-        return false;
-      }
-      replayBoot(true);
-      return true;
-    },
-    seek: (t: number) => {
-      setMode("boot");
-      bootStart = performance.now() / 1000 - t;
-      lastStep = "";
-    },
     archive: () => setMode("archive"),
     detail: () => openFile(),
     select: (i: number) => select(i),
@@ -1466,7 +1338,6 @@ Object.assign(window, {
       ready,
       startup: started ? "started" : entry?.phase ?? "loading",
       motion: { reduced: motionIsReduced(), preset: prefs.motionPreset },
-      bootTime: mode === "boot" ? started ? (frozenTime ?? performance.now() / 1000 - bootStart) + 5 : 6.76 : null,
       selected: records[selected].id,
       saved: [...saved],
       audio: audio.stats(),
