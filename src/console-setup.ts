@@ -184,8 +184,8 @@ export class ConsoleSetup {
     c.scale(scale, scale);
     c.fillStyle = "#eef3ff";
     c.textAlign = "center";
-    c.font = "700 82px MiSans, sans-serif";
-    c.fillText("LAPPAS", 0, 0);
+    c.font = "700 64px MiSans, sans-serif";
+    c.fillText("SHUHANG CHEN", 0, 0);
     c.font = "500 18px MiSans, sans-serif";
     c.fillStyle = "#cbb797";
     c.fillText("W O R K S   /   C O N S O L E", 0, 42);

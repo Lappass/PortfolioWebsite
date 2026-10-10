@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Lappas · Portfolio",
-  "short_name": "Lappas",
-  "description": "A 3D archive-style portfolio by Shuhang Chen (Lappas)",
+  "name": "Shuhang Chen · Portfolio",
+  "short_name": "Shuhang Chen",
+  "description": "A 3D archive-style portfolio by Shuhang Chen",
   "lang": "en",
   "start_url": "./?source=pwa",
   "scope": "./",

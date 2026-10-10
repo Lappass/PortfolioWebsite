@@ -101,5 +101,5 @@ export async function loadContent() {
 }
 
 export function archiveText(r) {
-  return `\uFEFFLAPPAS · PORTFOLIO ARCHIVE\nFILE ${r.id} / ${r.title}\n${r.en}\n\nRole: ${r.department}\nDate: ${r.date}\nStack: ${r.lead}\nStatus: ${r.clearance}\n\n${r.abstract}\n\nHighlights\n${r.findings.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n\nLink: ${r.source}\n`;
+  return `\uFEFFSHUHANG CHEN · PORTFOLIO ARCHIVE\nFILE ${r.id} / ${r.title}\n${r.en}\n\nRole: ${r.department}\nDate: ${r.date}\nStack: ${r.lead}\nStatus: ${r.clearance}\n\n${r.abstract}\n\nHighlights\n${r.findings.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n\nLink: ${r.source}\n`;
 }

@@ -134,7 +134,7 @@ export class ProjectPage {
     this.root.innerHTML = `
       <header class="pp-bar">
         <button type="button" data-page="back">← <span>Back to array</span><small>ESC</small></button>
-        <span class="pp-brand" aria-hidden="true">LAPPAS</span>
+        <span class="pp-brand" aria-hidden="true">SHUHANG CHEN</span>
         <nav aria-label="Switch work"><button type="button" data-page="prev" aria-label="Previous work: ${e(previous.title)}">← <span>Prev</span></button><span class="pp-count">${pad(position)} / ${pad(total)}</span><button type="button" data-page="next" aria-label="Next work: ${e(next.title)}"><span>Next</span> →</button></nav>
       </header>
       <nav class="pp-chapters" aria-label="Project sections"><span class="pp-index-label">WORK / ${e(r.id)}</span>${chapters.map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>${pad(i + 1)}</small>${label}</button>`).join("")}</nav>
