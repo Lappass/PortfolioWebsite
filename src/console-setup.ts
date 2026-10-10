@@ -6,6 +6,7 @@ import { drawIdentity, prepareIdentity } from "./profile-particles";
 import type { ArchiveRecord } from "./data";
 import { loaderFor } from "./game-loaders";
 import { drawCover, workImage } from "./case-art";
+import { disposeThreeTree } from "./three-resources";
 
 /**
  * Shared terminal: open case at left, monitor at centre, upright drive at right,
@@ -41,6 +42,8 @@ export class ConsoleSetup {
   private texture = new THREE.CanvasTexture(this.canvas);
   private drawn = "";
   loaded = false;
+  private portraitRequested = false;
+  private disposed = false;
 
   constructor() {
     void prepareIdentity(profile.name);
@@ -61,6 +64,7 @@ export class ConsoleSetup {
   async load(url: string) {
     // The asset is meshopt-compressed with WebP textures (see art/console_setup.py).
     const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(url);
+    if (this.disposed) { disposeThreeTree(gltf.scene); return; }
     gltf.scene.updateMatrixWorld(true);
     const slot = gltf.scene.getObjectByName("Console_Slot");
     if (slot) this.slotLocal.copy(slot.getWorldPosition(new THREE.Vector3())).add(SETUP_ORIGIN);
@@ -109,11 +113,38 @@ export class ConsoleSetup {
     this.loaded = true;
   }
 
+  private async loadDeskPortrait() {
+    this.portraitRequested = true;
+    try {
+      const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder)
+        .loadAsync(`${import.meta.env.BASE_URL}assets/desk-portrait.glb`);
+      if (this.disposed) { disposeThreeTree(gltf.scene); return; }
+      const bounds = new THREE.Box3().setFromObject(gltf.scene), center = bounds.getCenter(new THREE.Vector3());
+      const scale = 1.25 / (bounds.max.y - bounds.min.y);
+      gltf.scene.scale.multiplyScalar(scale);
+      gltf.scene.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+      const stand = new THREE.Group(); stand.name = 'Desk_Portrait';
+      // On the front-left of the monitor, clear of the controller and disc path.
+      stand.position.set(-2.15, .02, -.85); stand.rotation.y = .12;
+      gltf.scene.traverse(object => {
+        if (!(object instanceof THREE.Mesh)) return;
+        object.castShadow = object.receiveShadow = true;
+        for (const material of [object.material].flat()) {
+          material.alphaHash = true; this.surfaces.push(material);
+        }
+      });
+      stand.add(gltf.scene); this.group.add(stand);
+    } catch (error) { console.warn('Desk portrait unavailable', error); }
+  }
+
+  dispose() { this.disposed = true; }
+
   /** Follow the case; `insert` drives the slot light and the loading screen. */
   update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, record: ArchiveRecord, workspace = 0, viewportAspect = 16 / 9) {
     const presence = Math.max(THREE.MathUtils.smoothstep(insert, 0.18, 0.28), THREE.MathUtils.smoothstep(workspace, .02, .18));
     this.group.visible = visible && this.loaded && presence > 0;
     if (!this.group.visible) return;
+    if (!this.portraitRequested) void this.loadDeskPortrait();
     for (const surface of this.surfaces) {
       surface.opacity = presence;
     }

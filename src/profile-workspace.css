@@ -27,11 +27,6 @@
 .profile-orb-labels { position: absolute; inset: 0; pointer-events: none; }
 .profile-orb-labels span { position: absolute; transform: translateX(-50%); white-space: nowrap; font-size: 11px; color: var(--pp-muted); transition: color 220ms; }
 .profile-orb-labels span.active { color: var(--pp-accent); }
-.profile-orb-icons { position: absolute; inset: 0; pointer-events: none; animation: profile-icons-in 700ms 350ms both; }
-.profile-orb-icons img { position: absolute; transform: translate(-50%,-50%); object-fit: contain; opacity: .92; transition: opacity 220ms; }
-.profile-orb-icons img.monochrome { filter: brightness(0) invert(.9); }
-.profile-orb-icons img.muted { opacity: .25; }
-@keyframes profile-icons-in { from { opacity: 0; } to { opacity: 1; } }
 .profile-orb-study figcaption { text-align: center; }
 .profile-orb-index { font-size: 9px; letter-spacing: .18em; color: var(--pp-accent); }
 .profile-orb-caption { font-size: 15px; margin: 12px 0 18px; color: var(--pp-ink); }
@@ -66,4 +61,3 @@
  .profile-signature { margin-top: 28px; }
 }
 @media(prefers-reduced-motion:reduce) { .profile-page,.profile-page.visible { transition: none; transform: none; } }
-@media(prefers-reduced-motion:reduce) { .profile-orb-icons { animation: none; } }

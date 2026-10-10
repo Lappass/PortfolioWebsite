@@ -104,6 +104,7 @@ export class ArchiveScene {
   dispose() {
     this.inputEvents.abort();
     this.cancelPointer();
+    this.setup.dispose();
     disposeThreeTree(this.scene);
     this.appearance.disposeSources();
     this.model.clear();
