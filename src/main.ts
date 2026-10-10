@@ -22,7 +22,6 @@ import { assetUrl } from "./asset-url";
 import { initPwa, pwaSettingsMarkup } from "./pwa";
 import { createRollingNumber, createRollingText } from "@kitlangton/rolling-number";
 import { ArchiveScene } from "./scene";
-import { ModelViewer } from "./model-viewer";
 import { ContentTransition, SurfaceTransition } from "./ui-transitions";
 import { BootSequence } from "./boot";
 import { loadBootWebfonts } from "./boot-lettering";
@@ -97,7 +96,7 @@ $("#stage").innerHTML = `
   </section>
   <section id="detail-ui" class="detail-ui" aria-label="档案内容" hidden>
     <button class="back-button" data-action="back">← <span>ARCHIVE OVERVIEW</span><small>ESC</small></button>
-    <div class="object-caption"><span id="object-id">NO.001</span><div>INTERNAL DATABASE</div><small>DRAG TO INSPECT <span>↔</span></small><button class="viewer-open" data-action="model-viewer">360° 查看文档模型 <span>↗</span></button></div>
+    <div class="object-caption"><span id="object-id">NO.001</span><div>INTERNAL DATABASE</div><small>DRAG TO INSPECT <span>↔</span></small></div>
     <article id="detail-content" class="detail-content"></article>
   </section>
   <button class="experiments-entry" data-action="experiments"><svg class="experiment-stack" viewBox="0 0 40 34" aria-hidden="true"><path d="M3 28h34M5 26V12h24v14M10 12V7h24v19M15 7V2h24v24"/></svg><span><strong>EXPERIMENTS</strong><small>实验合集 · ${String(experimentFiles.length).padStart(2,"0")}</small></span><span>↗</span></button>
@@ -264,7 +263,6 @@ let scene: ArchiveScene | undefined;
 let threeState: "on" | "closing" | "off" | "loading" = "on";
 let resumeCell: { lane: number; row: number } | undefined;
 let resumeSelection = -1;
-let viewer: ModelViewer | undefined;
 const accessLog: { id: string; time: string }[] = [];
 const columnMemory = archiveColumns.map((_, lane) => columnFiles(lane)[0]);
 let projectIndex = featuredFiles[0];
@@ -391,10 +389,7 @@ function savePrefs() {
   scene?.setTheme(prefs.colorTheme === "dark", !motionActive("surfaceTransitions") || !started);
   document.querySelectorAll<HTMLElement>("[data-color-theme]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.colorTheme === prefs.colorTheme)));
   scene?.setSuperPerformance(superPerformanceEnabled());
-  viewer?.setSuperPerformance(superPerformanceEnabled());
   scene?.setQuality(effectiveRenderQuality());
-  viewer?.setQuality(effectiveRenderQuality());
-  viewer?.setMotion(prefs.motion);
   syncQualityUI(prefs.rendering);
   updateQualitySummary();
   fileCounter.update({ animated: motionActive("rollingNumbers") && mode === "archive" });
@@ -440,7 +435,6 @@ function fit() {
   if (layoutKey !== previousLayout) {
     previousLayout = layoutKey;
     scene?.resize();
-    viewer?.resize();
   }
   updateQualitySummary();
   // Re-measure line covers and tab underline after wrapping changes.
@@ -942,25 +936,6 @@ document.addEventListener("click", (e) => {
   if (action === "column-prev") stepColumn(-1);
   if (action === "column-next") stepColumn(1);
   if (action === "open") openFile();
-  if (action === "model-viewer" && mode === "detail" && scene) {
-    const activeScene = scene;
-    // Safari does not always focus a button when it is tapped. Capture the
-    // actual opener so closing the modal reliably restores the right control.
-    el.focus({ preventScroll: true });
-    viewer ??= new ModelViewer($("#stage"), () => { audio.setScene(mode); audio.play("page-close"); }, (sound) => audio.play(sound === "tick" ? "ui-tick" : sound));
-    audio.setScene("viewer");
-    viewer.setSuperPerformance(superPerformanceEnabled());
-    viewer.setQuality(effectiveRenderQuality());
-    viewer.setMotion(prefs.motion);
-    scene.finishDecryption();
-    viewer.open(
-      records[selected].id,
-      records[selected].title,
-      () => activeScene.createAssemblyModel(),
-      !motionActive("viewerNavigation"),
-    );
-    audio.play("page-open");
-  }
   if (action === "project-page" && mode === "detail") void insertDiscAndOpen();
   if (action === "about") closeModal(() => {
     profilePage.open({ instant: !motionActive("surfaceTransitions") });
@@ -1001,7 +976,6 @@ document.addEventListener("click", (e) => {
 });
 document.addEventListener("keydown", (e) => {
   if (!started) return;
-  if (viewer?.isOpen) return;
   if (projectPage.isOpen) {
     if (e.key === "Escape") { e.preventDefault(); closeProjectPage(); }
     return;
@@ -1160,7 +1134,6 @@ function frame(ms: number) {
   const theme = scene?.themeAmount ?? (prefs.colorTheme === "dark" ? 1 : 0);
   paintTheme(theme);
   scene?.setDustVisible(mode === "archive" && !projectPage.isOpen && !profilePage.isOpen && !modal);
-  viewer?.setTheme(theme);
   playground?.tick(time);
   const cinema =
     mode === "boot" && ready
@@ -1168,14 +1141,13 @@ function frame(ms: number) {
       : undefined;
   wallpaperEffects?.update(time, motionIsReduced(), motionActive("pointerParallax"));
   // The calibrated 2D opening fully covers the scene until array entry.
-    if (!viewer?.isOpen && (!projectPage.covering || profilePage.isOpen) && !profilePage.covering && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
+    if ((!projectPage.covering || profilePage.isOpen) && !profilePage.covering && (!cinema || cinema.time >= 21.9)) scene?.update(time, cinema);
   if (discInserting && scene) {
     const progress = scene.insertProgress;
     if (consoleCueProgress < 0.63 && progress >= 0.63) audio.play("brand");
     if (consoleCueProgress < 0.85 && progress >= 0.85) audio.play("scan");
     consoleCueProgress = progress;
   }
-  viewer?.update(time);
   if (threeState === "closing" && scene?.presentationHidden) releaseThree();
   playground?.position();
   if (scene && mode === "detail") {
@@ -1184,7 +1156,7 @@ function frame(ms: number) {
     $("#detail-content").style.translate =
       `0 ${(1 - scene.detailVisibility) * 18}px`;
     $("#detail-content").inert = scene.detailVisibility < 0.1;
-    if (pendingDetailFocus && scene.detailVisibility >= 0.1 && !modal && !viewer?.isOpen) {
+    if (pendingDetailFocus && scene.detailVisibility >= 0.1 && !modal) {
       $("#detail-content").focus({ preventScroll: true });
       pendingDetailFocus = false;
     }
@@ -1210,11 +1182,11 @@ function frame(ms: number) {
 function bindScene(scene: ArchiveScene, cell?: { lane: number; row: number }) {
     scene.select(selected, cell ? { cell } : undefined);
     scene.onSelect = (i, cell) => {
-      if (mode !== "archive" || modal || viewer?.isOpen) return;
+      if (mode !== "archive" || modal) return;
       select(i, cell ? { cell } : undefined);
     };
     scene.onNavigate = (axis, direction) => {
-      if (mode !== "archive" || modal || viewer?.isOpen) return;
+      if (mode !== "archive" || modal) return;
       if (axis === "lane") stepColumn(direction);
       else stepFile(direction);
     };
@@ -1252,7 +1224,6 @@ function syncThreeButton() {
 function releaseThree() {
   if (!scene) return;
   resumeCell = { ...scene.getStats().selectedCell }; resumeSelection = selected;
-  viewer?.dispose(); viewer = undefined;
   scene.dispose(); scene = undefined;
   if (mode === "detail") {
     $("#detail-content").style.opacity = "1";

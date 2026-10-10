@@ -6,6 +6,7 @@ Outputs art/console-setup.blend, art/console-setup-studio.png and public/assets/
 Blender Z-up; the front faces -Y (glTF +Z). Units match the archive scene (case height 3.7).
 Origin: centre of the console's footprint on the stand top (z = 0).
 Named nodes used by the site: Console_Slot (slot centre), Slot_Light, Monitor_Screen.
+After exporting, run `npm run compress:console` (meshopt + WebP, keeps marker nodes).
 """
 from pathlib import Path
 from math import pi, sin, cos

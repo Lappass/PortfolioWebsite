@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { profile } from "./profile";
 import { drawIdentity, prepareIdentity } from "./profile-particles";
 
@@ -55,7 +56,8 @@ export class ConsoleSetup {
   }
 
   async load(url: string) {
-    const gltf = await new GLTFLoader().loadAsync(url);
+    // The asset is meshopt-compressed with WebP textures (see art/console_setup.py).
+    const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(url);
     gltf.scene.updateMatrixWorld(true);
     const slot = gltf.scene.getObjectByName("Console_Slot");
     if (slot) this.slotLocal.copy(slot.getWorldPosition(new THREE.Vector3())).add(SETUP_ORIGIN);

@@ -129,8 +129,6 @@
 .detail-more:hover { background: var(--theme-ink, #080a08); color: var(--theme-paper, #eae5e1); }
 .detail-more:hover > span { transform: translateX(6px); }
 
-/* The 360° viewer still uses the former cassette assembly. */
-.viewer-open { display: none; }
 
 /* One quiet bottom band instead of three competing corners. */
 #stage:is([data-mode="archive"], [data-mode="detail"]) .powered { opacity: 0; pointer-events: none; }
