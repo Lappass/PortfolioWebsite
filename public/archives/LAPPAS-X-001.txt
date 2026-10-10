@@ -2,16 +2,16 @@
 FILE X-001 / 三维档案作品集
 PORTFOLIO ARCHIVE
 
-角色：独立设计与开发
+角色：二次开发与改造（原项目：LBEILC/RhineLabUI）
 时间：2026
 技术与协作：TypeScript / Three.js / Vite / Blender
 状态：PUBLIC
 
-以三维玻璃档案阵列浏览个人作品的网站。拖动或用方向键切换作品，打开后卡片抽出、解密并展示详情，支持 360° 模型查看、检索、收藏与导出。
+把开源的三维档案终端 RhineLabUI 改造成游戏开发作品集：作品以游戏盒的形式陈列，打开后光盘插入主机、在显示器上加载并进入详情页，开场为原创的主机开机动画。
 
 项目要点
-1. 原生 TypeScript 与 Three.js 实现，未使用前端框架。
-2. 阵列支持自由平面拖动、持续惯性与无尽循环。
-3. 模型通过 Blender 脚本生成，保留可复现源文件。
+1. 在原项目的三维阵列、材质与拖动交互基础上二次开发。
+2. 新增游戏盒、主机与显示器模型（Blender 脚本生成）、插盘读盘流程与开机动画。
+3. 重做配色、粒子、个人页与作品详情页，并去除所有原 IP 内容。
 
-项目链接：https://github.com/LBEILC/RhineLabUI
+项目链接：https://github.com/Lappass/PortfolioWebsite

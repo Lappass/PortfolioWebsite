@@ -1,5 +1,10 @@
 {
-  "featured": ["X-001", "X-004", "X-007", "X-010"],
+  "featured": [
+    "X-001",
+    "X-004",
+    "X-007",
+    "X-010"
+  ],
   "categories": [
     "网页开发",
     "三维图形",
@@ -12,18 +17,18 @@
       "id": "X-001",
       "title": "三维档案作品集",
       "en": "PORTFOLIO ARCHIVE",
-      "department": "独立设计与开发",
+      "department": "二次开发与改造（原项目：LBEILC/RhineLabUI）",
       "category": "网页开发",
       "date": "2026",
       "lead": "TypeScript / Three.js / Vite / Blender",
       "clearance": "PUBLIC",
-      "abstract": "以三维玻璃档案阵列浏览个人作品的网站。拖动或用方向键切换作品，打开后卡片抽出、解密并展示详情，支持 360° 模型查看、检索、收藏与导出。",
+      "abstract": "把开源的三维档案终端 RhineLabUI 改造成游戏开发作品集：作品以游戏盒的形式陈列，打开后光盘插入主机、在显示器上加载并进入详情页，开场为原创的主机开机动画。",
       "findings": [
-        "原生 TypeScript 与 Three.js 实现，未使用前端框架。",
-        "阵列支持自由平面拖动、持续惯性与无尽循环。",
-        "模型通过 Blender 脚本生成，保留可复现源文件。"
+        "在原项目的三维阵列、材质与拖动交互基础上二次开发。",
+        "新增游戏盒、主机与显示器模型（Blender 脚本生成）、插盘读盘流程与开机动画。",
+        "重做配色、粒子、个人页与作品详情页，并去除所有原 IP 内容。"
       ],
-      "source": "https://github.com/LBEILC/RhineLabUI",
+      "source": "https://github.com/Lappass/PortfolioWebsite",
       "tags": [
         "TypeScript",
         "Three.js",
@@ -51,11 +56,11 @@
       "links": [
         {
           "label": "GitHub",
-          "url": "https://github.com/LBEILC/RhineLabUI"
+          "url": "https://github.com/Lappass/PortfolioWebsite"
         },
         {
-          "label": "在线访问",
-          "url": "https://rhine.lubeiluchen.cc/"
+          "label": "原项目",
+          "url": "https://github.com/LBEILC/RhineLabUI"
         }
       ]
     },
@@ -74,7 +79,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     },
     {
       "id": "X-003",
@@ -91,7 +96,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     },
     {
       "id": "X-004",
@@ -108,7 +113,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     },
     {
       "id": "X-005",
@@ -125,7 +130,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     },
     {
       "id": "X-006",
@@ -142,7 +147,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     },
     {
       "id": "X-007",
@@ -159,7 +164,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     },
     {
       "id": "X-008",
@@ -176,7 +181,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     },
     {
       "id": "X-009",
@@ -193,7 +198,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     },
     {
       "id": "X-010",
@@ -210,7 +215,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     },
     {
       "id": "X-011",
@@ -227,7 +232,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     },
     {
       "id": "X-012",
@@ -244,7 +249,7 @@
         "要点二：待填写",
         "要点三：待填写"
       ],
-      "source": "https://github.com/LBEILC"
+      "source": "https://github.com/Lappass"
     }
   ]
 }

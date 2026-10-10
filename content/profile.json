@@ -20,7 +20,7 @@
     { "time": "待填写", "title": "Game Jam / 比赛", "detail": "占位：作品与成绩。" }
   ],
   "contact": [
-    { "label": "GitHub", "url": "https://github.com/LBEILC" },
+    { "label": "GitHub", "url": "https://github.com/Lappass" },
     { "label": "邮箱", "url": "mailto:you@example.com" }
   ],
   "resume": "",

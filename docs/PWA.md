@@ -6,7 +6,7 @@
 
 1. 用 Safari 打开正式地址。
 2. 轻点“分享”，选择“添加到主屏幕”；如果出现“作为网页 App 打开”，保持开启。
-3. 从主屏幕的莱茵生命图标打开，即可使用没有 Safari 地址栏的独立窗口。系统状态栏和底部手势区域会保留安全间距。
+3. 从主屏幕的 LAPPAS 图标打开，即可使用没有 Safari 地址栏的独立窗口。系统状态栏和底部手势区域会保留安全间距。
 
 首次保持联网，基础页面保存后可断网重新打开。预缓存仅含页面、脚本、样式与安装图标，共 10 个文件、约 1.7 MiB；字体分包、模型、音乐与 TXT 按实际使用缓存，不再下载完整字体库。已加载的内容可离线使用，尚未打开的查看器、未启用的音乐或未下载的 TXT 需先联网访问。Safari 标签页和主屏幕 App 的存储可能各自独立，请以主屏幕 App 内显示的状态为准。
 
@@ -38,6 +38,6 @@
 
 `scripts/check-startup-motion.mjs` 验证首次进入跟随浏览器动效偏好，以及本站的完整 / 减少 / 自定义选择、重播和正文解密；`scripts/check-pwa-recovery.mjs` 验证旧版迁移，需要以 `PWA_PREVIOUS_DIST` 指定保留的旧生产构建。两个脚本可设 `REVIEW_CHANNEL=msedge` 验证 Edge。更新恢复页保持网络获取，未加入离线资源清单。
 
-图标源自项目共享莱茵生命 SVG 路径，生成脚本为 `scripts/build-icons.mjs`，通过 `SHARP_MODULE` 可指定本地 Sharp 模块。修改资源后重新构建即可生成新的离线版本，无需手动修改缓存编号。
+图标源自项目共享的 LAPPAS 标志路径（src/brand.ts），生成脚本为 `scripts/build-icons.mjs`，通过 `SHARP_MODULE` 可指定本地 Sharp 模块。修改资源后重新构建即可生成新的离线版本，无需手动修改缓存编号。
 
 平台说明参考：[WebKit 主屏幕 Web App](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/)、[Safari 26 主屏幕安装行为](https://webkit.org/blog/17333/webkit-features-in-safari-26-0/)、[Service Worker 生命周期](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers)。

@@ -14,7 +14,6 @@
     "review:mobile": "node scripts/serve-mobile-review.mjs",
     "export:archives": "node scripts/export-records.mjs",
     "build": "tsc && vite build && node scripts/build-pwa.mjs",
-    "build:wallpaper": "node scripts/patch-rolling-number.mjs && node scripts/export-records.mjs && tsc && vite build --mode wallpaper --outDir release/wallpaper && node scripts/build-wallpaper.mjs",
     "format": "prettier --write src scripts index.html package.json tsconfig.json",
     "preview": "vite preview --host 127.0.0.1",
     "compress:console": "npx -y @gltf-transform/cli@4 optimize public/assets/console-setup.glb public/assets/console-setup.glb --compress meshopt --texture-compress webp --texture-size 1024 --simplify false --join false --instance false --flatten false --palette false --prune false"
