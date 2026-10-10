@@ -155,45 +155,65 @@ function spine() {
   return { svg: s, W, H };
 }
 
+/** Exact-cover search: place every shape (any rotation) to tile a cols×rows pan. */
+function solvePan(shapes, cols, rows, slack = 0) {
+  const norm = (c) => { const mx = Math.min(...c.map((p) => p[0])), my = Math.min(...c.map((p) => p[1])); return c.map(([x, y]) => [x - mx, y - my]); };
+  const turns = (c) => { const out = []; let cur = c; for (const m of [c, c.map(([x, y]) => [-x, y])]) { cur = m; for (let i = 0; i < 4; i++) { cur = norm(cur.map(([x, y]) => [-y, x])); out.push(cur); } } return out; };
+  const names = Object.keys(shapes), grid = new Set(), out = [];
+  const go = (i) => {
+    if (i === names.length) return grid.size >= cols * rows - slack;
+    for (const t of turns(shapes[names[i]])) for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      const cells = t.map(([a, b]) => [a + x, b + y]);
+      if (cells.some(([a, b]) => a >= cols || b >= rows || grid.has(a + "," + b))) continue;
+      cells.forEach(([a, b]) => grid.add(a + "," + b)); out.push({ name: names[i], cells });
+      if (go(i + 1)) return true;
+      out.pop(); cells.forEach(([a, b]) => grid.delete(a + "," + b));
+    }
+    return false;
+  };
+  if (!go(0)) throw new Error("pieces do not tile the pan");
+  return out;
+}
+
 /** Disc label, 1024 square mapped onto a ring (hub hole ≈ 36% of the radius).
  *  The disc face is a solved tangram: the seven classic pieces, each an
  *  ingredient colour, fitted into a square pan around the hub. */
 function disc() {
   const W = 1024, R = 512, hole = 196;
-  // Classic seven-piece tangram on a 4×4 grid.
-  const pieces = [
-    [[0, 0], [4, 0], [2, 2], C.pork],
-    [[0, 0], [2, 2], [0, 4], C.green],
-    [[4, 2], [4, 4], [2, 4], C.tan],
-    [[2, 2], [3, 1], [4, 2], [3, 3], C.tofu],
-    [[3, 1], [4, 0], [4, 2], C.warm],
-    [[2, 2], [3, 3], [1, 3], C.pork],
-    [[0, 4], [1, 3], [3, 3], [2, 4], C.green],
-  ];
+  // The game's own cooking pieces (Assets/Art/UI cooking panel), fitted into a 6×5 pan, part-filled.
+  const SHAPES = {
+    pork: [[0, 0], [1, 0], [0, 1], [1, 1], [2, 1], [1, 2], [2, 2]],
+    rice: [[0, 0], [1, 0], [2, 0], [1, 1], [1, 2]],
+    cabbage: [[1, 0], [0, 1], [1, 1], [2, 1], [1, 2]],
+    potato: [[1, 0], [1, 1], [1, 2], [0, 2]],
+    egg: [[1, 0], [0, 1], [1, 1]],
+  };
+  const COLORS = { pork: "#d9706a", rice: "#ece8dc", cabbage: "#86cf5e", potato: "#c9a54e", egg: "#f5e39a" };
+  const placed = solvePan(SHAPES, 6, 5, 6);
   let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">${defs}`;
   s += `<rect width="${W}" height="${W}" fill="${C.night}"/>`;
   s += `<circle cx="${R}" cy="${R}" r="${R}" fill="${C.wall}"/>`;
   s += `<circle cx="${R}" cy="${R}" r="${R - 14}" fill="none" stroke="${C.glow}" stroke-width="4" opacity=".7"/>`;
-  // A solved tangram in the band above the hub, in a dark pan; the warm
-  // small triangle is lifted out, mid-move, so it reads as a puzzle being played.
-  const u = 56, ox = R - 2 * u, oy = 66;
-  s += `<rect x="${ox - 14}" y="${oy - 14}" width="${4 * u + 28}" height="${4 * u + 28}" rx="8" fill="${C.frame}" stroke="${C.glow}" stroke-width="3" stroke-opacity=".6"/>`;
-  pieces.forEach((p, i) => {
-    const fill = p[p.length - 1], pts = p.slice(0, -1).map(([x, y]) => [ox + x * u, oy + y * u]);
-    const cx = pts.reduce((t, q) => t + q[0], 0) / pts.length, cy = pts.reduce((t, q) => t + q[1], 0) / pts.length;
-    const inset = pts.map(([x, y]) => { const dx = cx - x, dy = cy - y, d = Math.hypot(dx, dy); return [x + dx / d * 4, y + dy / d * 4]; });
-    const moved = i === 4 ? ` transform="translate(50 18) rotate(16 ${cx} ${cy})"` : "";
-    if (i === 4) s += `<polygon points="${inset.map((q) => q.join(",")).join(" ")}" fill="none" stroke="${C.warm}" stroke-width="2" stroke-dasharray="6 6" opacity=".7"/>`;
-    s += `<polygon${moved} points="${inset.map((q) => q.map((v) => v.toFixed(1)).join(",")).join(" ")}" fill="${fill}" stroke="${fill}" stroke-width="4" stroke-linejoin="round"/>`;
-  });
+  // The pan: metal rim, dark well, cell grid.
+  const cell = 38, gw = 6 * cell, gh = 5 * cell, ox = R - gw / 2, oy = 74;
+  s += `<rect x="${ox - 26}" y="${oy - 26}" width="${gw + 52}" height="${gh + 52}" rx="14" fill="#1a1f21" stroke="#8c9396" stroke-width="5"/>`;
+  s += `<rect x="${ox - 2}" y="${oy - 2}" width="${gw + 4}" height="${gh + 4}" fill="#262c2e"/>`;
+  for (const { name, cells } of placed) {
+    const lifted = name === "egg";
+    if (lifted) for (const [x, y] of cells) s += `<rect x="${ox + x * cell + 3}" y="${oy + y * cell + 3}" width="${cell - 6}" height="${cell - 6}" fill="none" stroke="${C.warm}" stroke-width="2" stroke-dasharray="5 5" opacity=".7"/>`;
+    const g = lifted ? ` transform="translate(${gw / 2 + 70} 40) rotate(-12 ${ox} ${oy})"` : "";
+    s += `<g${g}>`;
+    for (const [x, y] of cells) s += `<rect x="${ox + x * cell + 2}" y="${oy + y * cell + 2}" width="${cell - 4}" height="${cell - 4}" rx="3" fill="${COLORS[name]}"/>`;
+    s += `</g>`;
+  }
   // Hub shadow, so the hole reads as cut through the pieces.
   s += `<circle cx="${R}" cy="${R}" r="${hole + 10}" fill="none" stroke="${C.frame}" stroke-width="20"/>`;
   // Centre hole: punched through, as on a real disc.
   s += `<circle cx="${R}" cy="${R}" r="${hole}" fill="${C.night}"/><circle cx="${R}" cy="${R}" r="${hole - 60}" fill="none" stroke="#3a4246" stroke-width="2"/><circle cx="${R}" cy="${R}" r="56" fill="#0c0f10"/>`;
   // Billing: year across the top segment, the cell-built title across the bottom.
   s += text(R, 800, 22, "UNITY · 2026 · X-002", 'text-anchor="middle" letter-spacing="6"', C.warm);
-  const cell = 10, tw = wordWidth("LOCKDOWN", cell);
-  s += blockWord("LOCKDOWN", R - tw / 2, 880, cell, 1, C.ink).svg;
+  const tcell = 10, tw = wordWidth("LOCKDOWN", tcell);
+  s += blockWord("LOCKDOWN", R - tw / 2, 880, tcell, 1, C.ink).svg;
   s += `<rect width="${W}" height="${W}" filter="url(#grain)"/></svg>`;
   return { svg: s, W, H: W };
 }
