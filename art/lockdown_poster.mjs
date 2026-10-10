@@ -3,7 +3,7 @@
 // as flat cut-paper shapes in the manner of mid-century film posters. One lit
 // window holds the game's polyomino ingredients; the title is built from cells.
 // Run: node art/lockdown_poster.mjs  (needs sharp; SHARP_MODULE may point to it)
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
 
@@ -218,7 +218,124 @@ function disc() {
   return { svg: s, W, H: W };
 }
 
-for (const [name, make, size] of [["cover", cover, 1350], ["hero", hero, 1920], ["spine", spine, 148], ["disc", disc, 1024]]) {
+/** Disc direction A: the cover's key art printed full-bleed, as on most retail discs. */
+function discKeyArt() {
+  const W = 1024, R = 512;
+  const art = "data:image/jpeg;base64," + readFileSync(new URL("cover.jpg", OUT)).toString("base64");
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">${defs}`;
+  s += `<defs><linearGradient id="fadeA" x1="0" y1="0" x2="0" y2="1"><stop offset=".5" stop-color="${C.night}" stop-opacity="0"/><stop offset=".78" stop-color="${C.night}" stop-opacity=".92"/></linearGradient></defs>`;
+  s += `<rect width="${W}" height="${W}" fill="${C.night}"/>`;
+  s += `<image href="${art}" x="-230" y="-330" width="1350" height="1700"/>`;
+  s += `<rect width="${W}" height="${W}" fill="url(#fadeA)"/>`;
+  const cell = 12, tw = wordWidth("LOCKDOWN", cell);
+  s += blockWord("LOCKDOWN", R - tw / 2, 790, cell, 1, C.ink).svg;
+  s += text(R, 905, 20, "UNITY · 2026", 'text-anchor="middle" letter-spacing="8"', C.warm);
+  s += `<circle cx="${R}" cy="${R}" r="${R - 12}" fill="none" stroke="${C.glow}" stroke-width="3" opacity=".6"/></svg>`;
+  return { svg: s, W, H: W };
+}
+
+/** Disc direction B: the whole disc is the pan seen from above, packed with the game's pieces. */
+function discPan() {
+  const W = 1024, R = 512, cell = 64, n = 16;
+  const SH = [[[0,0],[1,0],[0,1],[1,1],[2,1],[1,2],[2,2]], [[0,0],[1,0],[2,0],[1,1],[1,2]], [[1,0],[0,1],[1,1],[2,1],[1,2]], [[1,0],[1,1],[1,2],[0,2]], [[1,0],[0,1],[1,1]]];
+  const COL = ["#d9706a", "#ece8dc", "#86cf5e", "#c9a54e", "#f5e39a"];
+  seed = 77;
+  const used = new Set(), inDisc = (x, y) => { const d = Math.hypot((x + .5) * cell - R, (y + .5) * cell - R); return d < R - 30 && d > 215; };
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">${defs}`;
+  s += `<rect width="${W}" height="${W}" fill="#1a1f21"/>`;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (inDisc(x, y)) s += `<rect x="${x * cell + 2}" y="${y * cell + 2}" width="${cell - 4}" height="${cell - 4}" rx="4" fill="#262c2e"/>`;
+  for (let tries = 0; tries < 900; tries++) {
+    const k = Math.floor(rand() * 5), rot = Math.floor(rand() * 4), x0 = Math.floor(rand() * n), y0 = Math.floor(rand() * n);
+    let cells = SH[k]; for (let r = 0; r < rot; r++) cells = cells.map(([x, y]) => [-y, x]);
+    cells = cells.map(([x, y]) => [x + x0, y + y0]);
+    if (cells.some(([x, y]) => !inDisc(x, y) || used.has(x + "," + y))) continue;
+    if (y0 > 11) continue; // keep the lower band clear for the title
+    cells.forEach(([x, y]) => { used.add(x + "," + y); s += `<rect x="${x * cell + 3}" y="${y * cell + 3}" width="${cell - 6}" height="${cell - 6}" rx="5" fill="${COL[k]}"/>`; });
+  }
+  s += `<rect x="0" y="760" width="${W}" height="${W - 760}" fill="#1a1f21"/>`;
+  const tc = 12, tw = wordWidth("LOCKDOWN", tc);
+  s += blockWord("LOCKDOWN", R - tw / 2, 800, tc, 1, C.ink).svg;
+  s += text(R, 915, 20, "UNITY · 2026", 'text-anchor="middle" letter-spacing="8"', C.warm);
+  s += `<rect width="${W}" height="${W}" filter="url(#grain)"/></svg>`;
+  return { svg: s, W, H: W };
+}
+
+/** Disc direction D: the disc itself assembled from puzzle pieces. Radial and
+ *  chord cuts split the ring into ingredient-coloured shards; one is still
+ *  being pushed home, its slot showing behind it. */
+function discPieces() {
+  const W = 1024, R = 512, rin = 200, rmid = 352, rout = 500, gap = 5;
+  const P = (r, a) => [R + r * Math.cos(a * Math.PI / 180), R + r * Math.sin(a * Math.PI / 180)];
+  const f = ([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`;
+  // [from°, to°, inner radius, outer radius, colour, cut style]
+  const cuts = [
+    [-90, -38, rin, rmid, "#ece8dc"], [-90, -58, rmid, rout, "#d9706a"], [-58, -38, rmid, rout, "#f5e39a"],
+    [-38, 20, rin, rout, "#86cf5e"],
+    [20, 50, rin, rmid, "#c9a54e"], [20, 50, rmid, rout, "#ece8dc"],
+    [50, 130, rin, rout, "#2c3438"],
+    [130, 160, rin, rout, "#d9706a"],
+    [160, 205, rin, rmid, "#f5e39a"], [160, 205, rmid, rout, "#86cf5e"],
+    [205, 270, rin, rmid, "#c9a54e"], [205, 236, rmid, rout, "#ece8dc"], [236, 270, rmid, rout, "#d9706a"],
+  ];
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">${defs}`;
+  s += `<rect width="${W}" height="${W}" fill="#14181a"/><circle cx="${R}" cy="${R}" r="${R}" fill="#14181a"/>`;
+  cuts.forEach(([a0, a1, r0, r1, col], i) => {
+    // Straight chords on the inner edge give the shards hard, tangram-like corners.
+    const ga = (gap / r1) * 180 / Math.PI, gb = (gap / r0) * 180 / Math.PI;
+    const d = `M${f(P(r0 + gap, a0 + gb))} L${f(P(r1 - gap, a0 + ga))} A${r1 - gap} ${r1 - gap} 0 0 1 ${f(P(r1 - gap, a1 - ga))} L${f(P(r0 + gap, a1 - gb))} Z`;
+    const loose = i === 2;
+    if (loose) s += `<path d="${d}" fill="none" stroke="${C.warm}" stroke-width="2" stroke-dasharray="6 6" opacity=".8"/>`;
+    s += `<path d="${d}" fill="${col}"${loose ? ` transform="translate(34 -40) rotate(6 ${R} ${R})"` : ""}/>`;
+  });
+  // Title on the dark shard at the bottom.
+  const tc = 8, tw = wordWidth("LOCKDOWN", tc);
+  s += blockWord("LOCKDOWN", R - tw / 2, 790, tc, 1, C.ink).svg;
+  s += text(R, 885, 18, "UNITY · 2026", 'text-anchor="middle" letter-spacing="6"', C.warm);
+  s += `<rect width="${W}" height="${W}" filter="url(#grain)"/></svg>`;
+  return { svg: s, W, H: W };
+}
+
+/** Disc direction E: the disc is an apartment block drawn on the game's cell grid.
+ *  Windows are 3×3 cells; most are dark, a few are lit and hold an ingredient
+ *  piece (a household cooking behind a closed door). Caution tape seals it. */
+function discBlock() {
+  const W = 1024, R = 512, c = 32, n = 32;
+  const SH = { pork: [[0,0],[1,0],[0,1],[1,1],[2,1],[1,2],[2,2]], rice: [[0,0],[1,0],[2,0],[1,1],[1,2]], cabbage: [[1,0],[0,1],[1,1],[2,1],[1,2]], potato: [[1,0],[1,1],[1,2],[0,2]], egg: [[1,0],[0,1],[1,1]] };
+  const COL = { pork: "#d9706a", rice: "#ece8dc", cabbage: "#86cf5e", potato: "#c9a54e", egg: "#f5e39a" };
+  // Lit windows by [column, row] of the 4-cell window lattice.
+  const lit = { "3,1": "rice", "5,2": "pork", "1,3": "cabbage", "1,1": "egg", "6,3": "potato" };
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W}" viewBox="0 0 ${W} ${W}">${defs}`;
+  s += `<rect width="${W}" height="${W}" fill="#1b2023"/>`;
+  // Wall cells: a faint grid, so the whole face reads as the puzzle board.
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) s += `<rect x="${x * c + 1.5}" y="${y * c + 1.5}" width="${c - 3}" height="${c - 3}" rx="2" fill="#2a3134"/>`;
+  for (let wy = 0; wy < 8; wy++) for (let wx = 0; wx < 8; wx++) {
+    const x0 = wx * 4 + 1, y0 = wy * 4 + 1, key = `${wx},${wy}`;
+    const piece = lit[key];
+    for (let y = 0; y < 3; y++) for (let x = 0; x < 3; x++)
+      s += `<rect x="${(x0 + x) * c + 1.5}" y="${(y0 + y) * c + 1.5}" width="${c - 3}" height="${c - 3}" rx="2" fill="${piece ? "#f2c879" : "#151a1c"}"/>`;
+    if (piece) {
+      s += `<rect x="${x0 * c - 10}" y="${y0 * c - 10}" width="${3 * c + 20}" height="${3 * c + 20}" fill="url(#halo)" opacity=".7"/>`;
+      for (const [x, y] of SH[piece]) s += `<rect x="${(x0 + x) * c + 1.5}" y="${(y0 + y) * c + 1.5}" width="${c - 3}" height="${c - 3}" rx="2" fill="${COL[piece]}"/>`;
+    }
+  }
+  // Caution tape across the lower third, title printed in black cells.
+  s += `<g transform="rotate(-10 ${R} 760)">`;
+  s += `<rect x="-100" y="700" width="${W + 200}" height="120" fill="#e9c443"/>`;
+  for (let x = -100; x < W + 100; x += 44) s += `<polygon points="${x},700 ${x + 22},700 ${x + 2},716 ${x - 20},716" fill="#151a1c"/><polygon points="${x},820 ${x + 22},820 ${x + 2},804 ${x - 20},804" fill="#151a1c"/>`;
+  const tc = 10, tw = wordWidth("LOCKDOWN", tc);
+  s += blockWord("LOCKDOWN", R - tw / 2, 726, tc, 1, "#151a1c").svg.replaceAll(C.pork, "#b4483f");
+  s += `</g>`;
+  s += text(R, 905, 18, "UNITY · 2026", 'text-anchor="middle" letter-spacing="6"', C.ink);
+  s += `<rect width="${W}" height="${W}" filter="url(#grain)"/></svg>`;
+  return { svg: s, W, H: W };
+}
+
+if (process.env.DISC_ONLY) {
+  for (const [name, make] of [["disc-e", discBlock]])
+    await sharp(Buffer.from(make().svg)).jpeg({ quality: 88 }).toFile(resolve(process.env.DISC_ONLY, name + ".jpg"));
+  process.exit(0);
+}
+for (const [name, make, size] of [["cover", cover, 1350], ["hero", hero, 1920], ["spine", spine, 148], ["disc", discBlock, 1024]]) {
   const { svg } = make();
   await sharp(Buffer.from(svg)).resize(size).jpeg({ quality: 88, mozjpeg: true }).toFile(new URL(`${name}.jpg`, OUT).pathname.replace(/^\//, ""));
   console.log("wrote", name);
