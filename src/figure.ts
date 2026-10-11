@@ -3,8 +3,8 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { disposeThreeTree } from "./three-resources";
 
-export type FigureClip = "idle" | "sit" | "jump" | "look" | "cheer" | "wave";
-const CLIPS: FigureClip[] = ["idle", "sit", "jump", "look", "cheer", "wave"];
+export type FigureClip = "idle" | "sit" | "jump" | "look" | "cheer" | "wave" | "run";
+const CLIPS: FigureClip[] = ["idle", "sit", "jump", "look", "cheer", "wave", "run"];
 /** Height on the shelf, in scene units: a third of a game case. */
 const HEIGHT = 1.25;
 
@@ -22,6 +22,12 @@ export interface FigurePose {
   hop?: number;
   /** Orientation of whatever it is sitting on; the body yaw is applied on top. */
   lean?: THREE.Quaternion;
+  /**
+   * Both arms held out of whatever the clip is doing: `amount` 0..1 towards the direction
+   * (x, y, z) in the figure's own frame, x mirrored for the right arm. `stretch` lengthens
+   * the arms to reach past the head.
+   */
+  arms?: { amount: number; x: number; y: number; z: number; stretch?: number };
 }
 
 /**
@@ -41,6 +47,11 @@ export class Figure {
   private gesture?: { clip: FigureClip; until: number };
   private nextFidget = 0;
   private head?: THREE.Object3D;
+  private headEnvelope: THREE.Vector3[] = [];
+  private headSurface: THREE.Vector3[] = [];
+  private back?: THREE.Object3D;
+  private arms: THREE.Object3D[] = [];
+  private armsShown = { amount: 0, x: 0, y: 1, z: 0, stretch: 0 };
   private shown = { yaw: 0, headYaw: 0, headPitch: 0 };
   private last = 0;
   private disposed = false;
@@ -74,6 +85,33 @@ export class Figure {
       }
     });
     this.head = gltf.scene.getObjectByName("mixamorigHead");
+    this.back = gltf.scene.getObjectByName("mixamorigSpine2");
+    gltf.scene.updateMatrixWorld(true);
+    if (this.head) {
+      // A conservative envelope of the actual head/hair geometry, in head-bone space.
+      // Bone centres alone miss the oversized hair and glasses on this character.
+      const bounds = new THREE.Box3(), vertex = new THREE.Vector3();
+      gltf.scene.traverse((mesh) => {
+        if (!(mesh instanceof THREE.SkinnedMesh)) return;
+        const indices = mesh.geometry.getAttribute("skinIndex"), weights = mesh.geometry.getAttribute("skinWeight");
+        for (let i = 0; i < indices.count; i++) {
+          let onHead = false;
+          for (let j = 0; j < 4; j++) {
+            if (weights.getComponent(i, j) > .1 && mesh.skeleton.bones[indices.getComponent(i, j)]?.name.includes("Head")) onHead = true;
+          }
+          if (onHead) {
+            const point = this.head!.worldToLocal(mesh.getVertexPosition(i, vertex).applyMatrix4(mesh.matrixWorld));
+            bounds.expandByPoint(point);
+            this.headSurface.push(point.clone());
+          }
+        }
+      });
+      if (!bounds.isEmpty()) for (const x of [bounds.min.x, bounds.max.x]) for (const y of [bounds.min.y, bounds.max.y]) for (const z of [bounds.min.z, bounds.max.z]) {
+        this.headEnvelope.push(new THREE.Vector3(x, y, z));
+      }
+    }
+    // Shoulder to wrist, each side in order, for the pushing pose.
+    this.arms = ["LeftArm", "LeftForeArm", "RightArm", "RightForeArm"].flatMap((name) => gltf.scene.getObjectByName(`mixamorig${name}`) ?? []);
     const hips = gltf.scene.getObjectByName("mixamorigHips");
     this.mixer = new THREE.AnimationMixer(gltf.scene);
     for (const clip of gltf.animations) {
@@ -109,6 +147,105 @@ export class Figure {
   }
 
   dispose() { this.disposed = true; }
+
+  /** Carry the actual disc on the animated back; keep its label's spin about its normal. */
+  carryDisc(parts: THREE.Object3D[], amount: number, grip: number, radius: number) {
+    if (!this.loaded || !this.back || amount <= 0 || !parts.length) return;
+    this.group.updateMatrixWorld(true);
+    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(this.group.getWorldQuaternion(new THREE.Quaternion()));
+    const frame = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(forward.x, forward.z));
+    // Lean with the carrier, about the back's contact point rather than the disc centre.
+    // Keep the running clip's torso twist out of this large, rigid load.
+    frame.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), .3));
+    const centre = this.back.getWorldPosition(new THREE.Vector3())
+      .add(new THREE.Vector3(0, 1.04, -.28).applyQuaternion(frame));
+    const first = parts[0], parent = first.parent;
+    if (!parent) return;
+    const rotation = frame.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), first.rotation.z));
+    const localRotation = parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(rotation);
+    const localCentre = parent.worldToLocal(centre.clone());
+    for (const part of parts) {
+      part.position.lerp(localCentre, amount);
+      part.quaternion.slerp(localRotation, amount);
+      part.updateMatrixWorld(true);
+    }
+    const actualCentre = first.getWorldPosition(new THREE.Vector3());
+    const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(first.getWorldQuaternion(new THREE.Quaternion()));
+    let clearance = Infinity, overlaps = false;
+    for (const corner of this.headEnvelope) {
+      const offset = this.head!.localToWorld(corner.clone()).sub(actualCentre);
+      const distance = offset.dot(normal);
+      if (offset.clone().addScaledVector(normal, -distance).length() < radius + .08) overlaps = true;
+    }
+    if (overlaps && this.head) {
+      // Support of the head surface along the disc normal, without transforming every
+      // vertex each frame. Box corners alone overestimate the round hair and separate
+      // the disc so far from the back that the short hands cannot reach it.
+      const m = this.head.matrixWorld.elements;
+      const axis = new THREE.Vector3(m[0] * normal.x + m[1] * normal.y + m[2] * normal.z,
+        m[4] * normal.x + m[5] * normal.y + m[6] * normal.z,
+        m[8] * normal.x + m[9] * normal.y + m[10] * normal.z);
+      const offset = new THREE.Vector3(m[12], m[13], m[14]).sub(actualCentre).dot(normal);
+      for (const point of this.headSurface) clearance = Math.min(clearance, point.dot(axis) + offset);
+    }
+    if (overlaps && clearance < .045) {
+      actualCentre.addScaledVector(normal, clearance - .045);
+      const safeCentre = parent.worldToLocal(actualCentre.clone());
+      for (const part of parts) { part.position.copy(safeCentre); part.updateMatrixWorld(true); }
+    }
+    // Grip the lower rim in the carrier's frame, independent of the printed label's spin.
+    // The two-bone solve bends elbows towards real contact points instead of holding both
+    // segments in the same direction. Fixed lengths keep the short arms believable.
+    for (const [side, sign] of [["Left", 1], ["Right", -1]] as const) {
+      const arm = this.arms.find((bone) => bone.name === `mixamorig${side}Arm`);
+      const elbow = this.arms.find((bone) => bone.name === `mixamorig${side}ForeArm`);
+      const hand = elbow?.children.find((bone) => bone.name === `mixamorig${side}Hand`);
+      if (!arm || !elbow || !hand) continue;
+      // Solve for the wrist slightly in front of the rim; the palm and fingers extend
+      // beyond the hand bone, so placing the wrist on the surface buries the fingers.
+      const target = actualCentre.clone().add(new THREE.Vector3(sign * .22, -Math.sqrt(radius * radius - .27 * .27) + .12, .08).applyQuaternion(frame));
+      const initial = [arm.quaternion.clone(), elbow.quaternion.clone()];
+      for (let i = 0; i < 6; i++) for (const bone of [elbow, arm]) {
+        const origin = bone.getWorldPosition(new THREE.Vector3());
+        const from = hand.getWorldPosition(new THREE.Vector3()).sub(origin).normalize();
+        const to = target.clone().sub(origin).normalize();
+        const turn = new THREE.Quaternion().setFromUnitVectors(from, to);
+        const parentRotation = bone.parent!.getWorldQuaternion(new THREE.Quaternion());
+        bone.quaternion.premultiply(parentRotation.clone().invert().multiply(turn).multiply(parentRotation));
+        bone.updateMatrixWorld(true);
+      }
+      for (const [i, bone] of [arm, elbow].entries()) {
+        bone.quaternion.copy(initial[i].slerp(bone.quaternion.clone(), grip));
+        bone.updateMatrixWorld(true);
+      }
+    }
+  }
+
+  /** Hold both arms towards a direction, over whatever the clip is doing with them. */
+  private reach() {
+    const { amount, x, y, z, stretch } = this.armsShown;
+    for (const bone of this.arms) {
+      const next = bone.children[0];
+      if (!next || bone.name.includes("Fore")) continue;
+      const axis = next.position.clone().normalize(), longer = stretch * amount;
+      bone.scale.set(1 + longer * Math.abs(axis.x), 1 + longer * Math.abs(axis.y), 1 + longer * Math.abs(axis.z));
+    }
+    if (amount < .01) return;
+    this.group.updateMatrixWorld(true);
+    const facing = this.group.getWorldQuaternion(new THREE.Quaternion());
+    const from = new THREE.Vector3(), to = new THREE.Vector3(), parent = new THREE.Quaternion();
+    for (const bone of this.arms) {
+      const next = bone.children[0];
+      if (!next || !bone.parent) continue;
+      const side = bone.name.includes("Left") ? 1 : -1;
+      to.subVectors(next.getWorldPosition(to), bone.getWorldPosition(from)).normalize();
+      const goal = new THREE.Vector3(side * x, y, z).normalize().applyQuaternion(facing);
+      const turn = new THREE.Quaternion().slerp(new THREE.Quaternion().setFromUnitVectors(to, goal), amount);
+      bone.parent.getWorldQuaternion(parent);
+      bone.quaternion.premultiply(parent.clone().invert().multiply(turn).multiply(parent));
+      bone.updateMatrixWorld(true);
+    }
+  }
 
   /** Play a clip once over whatever the figure is doing. */
   gestureOnce(clip: FigureClip) {
@@ -158,6 +295,13 @@ export class Figure {
     const asleep = state.asleep && pose.clip === "sit";
     look.headYaw += ((asleep ? 0 : THREE.MathUtils.clamp(turn, -.85, .85)) - look.headYaw) * (1 - Math.exp(-dt * 7));
     look.headPitch += ((asleep ? -.62 + .05 * Math.sin(time * 1.2) : THREE.MathUtils.clamp(pose.lookUp, -1, 1) * .5) - look.headPitch) * (1 - Math.exp(-dt * (asleep ? 1.4 : 6)));
+    const held = this.armsShown, aim = pose.arms, ease = 1 - Math.exp(-dt * 9);
+    held.amount += ((aim?.amount ?? 0) - held.amount) * ease;
+    if (aim) {
+      held.x += (aim.x - held.x) * ease; held.y += (aim.y - held.y) * ease; held.z += (aim.z - held.z) * ease;
+      held.stretch += ((aim.stretch ?? 0) - held.stretch) * ease;
+    }
+    this.reach();
     if (this.head && this.current !== "cheer") {
       this.head.quaternion.premultiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(-look.headPitch, look.headYaw, 0, "YXZ")));
     }

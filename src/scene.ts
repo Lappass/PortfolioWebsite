@@ -13,6 +13,7 @@ import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { buildGameCase, poseCase, printCase, transferPrint } from "./game-case";
 import { ConsoleSetup, PLAYER_WAKE_START } from "./console-setup";
 import { Figure } from "./figure";
+import { discCarry, DISC_RADIUS } from "./game-case";
 import { ParticleField } from "./particles";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -565,6 +566,8 @@ export class ArchiveScene {
   private figureFrom = new THREE.Vector3();
   private figureHome = new THREE.Vector3();
   private figureMoved = -10;
+  private figureNear = -1;
+  private figureTime = 0;
   private figureCell = "";
   private figureWaved = false;
   /**
@@ -575,7 +578,12 @@ export class ArchiveScene {
     const open = THREE.MathUtils.smoothstep(this.detail, 0, 1);
     const opening = this.intro.value * this.intro.value * (3 - 2 * this.intro.value);
     const desk = Math.max(this.setup.presence, THREE.MathUtils.smoothstep(this.insert.value, .1, .26));
-    const near = Math.max(open, opening);
+    // The figure takes its own time over a hop, a little behind the case and the camera.
+    const elapsed = THREE.MathUtils.clamp(time - this.figureTime, 0, .1), goal = Math.max(open, opening);
+    this.figureTime = time;
+    if (this.figureNear < 0 || this.reduced) this.figureNear = goal;
+    this.figureNear += THREE.MathUtils.clamp(goal - this.figureNear, -elapsed / 1.15, elapsed / 1.15);
+    const near = THREE.MathUtils.smoothstep(this.figureNear, 0, 1);
     // Home: seated on the top edge of the selected case, legs over its cover. The seat is
     // the case as drawn, lift and lean included, so the figure never sinks into it.
     const seat = new THREE.Vector3(.45, 3.7 - .29, .1).applyMatrix4(this.model.matrixWorld);
@@ -585,14 +593,41 @@ export class ArchiveScene {
       if (this.figureCell) { this.figureFrom.copy(this.figureHome); this.figureMoved = time; }
       this.figureCell = key;
     }
-    const move = this.reduced ? 1 : THREE.MathUtils.clamp((time - this.figureMoved) / .55, 0, 1);
+    const move = this.reduced ? 1 : THREE.MathUtils.clamp((time - this.figureMoved) / .85, 0, 1);
     const home = this.figureFrom.clone().lerp(seat, THREE.MathUtils.smoothstep(move, 0, 1));
     home.y += Math.sin(move * Math.PI) * .8;
     this.figureHome.copy(home);
     const lean = new THREE.Quaternion().setFromRotationMatrix(this.model.matrixWorld).slerp(new THREE.Quaternion(), Math.max(near, desk));
     // Opening and opened case: at the case's foot, below and to the right of the disc.
     const beside = this.model.position.clone().add(new THREE.Vector3(2.35, -.1, .7));
-    const onDesk = ConsoleSetup.FIGURE_SPOT.clone().applyMatrix4(this.model.matrixWorld);
+    // Inserting: the figure takes the disc on its back, carries it along the front of the
+    // desk, heaves it up into the slot and then stays by the console to watch the screen.
+    const p = this.insert.value, local = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z).applyMatrix4(this.model.matrixWorld);
+    const discNode = this.model.children.find((child) => child.userData.casePart && child.userData.casePart !== "lid");
+    const pushing = p > .1 && discNode ? 1 : 0;
+    const settle = pushing ? THREE.MathUtils.smoothstep(p, .6, .74) : 1;
+    const carry = discCarry(p), loaded = carry.lower * (1 - carry.lift);
+    let onDesk = ConsoleSetup.FIGURE_SPOT.clone().applyMatrix4(this.model.matrixWorld);
+    if (pushing && discNode) {
+      // A step ahead of the disc, in the lane between the controller's mat and the desk's
+      // front edge: the disc comes down upright behind it, clear of the back of its head.
+      // It steps further ahead as the disc rises, to have room to turn round and push.
+      // Only the disc enters the drive. The carrier's feet stay in the front lane even
+      // after poseCase moves the disc centre behind the console's front fascia.
+      const under = local(discNode.position.x + .32 + .12 * carry.lift, .02, this.setup.slotLocal.z + DISC_RADIUS + .2);
+      // A last shove on tiptoe as it goes in.
+      under.y += Math.sin(THREE.MathUtils.clamp((p - .44) / .14, 0, 1) * Math.PI) * .22;
+      const watch = local(6.9, .02, .35);
+      onDesk = under.lerp(watch, settle);
+      const caseLocal = this.model.worldToLocal(onDesk.clone());
+      if (caseLocal.x > this.setup.slotLocal.x - .9) {
+        caseLocal.z = Math.max(caseLocal.z, this.setup.slotLocal.z + .8);
+        onDesk.copy(caseLocal.applyMatrix4(this.model.matrixWorld));
+      }
+      onDesk.y += Math.sin(settle * Math.PI) * .5;
+    }
+    // Bent forward under the load, about the axis across its path.
+    if (pushing) lean.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1).transformDirection(this.model.matrixWorld), -.3 * loaded * (1 - settle)));
     // Each move is a hop, not a slide. The climb comes first and the drop last, so the
     // figure crosses above the cases' tops instead of through the shelf.
     const across = 1 - (1 - near) ** 3, down = near ** 3;
@@ -605,25 +640,40 @@ export class ArchiveScene {
     const cameraYaw = towards(position, this.camera.position);
     const disc = this.model.position.clone().add(new THREE.Vector3(1.35, 2, .55));
     const screen = towards(onDesk, this.setup.screenLocal.clone().applyMatrix4(this.model.matrixWorld));
+    // Facing the disc's face, which is the way it travels.
+    const along = Math.atan2(local(1, 0, 0).x - local(0, 0, 0).x, local(1, 0, 0).z - local(0, 0, 0).z);
     const reading = THREE.MathUtils.smoothstep(this.insert.value, .28, .45);
     // Body: legs over the cover and turned a little to the visitor while seated, half turned to the visitor by the case, on the
     // desk towards the visitor and then round to the screen while the disc is read.
     let yaw = lerpYaw(-.5, lerpYaw(cameraYaw, towards(position, disc), .2), near);
-    yaw = lerpYaw(yaw, lerpYaw(.12, screen, reading), desk);
+    // It walks the way the disc goes, then turns round to it for the heave.
+    const slotFacing = towards(onDesk, local(this.setup.slotLocal.x, 0, this.setup.slotLocal.z));
+    const facing = lerpYaw(along, slotFacing, THREE.MathUtils.smoothstep(carry.lift, .2, .8));
+    yaw = lerpYaw(yaw, pushing ? lerpYaw(facing, screen, settle) : lerpYaw(.12, screen, reading), desk);
     // Head: the pointer by default, the disc from the case's foot.
     let lookYaw = lerpYaw(cameraYaw + this.pointer.x * .7, towards(position, disc), near);
-    lookYaw = lerpYaw(lookYaw, lerpYaw(.12 + this.pointer.x * .7, screen, reading), desk);
+    lookYaw = lerpYaw(lookYaw, pushing ? lerpYaw(facing, screen, settle) : lerpYaw(.12 + this.pointer.x * .7, screen, reading), desk);
     const lookUp = (near + this.pointer.y * -.3 * (1 - near)) * (1 - desk);
-    const hop = near > .03 && near < .97 ? near : desk > .03 && desk < .97 ? desk : move < 1 ? move : undefined;
+    const hop = near > .03 && near < .97 ? near : desk > .03 && desk < .97 ? desk
+      : pushing && settle > .03 && settle < .97 ? settle : move < 1 ? move : undefined;
     // The first frame of the opening: a wave to whoever just arrived.
     if (this.intro.value > .98 && !this.figureWaved) { this.figureWaved = true; this.figure.gestureOnce("wave"); }
     if (this.intro.value === 0) this.figureWaved = false;
     this.figure.state.still = this.reduced;
     this.figure.update(time, {
       position, yaw, lookYaw, lookUp, hop, lean,
+      // Hands back on the disc's rim while carrying, then overhead to heave it into the slot.
+      arms: !pushing ? undefined : carry.lift > .5
+        ? { amount: 1 - THREE.MathUtils.smoothstep(p, .57, .63), x: .12, y: 1.5, z: 1, stretch: .3 }
+        : { amount: loaded, x: .9, y: .45, z: -.6 },
       opacity: cinematic ? 0 : Math.max(THREE.MathUtils.clamp(this.presence / .3, 0, 1), opening),
-      clip: near < .5 && desk < .5 ? "sit" : "idle",
+      clip: near < .5 && desk < .5 ? "sit" : pushing && carry.walk > .02 && carry.walk < .98 ? "run" : "idle",
     });
+    if (pushing && desk > .99 && hop === undefined) {
+      const contact = THREE.MathUtils.smoothstep(carry.lower, .25, 1)
+        * (1 - THREE.MathUtils.smoothstep(carry.lift, 0, .65)) * (1 - settle);
+      this.figure.carryDisc(this.model.children.filter((child) => child.userData.casePart === "disc"), contact, contact, DISC_RADIUS);
+    }
   }
   private terminalArrayVisibility = { value: 1 };
   get insertProgress() { return this.insert.value; }
@@ -658,7 +708,14 @@ export class ArchiveScene {
   private updateInsert(dt: number) {
     const { insert } = this;
     // Linear time; poseCase and the camera apply the easing.
-    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 3.6 : -dt / 1.1), 0, 1);
+    // Going in, time stretches while the figure runs the disc across the desk and shoves it
+    // home, so that part reads as an effort instead of a blur; ejecting stays brisk.
+    const ease = THREE.MathUtils.smoothstep, v = insert.value;
+    const carry = ease(v, .19, .25) * (1 - ease(v, .41, .45));
+    // Slower too for the hop onto the desk before it and the shove and hop away after it.
+    const around = ease(v, .06, .1) * (1 - ease(v, .72, .78)) * (1 - carry);
+    const pace = this.reduced ? 1 : 1 - .76 * carry - .55 * around;
+    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 3.6 * pace : -dt / 1.1), 0, 1);
     if (insert.value >= 1 && this.insertDone) {
       this.insertDone();
       this.insertDone = undefined;

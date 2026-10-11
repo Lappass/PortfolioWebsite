@@ -135,20 +135,43 @@ export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number, 
   return { selected, instanced, palettes, coverAttribute };
 }
 
-const DISC_RADIUS = 0.6 * SCALE;
+export const DISC_RADIUS = 0.6 * SCALE;
 const DEFAULT_SLOT = new THREE.Vector3(8.675, 2.4, 0.05);
 
 /**
- * Lid swings open on the spine hinge, then the disc rises and spins. `insert`
- * turns the disc upright in front of the console slot (`slotTop`, case-local) and
- * pushes it in, where the console body hides it.
+ * The disc's trip to the console, carried on the figure's back. All 0..1, from `insert`:
+ * it rises above head height and moves out over the desk's front edge (`raise`, `out`),
+ * turns side-on (`turn`), comes down behind the figure like a shield (`lower`), is walked
+ * across (`walk`) and is lifted to the slot (`lift`). Raising before turning keeps it
+ * clear of the figure, the case and the controller at every step.
+ */
+export function discCarry(insert: number) {
+  const u = THREE.MathUtils.clamp((insert - .2) / .24, 0, 1), step = THREE.MathUtils.smoothstep;
+  return {
+    raise: step(u, 0, .1), out: step(u, 0, .25), turn: step(u, .05, .3), lower: step(u, .3, .44),
+    walk: step(u, .44, .86), lift: step(u, .86, .97),
+  };
+}
+/** Disc centre height above the desk: turning overhead, and upright behind the figure. */
+const CARRY_HIGH = 2.65, CARRY_BACK = 1.7;
+const spins = new WeakMap<THREE.Object3D, { angle: number; time: number }>();
+
+/**
+ * Lid swings open on the spine hinge, then the disc rises and spins. `insert` sends the
+ * disc to the console slot (`slotTop`, case-local) on the figure's back and pushes it in,
+ * where the console body hides it.
  */
 export function poseCase(group: THREE.Object3D, open: number, time: number, insert = 0, slotTop?: THREE.Vector3) {
   const lid = THREE.MathUtils.smoothstep(open, 0, 0.7);
   const lift = THREE.MathUtils.smoothstep(open, 0.45, 1);
-  const travel = THREE.MathUtils.smoothstep(insert, 0.24, 0.43);
+  const carry = discCarry(insert);
   const push = THREE.MathUtils.smoothstep(insert, 0.44, 0.58);
   const slot = slotTop ?? DEFAULT_SLOT;
+  // The label spins while the disc floats and holds still once it is being carried.
+  const spin = spins.get(group) ?? { angle: 0, time };
+  spin.angle += THREE.MathUtils.clamp(time - spin.time, 0, .1) * 1.4 * lift * (1 - carry.raise);
+  spin.time = time;
+  spins.set(group, spin);
   for (const child of group.children) {
     const part = child.userData.casePart;
     if (!part) continue;
@@ -157,13 +180,13 @@ export function poseCase(group: THREE.Object3D, open: number, time: number, inse
     if (part === "lid") child.rotation.y = -1.25 * lid;
     else {
       const outX = x + 1.35 * lift, outY = y + 0.2 * lift, outZ = z + 0.55 * lift;
+      const height = THREE.MathUtils.lerp(THREE.MathUtils.lerp(THREE.MathUtils.lerp(outY, CARRY_HIGH, carry.raise), CARRY_BACK, carry.lower), slot.y, carry.lift);
       child.position.set(
-        THREE.MathUtils.lerp(outX, slot.x, travel),
-        THREE.MathUtils.lerp(outY, slot.y, travel),
-        THREE.MathUtils.lerp(outZ, slot.z + DISC_RADIUS + 0.2, travel) - push * (2 * DISC_RADIUS + 0.5),
+        THREE.MathUtils.lerp(outX, slot.x, carry.walk),
+        height,
+        THREE.MathUtils.lerp(outZ, slot.z + DISC_RADIUS + 0.2, carry.out) - push * (2 * DISC_RADIUS + 0.5),
       );
-      child.rotation.y = Math.PI / 2 * travel;
-      child.rotation.z = time * 1.4 * lift + insert * 4;
+      child.rotation.set(0, Math.PI / 2 * carry.turn, spin.angle);
     }
   }
 }
