@@ -43,7 +43,7 @@
   letter-spacing: 0.12em;
 }
 .pp-bar > button { justify-self: start; display: flex; align-items: center; gap: 10px; min-height: 40px; }
-.pp-bar small { font-size: 9px; border: 1px solid var(--pp-line); padding: 2px 5px; color: var(--pp-muted); }
+.pp-bar small { font-size: 11px; border: 1px solid var(--pp-line); padding: 2px 5px; color: var(--pp-muted); }
 .pp-brand { font-weight: 700; letter-spacing: 0.32em; }
 .pp-bar nav { justify-self: end; display: flex; align-items: center; gap: 18px; }
 .pp-bar nav button { min-height: 40px; }
@@ -92,7 +92,7 @@
   font-size: 15px;
   letter-spacing: 0.08em;
 }
-.pp-play small { font-size: 10px; opacity: 0.7; letter-spacing: 0.1em; }
+.pp-play small { font-size: 11px; opacity: 0.7; letter-spacing: 0.1em; }
 .pp-fullscreen {
   position: absolute;
   right: 10px;
@@ -117,7 +117,7 @@
   padding-top: 22px;
   border-top: 1px solid var(--pp-ink);
 }
-.pp-meta dt { font-size: 10px; letter-spacing: 0.16em; color: var(--pp-muted); margin-bottom: 6px; }
+.pp-meta dt { font-size: 11px; letter-spacing: 0.12em; color: var(--pp-muted); margin-bottom: 6px; }
 .pp-meta dd { margin: 0; font-size: 15px; line-height: 1.5; }
 .pp-abstract { margin: 0; font-size: 16px; line-height: 1.85; }
 .pp-tags { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 22px 0 0; padding: 0; }
@@ -243,15 +243,15 @@
 
 /* Archive reading layout: fixed chapter rail and captions outside the imagery. */
 .pp-chapters { position: sticky; top: 76px; z-index: 2; min-height: 56px; display: flex; align-items: center; gap: 24px; padding: 0 var(--pp-edge); background: var(--pp-paper); border-bottom: 1px solid var(--pp-line); }
-.pp-index-label { margin-right: auto; color: var(--pp-muted); font-size: 10px; letter-spacing: .14em; white-space: nowrap; }
+.pp-index-label { margin-right: auto; color: var(--pp-muted); font-size: 11px; letter-spacing: .12em; white-space: nowrap; }
 .pp-chapters button { min-height: 56px; display: flex; align-items: center; gap: 10px; font-size: 12px; border-bottom: 2px solid transparent; }
-.pp-chapters button small { font-size: 10px; color: var(--pp-muted); font-variant-numeric: tabular-nums; }
+.pp-chapters button small { font-size: 11px; color: var(--pp-muted); font-variant-numeric: tabular-nums; }
 .pp-chapters button[aria-current] { border-color: var(--pp-accent); color: var(--pp-accent); }
 .pp-chapters button:hover { color: var(--pp-accent); }
 .project-page [data-section] { scroll-margin-top: 152px; }
 .project-page [data-section]:focus { outline: none; }
 .pp-section-number { display: inline-grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--pp-line); margin-right: 14px; font-variant-numeric: tabular-nums; color: var(--pp-ink); }
-.pp-field-index { position: absolute; top: 28px; left: var(--pp-edge); right: var(--pp-edge); z-index: 1; display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .16em; color: #f1f3f0; }
+.pp-field-index { position: absolute; top: 28px; left: var(--pp-edge); right: var(--pp-edge); z-index: 1; display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .12em; color: #f1f3f0; }
 .pp-media-caption { display: flex; gap: 18px; padding-top: 12px; font-size: 11px; color: var(--pp-muted); letter-spacing: .06em; }
 .pp-media-caption span { color: var(--pp-accent); }
 .pp-record-image { position: relative; }
@@ -276,5 +276,5 @@
 @media (max-width: 540px) {
   .pp-chapters { gap: 8px; }
   .pp-chapters button { font-size: 11px; }
-  .pp-field-index { font-size: 9px; }
+  .pp-field-index { font-size: 11px; letter-spacing: .08em; }
 }

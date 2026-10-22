@@ -6,6 +6,7 @@ const all=await readdir(root,{recursive:true});
 const files=all.map(path=>path.replaceAll('\\','/')).filter(path=>
   path==='index.html'||path==='manifest.webmanifest'||path==='favicon.svg'||
   /^(assets|icons|archives|licenses)\/[^/]+\.[^/]+$/.test(path)||
+  /^assets\/(skill-logos|experience-logos)\/[^/]+\.svg$/.test(path)||
   /^fonts\/.*\.(woff2|pdf|txt|json|md)$/.test(path)||
   /^audio\/(atmosphere|motif|pulse)\.ogg$/.test(path)
 ).filter(path=>!/^assets\/archive-(cassette|assembly)\.glb$/.test(path)).sort();

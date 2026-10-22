@@ -19,6 +19,12 @@ const arc = (i: number) => {
 };
 const stacked = matchMedia("(max-width: 980px)");
 const arcAngle = { identity: 225, about: 135, skills: 315, experience: 45 } as const;
+// Optional facts for the status bar; left empty, it shows the console's own readings instead.
+const status = profile.status ?? {};
+const localTime = (now: Date) => {
+  try { return new Intl.DateTimeFormat("en-GB", { timeZone: status.timeZone || undefined, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(now); }
+  catch { return now.toTimeString().slice(0, 8); }
+};
 const clock = (seconds: number) => [seconds / 3600, seconds / 60 % 60, seconds % 60].map(n => String(Math.floor(n)).padStart(2, "0")).join(":");
 
 /** Full-screen "player profile": who made the works on the shelf. */
@@ -35,6 +41,13 @@ export class ProfilePage {
   private needle = 0;
   private statusTimer = 0;
   private openedAt = 0;
+  // Stacked layout: the orb sticks under the header and panels scroll to just below it, so both heights are measured.
+  private chrome = new ResizeObserver(() => {
+    const header = this.root.querySelector<HTMLElement>(".pp-bar"), orb = this.root.querySelector<HTMLElement>(".profile-orb-study");
+    if (!header || !orb) return;
+    this.root.style.setProperty("--pc-header", `${header.offsetHeight}px`);
+    this.root.style.setProperty("--pc-reading-top", `${header.offsetHeight + orb.offsetHeight + 8}px`);
+  });
   private entryFrame = 0;
   private entry?: ProfileEntry;
 
@@ -112,6 +125,8 @@ export class ProfilePage {
     this.active = "identity";
     this.select("identity", true);
     this.openedAt = performance.now();
+    this.chrome.disconnect();
+    for (const node of this.root.querySelectorAll(".pp-bar, .profile-orb-study")) this.chrome.observe(node);
     clearInterval(this.statusTimer);
     this.tickStatus();
     this.statusTimer = window.setInterval(() => this.tickStatus(), 1000);
@@ -144,6 +159,7 @@ export class ProfilePage {
     cancelAnimationFrame(this.entryFrame);
     cancelAnimationFrame(this.countFrame);
     clearInterval(this.statusTimer);
+    this.chrome.disconnect();
     this.entry?.dispose();
     this.workspace(false, this.root.classList.contains('instant'));
     this.orb?.dispose();
@@ -164,17 +180,12 @@ export class ProfilePage {
   private select(chapter: Chapter, force = false) {
     if (chapter === this.active && !force) return;
     this.active = chapter;
-    const index = sections.findIndex(([id]) => id === chapter);
     for (const node of this.root.querySelectorAll<HTMLElement>("[data-section]")) node.classList.toggle("active", node.dataset.section === chapter);
     for (const node of this.root.querySelectorAll<SVGElement>("[data-arc]")) node.classList.toggle("active", node.dataset.arc === chapter);
     for (const button of this.root.querySelectorAll<HTMLElement>("[data-chapter]")) {
       if (button.dataset.chapter === chapter) button.setAttribute("aria-current", "true");
       else button.removeAttribute("aria-current");
     }
-    const count = this.root.querySelector(".pp-count");
-    if (count) count.textContent = `0${index + 1} / 0${sections.length}`;
-    const section = this.root.querySelector('[data-status="section"]');
-    if (section) section.textContent = `0${index + 1} · ${sections[index][1]}`;
     // The ring pointer takes the short way round to the arc facing the selected panel.
     this.needle += ((arcAngle[chapter] - this.needle) % 360 + 540) % 360 - 180;
     this.root.querySelector<SVGElement>(".pc-needle")?.style.setProperty("transform", `rotate(${this.needle}deg)`);
@@ -190,7 +201,7 @@ export class ProfilePage {
     const now = new Date();
     const uptime = this.root.querySelector('[data-status="uptime"]'), local = this.root.querySelector('[data-status="clock"]');
     if (uptime) uptime.textContent = clock((performance.now() - this.openedAt) / 1000);
-    if (local) local.textContent = clock(now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds());
+    if (local) local.textContent = localTime(now);
   }
 
   private preview(chapter?: Chapter) {
@@ -198,10 +209,13 @@ export class ProfilePage {
       node.classList.toggle("preview", chapter !== undefined && (node.dataset.section ?? node.dataset.arc) === chapter);
   }
 
+  /** Stacked layout: the panel under a line a third of the way down the reading area (below the sticky orb) is current;
+   *  at the end of the page the last panel is, since a short one may never reach the line. */
   private readScroll() {
-    const edge = this.root.getBoundingClientRect().top + (parseFloat(getComputedStyle(this.root).getPropertyValue("--chapter-edge")) || 200);
     const panels = [...this.root.querySelectorAll<HTMLElement>(".pc-panel")];
-    const current = panels.filter(panel => panel.getBoundingClientRect().top <= edge).at(-1) ?? panels[0];
+    const top = this.root.querySelector(".profile-orb-study")!.getBoundingClientRect().bottom, line = top + (this.root.getBoundingClientRect().bottom - top) / 3;
+    const atEnd = this.root.scrollTop + this.root.clientHeight >= this.root.scrollHeight - 2;
+    const current = atEnd ? panels.at(-1) : panels.filter(panel => panel.getBoundingClientRect().top <= line).at(-1) ?? panels[0];
     if (current) this.select(current.dataset.section as Chapter);
   }
 
@@ -232,18 +246,17 @@ export class ProfilePage {
     const panel = (chapter: Chapter, index: number, meta: string, body: string) => `
         <section class="pc-panel" data-section="${chapter}" data-side="${index < 2 ? "left" : "right"}" style="--i:${index}" tabindex="-1" aria-labelledby="pc-${chapter}">
           <i class="pc-lead" aria-hidden="true"></i>
-          <header class="pc-head"><span class="pc-light" aria-hidden="true"></span><span class="pc-index">0${index + 1}</span><h2 id="pc-${chapter}">${sections[index][1]}</h2><span class="pc-meta">${e(meta)}</span></header>
+          <header class="pc-head"><span class="pc-light" aria-hidden="true"></span><span class="pc-index">0${index + 1}</span><h2 id="pc-${chapter}">${sections[index][1]}</h2>${meta ? `<span class="pc-meta">${e(meta)}</span>` : ""}</header>
           ${body}
         </section>`;
     this.root.innerHTML = `
       <header class="pp-bar">
         <button type="button" data-profile="back">← <span>Back to works</span><small>ESC</small></button>
         <span class="pp-brand">About me</span>
-        <span class="pp-count" aria-hidden="true">01 / 04</span>
+        <nav class="pp-chapters" aria-label="Profile sections">
+          ${sections.map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>0${i + 1}</small>${label}</button>`).join("")}
+        </nav>
       </header>
-      <nav class="pp-chapters" aria-label="Profile sections">
-        ${sections.map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>0${i + 1}</small>${label}</button>`).join("")}
-      </nav>
       <article class="pp-body profile-console">
         ${panel("identity", 0, p.roleEn, `
           <div class="pc-content profile-introduction">
@@ -251,7 +264,7 @@ export class ProfilePage {
             <p class="pp-abstract">${e(p.tagline)}</p>
             <div class="pp-links">${links.map((link) => `<a href="${asset(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} <span>↗</span></a>`).join("")}</div>
           </div>`)}
-        ${panel("about", 1, `${p.bio.length} notes`, `<div class="pc-content profile-bio">${p.bio.map((paragraph) => `<p>${e(paragraph)}</p>`).join("")}</div>`)}
+        ${panel("about", 1, "", `<div class="pc-content profile-bio">${p.bio.map((paragraph) => `<p>${e(paragraph)}</p>`).join("")}</div>`)}
         <figure class="profile-orb-study" aria-label="Identity particles following the selected panel">
           <div class="profile-orb-stage">
             <svg class="pc-ring" viewBox="-100 -100 200 200" aria-hidden="true">
@@ -263,19 +276,18 @@ export class ProfilePage {
             <canvas class="profile-particle-canvas" tabindex="0" role="img" aria-label="Interactive particles. In About, drag or use arrow keys to rotate the portrait; click or press Space to scatter and regroup."></canvas>
             <div class="profile-orb-labels" aria-hidden="true"></div>
           </div>
-          <figcaption><span class="profile-orb-index">01 / IDENTITY</span><p class="profile-orb-caption">A mark of my own.</p><small>Click a panel · Move to interact</small></figcaption>
+          <figcaption><p class="profile-orb-caption">A mark of my own.</p><small>Click a panel · Move to interact</small></figcaption>
           <dl class="pc-readouts">${readouts.map(([label, value]) => `<div><dt>${label}</dt><dd data-count="${value}">00</dd></div>`).join("")}</dl>
         </figure>
         ${panel("skills", 2, `${tools} tools`, `<div class="pc-content profile-skills">${p.skills.map((s, index) => `<div data-skill-group="${index}"><h3>${e(s.group)}</h3><p>${s.items.length ? s.items.map(e).join(" / ") : "—"}</p></div>`).join("")}</div>`)}
         ${panel("experience", 3, `${p.experience.length} entries`, `<ol class="pc-content profile-timeline">${p.experience.map((x) => `<li${x.upcoming ? ' class="upcoming"' : ""}><span>${e(x.time)}</span><div><strong>${e(x.title)}</strong>${x.detail ? `<p>${e(x.detail)}</p>` : ""}</div></li>`).join("")}</ol>`)}
       </article>
-      <div class="pp-body pc-status" aria-hidden="true">
-        <span><i class="pc-light"></i>Online</span>
-        <span>Section <b data-status="section">01 · Intro</b></span>
-        <span>Input <b data-status="input">Standby</b></span>
-        <span>Session <b data-status="uptime">00:00:00</b></span>
-        <span>Local <b data-status="clock">--:--:--</b></span>
-      </div>
-      <footer class="profile-model-credit"><a href="${import.meta.env.BASE_URL}model-credits.html" target="_blank" rel="noopener noreferrer">3D model credits ↗</a></footer>`;
+      <footer class="pp-body pc-status">
+        <span aria-hidden="true"><i class="pc-light"></i>${e(status.availability || "Online")}</span>
+        ${status.location ? `<span>Based in <b>${e(status.location)}</b></span>` : `<span aria-hidden="true">Input <b data-status="input">Standby</b></span>
+        <span aria-hidden="true">Session <b data-status="uptime">00:00:00</b></span>`}
+        <span aria-hidden="true">${status.timeZone ? "Local time" : "Local"} <b data-status="clock">--:--:--</b></span>
+        <a class="pc-credit" href="${import.meta.env.BASE_URL}model-credits.html" target="_blank" rel="noopener noreferrer">3D model credits ↗</a>
+      </footer>`;
   }
 }

@@ -25,6 +25,7 @@
     { "label": "Email", "url": "mailto:you@example.com" }
   ],
   "resume": "",
+  "status": { "availability": "", "location": "", "timeZone": "" },
   "boot": {
     "greeting": "HELLO, I'M SHUHANG CHEN",
     "identityLabel": "PLAYER",

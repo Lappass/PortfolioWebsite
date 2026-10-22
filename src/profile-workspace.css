@@ -1,24 +1,24 @@
 #stage[data-workspace="true"] > :not(#three-scene):not(#modal-root):not(#toast) { opacity: 0 !important; pointer-events: none !important; transition: opacity 250ms; }
-.profile-page { --chapter-edge: 200px; --pc-gap: clamp(36px,4vw,72px); background: var(--pp-paper); transform: none; }
+/* One screen: header on top, status bar pinned to the bottom, the console centred in between. */
+.profile-page { --pc-gap: clamp(36px,4vw,72px); display: flex; flex-direction: column; background: var(--pp-paper); transform: none; }
 .profile-page.visible { transition: opacity 280ms; }
 .profile-page.from-screen.visible { transition: opacity 180ms, clip-path 480ms cubic-bezier(.2,.75,.2,1); }
 .profile-entry-field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
 .profile-page.entering { overflow-y: hidden; }
 .profile-page.entering.visible { transition: none; }
-.profile-page.entering .profile-model-credit { opacity: 0; }
-.profile-model-credit { padding: 24px var(--pp-edge); font-size: 12px; letter-spacing: .06em; color: var(--pp-muted); }
-.profile-model-credit a { color: inherit; }
 .profile-page.entering :is(.pp-bar,.pp-chapters,.pc-status,.profile-orb-study figcaption,.pc-readouts,.pc-ring) { opacity: var(--profile-reveal,0); pointer-events: none; }
 /* Panels power on one after another as the entry settles. */
 .profile-page.entering .pc-panel { opacity: clamp(0, calc(var(--profile-reveal,0) * 2.4 - var(--i) * .45), 1); transform: translateY(calc((1 - clamp(0, calc(var(--profile-reveal,0) * 2.4 - var(--i) * .45), 1)) * 10px)); pointer-events: none; }
 .profile-page.entering #profile-title { opacity: var(--profile-heading,0); }
 .profile-page.instant,.profile-page.instant.visible { transition: none; transform: none; }
-.profile-page .pp-count { justify-self: end; font-size: 11px; letter-spacing: .14em; }
-.pp-chapters button[aria-current] { border-color: var(--pp-accent); color: var(--pp-accent); }
-.profile-page :is(.pp-bar small, .pp-chapters button small) { font-size: 11px; }
+/* Section tabs live in the header, so the current section shows once. */
+.profile-page .pp-bar .pp-chapters { position: static; justify-self: end; min-height: 0; gap: 22px; padding: 0; background: none; border: 0; letter-spacing: 0; }
+.profile-page .pp-bar .pp-chapters button { min-height: 40px; }
+/* The light palette's grey and gold fall below 4.5:1 for small text; pull them 20% toward the ink on this page only. */
+:root:not([data-dark-surface="true"]) .profile-page { --pp-muted: color-mix(in srgb, var(--theme-muted, #77756d) 80%, var(--theme-ink, #080a08)); --pp-accent: color-mix(in srgb, var(--theme-accent, #9b7247) 80%, var(--theme-ink, #080a08)); }
 
 /* Console: four panels around the particle orb, each wired to its arc of the ring. */
-.profile-console { display: grid; grid-template-columns: minmax(0,1.5fr) minmax(320px,min(560px,33%,calc(100svh - 340px))) minmax(0,1fr); grid-template-areas: "intro orb skills" "about orb experience"; grid-template-rows: auto 1fr; gap: 28px var(--pc-gap); max-width: 1480px; padding-top: clamp(24px,3.5vh,44px); padding-bottom: 24px; align-items: start; }
+.profile-console { display: grid; grid-template-columns: minmax(0,1.5fr) minmax(320px,min(560px,33%,calc(100svh - 340px))) minmax(0,1fr); grid-template-areas: "intro orb skills" "about orb experience"; grid-template-rows: auto 1fr; gap: 28px var(--pc-gap); flex: 1 0 auto; width: 100%; max-width: 1480px; align-content: center; padding-top: clamp(20px,3vh,40px); padding-bottom: clamp(20px,3vh,40px); align-items: start; }
 .pc-panel[data-section="identity"] { grid-area: intro; }
 .pc-panel[data-section="about"] { grid-area: about; }
 .pc-panel[data-section="skills"] { grid-area: skills; }
@@ -35,6 +35,9 @@
 .pc-panel.active { --frame: color-mix(in srgb, var(--pp-accent) 45%, var(--pp-line)); }
 .pc-panel.active::before { background-size: 100% 2px, auto; }
 .pc-panel.active::after { top: 2px; background: var(--pp-panel); }
+/* Light theme: panels are paler cards on the paper, otherwise they melt into it. */
+:root:not([data-dark-surface="true"]) .profile-page .pc-panel::after { background: color-mix(in srgb, var(--pp-paper) 45%, #ffffff); }
+:root:not([data-dark-surface="true"]) .profile-page .pc-panel.active::after { background: color-mix(in srgb, var(--pp-paper) 20%, #ffffff); }
 /* Leader line from the panel's inner edge toward the orb. */
 .pc-lead { position: absolute !important; top: 31px; width: var(--pc-gap); border-top: 1px dashed var(--pp-line); transition: border-color 240ms; }
 .pc-panel[data-side="left"] .pc-lead { left: 100%; }
@@ -100,11 +103,22 @@
 .pc-readouts dt { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--pp-muted); }
 .pc-readouts dd { margin: 4px 0 0; font-size: 26px; font-weight: 300; font-variant-numeric: tabular-nums; }
 
-.pc-status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; max-width: 1480px; padding-top: 14px; padding-bottom: 14px; border-top: 1px solid var(--pp-line); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--pp-muted); }
+.pc-status { position: sticky; bottom: 0; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; width: 100%; max-width: none; margin: 0; padding-top: 12px; padding-bottom: 12px; background: rgba(var(--theme-paper-rgb, 234, 229, 225), .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--pp-line); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--pp-muted); }
 .pc-status span { display: inline-flex; align-items: center; gap: 8px; }
 .pc-status b { font-weight: 400; color: var(--pp-ink); font-variant-numeric: tabular-nums; }
-.pc-status span:last-child { margin-left: auto; }
+.pc-status span:last-of-type { margin-left: auto; }
+.pc-credit { color: var(--pp-muted); letter-spacing: .06em; }
+.pc-credit:hover { color: var(--pp-accent); }
 
+/* Short desktop screens: tighter spacing so the console still fits one screen. */
+@media(min-width:981px) and (max-height:800px) {
+ .profile-console { row-gap: 16px; padding-top: 12px; padding-bottom: 12px; }
+ .pc-panel { padding: 14px 20px 18px; }
+ .pc-head { padding-bottom: 10px; margin-bottom: 12px; }
+ .profile-orb-study figcaption { margin-top: 4px; }
+ .pc-readouts { margin-top: 12px; }
+ .profile-page .pp-bar { padding-top: 12px; padding-bottom: 12px; }
+}
 @media(max-width:1180px) {
  .profile-console { grid-template-columns: minmax(0,1.3fr) minmax(300px,min(30%,calc(100svh - 340px))) minmax(0,1fr); }
  .profile-timeline li { grid-template-columns: 1fr; gap: 2px; }
@@ -113,20 +127,23 @@
  .profile-skills > div { grid-template-columns: 1fr; gap: 4px; }
 }
 @media(max-width:980px) {
- .profile-page { --chapter-edge: 390px; }
+/* Header wraps: back button on top, the section tabs as a full-width row below. */
+ .profile-page .pp-bar { row-gap: 6px; padding-bottom: 0; }
+ .profile-page .pp-bar .pp-chapters { grid-column: 1 / -1; justify-self: stretch; gap: 8px; margin: 0 calc(-1 * var(--pp-edge)); padding: 0 var(--pp-edge); border-top: 1px solid var(--pp-line); }
+ .profile-page .pp-bar .pp-chapters button { min-height: 48px; }
+ .pc-status { position: static; }
  .profile-console { display: flex; flex-direction: column; gap: 16px; padding-top: 0; }
- .profile-orb-study { order: -1; position: sticky; top: 132px; z-index: 1; width: calc(100% + 2 * var(--pp-edge)); margin: 0 calc(-1 * var(--pp-edge)); padding: 8px var(--pp-edge) 12px; box-sizing: border-box; background: var(--pp-paper); border-bottom: 1px solid var(--pp-line); }
+ .profile-orb-study { order: -1; position: sticky; top: var(--pc-header, 132px); z-index: 1; width: calc(100% + 2 * var(--pp-edge)); margin: 0 calc(-1 * var(--pp-edge)); padding: 8px var(--pp-edge) 12px; box-sizing: border-box; background: var(--pp-paper); border-bottom: 1px solid var(--pp-line); }
  .profile-orb-stage { width: 190px; min-width: 0; }
  .profile-orb-study figcaption { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 24px; margin-top: 4px; }
  .profile-orb-caption { font-size: 11px; margin: 0; }
  .profile-orb-study figcaption small, .pc-readouts { display: none; }
  /* At this size the labels would overlap the logos; the panel below lists them. */
  .profile-orb-labels { display: none; }
- .pc-panel { width: 100%; box-sizing: border-box; min-height: calc(100svh - 420px); }
- .profile-page .pc-panel { scroll-margin-top: 380px; }
- .pc-panel:last-of-type { min-height: calc(100svh - 400px); }
+ .pc-panel { width: 100%; box-sizing: border-box; }
+ .profile-page .pc-panel { scroll-margin-top: var(--pc-reading-top, 350px); }
  .pc-lead { display: none; }
- .pc-status span:nth-child(3), .pc-status span:nth-child(4) { display: none; }
+ .pc-status span[aria-hidden]:is(:nth-child(2), :nth-child(3)) { display: none; }
  .pc-meta { display: inline; }
  .profile-skills > div { grid-template-columns: 96px minmax(0,1fr); gap: 16px; }
  .profile-timeline li { grid-template-columns: 88px minmax(0,1fr); gap: 14px; }

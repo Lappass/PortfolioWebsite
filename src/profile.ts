@@ -12,6 +12,8 @@ export interface Profile {
   experience: { time: string; title: string; detail: string; logo?: string | string[]; upcoming?: boolean }[];
   contact: { label: string; url: string }[];
   resume: string;
+  /** Status bar: availability (e.g. "Open to internships"), city, and an IANA time zone for your local time. */
+  status?: { availability?: string; location?: string; timeZone?: string };
   boot: {
     greeting: string;
     identityLabel: string;
