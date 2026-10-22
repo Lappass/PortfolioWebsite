@@ -300,7 +300,7 @@ export class ProfileOrb {
     this.labels.dataset.chapter = this.chapter;
     this.figure.querySelector('.profile-orb-index')!.textContent = `0${index + 1} / ${this.chapter.toUpperCase()}`;
     this.figure.querySelector('.profile-orb-caption')!.textContent = this.chapter === 'about' && this.figure.dataset.portrait === 'error' ? 'Portrait unavailable. Explore the particle sphere.' : captions[index];
-    this.figure.querySelector('figcaption small')!.textContent = this.chapter === 'about' ? 'Drag to rotate · Click to scatter · Move to interact' : 'Pick a panel · Move to interact';
+    this.figure.querySelector('figcaption small')!.textContent = this.chapter === 'about' ? 'Drag to rotate · Click to scatter · Move to interact' : 'Click a panel · Move to interact';
     this.labels.replaceChildren();
     const names = this.chapter === 'skills' ? groups.map(s => s.group) : this.chapter === 'experience' ? profile.experience.map(s => s.time) : [];
     names.forEach((name, i) => {

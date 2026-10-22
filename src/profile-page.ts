@@ -46,20 +46,26 @@ export class ProfilePage {
     this.root.hidden = true;
     document.body.append(this.root);
     this.root.addEventListener("click", (event) => {
-      if ((event.target as Element).closest("[data-profile='back']")) this.onClose();
-      const button = (event.target as Element).closest<HTMLElement>("[data-chapter]");
+      const target = event.target as Element;
+      if (target.closest("[data-profile='back']")) this.onClose();
+      // Clicking a panel (outside its links) locks it.
+      const panel = target.closest<HTMLElement>(".pc-panel");
+      if (panel && !target.closest("a,button")) this.select(panel.dataset.section as Chapter);
+      const button = target.closest<HTMLElement>("[data-chapter]");
       const section = button && this.root.querySelector<HTMLElement>(`[data-section="${button.dataset.chapter}"]`);
       if (!section) return;
       this.select(button.dataset.chapter as Chapter);
       if (stacked.matches) section.scrollIntoView({ behavior: this.root.classList.contains("instant") || matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
       section.focus({ preventScroll: !stacked.matches });
     });
-    // Wide screens: the panel under the pointer or focus drives the orb. Stacked: the panel scrolled under the orb does.
+    // Wide screens: hovering a panel or its tab only lights that arc and leader line; a click or focus locks it and
+    // drives the orb. Stacked: the panel scrolled under the orb drives it.
     this.root.addEventListener("pointerover", (event) => {
-      if (event.pointerType !== "mouse" || stacked.matches) return;
-      const section = (event.target as Element).closest<HTMLElement>(".pc-panel");
-      if (section) this.select(section.dataset.section as Chapter);
+      if (event.pointerType !== "mouse") return;
+      const node = stacked.matches ? null : (event.target as Element).closest<HTMLElement>(".pc-panel,[data-chapter]");
+      this.preview((node?.dataset.section ?? node?.dataset.chapter) as Chapter | undefined);
     });
+    this.root.addEventListener("pointerleave", () => this.preview());
     this.root.addEventListener("focusin", (event) => {
       const section = (event.target as Element).closest<HTMLElement>(".pc-panel");
       if (section) this.select(section.dataset.section as Chapter);
@@ -187,6 +193,11 @@ export class ProfilePage {
     if (local) local.textContent = clock(now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds());
   }
 
+  private preview(chapter?: Chapter) {
+    for (const node of this.root.querySelectorAll<HTMLElement | SVGElement>(".pc-panel, [data-arc]"))
+      node.classList.toggle("preview", chapter !== undefined && (node.dataset.section ?? node.dataset.arc) === chapter);
+  }
+
   private readScroll() {
     const edge = this.root.getBoundingClientRect().top + (parseFloat(getComputedStyle(this.root).getPropertyValue("--chapter-edge")) || 200);
     const panels = [...this.root.querySelectorAll<HTMLElement>(".pc-panel")];
@@ -252,7 +263,7 @@ export class ProfilePage {
             <canvas class="profile-particle-canvas" tabindex="0" role="img" aria-label="Interactive particles. In About, drag or use arrow keys to rotate the portrait; click or press Space to scatter and regroup."></canvas>
             <div class="profile-orb-labels" aria-hidden="true"></div>
           </div>
-          <figcaption><span class="profile-orb-index">01 / IDENTITY</span><p class="profile-orb-caption">A mark of my own.</p><small>Pick a panel · Move to interact</small></figcaption>
+          <figcaption><span class="profile-orb-index">01 / IDENTITY</span><p class="profile-orb-caption">A mark of my own.</p><small>Click a panel · Move to interact</small></figcaption>
           <dl class="pc-readouts">${readouts.map(([label, value]) => `<div><dt>${label}</dt><dd data-count="${value}">00</dd></div>`).join("")}</dl>
         </figure>
         ${panel("skills", 2, `${tools} tools`, `<div class="pc-content profile-skills">${p.skills.map((s, index) => `<div data-skill-group="${index}"><h3>${e(s.group)}</h3><p>${s.items.length ? s.items.map(e).join(" / ") : "—"}</p></div>`).join("")}</div>`)}
