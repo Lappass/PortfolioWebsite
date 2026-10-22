@@ -5,6 +5,7 @@
 - 陈澍航（Shuhang Chen / Lappas，GitHub `Lappass`）的游戏开发作品集网站，仓库 `Lappass/PortfolioWebsite`，`main` 为正式分支，计划部署在 Vercel。
 - 基于 `LBEILC/RhineLabUI`（MIT，版权归 LBEILC）二次开发。保留 `LICENSE`、`PR15-ATTRIBUTION.md`、`public/model-credits.html` 与 README 中的致谢。LBEILC 的 GitHub 和 `lubeiluchen.cc` 域名不属于本作者，不要当作本作者的链接或域名使用。
 - 不得引入《明日方舟》或其他 IP 的名称、标志、文案、音频或参考素材；借鉴主机开机等风格时只借用节奏与氛围。
+- 例外（2026-10-22 用户同意）：个人页「经历」时间线可以使用作者就读学校、任职公司及参与项目的官方标志（目前为 NYU、Yahaha Studios、鹰角网络与《明日方舟：终末地》），只用来标注该段经历；来源与改动见 `public/assets/experience-logos/README.md`。网站其他地方仍按上一条执行。
 
 ## 技术
 

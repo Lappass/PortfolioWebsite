@@ -9,7 +9,7 @@ export interface Profile {
   avatar: string;
   bio: string[];
   skills: { group: string; items: string[] }[];
-  experience: { time: string; title: string; detail: string }[];
+  experience: { time: string; title: string; detail: string; logo?: string | string[]; upcoming?: boolean }[];
   contact: { label: string; url: string }[];
   resume: string;
   boot: {

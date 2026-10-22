@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { logoTarget, particleEase } from './profile-particles';
 import { profile } from './profile';
 
-type Chapter = 'identity' | 'about' | 'skills' | 'experience';
+export type Chapter = 'identity' | 'about' | 'skills' | 'experience';
 const chapters: Chapter[] = ['identity', 'about', 'skills', 'experience'];
 const COUNT = 30000;
 const groups = profile.skills.map((skill, sourceIndex) => ({ ...skill, sourceIndex })).filter(skill => skill.items.length);
@@ -20,28 +20,45 @@ function skillCenter(i: number, count: number) {
   const a = -Math.PI / 2 + i * Math.PI * 2 / count;
   return { x: Math.cos(a) * .25, y: Math.sin(a) * .25 };
 }
+/** Rasterize an SVG once, fit inside a square, and keep opaque pixels as [u, v, r, g, b] with u, v in -.5 to .5. */
+async function sampleMark(path: string, resolution = 96) {
+  const image = new Image(); image.src = `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
+  await image.decode();
+  const r = resolution, w = image.naturalWidth || r, h = image.naturalHeight || r, scale = r / Math.max(w, h);
+  const canvas = Object.assign(document.createElement('canvas'), { width: r, height: r });
+  const context = canvas.getContext('2d', { willReadFrequently: true })!;
+  context.drawImage(image, (r - w * scale) / 2, (r - h * scale) / 2, w * scale, h * scale);
+  const pixels = context.getImageData(0, 0, r, r).data, points: number[][] = [];
+  for (let y = 1; y < r; y += 2) for (let x = 1; x < r; x += 2) {
+    const p = (y * r + x) * 4;
+    if (pixels[p + 3] >= 100) points.push([x / r - .5, y / r - .5, pixels[p] / 255, pixels[p + 1] / 255, pixels[p + 2] / 255]);
+  }
+  if (!points.length) throw new Error(`Empty mark: ${path}`);
+  return points;
+}
 let skillSamples: Promise<number[][][]> | undefined;
 // Rasterize once, then retain only point coordinates and colors on the GPU.
 const loadSkillMarks = () => skillSamples ??= Promise.all(skillMarks.map(async mark => {
-  const image = new Image(); image.src = `${import.meta.env.BASE_URL}assets/skill-logos/${skillIcons[mark.item]}.svg`;
-  await image.decode();
-  const canvas = Object.assign(document.createElement('canvas'), { width: 96, height: 96 });
-  const context = canvas.getContext('2d', { willReadFrequently: true })!;
-  context.drawImage(image, 0, 0, 96, 96);
-  const pixels = context.getImageData(0, 0, 96, 96).data, points: number[][] = [];
-  for (let y = 1; y < 96; y += 2) for (let x = 1; x < 96; x += 2) {
-    const p = (y * 96 + x) * 4;
-    if (pixels[p + 3] < 100) continue;
-    const monochrome = mark.item === 'Unity' || mark.item === 'UE';
-    points.push([mark.x + (x / 96 - .5) * .105, mark.y + (y / 96 - .5) * .105,
-      ...(monochrome ? [.93, .89, .82] : [pixels[p] / 255, pixels[p + 1] / 255, pixels[p + 2] / 255])]);
-  }
-  if (!points.length) throw new Error('Empty skill mark');
-  return points;
+  const monochrome = mark.item === 'Unity' || mark.item === 'UE';
+  return (await sampleMark(`assets/skill-logos/${skillIcons[mark.item]}.svg`)).map(([u, v, r, g, b]) =>
+    [mark.x + u * .105, mark.y + v * .105, ...(monochrome ? [.93, .89, .82] : [r, g, b])]);
 })).catch(error => { skillSamples = undefined; throw error; });
+// Each experience entry may name one logo or several shown side by side; a missing or broken file is left out,
+// and an entry left with none keeps the plain node.
+type Mark = { x: number; y: number; size: number; points: number[][] };
+let experienceSamples: Promise<Mark[][]> | undefined;
+const loadExperienceMarks = () => experienceSamples ??= Promise.all(profile.experience.map(async (entry, k) => {
+  const found = (await Promise.all([entry.logo ?? []].flat().map(path => sampleMark(path, 128).catch(() => null)))).filter(points => points !== null);
+  const size = found.length > 1 ? .14 : .15, gap = .025, center = pathCenter(k, profile.experience.length);
+  return found.map((points, j) => ({ x: center.x + (j - (found.length - 1) / 2) * (size + gap), y: center.y, size, points }));
+}));
 const fract = (n: number) => n - Math.floor(n);
 const noise = (i: number) => fract(Math.sin(i * 127.1 + 311.7) * 43758.5453);
-const pathCenter = (i: number, count: number) => ({ x: -.27 + .54 * i / Math.max(1, count - 1), y: .22 - .44 * i / Math.max(1, count - 1) });
+// The experience path runs from lower left to upper right; logos need the room, so it spans most of the ring.
+const PATH_X = .36, PATH_Y = .28;
+const pathCenter = (i: number, count: number) => ({ x: -PATH_X + 2 * PATH_X * i / Math.max(1, count - 1), y: PATH_Y - 2 * PATH_Y * i / Math.max(1, count - 1) });
+// Walks every sampled cell of a mark once before repeating (197 and 211 are prime, so one of them is coprime with the count).
+const spread = (n: number, count: number) => n * (count % 197 ? 197 : 211) % count;
 const rgb = (css: string) => css.startsWith('#') ? [1, 3, 5].map(i => parseInt(css.slice(i, i + 2), 16) / 255) : (css.match(/[\d.]+/g) ?? ['242', '236', '228']).slice(0, 3).map(n => Number(n) / 255);
 let portraitData: Promise<Float32Array> | undefined;
 const loadPortrait = () => portraitData ??= fetch(`${import.meta.env.BASE_URL}assets/portrait-particles.bin`).then(async response => {
@@ -92,7 +109,7 @@ const vertexShader = `
     if (uHoverGroup >= 0.0 && abs(aInfo.x-uHoverGroup)>.1) skillAlpha *= .3;
     float portraitAmount = uWeights.y*uPortraitMorph;
     vAlpha = .38*uWeights.x + mix(.16+(s.z+1.0)*.10,1.0,uPortraitMorph)*uWeights.y + skillAlpha*uWeights.z + aInfo.y*uWeights.w;
-    vec3 ink = mix(uInk,uAccent,aInfo.z);
+    vec3 ink = mix(uInk,uAccent,max(aInfo.z,aExperience.z*uWeights.w));
     ink = mix(ink, mix(uInk,aSkillColor,.45), uWeights.z*step(1.5,aSkill.w));
     vec3 normal = vec3(aPortraitNormal.x*cos(yaw)+aPortraitNormal.z*sin(yaw), aPortraitNormal.y, -aPortraitNormal.x*sin(yaw)+aPortraitNormal.z*cos(yaw));
     float light = max(0.0,dot(normal,normalize(vec3(-.4,.65,.8))));
@@ -171,14 +188,13 @@ export class ProfileOrb {
       this.figure.dataset.renderer = 'unavailable';
       this.figure.querySelector('.profile-orb-caption')!.textContent = 'Particle display unavailable.';
     }
-    root.addEventListener('scroll', this.read, { passive: true });
     root.addEventListener('pointermove', this.move, { passive: true }); root.addEventListener('pointerleave', this.leave);
     canvas.addEventListener('pointerdown', this.down); canvas.addEventListener('pointermove', this.rotate);
     canvas.addEventListener('pointerup', this.up); canvas.addEventListener('pointercancel', this.cancel);
     canvas.addEventListener('lostpointercapture', this.cancel); canvas.addEventListener('keydown', this.key);
     document.addEventListener('visibilitychange', this.visibility);
     this.observer = new ResizeObserver(this.resize); this.observer.observe(canvas);
-    this.read(); this.resize();
+    this.updateLabels(); this.resize();
     void loadSkillMarks().then(samples => {
       if (this.disposed) return;
       const skills = this.geometry.getAttribute('aSkill') as THREE.BufferAttribute;
@@ -193,6 +209,30 @@ export class ProfileOrb {
       skills.needsUpdate = colors.needsUpdate = info.needsUpdate = true;
       this.figure.dataset.skillMarks = 'ready'; if (this.reduced) this.draw(1, 0);
     }).catch(() => { if (!this.disposed) this.figure.dataset.skillMarks = 'unavailable'; });
+    void loadExperienceMarks().then(entries => {
+      if (this.disposed || !entries.some(marks => marks.length)) return;
+      const experience = this.geometry.getAttribute('aExperience') as THREE.BufferAttribute;
+      const info = this.geometry.getAttribute('aInfo') as THREE.BufferAttribute;
+      const events = Math.max(1, profile.experience.length);
+      // The connecting line stops at the edge of each entry's marks instead of running through them.
+      const boxes = entries.filter(marks => marks.length).map(marks => ({
+        x0: Math.min(...marks.map(m => m.x - m.size / 2)) - .015, x1: Math.max(...marks.map(m => m.x + m.size / 2)) + .015,
+        y0: marks[0].y - marks[0].size / 2 - .015, y1: marks[0].y + marks[0].size / 2 + .015 }));
+      const totals = entries.map(marks => marks.reduce((sum, mark) => sum + mark.points.length, 0));
+      for (let i = 0; i < COUNT; i++) {
+        const k = Math.floor(i / 5) % events, marks = entries[k];
+        // Three in five particles of an entry with logos draw them (the node's share plus two taken from the line),
+        // divided by each logo's sampled area so a detailed mark gets as many particles as it has cells.
+        if (i % 5 < 3 && marks.length) {
+          let n = (Math.floor(i / 5 / events) * 3 + i % 5) % totals[k], j = 0;
+          while (n >= marks[j].points.length) n -= marks[j++].points.length;
+          const mark = marks[j], point = mark.points[spread(n, mark.points.length)];
+          experience.setXYZ(i, mark.x + point[0] * mark.size, mark.y + point[1] * mark.size, profile.experience[k].upcoming ? 1 : 0); info.setY(i, .8);
+        } else if (boxes.some(b => experience.getX(i) > b.x0 && experience.getX(i) < b.x1 && experience.getY(i) > b.y0 && experience.getY(i) < b.y1)) info.setY(i, 0);
+      }
+      experience.needsUpdate = info.needsUpdate = true;
+      this.figure.dataset.experienceMarks = 'ready'; if (this.reduced) this.draw(1, 0);
+    });
     this.figure.dataset.portrait = 'loading';
     void loadPortrait().then(data => {
       if (this.disposed) return;
@@ -225,11 +265,13 @@ export class ProfileOrb {
       } else skills.set([center.x, center.y, .16, 1], i * 4);
       if (i % 5 === 0 || events === 1) {
         const center = pathCenter(Math.floor(i / 5) % events, events);
-        experience.set([center.x + x * .043, center.y + y * .043, z * .043], i * 3); info[i * 3 + 1] = .32;
+        // z of aExperience is the accent amount (upcoming entries), not depth.
+        experience.set([center.x + x * .043, center.y + y * .043, profile.experience[Math.floor(i / 5) % events]?.upcoming ? 1 : 0], i * 3); info[i * 3 + 1] = .32;
       } else {
-        const t = i / COUNT;
-        experience.set([-.27 + .54 * t + (noise(i) - .5) * .013, .22 - .44 * t + Math.sin(t * Math.PI * (events - 1)) * .018 + (noise(i + 8) - .5) * .013, 0], i * 3);
-        info[i * 3 + 1] = .12;
+        const t = i / COUNT, along = t * (events - 1), upcoming = profile.experience[Math.min(events - 1, Math.floor(along) + 1)]?.upcoming;
+        experience.set([-PATH_X + 2 * PATH_X * t + (noise(i) - .5) * .013, PATH_Y - 2 * PATH_Y * t + Math.sin(t * Math.PI * (events - 1)) * .018 + (noise(i + 8) - .5) * .013, 0], i * 3);
+        // The stretch leading to an upcoming entry is dashed.
+        info[i * 3 + 1] = upcoming && fract(along * 18) > .5 ? 0 : .12;
       }
       seed.set([noise(i + 32) - .5, noise(i + 91) - .5], i * 2);
       info[i * 3] = groups[group]?.sourceIndex ?? -1; info[i * 3 + 2] = i % 17 === 0 ? 1 : 0;
@@ -246,36 +288,33 @@ export class ProfileOrb {
     this.geometry.setAttribute('aPortraitNormal', new THREE.BufferAttribute(new Float32Array(COUNT * 3), 3));
   }
 
-  private read = () => {
-    const edge = this.root.getBoundingClientRect().top + (parseFloat(getComputedStyle(this.root).getPropertyValue('--chapter-edge')) || 200);
-    const sections = [...this.root.querySelectorAll<HTMLElement>('[data-section]')];
-    const next = (sections.filter(el => el.getBoundingClientRect().top <= edge).at(-1) ?? sections[0])?.dataset.section as Chapter;
-    if (!chapters.includes(next)) return;
-    if (next !== this.chapter || !this.labels.dataset.chapter) {
-      this.chapter = next; if (next === 'about') this.aboutStart = this.elapsed;
-      this.burst = 0; this.drag = null; this.updateLabels();
-    }
+  /** Morph toward the panel the page has selected. */
+  select(next: Chapter) {
+    if (next === this.chapter) return;
+    this.chapter = next; if (next === 'about') this.aboutStart = this.elapsed;
+    this.burst = 0; this.drag = null; this.updateLabels();
     if (this.reduced) this.draw(1, 0);
-  };
+  }
   private updateLabels() {
     const index = chapters.indexOf(this.chapter); this.figure.dataset.shape = this.chapter;
     this.labels.dataset.chapter = this.chapter;
     this.figure.querySelector('.profile-orb-index')!.textContent = `0${index + 1} / ${this.chapter.toUpperCase()}`;
     this.figure.querySelector('.profile-orb-caption')!.textContent = this.chapter === 'about' && this.figure.dataset.portrait === 'error' ? 'Portrait unavailable. Explore the particle sphere.' : captions[index];
-    this.figure.querySelector('figcaption small')!.textContent = this.chapter === 'about' ? 'Drag to rotate · Click to scatter · Move to interact' : 'Scroll to explore · Move to interact';
+    this.figure.querySelector('figcaption small')!.textContent = this.chapter === 'about' ? 'Drag to rotate · Click to scatter · Move to interact' : 'Pick a panel · Move to interact';
     this.labels.replaceChildren();
     const names = this.chapter === 'skills' ? groups.map(s => s.group) : this.chapter === 'experience' ? profile.experience.map(s => s.time) : [];
     names.forEach((name, i) => {
       const node = document.createElement('span'); node.textContent = name;
       const center = this.chapter === 'skills' ? skillCenter(i, names.length) : pathCenter(i, names.length);
-      node.dataset.node = String(i); node.dataset.x = String(center.x); node.dataset.y = String(center.y); this.labels.append(node);
+      node.dataset.node = String(i); node.dataset.x = String(center.x); node.dataset.y = String(center.y);
+      node.classList.toggle('upcoming', this.chapter === 'experience' && Boolean(profile.experience[i]?.upcoming)); this.labels.append(node);
     });
     this.layoutLabels();
   }
   private layoutLabels() {
     for (const node of this.labels.children as HTMLCollectionOf<HTMLElement>) {
       node.style.left = `${this.width / 2 + Number(node.dataset.x) * this.size}px`;
-      node.style.top = `${this.height / 2 + Number(node.dataset.y) * this.size + this.size * (this.chapter === 'skills' ? .19 : .06)}px`;
+      node.style.top = `${this.height / 2 + Number(node.dataset.y) * this.size + this.size * (this.chapter === 'skills' ? .19 : .1)}px`;
       node.classList.toggle('active', this.chapter === 'skills' && groups[Number(node.dataset.node)]?.sourceIndex === this.hoveredGroup);
     }
   }
@@ -326,7 +365,7 @@ export class ProfileOrb {
     u.uInk.value.fromArray(rgb(style.color)); u.uAccent.value.fromArray(rgb(style.getPropertyValue('--pp-accent').trim() || '#e0b878'));
     u.uPointSize.value = Math.max(1.8, this.size / 620 * 2.5) * dpr;
     u.uPointerRadius.value = Math.min(.13, 65 / this.size);
-    this.layoutLabels(); cancelAnimationFrame(this.frame); this.previous = 0; this.read(); this.draw(this.reduced ? 1 : 0, 0);
+    this.layoutLabels(); cancelAnimationFrame(this.frame); this.previous = 0; this.draw(this.reduced ? 1 : 0, 0);
     if (!this.reduced && !document.hidden && this.renderer) this.frame = requestAnimationFrame(this.tick);
   };
   private tick = (now: number) => {
@@ -354,7 +393,7 @@ export class ProfileOrb {
   }
   dispose() {
     this.disposed = true; cancelAnimationFrame(this.frame); this.observer.disconnect();
-    this.root.removeEventListener('scroll', this.read); this.root.removeEventListener('pointermove', this.move); this.root.removeEventListener('pointerleave', this.leave);
+    this.root.removeEventListener('pointermove', this.move); this.root.removeEventListener('pointerleave', this.leave);
     this.canvas.removeEventListener('pointerdown', this.down); this.canvas.removeEventListener('pointermove', this.rotate);
     this.canvas.removeEventListener('pointerup', this.up); this.canvas.removeEventListener('pointercancel', this.cancel);
     this.canvas.removeEventListener('lostpointercapture', this.cancel); this.canvas.removeEventListener('keydown', this.key);

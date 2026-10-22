@@ -1,5 +1,5 @@
 #stage[data-workspace="true"] > :not(#three-scene):not(#modal-root):not(#toast) { opacity: 0 !important; pointer-events: none !important; transition: opacity 250ms; }
-.profile-page { --chapter-edge: 200px; background: var(--pp-paper); transform: none; }
+.profile-page { --chapter-edge: 200px; --pc-gap: clamp(36px,4vw,72px); background: var(--pp-paper); transform: none; }
 .profile-page.visible { transition: opacity 280ms; }
 .profile-page.from-screen.visible { transition: opacity 180ms, clip-path 480ms cubic-bezier(.2,.75,.2,1); }
 .profile-entry-field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
@@ -8,56 +8,119 @@
 .profile-page.entering .profile-model-credit { opacity: 0; }
 .profile-model-credit { padding: 24px var(--pp-edge); font-size: 10px; letter-spacing: .1em; color: var(--pp-muted); }
 .profile-model-credit a { color: inherit; }
-.profile-page.entering :is(.pp-bar,.pp-chapters,.profile-introduction > :not(h1),.profile-orb-study,.profile-signature,.pp-section) { opacity: var(--profile-reveal,0); pointer-events: none; }
+.profile-page.entering :is(.pp-bar,.pp-chapters,.pc-status,.profile-orb-study figcaption,.pc-readouts,.pc-ring) { opacity: var(--profile-reveal,0); pointer-events: none; }
+/* Panels power on one after another as the entry settles. */
+.profile-page.entering .pc-panel { opacity: clamp(0, calc(var(--profile-reveal,0) * 2.4 - var(--i) * .45), 1); transform: translateY(calc((1 - clamp(0, calc(var(--profile-reveal,0) * 2.4 - var(--i) * .45), 1)) * 10px)); pointer-events: none; }
 .profile-page.entering #profile-title { opacity: var(--profile-heading,0); }
 .profile-page.instant,.profile-page.instant.visible { transition: none; transform: none; }
-.profile-page .profile-layout { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: clamp(32px,5vw,80px); max-width: 1440px; align-items: start; }
-.profile-reading { min-width: 0; }
-.profile-page .profile-hero { display: block; min-height: calc(100svh - 180px); padding: 60px 0 40px; box-sizing: border-box; align-content: center; }
-.profile-page .profile-hero h1 { font-size: clamp(48px,6.6vw,96px); font-weight: 600; letter-spacing: -.045em; margin: 32px 0 18px; }
-.profile-introduction .pp-kicker { font-size: 14px; letter-spacing: 0; }
-.profile-introduction .pp-abstract { max-width: 460px; font-size: 18px; line-height: 1.9; }
-.profile-orb-study { position: sticky; top: 160px; margin: 0; padding: 30px 0; align-self: start; min-height: 0 !important; }
-.profile-orb-stage { position: relative; height: clamp(280px,calc(100svh - 330px),580px); }
-.profile-particle-canvas { display: block; width: 100%; height: 100%; color: var(--pp-ink); }
-.profile-particle-canvas { position: relative; touch-action: pan-y; }
+.profile-page .pp-count { justify-self: end; font-size: 11px; letter-spacing: .14em; }
+.pp-chapters button[aria-current] { border-color: var(--pp-accent); color: var(--pp-accent); }
+
+/* Console: four panels around the particle orb, each wired to its arc of the ring. */
+.profile-console { display: grid; grid-template-columns: minmax(0,1fr) minmax(340px,1.05fr) minmax(0,1fr); grid-template-areas: "intro orb skills" "about orb experience"; grid-template-rows: auto 1fr; gap: 28px var(--pc-gap); max-width: 1480px; padding-top: clamp(24px,3.5vh,44px); padding-bottom: 24px; align-items: start; }
+.pc-panel[data-section="identity"] { grid-area: intro; }
+.pc-panel[data-section="about"] { grid-area: about; }
+.pc-panel[data-section="skills"] { grid-area: skills; }
+.pc-panel[data-section="experience"] { grid-area: experience; }
+.profile-orb-study { grid-area: orb; align-self: stretch; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 0 !important; }
+/* Chamfered frame: ::before is the 1px border, ::after the fill; the cut sits on the outer top corner, away from the orb. */
+.pc-panel { --cut: 16px; --frame: var(--pp-line); position: relative; isolation: isolate; min-width: 0; padding: 18px 22px 22px; }
+.pc-panel > * { position: relative; z-index: 1; }
+.pc-panel::before, .pc-panel::after { content: ''; position: absolute; z-index: 0; pointer-events: none; }
+.pc-panel::before { inset: 0; background: linear-gradient(var(--pp-accent), var(--pp-accent)) left top / 0% 2px no-repeat, var(--frame); clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut)); transition: background-size 380ms cubic-bezier(.2,.8,.2,1), background-color 240ms; }
+.pc-panel::after { inset: 1px; background: color-mix(in srgb, var(--pp-panel) 55%, var(--pp-paper)); clip-path: polygon(calc(var(--cut) - .4px) 0, 100% 0, 100% 100%, 0 100%, 0 calc(var(--cut) - .4px)); transition: background-color 240ms, top 240ms; }
+.pc-panel[data-side="right"]::before { background-position: right top, 0 0; clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+.pc-panel[data-side="right"]::after { clip-path: polygon(0 0, calc(100% - var(--cut) + .4px) 0, 100% calc(var(--cut) - .4px), 100% 100%, 0 100%); }
+.pc-panel.active { --frame: color-mix(in srgb, var(--pp-accent) 45%, var(--pp-line)); }
+.pc-panel.active::before { background-size: 100% 2px, auto; }
+.pc-panel.active::after { top: 2px; background: var(--pp-panel); }
+/* Leader line from the panel's inner edge toward the orb. */
+.pc-lead { position: absolute !important; top: 31px; width: var(--pc-gap); border-top: 1px dashed var(--pp-line); transition: border-color 240ms; }
+.pc-panel[data-side="left"] .pc-lead { left: 100%; }
+.pc-panel[data-side="right"] .pc-lead { right: 100%; }
+.pc-panel.active .pc-lead { border-top-style: solid; border-color: var(--pp-accent); }
+.pc-panel:focus { outline: none; }
+.pc-head { display: flex; align-items: baseline; gap: 12px; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid var(--pp-line); }
+.pc-head h2 { margin: 0; font-size: 11px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; }
+/* Status light: dim when idle, lit and slowly breathing on the selected panel. */
+.pc-light { flex: none; align-self: center; width: 6px; height: 6px; border-radius: 50%; background: var(--pp-line); transition: background-color 240ms, box-shadow 240ms; }
+.pc-panel.active .pc-light, .pc-status .pc-light { background: var(--pp-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pp-accent) 18%, transparent); animation: pc-breathe 2.4s ease-in-out infinite; }
+@keyframes pc-breathe { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--pp-accent) 6%, transparent); } }
+.pc-index { font-size: 11px; color: var(--pp-muted); font-variant-numeric: tabular-nums; transition: color 240ms; }
+.pc-panel.active .pc-index { color: var(--pp-accent); }
+.pc-meta { margin-left: auto; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--pp-muted); white-space: nowrap; }
+.profile-console #profile-title { margin: 0 0 14px; font-size: clamp(34px,3.4vw,54px); line-height: 1.05; font-weight: 600; letter-spacing: -.035em; outline: none; }
+.profile-console .pp-abstract { margin: 0; font-size: 15px; line-height: 1.8; color: var(--pp-muted); }
+.profile-console .pp-links { margin-top: 20px; }
+.profile-bio p { margin: 0 0 12px; font-size: 15px; line-height: 1.85; }
+.profile-bio p:last-child { margin-bottom: 0; }
+.profile-skills { display: grid; gap: 0; }
+.profile-skills > div { display: grid; grid-template-columns: 96px minmax(0,1fr); gap: 16px; padding: 11px 0; border-top: 1px solid var(--pp-line); }
+.profile-skills > div:first-child { border-top: 0; padding-top: 0; }
+.profile-skills h3 { margin: 0; font-size: 12px; font-weight: 500; letter-spacing: .06em; color: var(--pp-muted); transition: color 220ms; }
+.profile-skills > div:hover h3 { color: var(--pp-accent); }
+.profile-skills p { margin: 0; font-size: 15px; line-height: 1.5; }
+.profile-timeline { list-style: none; margin: 0; padding: 0 0 0 18px; border-left: 1px solid var(--pp-line); }
+.profile-timeline li { position: relative; display: grid; grid-template-columns: 88px minmax(0,1fr); gap: 14px; padding: 0 0 18px; }
+.profile-timeline li:last-child { padding-bottom: 0; }
+.profile-timeline li::before { content: ''; position: absolute; left: -22px; top: 5px; width: 7px; height: 7px; background: var(--pp-paper); border: 1px solid var(--pp-accent); }
+.profile-timeline li.upcoming::before { border-style: dashed; }
+.profile-timeline li.upcoming strong { color: var(--pp-accent); }
+.profile-timeline span { font-size: 11px; color: var(--pp-accent); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.profile-timeline strong { font-size: 15px; font-weight: 500; }
+.profile-timeline p { margin: 4px 0 0; font-size: 13px; line-height: 1.7; color: var(--pp-muted); }
+
+.profile-orb-stage { position: relative; width: 100%; max-width: min(100%, calc(100svh - 360px)); min-width: 300px; aspect-ratio: 1; }
+.pc-ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.pc-ring line, .pc-ring-track { stroke: var(--pp-line); stroke-width: .4; fill: none; vector-effect: non-scaling-stroke; }
+.pc-ring line.major { stroke: var(--pp-muted); opacity: .55; }
+.pc-ring path { fill: none; stroke: var(--pp-line); stroke-width: 2; vector-effect: non-scaling-stroke; transition: stroke 300ms; }
+.pc-ring path.active { stroke: var(--pp-accent); }
+.pc-needle { transition: transform 620ms cubic-bezier(.3,1.25,.4,1); }
+.pc-needle path { fill: var(--pp-accent); stroke: none; }
+.pc-needle line { stroke: var(--pp-accent); stroke-width: 1; opacity: .5; vector-effect: non-scaling-stroke; }
+.profile-particle-canvas { position: absolute; inset: 7%; display: block; width: 86%; height: 86%; color: var(--pp-ink); touch-action: pan-y; }
 .profile-orb-study[data-shape="about"] .profile-particle-canvas { cursor: grab; }
 .profile-orb-study[data-shape="about"] .profile-particle-canvas:active { cursor: grabbing; }
-.profile-particle-canvas:focus-visible { outline: 1px solid var(--pp-accent); outline-offset: 4px; }
-.profile-orb-labels { position: absolute; inset: 0; pointer-events: none; }
+.profile-particle-canvas:focus-visible { outline: 1px solid var(--pp-accent); outline-offset: 4px; border-radius: 50%; }
+.profile-orb-labels { position: absolute; inset: 7%; pointer-events: none; }
 .profile-orb-labels span { position: absolute; transform: translateX(-50%); white-space: nowrap; font-size: 11px; color: var(--pp-muted); transition: color 220ms; }
-.profile-orb-labels span.active { color: var(--pp-accent); }
-.profile-orb-study figcaption { text-align: center; }
+.profile-orb-labels span:is(.active,.upcoming) { color: var(--pp-accent); }
+.profile-orb-study figcaption { text-align: center; margin-top: 10px; }
 .profile-orb-index { font-size: 9px; letter-spacing: .18em; color: var(--pp-accent); }
-.profile-orb-caption { font-size: 15px; margin: 12px 0 18px; color: var(--pp-ink); }
+.profile-orb-caption { font-size: 15px; margin: 8px 0 8px; color: var(--pp-ink); }
 .profile-orb-study figcaption small { font-size: 10px; letter-spacing: .03em; color: var(--pp-muted); }
-.profile-signature { margin-top: 48px; font-size: 10px; letter-spacing: .12em; color: var(--pp-muted); }
-.profile-page .pp-section { display: block; min-height: calc(100svh - 180px); box-sizing: border-box; padding: 64px 0; border-top: 1px solid var(--pp-line); }
-.profile-page .pp-section .pp-label { margin-bottom: 36px; }
-.profile-page .profile-bio p { font-size: clamp(18px,2vw,25px); line-height: 1.85; margin-bottom: 28px; }
-.profile-page .profile-skills { display: block; }
-.profile-page .profile-skills > div { display: flex; padding: 22px 0; }
-.profile-skills h3 { margin: 0 0 12px; font-size: 22px; font-weight: 500; transition: color 220ms; }
-.profile-skills > div:hover h3 { color: var(--pp-accent); }
-.profile-skills p { margin: 0; font-size: 14px; line-height: 1.8; color: var(--pp-muted); }
-.profile-page .pp-highlights ol { border-left: 1px solid var(--pp-line); padding-left: 28px; }
-.profile-page .pp-highlights li { position: relative; border: none; padding: 0 0 40px; }
-.profile-page .pp-highlights li::before { content: ''; position: absolute; left: -32px; top: 6px; width: 7px; height: 7px; background: var(--pp-accent); }
-@media(max-width:760px) {
- .profile-page { --chapter-edge: 370px; }
- .profile-page .profile-layout { display: flex; flex-direction: column; gap: 0; }
- .profile-orb-study { order: -1; width: 100%; top: 132px; padding: 8px 0 14px; background: var(--pp-paper); z-index: 1; }
- .profile-orb-stage { height: 190px; }
- .profile-orb-study figcaption { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 24px; }
- .profile-orb-caption { font-size: 11px; margin: 0; }
- .profile-orb-study figcaption small { display: none; }
- .profile-orb-labels span { font-size: 9px; }
- .profile-reading { width: 100%; }
- .profile-page .profile-hero { padding: 32px 0; min-height: calc(100svh - 350px); }
- .profile-page .profile-hero h1 { font-size: clamp(44px,12vw,72px); margin-top: 24px; }
- .profile-introduction .pp-abstract { font-size: 16px; }
- .profile-page .pp-section { padding: 36px 0; min-height: calc(100svh - 350px); }
- .profile-page [data-section] { scroll-margin-top: 370px; }
- .profile-signature { margin-top: 28px; }
+.pc-readouts { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); width: 100%; max-width: 440px; margin: 22px 0 0; border-top: 1px solid var(--pp-line); border-bottom: 1px solid var(--pp-line); }
+.pc-readouts div { padding: 10px 0 12px; text-align: center; }
+.pc-readouts div + div { border-left: 1px solid var(--pp-line); }
+.pc-readouts dt { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--pp-muted); }
+.pc-readouts dd { margin: 4px 0 0; font-size: 26px; font-weight: 300; font-variant-numeric: tabular-nums; }
+
+.pc-status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; max-width: 1480px; padding-top: 14px; padding-bottom: 14px; border-top: 1px solid var(--pp-line); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--pp-muted); }
+.pc-status span { display: inline-flex; align-items: center; gap: 8px; }
+.pc-status b { font-weight: 400; color: var(--pp-ink); font-variant-numeric: tabular-nums; }
+.pc-status span:last-child { margin-left: auto; }
+
+@media(max-width:1180px) {
+ .profile-console { grid-template-columns: minmax(0,1fr) minmax(300px,.9fr) minmax(0,1fr); }
+ .pc-head { flex-wrap: wrap; }
+ .pc-meta { display: none; }
+ .profile-skills > div { grid-template-columns: 1fr; gap: 4px; }
 }
-@media(prefers-reduced-motion:reduce) { .profile-page,.profile-page.visible { transition: none; transform: none; } }
+@media(max-width:980px) {
+ .profile-page { --chapter-edge: 390px; }
+ .profile-console { display: flex; flex-direction: column; gap: 16px; padding-top: 0; }
+ .profile-orb-study { order: -1; position: sticky; top: 132px; z-index: 1; width: calc(100% + 2 * var(--pp-edge)); margin: 0 calc(-1 * var(--pp-edge)); padding: 8px var(--pp-edge) 12px; box-sizing: border-box; background: var(--pp-paper); border-bottom: 1px solid var(--pp-line); }
+ .profile-orb-stage { width: 190px; min-width: 0; }
+ .profile-orb-study figcaption { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 24px; margin-top: 4px; }
+ .profile-orb-caption { font-size: 11px; margin: 0; }
+ .profile-orb-study figcaption small, .pc-readouts { display: none; }
+ .profile-orb-labels span { font-size: 9px; }
+ .pc-panel { width: 100%; box-sizing: border-box; min-height: calc(100svh - 420px); }
+ .profile-page .pc-panel { scroll-margin-top: 380px; }
+ .pc-panel:last-of-type { min-height: calc(100svh - 400px); }
+ .pc-lead { display: none; }
+ .pc-status span:nth-child(3), .pc-status span:nth-child(4) { display: none; }
+ .pc-meta { display: inline; }
+}
+@media(prefers-reduced-motion:reduce) { .profile-page,.profile-page.visible { transition: none; transform: none; } .pc-panel::before, .pc-needle { transition: none; } .pc-light { animation: none !important; } }

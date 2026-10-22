@@ -235,19 +235,6 @@
 @media (prefers-reduced-motion: reduce) {
   .pp-hub-art img, .project-page.intro * { animation: none !important; }
 }
-/* Player profile */
-.profile-hero { display: grid; grid-template-columns: minmax(140px, 190px) minmax(0, 1fr); gap: clamp(32px, 6vw, 96px); align-items: center; padding: clamp(36px, 6vw, 88px) 0; }
-.profile-avatar { aspect-ratio: 1; overflow: hidden; border: 1px solid var(--pp-line); background: var(--pp-panel); display: grid; place-items: center; }
-.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.profile-avatar span { font-size: clamp(56px, 7vw, 88px); font-weight: 500; color: var(--pp-ink); }
-.profile-hero h1 { margin: 14px 0 6px; font-size: clamp(38px, 5vw, 72px); line-height: 1.05; font-weight: 700; outline: none; }
-.profile-hero h1:focus-visible { outline: none; }
-.profile-hero .pp-abstract { margin-top: 18px; max-width: 640px; }
-.profile-bio p { margin: 0 0 14px; font-size: 16px; line-height: 1.85; }
-.profile-skills { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 24px; }
-.profile-skills .pp-tags { margin-top: 0; }
-.profile-page .pp-highlights li > div { flex: 1; }
-@media (max-width: 860px) { .profile-hero { grid-template-columns: 1fr; justify-items: start; } .profile-avatar { width: 140px; } }
 /* Grown out of the monitor screen after a disc is read. */
 
 /* Key art lifting off the monitor (ProjectPage.liftFromScreen). */
@@ -264,12 +251,6 @@
 .project-page [data-section] { scroll-margin-top: 152px; }
 .project-page [data-section]:focus { outline: none; }
 .pp-section-number { display: inline-grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--pp-line); margin-right: 14px; font-variant-numeric: tabular-nums; color: var(--pp-ink); }
-.profile-id { display: grid; gap: 8px; margin-top: 18px; font-size: 10px; color: var(--pp-muted); letter-spacing: .12em; }
-.profile-id strong { font-size: 19px; font-weight: 500; color: var(--pp-ink); }
-.profile-identity .pp-label { margin-bottom: 16px; }
-.profile-skills > div { border-top: 1px solid var(--pp-line); padding-top: 18px; }
-.profile-page .pp-count { justify-self: end; }
-.profile-page .pp-body > :last-child { min-height: calc(100svh - 152px); box-sizing: border-box; }
 .pp-field-index { position: absolute; top: 28px; left: var(--pp-edge); right: var(--pp-edge); z-index: 1; display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .16em; color: #f1f3f0; }
 .pp-media-caption { display: flex; gap: 18px; padding-top: 12px; font-size: 11px; color: var(--pp-muted); letter-spacing: .06em; }
 .pp-media-caption span { color: var(--pp-accent); }
@@ -291,16 +272,8 @@
   .pp-chapters button { flex: 1; justify-content: center; gap: 6px; }
   .pp-gallery figure { grid-template-columns: 1fr; gap: 12px; }
   .pp-gallery figcaption::before { display: none; }
-  .profile-hero { grid-template-columns: 140px minmax(0, 1fr); }
-  .profile-hero h1 { font-size: clamp(30px, 5vw, 48px); }
 }
 @media (max-width: 540px) {
-  .profile-hero { grid-template-columns: 1fr; gap: 28px; }
-  .profile-identity { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px 20px; align-items: center; width: 100%; }
-  .profile-identity .pp-label { grid-column: 1 / -1; margin: 0; }
-  .profile-identity .profile-avatar { width: 100px; }
-  .profile-id { margin: 0; }
-  .profile-avatar span { font-size: 52px; }
   .pp-chapters { gap: 8px; }
   .pp-chapters button { font-size: 11px; }
   .pp-field-index { font-size: 9px; }

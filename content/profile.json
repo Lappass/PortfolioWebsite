@@ -15,9 +15,10 @@
     { "group": "Tools", "items": [] }
   ],
   "experience": [
-    { "time": "TBD", "title": "School / Major", "detail": "Placeholder: education." },
-    { "time": "TBD", "title": "Internship or project experience", "detail": "Placeholder: what you built and what you owned." },
-    { "time": "TBD", "title": "Game Jam / Competition", "detail": "Placeholder: entries and results." }
+    { "time": "2023", "title": "New York University", "detail": "", "logo": "assets/experience-logos/nyu.svg" },
+    { "time": "2024–2025", "title": "Yahaha Studios", "detail": "", "logo": "assets/experience-logos/yahaha.svg" },
+    { "time": "Summer 2026", "title": "Hypergryph", "detail": "", "logo": ["assets/experience-logos/hypergryph.svg", "assets/experience-logos/endfield.svg"] },
+    { "time": "Future", "title": "What's next?", "detail": "", "logo": "assets/experience-logos/next.svg", "upcoming": true }
   ],
   "contact": [
     { "label": "GitHub", "url": "https://github.com/Lappass" },
