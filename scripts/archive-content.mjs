@@ -27,7 +27,7 @@ const isMediaPath = (value) =>
 function validateMedia(record, label, errors) {
   if (record.tags !== undefined && (!Array.isArray(record.tags) || !record.tags.every(isText)))
     errors.push(`${label}.tags：必须是非空文本数组`);
-  for (const key of ["cover", "spine", "disc", "back", "hero", "video", "unity"])
+  for (const key of ["cover", "spine", "disc", "back", "hero", "video", "unity", "trailer"])
     if (record[key] !== undefined && !isMediaPath(record[key]))
       errors.push(`${label}.${key}：必须是 public 目录内的路径或 HTTP(S) 链接`);
   if (record.loader !== undefined && !isText(record.loader))
@@ -38,6 +38,17 @@ function validateMedia(record, label, errors) {
   if (record.links !== undefined && (!Array.isArray(record.links) ||
     !record.links.every((item) => item && isText(item.label) && isWebUrl(item.url))))
     errors.push(`${label}.links：每项需要 label 和 HTTP(S) url`);
+  if (record.menu !== undefined && !["lastmile", "trail", "lockdown"].includes(record.menu))
+    errors.push(`${label}.menu：只能是 lastmile、trail 或 lockdown`);
+  const run = record.playthrough;
+  if (run !== undefined && (!run || !isMediaPath(run.src) || (run.chapters !== undefined && (!Array.isArray(run.chapters) ||
+    !run.chapters.every((c) => c && /^\d+:\d{2}(:\d{2})?$/.test(c.at) && isText(c.label))))))
+    errors.push(`${label}.playthrough：需要有效的 src，chapters 每项为 { at: "m:ss", label }`);
+  const build = record.download;
+  if (build !== undefined && (!build || !isMediaPath(build.url) || (build.label !== undefined && !isText(build.label)) || (build.size !== undefined && !isText(build.size))))
+    errors.push(`${label}.download：需要 url，label 和 size 为可选文本`);
+  if (record.soon !== undefined && (!Array.isArray(record.soon) || !record.soon.every((key) => ["play", "trailer", "playthrough", "download"].includes(key))))
+    errors.push(`${label}.soon：只能包含 play、trailer、playthrough、download`);
 }
 
 export function validateContent(content) {

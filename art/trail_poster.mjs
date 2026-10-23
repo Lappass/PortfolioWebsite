@@ -179,16 +179,23 @@ function cover() {
   return { svg: s, W, H };
 }
 
-function hero() {
+function hero(bare = false) {
   const W = 1920, H = 1080;
   seed = 20261006;
   let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${defs}`;
   s += `<rect width="${W}" height="${H}" fill="url(#sky)"/>`;
   s += bird(1560, 330, 1.1) + bird(1630, 295, 0.8) + bird(1490, 370, 0.6);
-  // No billing: the project page sets the title over the dark lower left.
-  s += range(W, 1280, 1300, 420, { bands: [740, 810, 880, 950, 1020], wide: 1.9 });
+  // No billing: the project page sets the title over the dark lower left. `bare` leaves out
+  // the trail and the hiker for the title menu, which draws its own (src/title-menus.ts).
+  s += range(W, 1280, 1300, 420, { bands: [740, 810, 880, 950, 1020], wide: 1.9, ...(bare ? { figure: false, trail: false } : {}) });
   s += grain(W, H) + `</svg>`;
   return { svg: s, W, H };
+}
+
+/** The title for the menu, white on transparent so the page can tint it by the time of day. */
+function menuTitle() {
+  const W = 760, H = 120;
+  return { svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${text(4, 86, 80, "Trail Adventure", 'font-weight="700"', "#ffffff", HAND)}</svg>`, W, H };
 }
 
 /** Spine strip, 148×1700: summit and climber at the head, title running down, engine and year at the foot. */
@@ -317,3 +324,9 @@ for (const [name, make, size] of [["cover", cover, 1350], ["hero", hero, 1920], 
   console.log("wrote", name);
 }
 
+
+// Title menu art (src/title-menus.ts): the key art without trail or hiker, and the title.
+mkdirSync(resolve(OUT, "menu"), { recursive: true });
+await sharp(Buffer.from(hero(true).svg)).jpeg({ quality: 88, mozjpeg: true }).toFile(resolve(OUT, "menu/bg.jpg"));
+await sharp(Buffer.from(menuTitle().svg)).png().toFile(resolve(OUT, "menu/title.png"));
+console.log("wrote menu");

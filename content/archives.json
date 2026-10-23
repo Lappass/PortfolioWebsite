@@ -111,6 +111,12 @@
           "src": "works/x-002/news.jpg",
           "caption": "Daily news"
         }
+      ],
+      "menu": "lockdown",
+      "soon": [
+        "play",
+        "playthrough",
+        "download"
       ]
     },
     {
@@ -157,6 +163,13 @@
           "src": "works/x-003/postcards.jpg",
           "caption": "Photos and postcards brought home"
         }
+      ],
+      "menu": "trail",
+      "soon": [
+        "play",
+        "trailer",
+        "playthrough",
+        "download"
       ]
     },
     {
@@ -203,6 +216,13 @@
           "src": "works/x-004/briefing.jpg",
           "caption": "Day one briefing"
         }
+      ],
+      "menu": "lastmile",
+      "soon": [
+        "play",
+        "trailer",
+        "playthrough",
+        "download"
       ]
     },
     {

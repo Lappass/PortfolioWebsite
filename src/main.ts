@@ -311,6 +311,7 @@ const projectPage = new ProjectPage({
     openProjectAt(projectOrder[wrap(position + direction, projectOrder.length)], { instant: true, push: false });
     audio.play("tick");
   },
+  sound: (name) => audio.play(name),
 });
 window.addEventListener("popstate", () => {
   if (!started || !ready) return;
@@ -957,7 +958,9 @@ attachPadInput({
   confirm() {
     lastInput = performance.now();
     if (!started || $("#stage").dataset.intro || mode === "boot") padKey("Enter");
-    else if (projectPage.isOpen || profilePage.isOpen || modal) return;
+    // A game's title menu takes A as Enter.
+    else if (projectPage.isOpen) padKey("Enter");
+    else if (profilePage.isOpen || modal) return;
     else if (mode === "archive") openFile();
     else if (mode === "detail") void insertDiscAndOpen();
   },
@@ -974,7 +977,8 @@ attachPadInput({
 document.addEventListener("keydown", (e) => {
   if (!started) return;
   if (projectPage.isOpen) {
-    if (e.key === "Escape") { e.preventDefault(); closeProjectPage(); }
+    if (projectPage.handleKey(e)) e.preventDefault();
+    else if (e.key === "Escape") { e.preventDefault(); closeProjectPage(); }
     return;
   }
   if (profilePage.isOpen) {
@@ -1241,7 +1245,7 @@ async function start() {
     if (scene) bindScene(scene);
     savePrefs();
     ready = true;
-    select(0);
+    select(featuredFiles[0]);
     if (entry) entry.ready();
     else {
       if (isWallpaper) {

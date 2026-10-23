@@ -12,6 +12,7 @@
 - TypeScript、Three.js、Vite，不使用前端框架。只维护网页版本。
 - 模型通过 Blender 脚本生成并保留源文件：`art/game_case.py`、`art/console_setup.py`（导出后运行 `npm run compress:console`）。
 - 内容：作品 `content/archives.json`（写法见 `content/README.md`），个人信息与开场文字 `content/profile.json`。修改后运行 `npm run check:content`。
+- 设了 `menu` 的游戏（Last Mile、Trail Adventure、LOCKDOWN），详情页是这款游戏自己的主菜单（`src/title-menus.ts`），其余作品仍用通用详情页。菜单素材由对应的 `art/*_poster.mjs` 一并输出到 `public/works/<编号>/menu/`。
 - 声音为程序合成的原创配乐与音效，见 `public/audio/README.md`。
 - 视觉与交互规范见 `DESIGN.md`。
 

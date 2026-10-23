@@ -29,8 +29,15 @@
 | `video`   | `.mp4` / `.webm` 文件路径，或 B 站、YouTube 等嵌入播放器的 HTTPS 地址      |
 | `unity`   | Unity WebGL 构建的 `index.html` 路径，例如 `works/x-005/unity/index.html`；页面先显示封面，点击后才加载 |
 | `links`   | 链接数组，每项 `{ "label": "GitHub", "url": "https://..." }`               |
+| `menu`    | 游戏主菜单主题：`lastmile`、`trail` 或 `lockdown`。设置后详情页整屏换成该游戏自己的主菜单，素材在 `public/works/<编号>/menu/`（由 `art/` 下的海报脚本生成） |
+| `trailer` | 预告片，写法同 `video`；缺省时用 `video` |
+| `playthrough` | 完整流程视频 `{ "src": "...", "chapters": [{ "at": "3:20", "label": "第二天" }] }`，章节可省略 |
+| `download` | 下载 `{ "url": "https://...", "label": "可选说明", "size": "可选大小" }` |
+| `soon`    | 已预告但还没有内容的菜单项，可含 `play`、`trailer`、`playthrough`、`download`；菜单里显示 COMING SOON |
 
 封面区按 Unity、视频、封面图的顺序选择第一个可用项；有 Unity 时视频单独显示在下方。
+
+有 `menu` 的作品不用这套版式：主菜单列出在线试玩（`unity`）、预告片、完整流程、下载、简介和截图（`gallery`），没有内容也不在 `soon` 里的项不显示。
 
 上表之前的字段均必填，文本不能只包含空白。所有内容按纯文本显示，不支持 Markdown 或 HTML；引号按 JSON 规则写为 `\"`，换行写为 `\n`。页面会转义 HTML 特殊字符，TXT 下载保留原文。保留公开设定的来源，区分档案式改写与游戏原文。
 

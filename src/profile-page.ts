@@ -287,7 +287,6 @@ export class ProfilePage {
         ${status.location ? `<span>Based in <b>${e(status.location)}</b></span>` : `<span aria-hidden="true">Input <b data-status="input">Standby</b></span>
         <span aria-hidden="true">Session <b data-status="uptime">00:00:00</b></span>`}
         <span aria-hidden="true">${status.timeZone ? "Local time" : "Local"} <b data-status="clock">--:--:--</b></span>
-        <a class="pc-credit" href="${import.meta.env.BASE_URL}model-credits.html" target="_blank" rel="noopener noreferrer">3D model credits ↗</a>
       </footer>`;
   }
 }

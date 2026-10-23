@@ -10,7 +10,7 @@ All files were retrieved on 2026-10-22 and rebuilt as minimal SVGs that keep onl
 | `yahaha.svg` | Yahaha Studios | `https://www-cdn.yahaha.com/images/logo.svg`, the logo on yahaha.com | None apart from dropping the fixed width and height |
 | `hypergryph.svg` | Hypergryph (鹰角网络) | `https://web-ipv6.hycdn.cn/hypergryph/official/assets/img/logo.a085fd.svg`, the logo on hypergryph.com | Kept the mark; removed the 鹰角网络 and HYPERGRYPH wordmarks |
 | `next.svg` | Question mark for the open "Future" entry | Drawn for this site | — |
-| `endfield.svg` | Arknights: Endfield | Header logo of https://endfield.hypergryph.com/ (inline SVG) | Kept the 终末地 characters and block; removed the 明日方舟 and ARKNIGHTS ENDFIELD lettering |
+| `endfield.svg` | Arknights: Endfield (English logo) | Header logo of https://endfield.gryphline.com/, the global site (inline SVG) | None apart from a fixed fill colour |
 
 For a new logo, use a single-colour mark on a transparent background: only opaque pixels become particles, so a logo drawn on a filled square turns into a solid square unless its inner shape is cut out. Any aspect ratio works; each mark is fitted inside a square.
 

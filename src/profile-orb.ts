@@ -34,7 +34,7 @@ async function sampleMark(path: string, resolution = 96) {
     if (pixels[p + 3] >= 100) points.push([x / r - .5, y / r - .5, pixels[p] / 255, pixels[p + 1] / 255, pixels[p + 2] / 255]);
   }
   if (!points.length) throw new Error(`Empty mark: ${path}`);
-  return points;
+  return Object.assign(points, { aspect: w / h });
 }
 let skillSamples: Promise<number[][][]> | undefined;
 // Rasterize once, then retain only point coordinates and colors on the GPU.
@@ -45,15 +45,25 @@ const loadSkillMarks = () => skillSamples ??= Promise.all(skillMarks.map(async m
 })).catch(error => { skillSamples = undefined; throw error; });
 // Each experience entry may name one logo or several shown side by side; a missing or broken file is left out,
 // and an entry left with none keeps the plain node.
-type Mark = { x: number; y: number; size: number; points: number[][] };
+type Mark = { x: number; y: number; size: number; w: number; h: number; points: number[][] };
 let experienceSamples: Promise<Mark[][]> | undefined;
 const loadExperienceMarks = () => experienceSamples ??= Promise.all(profile.experience.map(async (entry, k) => {
   const found = (await Promise.all([entry.logo ?? []].flat().map(path => sampleMark(path, 128).catch(() => null)))).filter(points => points !== null);
-  const size = found.length > 1 ? .14 : .15, gap = .025, center = pathCenter(k, profile.experience.length);
-  return found.map((points, j) => ({ x: center.x + (j - (found.length - 1) / 2) * (size + gap), y: center.y, size, points }));
+  const center = pathCenter(k, profile.experience.length), gap = .025;
+  // One logo fills a .15 square. Several share a height (wide ones capped in width) so a wordmark doesn't dwarf a symbol.
+  const fitted = found.map(points => {
+    const a = points.aspect, h = found.length > 1 ? Math.min(.11, .16 / a) : a > 1 ? .15 / a : .15, w = h * a;
+    return { points, w, h, size: Math.max(w, h) };
+  });
+  let x = center.x - (fitted.reduce((sum, m) => sum + m.w, 0) + gap * (fitted.length - 1)) / 2;
+  return fitted.map(m => { const mark = { ...m, x: x + m.w / 2, y: center.y }; x += m.w + gap; return mark; });
 }));
 const fract = (n: number) => n - Math.floor(n);
 const noise = (i: number) => fract(Math.sin(i * 127.1 + 311.7) * 43758.5453);
+// Marks are sampled on a lattice and several particles share each point; spreading them across their cell
+// fills the gaps that otherwise read as a moire grid.
+const jitter = (i: number, cell: number) => (noise(i * 3.7 + 11) - .5) * cell;
+const LOGO_CELL = 2 / 420, SKILL_CELL = 2 / 96 * .105;
 // The experience path runs from lower left to upper right; logos need the room, so it spans most of the ring.
 const PATH_X = .36, PATH_Y = .28;
 const pathCenter = (i: number, count: number) => ({ x: -PATH_X + 2 * PATH_X * i / Math.max(1, count - 1), y: PATH_Y - 2 * PATH_Y * i / Math.max(1, count - 1) });
@@ -127,7 +137,8 @@ const vertexShader = `
     }
     float depth = mix(s.z*.30,p.z,uPortraitMorph)*uWeights.y;
     gl_Position = vec4(xy.x*2.0/uViewport.x,-xy.y*2.0/uViewport.y,-depth,1.0);
-    gl_PointSize = uPointSize*mix(.65,1.0,portraitAmount);
+    // The logo is drawn from a regular lattice; smaller points leave a visible grid of gaps (moire) in it.
+    gl_PointSize = uPointSize*mix(mix(.65,.8,uWeights.x),1.0,portraitAmount);
   }
 `;
 const fragmentShader = `
@@ -202,7 +213,7 @@ export class ProfileOrb {
       const info = this.geometry.getAttribute('aInfo') as THREE.BufferAttribute;
       for (let i = 1, n = 0; i < COUNT && samples.length; i += 5, n++) {
         const index = n % samples.length, points = samples[index], point = points[Math.floor(n / samples.length) * 197 % points.length];
-        skills.setXYZW(i, point[0], point[1], 0, 2);
+        skills.setXYZW(i, point[0] + jitter(i, SKILL_CELL), point[1] + jitter(i + 1, SKILL_CELL), 0, 2);
         colors.setXYZ(i, point[2], point[3], point[4]);
         info.setX(i, skillMarks[index].group);
       }
@@ -216,8 +227,8 @@ export class ProfileOrb {
       const events = Math.max(1, profile.experience.length);
       // The connecting line stops at the edge of each entry's marks instead of running through them.
       const boxes = entries.filter(marks => marks.length).map(marks => ({
-        x0: Math.min(...marks.map(m => m.x - m.size / 2)) - .015, x1: Math.max(...marks.map(m => m.x + m.size / 2)) + .015,
-        y0: marks[0].y - marks[0].size / 2 - .015, y1: marks[0].y + marks[0].size / 2 + .015 }));
+        x0: Math.min(...marks.map(m => m.x - m.w / 2)) - .015, x1: Math.max(...marks.map(m => m.x + m.w / 2)) + .015,
+        y0: marks[0].y - Math.max(...marks.map(m => m.h)) / 2 - .015, y1: marks[0].y + Math.max(...marks.map(m => m.h)) / 2 + .015 }));
       const totals = entries.map(marks => marks.reduce((sum, mark) => sum + mark.points.length, 0));
       for (let i = 0; i < COUNT; i++) {
         const k = Math.floor(i / 5) % events, marks = entries[k];
@@ -227,7 +238,7 @@ export class ProfileOrb {
           let n = (Math.floor(i / 5 / events) * 3 + i % 5) % totals[k], j = 0;
           while (n >= marks[j].points.length) n -= marks[j++].points.length;
           const mark = marks[j], point = mark.points[spread(n, mark.points.length)];
-          experience.setXYZ(i, mark.x + point[0] * mark.size, mark.y + point[1] * mark.size, profile.experience[k].upcoming ? 1 : 0); info.setY(i, .8);
+          experience.setXYZ(i, mark.x + (point[0] + jitter(i, 2 / 128)) * mark.size, mark.y + (point[1] + jitter(i + 1, 2 / 128)) * mark.size, profile.experience[k].upcoming ? 1 : 0); info.setY(i, .8);
         } else if (boxes.some(b => experience.getX(i) > b.x0 && experience.getX(i) < b.x1 && experience.getY(i) > b.y0 && experience.getY(i) < b.y1)) info.setY(i, 0);
       }
       experience.needsUpdate = info.needsUpdate = true;
@@ -253,7 +264,7 @@ export class ProfileOrb {
       const y = 1 - 2 * (i + .5) / COUNT, a = i * 2.399963, r = Math.sqrt(1 - y * y);
       const x = Math.cos(a) * r, z = Math.sin(a) * r;
       sphere.set([x, y, z], i * 3);
-      const mark = logoTarget(i); logo.set([mark.x, mark.y], i * 2);
+      const mark = logoTarget(i); logo.set([mark.x + jitter(i, LOGO_CELL), mark.y + jitter(i + 1, LOGO_CELL)], i * 2);
       const group = i % count, center = skillCenter(group, count);
       if (i % 80 === 0 && count > 1) {
         const segment = Math.floor(i / 80) % (count - 1);

@@ -4,6 +4,8 @@ import { escapeHtml } from "./html";
 import { logo } from "./brand";
 import { paintArtwork } from "./case-art";
 import { PageChapters } from "./page-chapters";
+import type { Sound } from "./audio";
+import { createTitleMenu, type TitleMenuView } from "./title-menus";
 
 const heroArt = new Map<string, string>();
 type ScreenRect = { left: number; top: number; right: number; bottom: number; quad?: [number, number][] };
@@ -56,8 +58,10 @@ export class ProjectPage {
   private introTimer = 0;
   private lift?: HTMLImageElement;
   private chapters = new PageChapters(this.root);
+  /** Games with a `menu` theme get their own title menu instead of the standard page. */
+  private menu: TitleMenuView | null = null;
 
-  constructor(private handlers: { close: () => void; navigate: (direction: 1 | -1) => void }) {
+  constructor(private handlers: { close: () => void; navigate: (direction: 1 | -1) => void; sound: (name: Sound) => void }) {
     this.root.id = "project-page";
     this.root.className = "project-page";
     this.root.setAttribute("role", "dialog");
@@ -106,6 +110,7 @@ export class ProjectPage {
     const reveal = () => {
       this.root.classList.toggle("intro", Boolean(options.intro));
       if (options.intro) this.introTimer = window.setTimeout(() => this.root.classList.remove("intro"), 2600);
+      this.menu?.begin(Boolean(options.instant));
       // Commit the hidden state first so the fade actually runs.
       void this.root.offsetWidth;
       this.root.classList.add("visible");
@@ -123,6 +128,16 @@ export class ProjectPage {
     this.record = record;
     if (changed && this.isOpen && location.hash !== workHash(record.id))
       history.replaceState({ work: record.id }, "", workHash(record.id));
+    this.menu?.destroy();
+    this.menu = createTitleMenu(record, { previous, next, position, total }, this.handlers.sound);
+    this.root.classList.toggle("menu-mode", Boolean(this.menu));
+    if (this.menu) {
+      this.root.replaceChildren(this.menu.el);
+      this.menu.mount();
+      // Switched to another work while open: its menu starts straight away.
+      if (this.isOpen) this.menu.begin(matchMedia("(prefers-reduced-motion: reduce)").matches);
+      return;
+    }
     const r = record, e = escapeHtml;
     const tags = r.tags?.length ? `<ul class="pp-tags">${r.tags.map((tag) => `<li>${e(tag)}</li>`).join("")}</ul>` : "";
     const links = [...(r.links ?? []), ...(r.links?.some((link) => link.url === r.source) ? [] : [{ label: "Project link", url: r.source }])];
@@ -192,7 +207,7 @@ export class ProjectPage {
     this.lift?.remove();
     const img = Object.assign(document.createElement("img"), { src: heroSource(record), alt: "", className: "pp-lift" });
     // The hub art's box once the page shows, and the 16:9 frame that covers it as object-fit does.
-    const R = this.root.querySelector(".pp-hub-art")?.getBoundingClientRect() ?? new DOMRect(0, 0, innerWidth, innerHeight);
+    const R = this.root.querySelector(".pp-hub-art, .tm-art")?.getBoundingClientRect() ?? new DOMRect(0, 0, innerWidth, innerHeight);
     const ew = Math.max(R.width, (R.height * 16) / 9), eh = (ew * 9) / 16;
     const ex = R.left + (R.width - ew) / 2, ey = R.top + (R.height - eh) / 2;
     const target: [number, number][] = [[ex, ey], [ex + ew, ey], [ex + ew, ey + eh], [ex, ey + eh]];
@@ -239,12 +254,17 @@ export class ProjectPage {
       this.state = "closed";
       this.root.hidden = true;
       // Stop video and Unity playback.
+      this.menu?.destroy();
+      this.menu = null;
       this.root.innerHTML = "";
       this.record = null;
       this.returnFocus?.focus({ preventScroll: true });
     }, instant ? 0 : 240);
     return true;
   }
+
+  /** Keys for the title menu (choose, open, close a panel); false when it has no use for them. */
+  handleKey(event: KeyboardEvent) { return this.menu?.handleKey(event) ?? false; }
 
   setInstant(instant: boolean) { this.root.classList.toggle("instant", instant); }
 

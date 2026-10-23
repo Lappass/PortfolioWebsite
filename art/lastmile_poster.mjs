@@ -296,3 +296,28 @@ for (const [name, make, size] of [["cover", cover, 1350], ["hero", hero, 1920], 
   await print(name, plates.W, plates.H, plates, size);
 }
 
+
+// Title menu art (src/title-menus.ts): the three gears of the key art (hero(): machine(860, -110,
+// 0.82)), each printed on white in its own square centred on its axle so the page can turn it,
+// and the title. The page multiplies them over paper; positions are noted in title-menus.ts.
+async function menuLayer(name, ink, amber, [x, y, w]) {
+  const S = Math.round(w);
+  const plate = (content, seed, shift = [0, 0]) => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${w} ${w}">${plateDefs(seed)}<rect width="${w}" height="${w}" fill="${NONE}"/><g filter="url(#print)" transform="translate(${shift[0] - x} ${shift[1] - y})">${content}</g></svg>`);
+  const flat = await sharp({ create: { width: S, height: S, channels: 3, background: NONE } })
+    .composite([{ input: await sharp(plate(amber, 11, [5, 3])).png().toBuffer(), blend: "multiply" }, { input: await sharp(plate(ink, 3)).png().toBuffer(), blend: "multiply" }]).png().toBuffer();
+  await sharp(flat).jpeg({ quality: 88, mozjpeg: true }).toFile(resolve(OUT, `menu/${name}.jpg`));
+}
+{
+  mkdirSync(resolve(OUT, "menu"), { recursive: true });
+  const k = 0.82, P = (x, y) => [860 + x * k, -110 + y * k];
+  const [ax, ay] = P(430, 1010), [bx, by] = P(950, 700), [cx, cy] = P(940, 1300);
+  const RA = 330 * k, RB = 230 * k, RC = 200 * k;
+  const square = (gx, gy, r) => [gx - r, gy - r, r * 2];
+  await menuLayer("gear-slips", `<g transform="translate(${ax} ${ay})">${teeth(RA, 12, -Math.PI / 2, RA * 0.16, (i) => slip(70 * k, 108 * k, INK, NONE, GOODS[i % 8]))}${body(RA, 6, -0.05, INK)}</g>`, "", square(ax, ay, RA + 110));
+  await menuLayer("gear-pins", "", `<g transform="translate(${bx} ${by})">${teeth(RB, 9, 0.45, RB * 0.1, (i) => pin(78 * k, 70 * k, AMBER, NONE, TIMES[i % 8]))}${body(RB, 5, 0.45, AMBER)}</g>`, square(bx, by, RB + 70));
+  await menuLayer("gear-drive", `<circle cx="${cx}" cy="${cy}" r="${RC * 0.42}" fill="${INK}"/><circle cx="${cx}" cy="${cy}" r="${RC * 0.12}" fill="${NONE}"/>`,
+    `<g transform="translate(${cx} ${cy})">${teeth(RC, 18, 0.1, 10 * k, () => `<path d="M${-22 * k} ${18 * k} L${-15 * k} ${-16 * k} L${15 * k} ${-16 * k} L${22 * k} ${18 * k} Z" fill="url(#dots)"/>`)}<circle r="${RC}" fill="url(#dots)"/></g>`, square(cx, cy, RC + 40));
+  // The title, ink on transparent, roughened like the plates.
+  await sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="620" height="230">${plateDefs(3)}<g filter="url(#print)">${text(0, 104, 120, "LAST", INK, 'font-weight="700" letter-spacing="2"')}${text(0, 214, 120, "MILE", INK, 'font-weight="700" letter-spacing="2"')}</g></svg>`)).png().toFile(resolve(OUT, "menu/title.png"));
+  console.log("wrote menu");
+}

@@ -26,9 +26,19 @@ export interface ArchiveRecord {
   video?: string;
   unity?: string;
   links?: { label: string; url: string }[];
+  /** Title-menu theme for the project page (src/title-menus.ts); without it the page uses the standard layout. */
+  menu?: "lastmile" | "trail" | "lockdown";
+  /** Trailer video; falls back to `video`. */
+  trailer?: string;
+  /** A full run of the game, with optional chapter marks ("m:ss"). */
+  playthrough?: { src: string; chapters?: { at: string; label: string }[] };
+  download?: { url: string; label?: string; size?: string };
+  /** Menu items announced but not out yet: play, trailer, playthrough, download. */
+  soon?: string[];
 }
 
-export const records: ArchiveRecord[] = content.records;
+// JSON types `menu` as a plain string; scripts/archive-content.mjs checks it is one of the themes.
+export const records = content.records as ArchiveRecord[];
 export const featuredFiles = content.featured.map(id => records.findIndex(record => record.id === id));
 export const experimentFiles = records.map((_, index) => index).filter(index => !featuredFiles.includes(index));
 export const categories = ["All", ...content.categories];
