@@ -714,7 +714,9 @@ export class ArchiveScene {
     const carry = ease(v, .19, .25) * (1 - ease(v, .41, .45));
     // Slower too for the hop onto the desk before it and the shove and hop away after it.
     const around = ease(v, .06, .1) * (1 - ease(v, .72, .78)) * (1 - carry);
-    const pace = this.reduced ? 1 : 1 - .76 * carry - .55 * around;
+    // And while the monitor reads the disc, so the game's loading screen gets a few seconds.
+    const read = ease(v, .74, .78) * (1 - ease(v, .97, .99));
+    const pace = this.reduced ? 1 : (1 - .76 * carry - .55 * around) * (1 - .7 * read);
     insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 3.6 * pace : -dt / 1.1), 0, 1);
     if (insert.value >= 1 && this.insertDone) {
       this.insertDone();

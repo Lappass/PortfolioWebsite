@@ -2,7 +2,7 @@
   "featured": [
     "X-001",
     "X-002",
-    "X-004",
+    "X-003",
     "X-007"
   ],
   "categories": [
@@ -115,20 +115,49 @@
     },
     {
       "id": "X-003",
-      "title": "Web Work 03",
-      "en": "WEB WORK 03",
-      "department": "Placeholder: your role",
-      "category": "Web",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: stack / collaborators",
+      "title": "Trail Adventure",
+      "en": "A CLIMBING & WILDLIFE PHOTOGRAPHY GAME",
+      "department": "Solo developer · Indie",
+      "category": "Games",
+      "date": "2026",
+      "lead": "Unity · C#",
       "clearance": "PUBLIC",
-      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
+      "abstract": "A first-person game about climbing and wildlife photography. An old photographer leaves you his cabin, his camera and a mountain island. Pack your bag, climb any rock face, creep up on the animals, and send your best shots to the people who live on the island.",
       "findings": [
-        "Highlight one: placeholder",
-        "Highlight two: placeholder",
-        "Highlight three: placeholder"
+        "Climb anywhere steeper than 50°, on one stamina bar that hunger, cold, tiredness, injury and bag weight each eat into.",
+        "Photos are scored from one to three stars (close-ups, flight, eye contact, golden hour) and fill a field guide of 24 species.",
+        "The island, its cave and the old mine are generated in the editor, and the whole journal-style interface is drawn in code."
       ],
-      "source": "https://github.com/Lappass"
+      "source": "https://github.com/Lappass",
+      "tags": [
+        "Climbing",
+        "Photography",
+        "Low-poly"
+      ],
+      "cover": "works/x-003/cover.jpg",
+      "spine": "works/x-003/spine.jpg",
+      "disc": "works/x-003/disc.jpg",
+      "back": "works/x-003/back.jpg",
+      "loader": "trail",
+      "hero": "works/x-003/hero.jpg",
+      "gallery": [
+        {
+          "src": "works/x-003/cabin.jpg",
+          "caption": "Leo’s cabin, where every trip starts"
+        },
+        {
+          "src": "works/x-003/viewfinder.jpg",
+          "caption": "Creeping up on deer by the pond"
+        },
+        {
+          "src": "works/x-003/campfire.jpg",
+          "caption": "Dusk at a campfire"
+        },
+        {
+          "src": "works/x-003/postcards.jpg",
+          "caption": "Photos and postcards brought home"
+        }
+      ]
     },
     {
       "id": "X-004",

@@ -222,8 +222,9 @@ export class ConsoleSetup {
   private draw(progress: number, record?: ArchiveRecord) {
     const title = record?.title ?? "";
     // Every visual follows the insertion timeline, including interrupted ejection.
-    // Quantise uploads to ~30 fps during the six-second sequence; idle screens reuse pixels.
-    progress = Math.round(progress * 180) / 180;
+    // Quantise uploads to ~30 fps during the sequence; idle screens reuse pixels. The read
+    // itself runs slower, so it steps finer to stay smooth there.
+    progress = progress >= 0.75 ? Math.round(progress * 900) / 900 : Math.round(progress * 180) / 180;
     const key = `${progress}|${title}`;
     if (key === this.drawn) return;
     this.drawn = key;
@@ -263,11 +264,13 @@ export class ConsoleSetup {
     c.fillText("W O R K S   /   C O N S O L E", 0, 42);
     c.restore();
 
+    const art = record && workImage(record.id, record.hero ? "hero" : "cover");
     const loader = record && loaderFor(record);
     if (loader && progress >= 0.75) {
-      // The game's own loading screen takes over the monitor once the system wakes.
+      // The game's own loading screen takes over the monitor once the system wakes; it may
+      // end on the key art itself so the handoff below is seamless.
       c.globalAlpha = ease(progress, 0.75, 0.8);
-      loader(c, w, h, THREE.MathUtils.clamp((progress - 0.76) / 0.22, 0, 1));
+      loader(c, w, h, THREE.MathUtils.clamp((progress - 0.76) / 0.22, 0, 1), art);
     } else if (progress >= 0.75) {
       const system = ease(progress, 0.75, 0.83);
       const read = ease(progress, 0.85, 0.98);
@@ -285,7 +288,6 @@ export class ConsoleSetup {
       c.fillText(progress < 0.85 ? "BOOT / Initializing…" : progress < 0.98 ? "DISC / Reading works…" : "READY", w / 2, h * 0.73);
     }
     // Last beat: the project's key art, so the page grows out of the same picture.
-    const art = record && workImage(record.id, record.hero ? "hero" : "cover");
     const handoff = ease(progress, 0.95, 0.995);
     if (art && handoff) {
       c.globalAlpha = handoff;

@@ -7,7 +7,7 @@ import { PageChapters } from "./page-chapters";
 
 const heroArt = new Map<string, string>();
 type ScreenRect = { left: number; top: number; right: number; bottom: number; quad?: [number, number][] };
-const LIFT_MS = 900;
+const LIFT_MS = 1100;
 /** CSS matrix3d taking the W×H box (origin top-left) onto quad tl, tr, br, bl. */
 function quadMatrix(W: number, H: number, q: [number, number][]) {
   const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q;
@@ -101,6 +101,8 @@ export class ProjectPage {
     clearTimeout(this.introTimer);
     this.state = "opening";
     const quad = !options.instant && options.from?.quad;
+    this.root.classList.toggle("lifted", Boolean(quad));
+    this.root.scrollTop = 0;
     const reveal = () => {
       this.root.classList.toggle("intro", Boolean(options.intro));
       if (options.intro) this.introTimer = window.setTimeout(() => this.root.classList.remove("intro"), 2600);
@@ -110,7 +112,6 @@ export class ProjectPage {
     };
     if (quad) this.liftFromScreen(record, quad, reveal);
     else reveal();
-    this.root.scrollTop = 0;
     this.chapters.sync();
     this.root.querySelector<HTMLElement>("#pp-title")?.focus({ preventScroll: true });
     this.timer = window.setTimeout(() => { this.state = "open"; }, options.instant ? 0 : quad ? LIFT_MS + 340 : 340);
@@ -182,31 +183,40 @@ export class ProjectPage {
   }
 
   /**
-   * The key art lifts off the monitor: an image pinned to the screen's four
-   * projected corners (perspective included) eases out to the window corners,
-   * then hands over to the page, whose text rises in behind it.
+   * The key art lifts off the monitor: a 16:9 image pinned to the screen's four
+   * projected corners (perspective included) eases out until it sits exactly where
+   * the page's hub art will be, cropped the same way, then hands over to the page,
+   * whose text rises in around it. The handover itself is invisible.
    */
   private liftFromScreen(record: ArchiveRecord, quad: [number, number][], done: () => void) {
     this.lift?.remove();
     const img = Object.assign(document.createElement("img"), { src: heroSource(record), alt: "", className: "pp-lift" });
+    // The hub art's box once the page shows, and the 16:9 frame that covers it as object-fit does.
+    const R = this.root.querySelector(".pp-hub-art")?.getBoundingClientRect() ?? new DOMRect(0, 0, innerWidth, innerHeight);
+    const ew = Math.max(R.width, (R.height * 16) / 9), eh = (ew * 9) / 16;
+    const ex = R.left + (R.width - ew) / 2, ey = R.top + (R.height - eh) / 2;
+    const target: [number, number][] = [[ex, ey], [ex + ew, ey], [ex + ew, ey + eh], [ex, ey + eh]];
+    const crop = [R.top - ey, ex + ew - R.right, ey + eh - R.bottom, R.left - ex];
+    Object.assign(img.style, { width: `${ew}px`, height: `${eh}px` });
     document.body.append(img);
     this.lift = img;
-    const W = innerWidth, H = innerHeight, target: [number, number][] = [[0, 0], [W, 0], [W, H], [0, H]];
     const start = performance.now();
-    const ease = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
+    // Ease out: it leaves the screen at the speed the camera was closing in, then settles.
+    const ease = (t: number) => 1 - (1 - t) ** 3;
     const frame = (now: number) => {
       if (this.lift !== img) return;
       const t = Math.min(1, (now - start) / LIFT_MS), k = ease(t);
       const q = quad.map(([x, y], i) => [x + (target[i][0] - x) * k, y + (target[i][1] - y) * k] as [number, number]);
-      img.style.transform = quadMatrix(W, H, q);
-      // A touch of screen glow that burns off as it reaches the window.
-      img.style.filter = `brightness(${1.25 - 0.25 * k})`;
+      img.style.transform = quadMatrix(ew, eh, q);
+      img.style.clipPath = `inset(${crop.map((v) => `${v * k}px`).join(" ")})`;
+      // A touch of screen glow that burns off as it lands.
+      img.style.filter = `brightness(${1.12 - 0.12 * k})`;
       if (t < 1) { requestAnimationFrame(frame); return; }
       done();
-      img.classList.add("out");
-      window.setTimeout(() => { if (this.lift === img) { img.remove(); this.lift = undefined; } }, 420);
+      // Same picture in the same place underneath: drop it once the page has faded up.
+      window.setTimeout(() => { if (this.lift === img) { img.remove(); this.lift = undefined; } }, 380);
     };
-    img.style.transform = quadMatrix(W, H, quad);
+    img.style.transform = quadMatrix(ew, eh, quad);
     requestAnimationFrame(frame);
   }
 

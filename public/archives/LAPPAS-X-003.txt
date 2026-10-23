@@ -1,17 +1,17 @@
 ﻿SHUHANG CHEN · PORTFOLIO ARCHIVE
-FILE X-003 / Web Work 03
-WEB WORK 03
+FILE X-003 / Trail Adventure
+A CLIMBING & WILDLIFE PHOTOGRAPHY GAME
 
-Role: Placeholder: your role
-Date: Placeholder: year
-Stack: Placeholder: stack / collaborators
+Role: Solo developer · Indie
+Date: 2026
+Stack: Unity · C#
 Status: PUBLIC
 
-Placeholder. Describe what this project is, what problem it solves, and how it turned out.
+A first-person game about climbing and wildlife photography. An old photographer leaves you his cabin, his camera and a mountain island. Pack your bag, climb any rock face, creep up on the animals, and send your best shots to the people who live on the island.
 
 Highlights
-1. Highlight one: placeholder
-2. Highlight two: placeholder
-3. Highlight three: placeholder
+1. Climb anywhere steeper than 50°, on one stamina bar that hunger, cold, tiredness, injury and bag weight each eat into.
+2. Photos are scored from one to three stars (close-ups, flight, eye contact, golden hour) and fill a field guide of 24 species.
+3. The island, its cave and the old mine are generated in the editor, and the whole journal-style interface is drawn in code.
 
 Link: https://github.com/Lappass
