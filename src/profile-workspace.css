@@ -1,6 +1,8 @@
 #stage[data-workspace="true"] > :not(#three-scene):not(#modal-root):not(#toast) { opacity: 0 !important; pointer-events: none !important; transition: opacity 250ms; }
 /* One screen: header on top, status bar pinned to the bottom, the console centred in between. */
 .profile-page { --pc-gap: clamp(36px,4vw,72px); display: flex; flex-direction: column; background: var(--pp-paper); transform: none; }
+/* display:flex above would otherwise override [hidden] and leave a clear full-screen layer over the site. */
+.profile-page[hidden] { display: none; }
 .profile-page.visible { transition: opacity 280ms; }
 .profile-page.from-screen.visible { transition: opacity 180ms, clip-path 480ms cubic-bezier(.2,.75,.2,1); }
 .profile-entry-field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
