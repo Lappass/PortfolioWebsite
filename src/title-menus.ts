@@ -394,7 +394,9 @@ class TrailMenu extends TitleMenu {
             <path d="M-8 -108C-19 -107 -25 -103 -26 -94L-25 -54C-26 -32 -27 -14 -26 2L26 2C27 -14 26 -32 25 -54L26 -94C25 -103 19 -107 8 -108Z"/>
             <path d="M-24 -100C-32 -96 -35 -82 -36 -62C-37 -44 -35 -26 -32 -6L-23 -6C-25 -26 -27 -44 -26 -60Z"/><path d="M24 -100C32 -96 35 -82 36 -62C37 -44 35 -26 32 -6L23 -6C25 -26 27 -44 26 -60Z"/>
             <path d="M-21 -2L-3 -2L-4 20C-5 60 -6 90 -6 110L-1 120L-21 120L-18 110C-18 90 -19 60 -20 20Z"/><path d="M21 -2L3 -2L4 20C5 60 6 90 6 110L1 120L21 120L18 110C18 90 19 60 20 20Z"/>
-            <rect x="-13" y="-80" width="26" height="17" rx="3" fill="#25322e"/></g></g>
+            <path d="M-17 -104 L-6 -76 M17 -104 L6 -76" stroke="#25322e" stroke-width="2.5" fill="none" opacity=".55"/>
+            <rect x="-13" y="-80" width="26" height="17" rx="3" fill="#25322e"/>
+            <circle cy="-71.5" r="5.5"/><circle cy="-71.5" r="3" fill="#25322e"/></g></g>
         </g></svg>${this.heroArt()}</div>
       <div class="tr-head tm-in">${this.title(`<span class="tr-title" style="--src:url('${this.asset("title.png")}')">${e(this.r.title)}</span>`)}<p>A CABIN · A CAMERA · A MOUNTAIN</p></div>
       <div class="tr-now tm-in"></div>
