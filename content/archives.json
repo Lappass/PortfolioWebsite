@@ -1,6 +1,6 @@
 {
   "featured": [
-    "X-001",
+    "X-004",
     "X-002",
     "X-003",
     "X-007"
@@ -161,20 +161,49 @@
     },
     {
       "id": "X-004",
-      "title": "3D Graphics Work 01",
-      "en": "3D GRAPHICS WORK 01",
-      "department": "Placeholder: your role",
-      "category": "3D Graphics",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: stack / collaborators",
+      "title": "Last Mile",
+      "en": "A DELIVERY STATION MANAGEMENT GAME",
+      "department": "Solo developer · Indie",
+      "category": "Games",
+      "date": "2026",
+      "lead": "Unity · C#",
       "clearance": "PUBLIC",
-      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
+      "abstract": "A ten-day management game about running a neighbourhood delivery station. Each wave of orders lands on a live 3D city as countdown pins, and you decide who takes them: riders, robots or drones. Speed is only half the job; heavy loads, stairs, fatigue and the riders' own lives all weigh on every assignment.",
       "findings": [
-        "Highlight one: placeholder",
-        "Highlight two: placeholder",
-        "Highlight three: placeholder"
+        "Real-time dispatch on a 3D city: routing modes, traffic, rush hours, fatigue and heavy loads all change who should take an order.",
+        "A small cast of riders with their own stories, written in a dry corporate voice, and choices that carry from one day to the next.",
+        "A procedurally laid-out city with a day-night cycle and automated play-through checks in the editor; the illustrations and landmark models are AI-generated and assembled by editor scripts."
       ],
-      "source": "https://github.com/Lappass"
+      "source": "https://github.com/Lappass",
+      "tags": [
+        "Management",
+        "Simulation",
+        "Narrative"
+      ],
+      "cover": "works/x-004/cover.jpg",
+      "spine": "works/x-004/spine.jpg",
+      "disc": "works/x-004/disc.jpg",
+      "back": "works/x-004/back.jpg",
+      "loader": "lastmile",
+      "hero": "works/x-004/hero.jpg",
+      "gallery": [
+        {
+          "src": "works/x-004/title.jpg",
+          "caption": "Title screen: the station at dawn"
+        },
+        {
+          "src": "works/x-004/dispatch.jpg",
+          "caption": "Morning rush: orders as countdown pins over the city"
+        },
+        {
+          "src": "works/x-004/evening.jpg",
+          "caption": "Assigning an order: time left, ETA and who can take it"
+        },
+        {
+          "src": "works/x-004/briefing.jpg",
+          "caption": "Day one briefing"
+        }
+      ]
     },
     {
       "id": "X-005",

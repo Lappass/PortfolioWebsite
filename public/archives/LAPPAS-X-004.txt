@@ -1,17 +1,17 @@
 ﻿SHUHANG CHEN · PORTFOLIO ARCHIVE
-FILE X-004 / 3D Graphics Work 01
-3D GRAPHICS WORK 01
+FILE X-004 / Last Mile
+A DELIVERY STATION MANAGEMENT GAME
 
-Role: Placeholder: your role
-Date: Placeholder: year
-Stack: Placeholder: stack / collaborators
+Role: Solo developer · Indie
+Date: 2026
+Stack: Unity · C#
 Status: PUBLIC
 
-Placeholder. Describe what this project is, what problem it solves, and how it turned out.
+A ten-day management game about running a neighbourhood delivery station. Each wave of orders lands on a live 3D city as countdown pins, and you decide who takes them: riders, robots or drones. Speed is only half the job; heavy loads, stairs, fatigue and the riders' own lives all weigh on every assignment.
 
 Highlights
-1. Highlight one: placeholder
-2. Highlight two: placeholder
-3. Highlight three: placeholder
+1. Real-time dispatch on a 3D city: routing modes, traffic, rush hours, fatigue and heavy loads all change who should take an order.
+2. A small cast of riders with their own stories, written in a dry corporate voice, and choices that carry from one day to the next.
+3. A procedurally laid-out city with a day-night cycle and automated play-through checks in the editor; the illustrations and landmark models are AI-generated and assembled by editor scripts.
 
 Link: https://github.com/Lappass

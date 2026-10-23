@@ -229,7 +229,179 @@ const trail: GameLoader = (c, w, h, t, art) => {
   }
 };
 
-const LOADERS: Record<string, GameLoader> = { lockdown, trail };
+// Last Mile: the monitor becomes the station's dispatch board, printed in the cover's
+// three inks. Order slips come in with their countdowns running, the rider runs the track
+// along the bottom as the progress bar, and each order is stamped as they pass its stop.
+// With the last one in, ON TIME goes across the board; then the view pulls back from the
+// rider on the key art (public/works/x-004/hero.jpg) to the whole frame. Shapes follow
+// art/lastmile_poster.mjs.
+const LM_PAPER = "#ede6d6", LM_CARD = "#f6f1e6", LM_INK = "#272c30", LM_AMBER = "#f1b05f";
+const LM_ORDERS: [string, number][] = [["BREAKFAST", 46], ["MILK", 31], ["SNACKS", 58], ["NOODLES", 22], ["COFFEE", 40], ["MEDS", 24]];
+// Where the rider stands in the key art (hero(): machine(860, -110, 0.82), rider at 420, 574).
+const LM_RIDER_ART: [number, number] = [(860 + 420 * 0.82) / 1920, (-110 + 574 * 0.82 - 130) / 1080];
+// The cover's running rider, ~270 units tall, feet at the origin, facing right.
+const LM_LIMBS: [string, number][] = [
+  ["M-2 -194 L-32 -150 L-22 -122", 17], ["M-14 -112 L-40 -66 L-84 -52", 21],
+  ["M-8 -110 L34 -66 L18 -8", 21], ["M12 -192 L44 -160 L70 -176", 17],
+];
+const LM_BODY = [
+  "M-90 -58 l-8 18 h22 l6 -14 Z", "M8 -12 h30 l8 12 h-42 Z",
+  "M-14 -102 C-26 -130 -18 -176 4 -204 L30 -196 C26 -168 18 -132 12 -104 Z",
+  "M37 -236 A21 24 0 1 1 -5 -236 A21 24 0 1 1 37 -236 Z",
+].map((d) => new Path2D(d));
+const LM_BOX = new Path2D("M-76 -202 h70 v74 h-70 Z");
+const LM_NECK = new Path2D("M6 -226 h14 v22 h-14 Z");
+const LM_CUTS: [string, number][] = [["M-20 -118 C-27 -140 -20 -178 2 -203", 4], ["M-6 -201 C10 -208 24 -194 20 -150 L4 -146", 5]];
+const LM_HELMET = new Path2D("M-12 -240 C-12 -276 40 -278 42 -240 Z M-16 -244 h66 v9 h-66 Z");
+
+function lmRider(c: CanvasRenderingContext2D, x: number, y: number, s: number) {
+  c.save();
+  c.translate(x, y);
+  c.scale(s, s);
+  c.lineCap = "round";
+  c.lineJoin = "round";
+  c.strokeStyle = LM_INK;
+  c.fillStyle = LM_INK;
+  // Box, tilted with the lean, with the band across it.
+  c.save();
+  c.translate(-40, -164); c.rotate((14 * Math.PI) / 180); c.translate(40, 164);
+  c.fill(LM_BOX);
+  c.strokeStyle = LM_PAPER; c.lineWidth = 5;
+  c.beginPath(); c.moveTo(-70, -168); c.lineTo(-14, -168); c.stroke();
+  c.restore();
+  for (const [d, wd] of LM_LIMBS.slice(0, 2)) { c.lineWidth = wd; c.stroke(new Path2D(d)); }
+  for (const p of LM_BODY) c.fill(p);
+  c.save();
+  c.translate(12, -214); c.rotate((14 * Math.PI) / 180); c.translate(-12, 214);
+  c.fill(LM_NECK);
+  c.restore();
+  c.strokeStyle = LM_PAPER;
+  for (const [d, wd] of LM_CUTS) { c.lineWidth = wd; c.stroke(new Path2D(d)); }
+  c.strokeStyle = LM_INK;
+  for (const [d, wd] of LM_LIMBS.slice(2)) { c.lineWidth = wd; c.stroke(new Path2D(d)); }
+  c.fillStyle = LM_AMBER;
+  c.fill(LM_HELMET);
+  c.restore();
+}
+
+const lastmile: GameLoader = (c, w, h, t, art) => {
+  const alpha = c.globalAlpha;
+  c.fillStyle = LM_PAPER;
+  c.fillRect(0, 0, w, h);
+  // The key art comes up under the board, zoomed in on its rider, then pulls back to the frame.
+  const show = art ? ease(span(t, 0.66, 0.8)) : 0;
+  if (art && show) {
+    const k = inOut(span(t, 0.7, 1)), zoom = lerp(2.2, 1, k), half = 0.5 / zoom;
+    const cx = Math.min(1 - half, Math.max(half, lerp(LM_RIDER_ART[0], 0.5, k)));
+    const cy = Math.min(1 - half, Math.max(half, lerp(LM_RIDER_ART[1], 0.5, k)));
+    c.globalAlpha = alpha * show;
+    c.drawImage(art, w / 2 - cx * w * zoom, h / 2 - cy * h * zoom, w * zoom, h * zoom);
+  }
+  const ui = 1 - ease(span(t, 0.7, 0.8));
+  if (!ui) { c.globalAlpha = alpha; return; }
+  c.globalAlpha = alpha * ui;
+  // The rider's run is the progress bar; each stop on the track is one order.
+  const run = span(t, 0.08, 0.6), stops = LM_ORDERS.length + 1;
+  const tx0 = w * 0.08, tx1 = w * 0.92, ty = h * 0.86;
+  const delivered = LM_ORDERS.filter((_, i) => run >= (i + 1) / stops).length;
+  c.font = `600 ${h * 0.03}px MiSans, sans-serif`;
+  c.fillStyle = LM_INK;
+  c.textAlign = "left";
+  c.fillText("DAY 01  ·  06:00", w * 0.08, h * 0.1);
+  c.textAlign = "right";
+  c.fillText(`DELIVERED  ${delivered} / ${LM_ORDERS.length}`, w * 0.92, h * 0.1);
+  c.fillRect(w * 0.08, h * 0.125, w * 0.84, 3);
+  // Order slips: in they come, countdowns running, stamped as the rider passes their stop.
+  const cw = w * 0.25, ch = h * 0.2, gx = (w * 0.84 - cw * 3) / 2;
+  LM_ORDERS.forEach(([name, secs], i) => {
+    const appear = ease(span(t, i * 0.03, 0.06 + i * 0.03));
+    if (!appear) return;
+    const x = w * 0.08 + (i % 3) * (cw + gx), y = h * 0.19 + Math.floor(i / 3) * (ch + h * 0.06) + (1 - appear) * 24;
+    c.globalAlpha = alpha * ui * appear;
+    c.fillStyle = LM_CARD;
+    c.fillRect(x, y, cw, ch);
+    c.strokeStyle = LM_INK;
+    c.lineWidth = 3;
+    c.strokeRect(x, y, cw, ch);
+    // Side notches and the tear line.
+    const ny = y + ch * 0.62;
+    c.fillStyle = LM_PAPER;
+    for (const nx of [x, x + cw]) { c.beginPath(); c.arc(nx, ny, ch * 0.08, 0, Math.PI * 2); c.fill(); }
+    c.setLineDash([10, 8]);
+    c.beginPath(); c.moveTo(x + ch * 0.14, ny); c.lineTo(x + cw - ch * 0.14, ny); c.stroke();
+    c.setLineDash([]);
+    c.fillStyle = LM_INK;
+    c.textAlign = "left";
+    c.font = `700 ${h * 0.036}px MiSans, sans-serif`;
+    c.fillText(name, x + cw * 0.07, y + ch * 0.4);
+    const done = run >= (i + 1) / stops;
+    if (!done) {
+      // The countdown keeps running until the order is in.
+      const left = Math.max(0, Math.round(secs - t * 34));
+      const pw = cw * 0.3, ph = ch * 0.3, px = x + cw - pw - cw * 0.06, py = y + ch * 0.15;
+      c.fillStyle = LM_AMBER;
+      c.beginPath(); c.roundRect(px, py, pw, ph, ph * 0.2); c.fill();
+      c.fillStyle = LM_INK;
+      c.textAlign = "center";
+      c.font = `700 ${ph * 0.6}px MiSans, sans-serif`;
+      c.fillText(`${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`, px + pw / 2, py + ph * 0.72);
+    } else {
+      const k = ease(span(run, (i + 1) / stops, (i + 1) / stops + 0.05));
+      c.save();
+      c.translate(x + cw * 0.79, y + ch * 0.3);
+      c.rotate(-0.14);
+      c.scale(1 + (1 - k) * 0.6, 1 + (1 - k) * 0.6);
+      c.globalAlpha = alpha * ui * appear * k;
+      c.strokeStyle = LM_INK;
+      c.lineWidth = 3;
+      c.strokeRect(-cw * 0.16, -ch * 0.13, cw * 0.32, ch * 0.26);
+      c.fillStyle = LM_INK;
+      c.textAlign = "center";
+      c.font = `700 ${ch * 0.12}px MiSans, sans-serif`;
+      c.fillText("DELIVERED", 0, ch * 0.045);
+      c.restore();
+    }
+    c.globalAlpha = alpha * ui;
+  });
+  // The track, its stops, and the rider running it, speed lines behind.
+  c.strokeStyle = LM_INK;
+  c.lineWidth = 4;
+  c.beginPath(); c.moveTo(tx0, ty); c.lineTo(tx1, ty); c.stroke();
+  for (let i = 1; i < stops; i++) {
+    const sx = tx0 + ((tx1 - tx0) * i) / stops, passed = run >= i / stops;
+    c.fillStyle = passed ? LM_AMBER : LM_PAPER;
+    c.beginPath(); c.arc(sx, ty, h * 0.014, 0, Math.PI * 2); c.fill(); c.stroke();
+  }
+  const rx = tx0 + (tx1 - tx0) * run, bob = Math.abs(Math.sin(t * 70)) * h * 0.006;
+  c.lineCap = "round";
+  [0, 1, 2].forEach((i) => {
+    c.lineWidth = 6 - i * 1.5;
+    c.beginPath(); c.moveTo(rx - h * (0.16 - i * 0.03), ty - h * (0.1 - i * 0.025)); c.lineTo(rx - h * 0.06, ty - h * (0.1 - i * 0.025)); c.stroke();
+  });
+  lmRider(c, rx, ty - 2 - bob, h * 0.00052);
+  // Every order in: ON TIME goes across the board.
+  const stamp = ease(span(t, 0.6, 0.66));
+  if (stamp) {
+    c.save();
+    c.translate(w / 2, h * 0.43);
+    c.rotate(-0.12);
+    c.scale(1 + (1 - stamp) * 0.5, 1 + (1 - stamp) * 0.5);
+    c.globalAlpha = alpha * ui * stamp;
+    c.fillStyle = LM_AMBER;
+    c.fillRect(-w * 0.2, -h * 0.08, w * 0.4, h * 0.16);
+    c.strokeStyle = LM_PAPER;
+    c.lineWidth = 5;
+    c.strokeRect(-w * 0.19, -h * 0.065, w * 0.38, h * 0.13);
+    c.fillStyle = LM_PAPER;
+    c.textAlign = "center";
+    c.font = `700 ${h * 0.09}px MiSans, sans-serif`;
+    c.fillText("ON TIME", 0, h * 0.032);
+    c.restore();
+  }
+  c.globalAlpha = alpha;
+};
+
+const LOADERS: Record<string, GameLoader> = { lockdown, trail, lastmile };
 
 export function loaderFor(record: ArchiveRecord): GameLoader | undefined {
   return record.loader ? LOADERS[record.loader] : undefined;
