@@ -169,7 +169,8 @@ export class ConsoleSetup {
 
   /** Follow the case; `insert` drives the slot light and the loading screen. */
   update(caseMatrix: THREE.Matrix4, camera: THREE.Vector3, visible: boolean, insert: number, time: number, record: ArchiveRecord, workspace = 0, viewportAspect = 16 / 9) {
-    const presence = Math.max(THREE.MathUtils.smoothstep(insert, 0.18, 0.28), THREE.MathUtils.smoothstep(workspace, .02, .18));
+    // Solid by the time the figure hops onto it for the disc.
+    const presence = Math.max(THREE.MathUtils.smoothstep(insert, 0.06, 0.16), THREE.MathUtils.smoothstep(workspace, .02, .18));
     this.group.visible = visible && this.loaded && presence > 0;
     this.presence = this.group.visible ? presence : 0;
     if (!this.group.visible) return;

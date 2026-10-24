@@ -7,6 +7,10 @@ export type FigureClip = "idle" | "sit" | "jump" | "look" | "cheer" | "wave" | "
 const CLIPS: FigureClip[] = ["idle", "sit", "jump", "look", "cheer", "wave", "run"];
 /** Height on the shelf, in scene units: a third of a game case. */
 const HEIGHT = 1.25;
+/** Ground the run clip covers in a second at this height; faster travel speeds the stride up. */
+const RUN_SPEED = 2.65;
+/** Extra bend under a load on the back, in radians: spread down the spine, and the head bowed. */
+const STOOP = { spine: .8, neck: .4 };
 
 export interface FigurePose {
   position: THREE.Vector3;
@@ -28,6 +32,10 @@ export interface FigurePose {
    * the arms to reach past the head.
    */
   arms?: { amount: number; x: number; y: number; z: number; stretch?: number };
+  /** 0..1: bent forward under a load on its back. */
+  stoop?: number;
+  /** Busy with the disc: no idle glances or gestures. */
+  busy?: boolean;
 }
 
 /**
@@ -47,12 +55,20 @@ export class Figure {
   private gesture?: { clip: FigureClip; until: number };
   private nextFidget = 0;
   private head?: THREE.Object3D;
-  private headEnvelope: THREE.Vector3[] = [];
-  private headSurface: THREE.Vector3[] = [];
   private back?: THREE.Object3D;
+  private spine: THREE.Object3D[] = [];
+  private neck?: THREE.Object3D;
+  /** Skinned vertices along the body's centre plane (head, neck, trunk, shoulders): what a disc carried in that plane can touch. */
+  private midline: { mesh: THREE.SkinnedMesh; index: number }[] = [];
   private arms: THREE.Object3D[] = [];
+  /** Shoulder to wrist, each side. */
+  private chains: Partial<Record<"Left" | "Right", { arm: THREE.Object3D; elbow: THREE.Object3D; hand: THREE.Object3D }>> = {};
+  private armLength = .3;
   private armsShown = { amount: 0, x: 0, y: 1, z: 0, stretch: 0 };
-  private shown = { yaw: 0, headYaw: 0, headPitch: 0 };
+  private shown = { yaw: 0, headYaw: 0, headPitch: 0, stoop: 0 };
+  /** The bend added to the spine this frame, taken back before the next. */
+  private stooped = 0;
+  private busy = false;
   private last = 0;
   private disposed = false;
   loaded = false;
@@ -86,33 +102,43 @@ export class Figure {
     });
     this.head = gltf.scene.getObjectByName("mixamorigHead");
     this.back = gltf.scene.getObjectByName("mixamorigSpine2");
-    gltf.scene.updateMatrixWorld(true);
-    if (this.head) {
-      // A conservative envelope of the actual head/hair geometry, in head-bone space.
-      // Bone centres alone miss the oversized hair and glasses on this character.
-      const bounds = new THREE.Box3(), vertex = new THREE.Vector3();
-      gltf.scene.traverse((mesh) => {
-        if (!(mesh instanceof THREE.SkinnedMesh)) return;
-        const indices = mesh.geometry.getAttribute("skinIndex"), weights = mesh.geometry.getAttribute("skinWeight");
-        for (let i = 0; i < indices.count; i++) {
-          let onHead = false;
-          for (let j = 0; j < 4; j++) {
-            if (weights.getComponent(i, j) > .1 && mesh.skeleton.bones[indices.getComponent(i, j)]?.name.includes("Head")) onHead = true;
-          }
-          if (onHead) {
-            const point = this.head!.worldToLocal(mesh.getVertexPosition(i, vertex).applyMatrix4(mesh.matrixWorld));
-            bounds.expandByPoint(point);
-            this.headSurface.push(point.clone());
-          }
-        }
-      });
-      if (!bounds.isEmpty()) for (const x of [bounds.min.x, bounds.max.x]) for (const y of [bounds.min.y, bounds.max.y]) for (const z of [bounds.min.z, bounds.max.z]) {
-        this.headEnvelope.push(new THREE.Vector3(x, y, z));
-      }
-    }
-    // Shoulder to wrist, each side in order, for the pushing pose.
-    this.arms = ["LeftArm", "LeftForeArm", "RightArm", "RightForeArm"].flatMap((name) => gltf.scene.getObjectByName(`mixamorig${name}`) ?? []);
+    this.spine = ["Spine", "Spine1", "Spine2"].flatMap((name) => gltf.scene.getObjectByName(`mixamorig${name}`) ?? []);
+    this.neck = gltf.scene.getObjectByName("mixamorigNeck");
     const hips = gltf.scene.getObjectByName("mixamorigHips");
+    gltf.scene.updateMatrixWorld(true);
+    // The head, neck, trunk and shoulders along the body's centre plane, the oversized hair and
+    // glasses included: bone centres alone miss them. The rest pose faces +Z, so the plane is
+    // at the hips' x. Thinned to about a thousand vertices.
+    const middle = hips?.getWorldPosition(new THREE.Vector3()).x ?? 0, vertex = new THREE.Vector3();
+    const midline: { mesh: THREE.SkinnedMesh; index: number }[] = [];
+    gltf.scene.traverse((mesh) => {
+      if (!(mesh instanceof THREE.SkinnedMesh)) return;
+      const indices = mesh.geometry.getAttribute("skinIndex"), weights = mesh.geometry.getAttribute("skinWeight");
+      for (let i = 0; i < indices.count; i++) {
+        let bone = "", most = 0;
+        for (let j = 0; j < 4; j++) {
+          if (weights.getComponent(i, j) <= most) continue;
+          most = weights.getComponent(i, j);
+          bone = mesh.skeleton.bones[indices.getComponent(i, j)]?.name ?? "";
+        }
+        if (/Hips|Spine|Neck|Head|Shoulder/.test(bone) && Math.abs(mesh.getVertexPosition(i, vertex).applyMatrix4(mesh.matrixWorld).x - middle) < .1) {
+          midline.push({ mesh, index: i });
+        }
+      }
+    });
+    const thin = Math.max(1, Math.ceil(midline.length / 1000));
+    this.midline = midline.filter((_, i) => i % thin === 0);
+    // Shoulder to wrist, each side in order, for the reaching and gripping poses.
+    this.arms = ["LeftArm", "LeftForeArm", "RightArm", "RightForeArm"].flatMap((name) => gltf.scene.getObjectByName(`mixamorig${name}`) ?? []);
+    for (const side of ["Left", "Right"] as const) {
+      const arm = gltf.scene.getObjectByName(`mixamorig${side}Arm`), elbow = gltf.scene.getObjectByName(`mixamorig${side}ForeArm`);
+      const hand = elbow?.children.find((bone) => bone.name === `mixamorig${side}Hand`);
+      if (arm && elbow && hand) this.chains[side] = { arm, elbow, hand };
+    }
+    if (this.chains.Left) {
+      const [shoulder, elbow, wrist] = Object.values(this.chains.Left).map((bone) => bone.getWorldPosition(new THREE.Vector3()));
+      this.armLength = shoulder.distanceTo(elbow) + elbow.distanceTo(wrist);
+    }
     this.mixer = new THREE.AnimationMixer(gltf.scene);
     for (const clip of gltf.animations) {
       const name = clip.name as FigureClip;
@@ -148,62 +174,66 @@ export class Figure {
 
   dispose() { this.disposed = true; }
 
-  /** Carry the actual disc on the animated back; keep its label's spin about its normal. */
-  carryDisc(parts: THREE.Object3D[], amount: number, grip: number, radius: number) {
-    if (!this.loaded || !this.back || amount <= 0 || !parts.length) return;
+  /**
+   * Rest the actual disc (its meshes) on the animated back, blended in by `amount`. From the
+   * upper spine the disc goes out `angle` above the backward horizontal, just far enough that
+   * its rim clears the head, neck and trunk, so it lies against whichever of them sticks out.
+   * The disc keeps the orientation its case gives it; it is carried in the figure's own plane.
+   */
+  carry(parts: THREE.Object3D[], amount: number, radius: number, angle: number) {
+    const first = parts[0], parent = first?.parent;
+    if (!this.loaded || !this.back || !parent || amount <= 0) return;
     this.group.updateMatrixWorld(true);
-    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(this.group.getWorldQuaternion(new THREE.Quaternion()));
-    const frame = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(forward.x, forward.z));
-    // Lean with the carrier, about the back's contact point rather than the disc centre.
-    // Keep the running clip's torso twist out of this large, rigid load.
-    frame.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), .3));
-    const centre = this.back.getWorldPosition(new THREE.Vector3())
-      .add(new THREE.Vector3(0, 1.04, -.28).applyQuaternion(frame));
-    const first = parts[0], parent = first.parent;
-    if (!parent) return;
-    const rotation = frame.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), first.rotation.z));
-    const localRotation = parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(rotation);
-    const localCentre = parent.worldToLocal(centre.clone());
+    const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(first.getWorldQuaternion(new THREE.Quaternion()));
+    const along = new THREE.Vector3(0, 0, -Math.cos(angle)).applyQuaternion(this.group.getWorldQuaternion(new THREE.Quaternion()));
+    along.y += Math.sin(angle);
+    along.addScaledVector(normal, -along.dot(normal)).normalize();
+    const from = this.back.getWorldPosition(new THREE.Vector3());
+    // Circle against points: each vertex rules out a stretch of the line, so go past the
+    // furthest. Vertices off to the side of the disc's plane cannot touch it.
+    const clear = radius + .015, point = new THREE.Vector3();
+    let out = 0;
+    for (const { mesh, index } of this.midline) {
+      mesh.getVertexPosition(index, point).applyMatrix4(mesh.matrixWorld).sub(from);
+      const side = point.dot(normal);
+      if (Math.abs(side) > .055) continue;
+      point.addScaledVector(normal, -side);
+      const onLine = point.dot(along), room = onLine * onLine - point.lengthSq() + clear * clear;
+      if (room > 0) out = Math.max(out, onLine + Math.sqrt(room));
+    }
+    const centre = parent.worldToLocal(from.addScaledVector(along, out));
     for (const part of parts) {
-      part.position.lerp(localCentre, amount);
-      part.quaternion.slerp(localRotation, amount);
+      part.position.lerp(centre, amount);
       part.updateMatrixWorld(true);
     }
-    const actualCentre = first.getWorldPosition(new THREE.Vector3());
+  }
+
+  /**
+   * Each hand to the rim nearest its shoulder, by weight, wherever the disc is. The two-bone
+   * solve bends the elbows towards real contact points; a rim out of reach stretches the
+   * short arm a little and then only straightens it towards the disc.
+   */
+  grip(parts: THREE.Object3D[], radius: number, left: number, right: number) {
+    const first = parts[0];
+    if (!this.loaded || !first || (left <= 0 && right <= 0)) return;
+    this.group.updateMatrixWorld(true);
+    const centre = first.getWorldPosition(new THREE.Vector3());
     const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(first.getWorldQuaternion(new THREE.Quaternion()));
-    let clearance = Infinity, overlaps = false;
-    for (const corner of this.headEnvelope) {
-      const offset = this.head!.localToWorld(corner.clone()).sub(actualCentre);
-      const distance = offset.dot(normal);
-      if (offset.clone().addScaledVector(normal, -distance).length() < radius + .08) overlaps = true;
-    }
-    if (overlaps && this.head) {
-      // Support of the head surface along the disc normal, without transforming every
-      // vertex each frame. Box corners alone overestimate the round hair and separate
-      // the disc so far from the back that the short hands cannot reach it.
-      const m = this.head.matrixWorld.elements;
-      const axis = new THREE.Vector3(m[0] * normal.x + m[1] * normal.y + m[2] * normal.z,
-        m[4] * normal.x + m[5] * normal.y + m[6] * normal.z,
-        m[8] * normal.x + m[9] * normal.y + m[10] * normal.z);
-      const offset = new THREE.Vector3(m[12], m[13], m[14]).sub(actualCentre).dot(normal);
-      for (const point of this.headSurface) clearance = Math.min(clearance, point.dot(axis) + offset);
-    }
-    if (overlaps && clearance < .045) {
-      actualCentre.addScaledVector(normal, clearance - .045);
-      const safeCentre = parent.worldToLocal(actualCentre.clone());
-      for (const part of parts) { part.position.copy(safeCentre); part.updateMatrixWorld(true); }
-    }
-    // Grip the lower rim in the carrier's frame, independent of the printed label's spin.
-    // The two-bone solve bends elbows towards real contact points instead of holding both
-    // segments in the same direction. Fixed lengths keep the short arms believable.
-    for (const [side, sign] of [["Left", 1], ["Right", -1]] as const) {
-      const arm = this.arms.find((bone) => bone.name === `mixamorig${side}Arm`);
-      const elbow = this.arms.find((bone) => bone.name === `mixamorig${side}ForeArm`);
-      const hand = elbow?.children.find((bone) => bone.name === `mixamorig${side}Hand`);
-      if (!arm || !elbow || !hand) continue;
-      // Solve for the wrist slightly in front of the rim; the palm and fingers extend
-      // beyond the hand bone, so placing the wrist on the surface buries the fingers.
-      const target = actualCentre.clone().add(new THREE.Vector3(sign * .22, -Math.sqrt(radius * radius - .27 * .27) + .12, .08).applyQuaternion(frame));
+    for (const [side, weight] of [["Left", left], ["Right", right]] as const) {
+      const chain = this.chains[side];
+      if (!chain || weight <= 0) continue;
+      const { arm, elbow, hand } = chain;
+      const shoulder = arm.getWorldPosition(new THREE.Vector3());
+      const out = shoulder.clone().sub(centre), across = out.dot(normal);
+      out.addScaledVector(normal, -across);
+      if (out.lengthSq() < 1e-6) continue;
+      out.normalize();
+      // The wrist just inside the rim, beside the disc on the shoulder's side: the palm and
+      // fingers reach past the hand bone onto the edge without going into the disc.
+      const target = centre.clone().addScaledVector(out, radius - .08).addScaledVector(normal, (Math.sign(across) || 1) * .055);
+      const longer = THREE.MathUtils.clamp(shoulder.distanceTo(target) / this.armLength - 1, 0, .3) * weight;
+      this.stretch(arm, Math.max(longer, this.armsShown.stretch * this.armsShown.amount));
+      arm.updateMatrixWorld(true);
       const initial = [arm.quaternion.clone(), elbow.quaternion.clone()];
       for (let i = 0; i < 6; i++) for (const bone of [elbow, arm]) {
         const origin = bone.getWorldPosition(new THREE.Vector3());
@@ -215,21 +245,31 @@ export class Figure {
         bone.updateMatrixWorld(true);
       }
       for (const [i, bone] of [arm, elbow].entries()) {
-        bone.quaternion.copy(initial[i].slerp(bone.quaternion.clone(), grip));
+        bone.quaternion.copy(initial[i].slerp(bone.quaternion.clone(), weight));
         bone.updateMatrixWorld(true);
       }
     }
   }
 
+  /** Bend forward down the spine and bow the head by `stoop` of STOOP (negative to take it back). */
+  private bend(stoop: number) {
+    if (!stoop) return;
+    for (const bone of this.spine) bone.rotateX(STOOP.spine / this.spine.length * stoop);
+    this.neck?.rotateX(STOOP.neck * stoop);
+  }
+
+  /** Lengthen an upper arm, and so the whole arm, along its own length. */
+  private stretch(bone: THREE.Object3D, longer: number) {
+    const next = bone.children[0];
+    if (!next) return;
+    const axis = next.position.clone().normalize();
+    bone.scale.set(1 + longer * Math.abs(axis.x), 1 + longer * Math.abs(axis.y), 1 + longer * Math.abs(axis.z));
+  }
+
   /** Hold both arms towards a direction, over whatever the clip is doing with them. */
   private reach() {
     const { amount, x, y, z, stretch } = this.armsShown;
-    for (const bone of this.arms) {
-      const next = bone.children[0];
-      if (!next || bone.name.includes("Fore")) continue;
-      const axis = next.position.clone().normalize(), longer = stretch * amount;
-      bone.scale.set(1 + longer * Math.abs(axis.x), 1 + longer * Math.abs(axis.y), 1 + longer * Math.abs(axis.z));
-    }
+    for (const bone of this.arms) if (!bone.name.includes("Fore")) this.stretch(bone, stretch * amount);
     if (amount < .01) return;
     this.group.updateMatrixWorld(true);
     const facing = this.group.getWorldQuaternion(new THREE.Quaternion());
@@ -250,7 +290,7 @@ export class Figure {
   /** Play a clip once over whatever the figure is doing. */
   gestureOnce(clip: FigureClip) {
     const action = this.actions.get(clip);
-    if (!action || this.state.still) return;
+    if (!action || this.state.still || this.busy) return;
     action.time = 0;
     this.gesture = { clip, until: this.last + action.getClip().duration - .35 };
   }
@@ -262,7 +302,9 @@ export class Figure {
     if (!this.group.visible || !this.mixer) return;
     for (const surface of this.surfaces) surface.opacity = pose.opacity;
     const state = this.state, look = this.shown;
-    if (this.gesture && (time > this.gesture.until || pose.hop !== undefined)) this.gesture = undefined;
+    this.busy = Boolean(pose.busy);
+    if (this.gesture && (time > this.gesture.until || pose.hop !== undefined || this.busy)) this.gesture = undefined;
+    if (this.busy) this.nextFidget = Math.max(this.nextFidget, time + 6);
     // Standing about, it looks around now and then.
     if (pose.clip === "idle" && pose.hop === undefined && !this.gesture && !state.still && time > this.nextFidget) {
       if (this.nextFidget) this.gestureOnce("look");
@@ -284,7 +326,20 @@ export class Figure {
       jump.time = THREE.MathUtils.lerp(.15, .82, pose.hop) * jump.getClip().duration;
       jump.timeScale = 0;
     } else if (jump) jump.timeScale = 1;
+    // The stride keeps up with the ground covered instead of skating.
+    const run = this.actions.get("run");
+    if (run && dt > 0) {
+      const speed = Math.hypot(pose.position.x - this.group.position.x, pose.position.z - this.group.position.z) / dt;
+      run.timeScale += (THREE.MathUtils.clamp(speed / RUN_SPEED, .6, 1.7) - run.timeScale) * (1 - Math.exp(-dt * 8));
+    }
+    // The mixer only writes a bone when its animated value changes, so last frame's bend comes
+    // off first; where a clip holds still it would otherwise add up.
+    this.bend(-this.stooped);
     this.mixer.update(state.still ? 0 : dt);
+    // Bent under a load: spread down the spine, the head bowed.
+    look.stoop += ((pose.stoop ?? 0) - look.stoop) * (1 - Math.exp(-dt * 8));
+    this.stooped = look.stoop > .001 ? look.stoop : 0;
+    this.bend(this.stooped);
 
     this.group.position.copy(pose.position);
     look.yaw += Math.atan2(Math.sin(pose.yaw - look.yaw), Math.cos(pose.yaw - look.yaw)) * (1 - Math.exp(-dt * 6));

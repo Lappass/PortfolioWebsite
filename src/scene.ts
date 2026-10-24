@@ -13,7 +13,7 @@ import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { buildGameCase, poseCase, printCase, transferPrint } from "./game-case";
 import { ConsoleSetup, PLAYER_WAKE_START } from "./console-setup";
 import { Figure } from "./figure";
-import { discCarry, DISC_RADIUS } from "./game-case";
+import { CARRY, carrierSpot, discCarry, DISC_RADIUS } from "./game-case";
 import { ParticleField } from "./particles";
 import { createArchiveLighting, type LightingLook } from "./archive-lighting";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -70,6 +70,14 @@ const ease = (t: number) => {
   t = THREE.MathUtils.clamp(t, 0, 1);
   return t * t * t * (t * (t * 6 - 15) + 10);
 };
+/**
+ * Seconds per unit of disc insertion at its knots (insert progress, seconds), eased between:
+ * slow for the hop onto the desk, slowest while the figure takes the disc, runs it across and
+ * heaves it in, so that reads as an effort rather than a blur, brisker for the shove, and slow
+ * again while the monitor reads the disc so the game's loading screen gets a few seconds.
+ * About 9.6 s in all.
+ */
+const INSERT_PACE: [number, number][] = [[0, 5], [.06, 6.2], [.16, 6.8], [.19, 12.6], [.44, 13], [.46, 7.6], [.72, 7.6], [.78, 11.6], [.97, 11.6], [.99, 3.6], [1, 3.6]];
 export class ArchiveScene {
   private inputEvents = new AbortController();
   private presence = 1;
@@ -577,7 +585,8 @@ export class ArchiveScene {
   private placeFigure(time: number, cinematic: boolean) {
     const open = THREE.MathUtils.smoothstep(this.detail, 0, 1);
     const opening = this.intro.value * this.intro.value * (3 - 2 * this.intro.value);
-    const desk = Math.max(this.setup.presence, THREE.MathUtils.smoothstep(this.insert.value, .1, .26));
+    const carry = discCarry(this.insert.value);
+    const desk = Math.max(this.setup.presence, carry.hop);
     // The figure takes its own time over a hop, a little behind the case and the camera.
     const elapsed = THREE.MathUtils.clamp(time - this.figureTime, 0, .1), goal = Math.max(open, opening);
     this.figureTime = time;
@@ -600,34 +609,24 @@ export class ArchiveScene {
     const lean = new THREE.Quaternion().setFromRotationMatrix(this.model.matrixWorld).slerp(new THREE.Quaternion(), Math.max(near, desk));
     // Opening and opened case: at the case's foot, below and to the right of the disc.
     const beside = this.model.position.clone().add(new THREE.Vector3(2.35, -.1, .7));
-    // Inserting: the figure takes the disc on its back, carries it along the front of the
-    // desk, heaves it up into the slot and then stays by the console to watch the screen.
+    // Inserting: the figure takes the disc on its back, runs it along the front of the desk,
+    // heaves it over into the slot's mouth and shoves it in, then stays by the console to
+    // watch the screen.
     const p = this.insert.value, local = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z).applyMatrix4(this.model.matrixWorld);
     const discNode = this.model.children.find((child) => child.userData.casePart && child.userData.casePart !== "lid");
-    const pushing = p > .1 && discNode ? 1 : 0;
+    const pushing = p > .06 && discNode ? 1 : 0;
     const settle = pushing ? THREE.MathUtils.smoothstep(p, .6, .74) : 1;
-    const carry = discCarry(p), loaded = carry.lower * (1 - carry.lift);
+    const slot = this.setup.slotLocal;
     let onDesk = ConsoleSetup.FIGURE_SPOT.clone().applyMatrix4(this.model.matrixWorld);
     if (pushing && discNode) {
-      // A step ahead of the disc, in the lane between the controller's mat and the desk's
-      // front edge: the disc comes down upright behind it, clear of the back of its head.
-      // It steps further ahead as the disc rises, to have room to turn round and push.
-      // Only the disc enters the drive. The carrier's feet stay in the front lane even
-      // after poseCase moves the disc centre behind the console's front fascia.
-      const under = local(discNode.position.x + .32 + .12 * carry.lift, .02, this.setup.slotLocal.z + DISC_RADIUS + .2);
-      // A last shove on tiptoe as it goes in.
-      under.y += Math.sin(THREE.MathUtils.clamp((p - .44) / .14, 0, 1) * Math.PI) * .22;
+      // In the lane between the controller's mat and the desk's front edge (CARRY). A dip as
+      // the disc settles on its back, and up on tiptoe to meet it at the slot's mouth.
+      const spot = carrierSpot(p, slot);
+      spot.y += -.04 * Math.sin(carry.load * Math.PI) + .22 * THREE.MathUtils.smoothstep(p, .41, .44) * (1 - THREE.MathUtils.smoothstep(p, .5, .56));
       const watch = local(6.9, .02, .35);
-      onDesk = under.lerp(watch, settle);
-      const caseLocal = this.model.worldToLocal(onDesk.clone());
-      if (caseLocal.x > this.setup.slotLocal.x - .9) {
-        caseLocal.z = Math.max(caseLocal.z, this.setup.slotLocal.z + .8);
-        onDesk.copy(caseLocal.applyMatrix4(this.model.matrixWorld));
-      }
+      onDesk = spot.applyMatrix4(this.model.matrixWorld).lerp(watch, settle);
       onDesk.y += Math.sin(settle * Math.PI) * .5;
     }
-    // Bent forward under the load, about the axis across its path.
-    if (pushing) lean.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1).transformDirection(this.model.matrixWorld), -.3 * loaded * (1 - settle)));
     // Each move is a hop, not a slide. The climb comes first and the drop last, so the
     // figure crosses above the cases' tops instead of through the shelf.
     const across = 1 - (1 - near) ** 3, down = near ** 3;
@@ -640,20 +639,28 @@ export class ArchiveScene {
     const cameraYaw = towards(position, this.camera.position);
     const disc = this.model.position.clone().add(new THREE.Vector3(1.35, 2, .55));
     const screen = towards(onDesk, this.setup.screenLocal.clone().applyMatrix4(this.model.matrixWorld));
-    // Facing the disc's face, which is the way it travels.
+    // Down the desk, the way it runs with the disc.
     const along = Math.atan2(local(1, 0, 0).x - local(0, 0, 0).x, local(1, 0, 0).z - local(0, 0, 0).z);
     const reading = THREE.MathUtils.smoothstep(this.insert.value, .28, .45);
     // Body: legs over the cover and turned a little to the visitor while seated, half turned to the visitor by the case, on the
     // desk towards the visitor and then round to the screen while the disc is read.
     let yaw = lerpYaw(-.5, lerpYaw(cameraYaw, towards(position, disc), .2), near);
-    // It walks the way the disc goes, then turns round to it for the heave.
-    const slotFacing = towards(onDesk, local(this.setup.slotLocal.x, 0, this.setup.slotLocal.z));
-    const facing = lerpYaw(along, slotFacing, THREE.MathUtils.smoothstep(carry.lift, .2, .8));
+    // It half turns from the visitor to the disc to reach for it, turns its back to it to take
+    // it, runs, and turns square to the console for the heave and the shove, the disc at its
+    // right hand.
+    const discAt = discNode?.getWorldPosition(new THREE.Vector3()) ?? disc;
+    const inwards = towards(local(0, 0, 0), local(0, 0, -1));
+    const facing = lerpYaw(lerpYaw(lerpYaw(cameraYaw, towards(position, discAt), .4), along, carry.turn), inwards, THREE.MathUtils.smoothstep(carry.toss, .2, .7));
     yaw = lerpYaw(yaw, pushing ? lerpYaw(facing, screen, settle) : lerpYaw(.12, screen, reading), desk);
-    // Head: the pointer by default, the disc from the case's foot.
+    // Head: the pointer by default, the disc from the case's foot. With the disc it watches it
+    // come over to be taken and go up off its back, and otherwise looks where it is going;
+    // turned to the disc as it comes down by its face, it would put its face into it.
+    const launch = THREE.MathUtils.smoothstep(carry.toss, 0, .3) * (1 - THREE.MathUtils.smoothstep(carry.toss, .55, .8));
+    const watching = Math.max(1 - carry.turn, launch);
     let lookYaw = lerpYaw(cameraYaw + this.pointer.x * .7, towards(position, disc), near);
-    lookYaw = lerpYaw(lookYaw, pushing ? lerpYaw(facing, screen, settle) : lerpYaw(.12 + this.pointer.x * .7, screen, reading), desk);
-    const lookUp = (near + this.pointer.y * -.3 * (1 - near)) * (1 - desk);
+    lookYaw = lerpYaw(lookYaw, pushing ? lerpYaw(lerpYaw(facing, towards(position, discAt), watching), screen, settle) : lerpYaw(.12 + this.pointer.x * .7, screen, reading), desk);
+    const lookUp = (near + this.pointer.y * -.3 * (1 - near)) * (1 - desk) + (pushing ? desk
+      * (Math.max(carry.reach, carry.settle * (1 - carry.turn)) + .15 * carry.load * (1 - carry.heave) + .7 * launch) : 0);
     const hop = near > .03 && near < .97 ? near : desk > .03 && desk < .97 ? desk
       : pushing && settle > .03 && settle < .97 ? settle : move < 1 ? move : undefined;
     // The first frame of the opening: a wave to whoever just arrived.
@@ -662,17 +669,23 @@ export class ArchiveScene {
     this.figure.state.still = this.reduced;
     this.figure.update(time, {
       position, yaw, lookYaw, lookUp, hop, lean,
-      // Hands back on the disc's rim while carrying, then overhead to heave it into the slot.
-      arms: !pushing ? undefined : carry.lift > .5
-        ? { amount: 1 - THREE.MathUtils.smoothstep(p, .57, .63), x: .12, y: 1.5, z: 1, stretch: .3 }
-        : { amount: loaded, x: .9, y: .45, z: -.6 },
+      // Arms up and out, clear of its head, for the disc coming over; the hands then take the
+      // rim (grip below).
+      arms: pushing ? { amount: carry.reach, x: .9, y: .8, z: .2, stretch: .3 } : undefined,
+      // Bent under the disc, then leaning into the shove.
+      stoop: pushing ? carry.load * (1 - carry.heave) + .25 * carry.shove * (1 - THREE.MathUtils.smoothstep(p, .5, .56)) : 0,
+      busy: Boolean(pushing) && p < 1,
       opacity: cinematic ? 0 : Math.max(THREE.MathUtils.clamp(this.presence / .3, 0, 1), opening),
-      clip: near < .5 && desk < .5 ? "sit" : pushing && carry.walk > .02 && carry.walk < .98 ? "run" : "idle",
+      clip: near < .5 && desk < .5 ? "sit" : pushing && carry.walk > .01 && carry.walk < .99 ? "run" : "idle",
     });
     if (pushing && desk > .99 && hop === undefined) {
-      const contact = THREE.MathUtils.smoothstep(carry.lower, .25, 1)
-        * (1 - THREE.MathUtils.smoothstep(carry.lift, 0, .65)) * (1 - settle);
-      this.figure.carryDisc(this.model.children.filter((child) => child.userData.casePart === "disc"), contact, contact, DISC_RADIUS);
+      const parts = this.model.children.filter((child) => child.userData.casePart === "disc");
+      this.figure.carry(parts, carry.load * (1 - carry.heave), DISC_RADIUS, CARRY.angle);
+      // Both hands reach for the disc as it comes over and take its rim as it comes down. The
+      // left lets go as it is heaved; the right reaches after it, takes it at the slot's mouth
+      // and lets go once it is in.
+      const hold = Math.max(carry.reach, THREE.MathUtils.smoothstep(p, .21, .25));
+      this.figure.grip(parts, DISC_RADIUS, hold * (1 - THREE.MathUtils.smoothstep(p, .4, .42)), hold * (1 - THREE.MathUtils.smoothstep(p, .48, .5)));
     }
   }
   private terminalArrayVisibility = { value: 1 };
@@ -707,17 +720,16 @@ export class ArchiveScene {
   }
   private updateInsert(dt: number) {
     const { insert } = this;
-    // Linear time; poseCase and the camera apply the easing.
-    // Going in, time stretches while the figure runs the disc across the desk and shoves it
-    // home, so that part reads as an effort instead of a blur; ejecting stays brisk.
-    const ease = THREE.MathUtils.smoothstep, v = insert.value;
-    const carry = ease(v, .19, .25) * (1 - ease(v, .41, .45));
-    // Slower too for the hop onto the desk before it and the shove and hop away after it.
-    const around = ease(v, .06, .1) * (1 - ease(v, .72, .78)) * (1 - carry);
-    // And while the monitor reads the disc, so the game's loading screen gets a few seconds.
-    const read = ease(v, .74, .78) * (1 - ease(v, .97, .99));
-    const pace = this.reduced ? 1 : (1 - .76 * carry - .55 * around) * (1 - .7 * read);
-    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / 3.6 * pace : -dt / 1.1), 0, 1);
+    // Linear time; poseCase and the camera apply the easing. Going in, it takes INSERT_PACE
+    // seconds per unit, eased between the knots; ejecting stays brisk.
+    let seconds = 3.6;
+    if (!this.reduced) for (let i = 1; i < INSERT_PACE.length; i++) {
+      const [from, before] = INSERT_PACE[i - 1], [to, after] = INSERT_PACE[i];
+      if (insert.value > to) continue;
+      seconds = THREE.MathUtils.lerp(before, after, THREE.MathUtils.smoothstep(insert.value, from, to));
+      break;
+    }
+    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / seconds : -dt / 1.1), 0, 1);
     if (insert.value >= 1 && this.insertDone) {
       this.insertDone();
       this.insertDone = undefined;

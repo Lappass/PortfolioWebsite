@@ -137,41 +137,67 @@ export function buildGameCase(gltf: GLTF, capacity: number, anisotropy: number, 
 
 export const DISC_RADIUS = 0.6 * SCALE;
 const DEFAULT_SLOT = new THREE.Vector3(8.675, 2.4, 0.05);
+/** The label's roll about the disc's face that reads upright. */
+const LABEL_UP = Math.PI;
+/**
+ * The carry, case-local. The figure takes the disc at `catchX` and runs the lane between the
+ * controller's mat and the desk's front edge (z 0.95 and 1.35, art/console_setup.py) to
+ * `beside` short of the slot. On its back the disc is face-on to the visitor, its centre
+ * about `back` from the figure's feet and `angle` above the backward horizontal from the upper
+ * back (Figure.carry finds the exact spot); it comes down onto the back from `hover` further
+ * out along that line. At the slot the figure steps `reach` towards the desk's edge to get a
+ * hand to the disc's rim there, shoves it `shove` into the slot, and the drive takes the rest.
+ */
+export const CARRY = { laneZ: 1.14, catchX: 3, beside: .36, reach: .06, back: new THREE.Vector3(-.75, 1.7, 0), angle: .84, hover: .8, shove: .45 };
 
 /**
- * The disc's trip to the console, carried on the figure's back. All 0..1, from `insert`:
- * it rises above head height and moves out over the desk's front edge (`raise`, `out`),
- * turns side-on (`turn`), comes down behind the figure like a shield (`lower`), is walked
- * across (`walk`) and is lifted to the slot (`lift`). Raising before turning keeps it
- * clear of the figure, the case and the controller at every step.
+ * The disc's trip to the console on the figure's back. All 0..1, from `insert`. The figure hops
+ * onto the desk (`hop`) as the disc's label comes round upright (`settle`); it looks up and
+ * reaches (`reach`) while the disc glides over the lane to hover behind it (`glide`), turns its
+ * back to it (`turn`) and stoops as the disc comes down onto its back (`load`). It runs the
+ * length of the desk (`walk`), heaves the disc off its back (`heave`) so that it arcs over, turns
+ * side-on and comes down at the slot's mouth (`toss`), shoves it in (`shove`), and the drive
+ * draws it the rest of the way (`pull`).
  */
 export function discCarry(insert: number) {
-  const u = THREE.MathUtils.clamp((insert - .2) / .24, 0, 1), step = THREE.MathUtils.smoothstep;
+  const step = (from: number, to: number) => THREE.MathUtils.smoothstep(insert, from, to);
   return {
-    raise: step(u, 0, .1), out: step(u, 0, .25), turn: step(u, .05, .3), lower: step(u, .3, .44),
-    walk: step(u, .44, .86), lift: step(u, .86, .97),
+    hop: step(.06, .17), settle: step(.08, .17), reach: step(.12, .17) * (1 - step(.2, .235)),
+    glide: step(.16, .205), turn: step(.2, .235), load: step(.225, .262),
+    walk: cruise(THREE.MathUtils.clamp((insert - .265) / .12, 0, 1)),
+    heave: step(.385, .4), toss: step(.385, .44), shove: step(.44, .5), pull: step(.48, .58),
   };
 }
-/** Disc centre height above the desk: turning overhead, and upright behind the figure. */
-const CARRY_HIGH = 2.65, CARRY_BACK = 1.7;
+/** Eases in and out of a constant-speed middle, so the run's stride can keep up with it. */
+function cruise(u: number, ease = .2) {
+  if (u < ease) return u * u / (2 * ease * (1 - ease));
+  if (u > 1 - ease) return 1 - (1 - u) ** 2 / (2 * ease * (1 - ease));
+  return (u - ease / 2) / (1 - ease);
+}
+/** Where the figure stands while it has the disc: at the catch, along the lane, beside the slot. */
+export function carrierSpot(insert: number, slot: THREE.Vector3, out = new THREE.Vector3()) {
+  const carry = discCarry(insert);
+  return out.set(THREE.MathUtils.lerp(CARRY.catchX, slot.x - CARRY.beside, carry.walk), .02, CARRY.laneZ + CARRY.reach * carry.toss - .2 * carry.shove);
+}
 const spins = new WeakMap<THREE.Object3D, { angle: number; time: number }>();
 
 /**
- * Lid swings open on the spine hinge, then the disc rises and spins. `insert` sends the
- * disc to the console slot (`slotTop`, case-local) on the figure's back and pushes it in,
- * where the console body hides it.
+ * Lid swings open on the spine hinge, then the disc rises and spins. `insert` takes the disc
+ * to the console slot (`slotTop`, case-local) on the figure's back and pushes it in, where the
+ * console body hides it. The figure rests it on its actual back (Figure.carry); this is the
+ * path that refines, and the whole trip when there is no figure.
  */
 export function poseCase(group: THREE.Object3D, open: number, time: number, insert = 0, slotTop?: THREE.Vector3) {
   const lid = THREE.MathUtils.smoothstep(open, 0, 0.7);
   const lift = THREE.MathUtils.smoothstep(open, 0.45, 1);
   const carry = discCarry(insert);
-  const push = THREE.MathUtils.smoothstep(insert, 0.44, 0.58);
   const slot = slotTop ?? DEFAULT_SLOT;
-  // The label spins while the disc floats and holds still once it is being carried.
+  // The label spins while the disc floats, and stops and comes round upright to be carried.
   const spin = spins.get(group) ?? { angle: 0, time };
-  spin.angle += THREE.MathUtils.clamp(time - spin.time, 0, .1) * 1.4 * lift * (1 - carry.raise);
+  if (carry.settle <= 0) spin.angle += THREE.MathUtils.clamp(time - spin.time, 0, .1) * 1.4 * lift;
   spin.time = time;
   spins.set(group, spin);
+  const off = spin.angle - LABEL_UP, roll = spin.angle - (off - Math.round(off / (Math.PI * 2)) * Math.PI * 2) * carry.settle;
   for (const child of group.children) {
     const part = child.userData.casePart;
     if (!part) continue;
@@ -179,14 +205,19 @@ export function poseCase(group: THREE.Object3D, open: number, time: number, inse
     // Half-open like a door, so the cover art stays readable beside the disc.
     if (part === "lid") child.rotation.y = -1.25 * lid;
     else {
-      const outX = x + 1.35 * lift, outY = y + 0.2 * lift, outZ = z + 0.55 * lift;
-      const height = THREE.MathUtils.lerp(THREE.MathUtils.lerp(THREE.MathUtils.lerp(outY, CARRY_HIGH, carry.raise), CARRY_BACK, carry.lower), slot.y, carry.lift);
-      child.position.set(
-        THREE.MathUtils.lerp(outX, slot.x, carry.walk),
-        height,
-        THREE.MathUtils.lerp(outZ, slot.z + DISC_RADIUS + 0.2, carry.out) - push * (2 * DISC_RADIUS + 0.5),
-      );
-      child.rotation.set(0, Math.PI / 2 * carry.turn, spin.angle);
+      // Floating by the case, then over the lane to hover behind the figure and down onto its
+      // back, which it follows along the desk. Heaved off, it arcs over to the slot's mouth.
+      const back = carrierSpot(insert, slot).add(CARRY.back);
+      const hover = back.clone().add(new THREE.Vector3(-Math.cos(CARRY.angle), Math.sin(CARRY.angle), 0).multiplyScalar(CARRY.hover));
+      const at = new THREE.Vector3(x + 1.35 * lift, y + 0.2 * lift + .15 * carry.settle, z + 0.55 * lift).lerp(hover, carry.glide).lerp(back, carry.load);
+      if (carry.toss > 0) {
+        const mouth = new THREE.Vector3(slot.x, slot.y, slot.z + DISC_RADIUS + .2);
+        new THREE.CubicBezierCurve3(back, back.clone().add(new THREE.Vector3(-.35, 1, .05)), new THREE.Vector3(slot.x, 3, mouth.z), mouth).getPoint(carry.toss, at);
+      }
+      at.z -= CARRY.shove * carry.shove + (2 * DISC_RADIUS + .5 - CARRY.shove) * carry.pull;
+      child.position.copy(at);
+      // Side-on for the slot, swinging the label round towards the visitor's side.
+      child.rotation.set(0, -Math.PI / 2 * THREE.MathUtils.smoothstep(carry.toss, .3, .75), roll);
     }
   }
 }
