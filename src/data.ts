@@ -43,6 +43,10 @@ export interface CaseStudyMedia { src: string; caption?: string }
 export interface CaseStudySection {
   kicker: string;
   heading: string;
+  /** The line shown on the slide; `body` and `points` sit behind "Read more". */
+  summary?: string;
+  /** Up to three figures from the section, shown large. */
+  stats?: { value: string; label: string }[];
   body: string[];
   points?: string[];
   media?: CaseStudyMedia[];
@@ -52,6 +56,8 @@ export interface CaseStudySection {
 export interface CaseStudy {
   pitch: string;
   facts: { label: string; value: string }[];
+  /** More shots for a strip on the cover. */
+  gallery?: CaseStudyMedia[];
   sections: CaseStudySection[];
 }
 

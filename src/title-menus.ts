@@ -185,35 +185,41 @@ abstract class TitleMenu {
   }
 
   /**
-   * "About the game" as a portfolio case study, one section to a screen: a cover on the key art
-   * (title, pitch, facts), then a slide per section with the text on the menu's own panel colour
-   * and the pictures large beside it. Screens snap as they scroll; dots on the right jump.
+   * "About the game" as a portfolio case study, one section to a screen, dressed in the game's
+   * own look by the theme's CSS (a field journal, an order slip, a lit window, an exhibit). Each
+   * screen shows a short line, three figures and a collage of up to four pictures; the full text
+   * waits behind "Read more". The cover is the key art with the title, pitch, facts and a strip
+   * of shots.
    */
   private studyMarkup(s: CaseStudy) {
-    const r = this.r, hero = r.hero ?? r.cover, total = pad(s.sections.length);
+    const r = this.r, hero = r.hero ?? r.cover, count = s.sections.length, total = pad(count);
     const links = [...(r.links ?? []), ...(r.links?.some((link) => link.url === r.source) ? [] : [{ label: "Project link", url: r.source }])];
-    // The whole screenshot, over a blurred, darkened copy of itself that fills the space.
-    const picture = (m: CaseStudyMedia, inset?: CaseStudyMedia) => `<figure class="cs-pic">
-      <img class="cs-fill" src="${media(m.src)}" alt="" aria-hidden="true" decoding="async">
-      <img class="cs-shot" src="${media(m.src)}" alt="${e(m.caption ?? r.title)}" decoding="async">
-      ${inset ? `<img class="cs-inset" src="${media(inset.src)}" alt="${e(inset.caption ?? r.title)}" decoding="async">` : ""}
-      ${m.caption || inset?.caption ? `<figcaption>${e(m.caption ?? "")}${inset?.caption ? `<span>Inset: ${e(inset.caption)}</span>` : ""}</figcaption>` : ""}</figure>`;
+    const figure = (m: CaseStudyMedia, i: number) => `<figure class="cs-fig cs-f${i + 1}"><img src="${media(m.src)}" alt="${e(m.caption ?? r.title)}" decoding="async">${m.caption ? `<figcaption>${e(m.caption)}</figcaption>` : ""}</figure>`;
+    // Where the reader is, drawn by the theme: tents on a trail, stops on a track, lit windows, paws.
+    const track = (at: number) => `<div class="cs-track" aria-hidden="true">${Array.from({ length: count }, (_, i) => `<i class="${i < at ? "done" : i === at ? "on" : ""}"></i>`).join("")}</div>`;
+    const first = (x: CaseStudySection) => x.body[0].split(/(?<=\.)\s/)[0];
     const slide = (x: CaseStudySection, i: number) => {
-      const [first, second] = x.media ?? [];
-      const text = `<div class="cs-text"><div class="cs-inner"><div class="cs-n">${pad(i + 1)} / ${total}</div><div class="cs-k">${e(x.kicker)}</div><h3>${e(x.heading)}</h3>
-        ${x.body.map((p) => `<p>${e(p)}</p>`).join("")}
-        ${x.points?.length ? `<ul class="cs-points">${x.points.map((p) => `<li>${e(p)}</li>`).join("")}</ul>` : ""}
-        ${i === s.sections.length - 1 ? `<div class="tm-links">${links.map((link) => `<a href="${e(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} ↗</a>`).join("")}</div>` : ""}</div></div>`;
-      return first
-        ? `<section class="cs-slide" data-sec="${i + 1}">${text}${picture(first, second)}</section>`
-        : `<section class="cs-slide cs-solo" data-sec="${i + 1}">${hero ? `<img class="cs-fill" src="${media(hero)}" alt="" aria-hidden="true" decoding="async">` : ""}${text}</section>`;
+      const shots = (x.media ?? []).slice(0, 4);
+      const text = `<div class="cs-text"><div class="cs-inner">
+        <div class="cs-k"><span class="cs-n">${pad(i + 1)} / ${total}</span><span>${e(x.kicker)}</span></div>
+        <h3>${e(x.heading)}</h3>
+        <p class="cs-sum">${e(x.summary ?? first(x))}</p>
+        ${x.stats?.length ? `<div class="cs-stats">${x.stats.map((st) => `<div><b>${e(st.value)}</b><span>${e(st.label)}</span></div>`).join("")}</div>` : ""}
+        <button type="button" class="cs-more" data-tm="more" aria-expanded="false">Read more</button>
+        <div class="cs-full" hidden>${x.body.map((p) => `<p>${e(p)}</p>`).join("")}
+          ${x.points?.length ? `<ul class="cs-points">${x.points.map((p) => `<li>${e(p)}</li>`).join("")}</ul>` : ""}</div>
+        ${i === count - 1 ? `<div class="tm-links">${links.map((link) => `<a href="${e(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} ↗</a>`).join("")}</div>` : ""}</div></div>`;
+      return shots.length
+        ? `<section class="cs-slide" data-sec="${i + 1}">${text}<div class="cs-pics cs-n${shots.length}">${shots.map(figure).join("")}</div>${track(i)}</section>`
+        : `<section class="cs-slide cs-solo" data-sec="${i + 1}">${hero ? `<img class="cs-fill" src="${media(hero)}" alt="" aria-hidden="true" decoding="async">` : ""}${text}${track(i)}</section>`;
     };
+    const strip = (s.gallery ?? []).slice(0, 4);
     return `<div class="cs">
       <section class="cs-slide cs-cover" data-sec="0">${hero ? `<img class="cs-hero" src="${media(hero)}" alt="${e(r.title)}" decoding="async">` : ""}
         <div class="cs-inner"><div class="cs-k">${e(r.en)}</div><h3 class="cs-title">${e(r.title)}</h3><p class="cs-pitch">${e(s.pitch)}</p>
           <dl class="cs-facts">${s.facts.map((f) => `<div><dt>${e(f.label)}</dt><dd>${e(f.value)}</dd></div>`).join("")}</dl>
-          ${r.tags?.length ? `<ul class="tm-tags">${r.tags.map((tag) => `<li>${e(tag)}</li>`).join("")}</ul>` : ""}
-          <div class="cs-more">${total} SECTIONS · SCROLL ↓</div></div></section>
+          <div class="cs-go">${total} SECTIONS · SCROLL ↓</div></div>
+        ${strip.length ? `<div class="cs-strip">${strip.map((m) => `<figure><img src="${media(m.src)}" alt="${e(m.caption ?? r.title)}" decoding="async"></figure>`).join("")}</div>` : ""}</section>
       ${s.sections.map(slide).join("")}
     </div>`;
   }
@@ -315,6 +321,14 @@ abstract class TitleMenu {
     if (control?.dataset.tm === "close") this.closePanel();
     if (control?.dataset.tm === "shot") this.showShot(Number(control.dataset.i));
     if (control?.dataset.tm === "toc") this.toSlide(Number(control.dataset.i));
+    if (control?.dataset.tm === "more") {
+      // The section's full text opens in place; the text column scrolls if it runs long.
+      const full = control.nextElementSibling as HTMLElement, open = full.hidden;
+      full.hidden = !open;
+      control.setAttribute("aria-expanded", String(open));
+      control.textContent = open ? "Show less" : "Read more";
+      control.closest(".cs-slide")?.classList.toggle("cs-open", open);
+    }
     if (control?.dataset.tm === "seek") {
       const video = this.panel.querySelector("video");
       if (video) { video.currentTime = Number(control.dataset.at); void video.play().catch(() => {}); }

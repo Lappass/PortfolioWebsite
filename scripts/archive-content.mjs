@@ -63,6 +63,8 @@ function validateStudy(study, label, errors) {
   if (!isText(study.pitch)) errors.push(`${label}.pitch：必须是非空文本`);
   if (!Array.isArray(study.facts) || !study.facts.every((fact) => fact && isText(fact.label) && isText(fact.value)))
     errors.push(`${label}.facts：每项需要 label 和 value`);
+  if (study.gallery !== undefined && (!Array.isArray(study.gallery) || !study.gallery.every((item) => item && isMediaPath(item.src) && (item.caption === undefined || isText(item.caption)))))
+    errors.push(`${label}.gallery：每项需要有效的 src，caption 为可选文本`);
   if (!Array.isArray(study.sections) || study.sections.length === 0) {
     errors.push(`${label}.sections：至少需要一节`);
     return;
@@ -72,6 +74,9 @@ function validateStudy(study, label, errors) {
     if (!section || !isText(section.kicker) || !isText(section.heading) || !texts(section.body))
       errors.push(`${at}：需要 kicker、heading 和至少一段 body`);
     if (section?.points !== undefined && !texts(section.points)) errors.push(`${at}.points：必须是非空文本数组`);
+    if (section?.summary !== undefined && !isText(section.summary)) errors.push(`${at}.summary：必须是非空文本`);
+    if (section?.stats !== undefined && (!Array.isArray(section.stats) || section.stats.length > 3 || !section.stats.every((s) => s && isText(s.value) && isText(s.label))))
+      errors.push(`${at}.stats：最多三项，每项需要 value 和 label`);
     if (section?.media !== undefined && (!Array.isArray(section.media) || !section.media.every((item) => item && isMediaPath(item.src) && (item.caption === undefined || isText(item.caption)))))
       errors.push(`${at}.media：每项需要有效的 src，caption 为可选文本`);
     if (section?.layout !== undefined && !["side", "wide"].includes(section.layout)) errors.push(`${at}.layout：只能是 side 或 wide`);

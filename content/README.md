@@ -46,6 +46,8 @@
     {
       "kicker": "CORE LOOP",
       "heading": "一节的标题",
+      "summary": "幻灯片上显示的一两句话",
+      "stats": [{ "value": "50°", "label": "可攀爬的坡度" }],
       "body": ["第一段", "第二段"],
       "points": ["可选的要点"],
       "media": [{ "src": "works/x-002/study/01.jpg", "caption": "可选图注" }],
@@ -55,7 +57,7 @@
 }
 ```
 
-长文整屏显示，一节一屏：第一屏是铺满的主视觉与标题、`pitch`、`facts`；之后每节左边是文字（菜单面板的颜色，过长时单独滚动），右边是第一张图的完整画面，第二张图作为右下角的小插图，第三张起不显示；没有图片的节把文字放在模糊的主视觉上。右侧圆点可以跳转，↑↓、PageUp/PageDown 与空格逐屏翻页。`layout` 目前不影响版式，可以省略。长文的配图放在 `public/works/<编号>/study/`。TXT 下载会附上各节正文。
+长文整屏显示，一节一屏，并按游戏的 `menu` 主题换装（Trail 是旅行日记、Last Mile 是订单条、LOCKDOWN 是夜里亮灯的窗户、Sniff & Snitch 是证物墙）。第一屏是铺满的主视觉与标题、`pitch`、`facts`，`gallery` 可再放最多四张截图排在右下。之后每节左边是 `summary` 与最多三个 `stats`（大号数字与短标签），右边是 `media` 前四张图的拼贴；`body` 与 `points` 收在“Read more”里，点开才显示。没有 `summary` 时取 `body` 的第一句。没有图片的节把文字放在模糊的主视觉上。右侧圆点可以跳转，↑↓、PageUp/PageDown 与空格逐屏翻页。`layout` 目前不影响版式，可以省略。长文的配图放在 `public/works/<编号>/study/`。TXT 下载会附上各节正文。
 
 封面区按 Unity、视频、封面图的顺序选择第一个可用项；有 Unity 时视频单独显示在下方。
 

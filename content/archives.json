@@ -145,6 +145,27 @@
               "LockDown is about slowly losing control while you wait for something with no announced end. The idea comes from my family's 2022 lockdown in Shanghai. We ate whatever came in the supply package, my grandparents needed medicine that nobody was allowed to go and get, and nobody told us when it would end.",
               "I use those memories as design rules. The player receives supplies instead of shopping. The apartment never grows. Food, medicine and the neighbors' requests all come out of one small reserve. The run lasts twenty days, but the screen shows the day number with no countdown.",
               "The cooking puzzle starts from the traditional Chinese tangram. Here the shapes are ingredients and the space is a pan or a fridge, and the gaps and leftovers show the shortage without a line of dialogue."
+            ],
+            "summary": "LockDown comes from my family's 2022 Shanghai lockdown. I turned those memories into rules: supplies arrive instead of shopping, the flat never grows, and twenty days pass with no countdown.",
+            "stats": [
+              {
+                "value": "2022",
+                "label": "Family lockdown in Shanghai"
+              },
+              {
+                "value": "20",
+                "label": "Days in a run"
+              },
+              {
+                "value": "Tangram",
+                "label": "Root of the puzzle"
+              }
+            ],
+            "media": [
+              {
+                "src": "works/x-002/study/e11.jpg",
+                "caption": "Day 12 in the same small apartment, with no countdown shown."
+              }
             ]
           },
           {
@@ -162,9 +183,32 @@
               {
                 "src": "works/x-002/study/02.jpg",
                 "caption": "The Day 7 package: noodles, a cabbage and rice for three people."
+              },
+              {
+                "src": "works/x-002/study/e21.jpg",
+                "caption": "Day 1 morning, with the first package waiting to be picked up."
+              },
+              {
+                "src": "works/x-002/study/e22.jpg",
+                "caption": "Day 6 after dinner: time to rest before the next day."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "Each morning carries yesterday's consequences. The player reads the phone, fits food into the pan, serves, and stores the leftovers that fit. Sleep moves the day on but resets nothing.",
+            "stats": [
+              {
+                "value": "-2",
+                "label": "Morale lost each morning"
+              },
+              {
+                "value": "-1",
+                "label": "Health lost each morning"
+              },
+              {
+                "value": "Day 3",
+                "label": "Fridge becomes usable"
+              }
+            ]
           },
           {
             "kicker": "COOKING",
@@ -182,9 +226,32 @@
               {
                 "src": "works/x-002/study/04.jpg",
                 "caption": "Day 6, when the new knife splits a piece of tofu along the grid before it goes into the irregular pan."
+              },
+              {
+                "src": "works/x-002/study/e31.jpg",
+                "caption": "Before the knife, whole pieces fill a plain rectangular pan."
+              },
+              {
+                "src": "works/x-002/study/e32.jpg",
+                "caption": "Later, pork, tofu and egg share an irregular pan."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "I built the game around a pan, because every problem in the house ends at dinner. From Day 6 a knife cuts along the grid and the pan turns irregular.",
+            "stats": [
+              {
+                "value": "470 kcal",
+                "label": "Meal calorie target"
+              },
+              {
+                "value": "12",
+                "label": "Ingredients, 3 to 7 cells"
+              },
+              {
+                "value": "38%",
+                "label": "Grade weight on balance"
+              }
+            ]
           },
           {
             "kicker": "FRIDGE AND SPOILAGE",
@@ -198,9 +265,32 @@
               {
                 "src": "works/x-002/study/05.jpg",
                 "caption": "The fridge on Day 8, where the dark olive cells are rot that has crossed between items where they touch."
+              },
+              {
+                "src": "works/x-002/study/e41.jpg",
+                "caption": "Day 3: Grandpa says to put spare food in the fridge."
+              },
+              {
+                "src": "works/x-002/study/e42.jpg",
+                "caption": "The repaired fridge on Day 3: 48 empty cells."
               }
             ],
-            "layout": "side"
+            "layout": "side",
+            "summary": "The fridge unlocks on Day 3. From Day 8 stored food rots and spreads. The grade ignores rot, so an S meal can still make the family ill.",
+            "stats": [
+              {
+                "value": "6×8",
+                "label": "Fridge grid"
+              },
+              {
+                "value": "62%",
+                "label": "Daily spread within an item"
+              },
+              {
+                "value": "-4",
+                "label": "Health per rotten cell"
+              }
+            ]
           },
           {
             "kicker": "NARRATIVE",
@@ -218,9 +308,32 @@
               {
                 "src": "works/x-002/study/07.jpg",
                 "caption": "Day 13, when 7F is sealed and each answer says what it will cost."
+              },
+              {
+                "src": "works/x-002/study/e51.jpg",
+                "caption": "Day 8: Daughter has a fever, and the player chooses porridge."
+              },
+              {
+                "src": "works/x-002/study/e52.jpg",
+                "caption": "Day 18: take Daughter downstairs early, or wait for the assigned time."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "I cut my real household of five to three: Grandpa, Daughter and a faceless player. Five neighbors reach the flat through the building chat, and their requests cost food.",
+            "stats": [
+              {
+                "value": "60",
+                "label": "Grandpa's starting health"
+              },
+              {
+                "value": "38.2°",
+                "label": "Daughter's fever, Day 8"
+              },
+              {
+                "value": "60%",
+                "label": "Day 18 downstairs trip works"
+              }
+            ]
           },
           {
             "kicker": "INFORMATION",
@@ -233,9 +346,32 @@
               {
                 "src": "works/x-002/study/08.jpg",
                 "caption": "The final report after Day 20, with the days at home and each person's health."
+              },
+              {
+                "src": "works/x-002/study/e61.jpg",
+                "caption": "The Day 5 paper reports medicine refills running late."
+              },
+              {
+                "src": "works/x-002/study/e62.jpg",
+                "caption": "After dinner, one family member answers in a single line."
               }
             ],
-            "layout": "side"
+            "layout": "side",
+            "summary": "The phone's three channels often report the same problem from different distances. The HUD shows the day and health, and the family's reaction comes as one line after dinner.",
+            "stats": [
+              {
+                "value": "3",
+                "label": "Phone channels"
+              },
+              {
+                "value": "1",
+                "label": "Family reply after dinner"
+              },
+              {
+                "value": "Day 20",
+                "label": "Lockdown ends, final report"
+              }
+            ]
           },
           {
             "kicker": "NEXT BUILD",
@@ -243,7 +379,22 @@
             "body": [
               "In the next build the knife slowly goes blunt. Hard ingredients wear it down faster, a blunt knife only cuts soft food like tofu or cabbage, and sharpening it depends on a neighbor lending a stone. Cut surfaces spoil faster than whole ingredients. On outage days the spoilage clock advances twice and the fridge hum cuts out.",
               "Choices should also reach further. In that build the player picks which two items go to the 6F Stranger, and he comes back on Day 13 expecting the same deal. If Daughter was left to rest, her fever returns on Day 14. 7F sends something back on Day 17 only if they were helped. If the patrol catches the family on Day 18, no package arrives on Day 19."
-            ]
+            ],
+            "summary": "Next I want the knife to wear out and choices to come back later: the 6F Stranger returns, the fever recurs, and a failed Day 18 trip costs a package."
+          }
+        ],
+        "gallery": [
+          {
+            "src": "works/x-002/study/g1.jpg",
+            "caption": "The dining table where every meal ends up."
+          },
+          {
+            "src": "works/x-002/study/g2.jpg",
+            "caption": "Day 7, the apartment before cooking at the counter."
+          },
+          {
+            "src": "works/x-002/study/g3.jpg",
+            "caption": "Day 5: Grandpa finds his medicine box empty."
           }
         ]
       },
@@ -346,9 +497,14 @@
               {
                 "src": "works/x-003/study/01.jpg",
                 "caption": "The title screen, where she sits in the armchair over Leo's Journal with the mountain outside the window."
+              },
+              {
+                "src": "works/x-003/study/e11.jpg",
+                "caption": "Leo's cabin, where every trip starts and ends."
               }
             ],
-            "layout": "side"
+            "layout": "side",
+            "summary": "I want the climb to cost something, so a photo is remembered with the way up. The rules come from my own mountain trips."
           },
           {
             "kicker": "THE CORE LOOP",
@@ -366,9 +522,32 @@
               {
                 "src": "works/x-003/study/02.jpg",
                 "caption": "One trip, with the screen she sees at each step, from packing at home to resting at a fire and coming back."
+              },
+              {
+                "src": "works/x-003/study/e21.jpg",
+                "caption": "The wall map, where she picks the day's start."
+              },
+              {
+                "src": "works/x-003/study/e22.jpg",
+                "caption": "A fire on the mountain, where a night brings fresh film."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "Each trip starts and ends in the cabin, so the player makes the day's choices before opening the door.",
+            "stats": [
+              {
+                "value": "4",
+                "label": "tools in the bag"
+              },
+              {
+                "value": "10",
+                "label": "shots per roll"
+              },
+              {
+                "value": "50%",
+                "label": "score for a blurred photo"
+              }
+            ]
           },
           {
             "kicker": "CLIMBING AND STAMINA",
@@ -392,7 +571,22 @@
                 "caption": "Evening at the Snow Fire, where hunger and cold have each taken a marked slice off the end of the bar."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "Climbing replaced set obstacles. Any face over 50° can be climbed, walking is free, and five afflictions each take a visible slice off the stamina bar.",
+            "stats": [
+              {
+                "value": "50°",
+                "label": "steepness you can climb"
+              },
+              {
+                "value": "20/s",
+                "label": "stamina regained"
+              },
+              {
+                "value": "5",
+                "label": "afflictions on the bar"
+              }
+            ]
           },
           {
             "kicker": "PHOTOGRAPHY",
@@ -412,7 +606,22 @@
                 "caption": "The field guide open at the fox, with all eight of its moments on film."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "The score comes from what is in the frame, and moving blurs the shot, so good photos come from keeping still. Each of the 24 species reacts differently.",
+            "stats": [
+              {
+                "value": "3",
+                "label": "stars at most"
+              },
+              {
+                "value": "24",
+                "label": "species"
+              },
+              {
+                "value": "17:30",
+                "label": "when the owl appears"
+              }
+            ]
           },
           {
             "kicker": "THE ISLAND",
@@ -430,9 +639,32 @@
               {
                 "src": "works/x-003/study/08.jpg",
                 "caption": "Old Ida in the Miners' Camp, deep in the old mine."
+              },
+              {
+                "src": "works/x-003/study/e51.jpg",
+                "caption": "Shepherd Bram asks for a photo of a duck."
+              },
+              {
+                "src": "works/x-003/study/e52.jpg",
+                "caption": "A reward coming down on a paper parachute."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "Sixteen islanders make 38 requests, and the eight tools come from six of their stories, so every new ability has a person behind it.",
+            "stats": [
+              {
+                "value": "16",
+                "label": "people on the island"
+              },
+              {
+                "value": "38",
+                "label": "photo requests"
+              },
+              {
+                "value": "8",
+                "label": "tools from their stories"
+              }
+            ]
           },
           {
             "kicker": "THE CABIN AND THE JOURNAL",
@@ -449,9 +681,18 @@
               {
                 "src": "works/x-003/study/10.jpg",
                 "caption": "The wrist phone sending a goat photo to Kofi on its clean screen."
+              },
+              {
+                "src": "works/x-003/study/e61.jpg",
+                "caption": "The Carver's Shelf, one carving for each completed species."
+              },
+              {
+                "src": "works/x-003/study/e62.jpg",
+                "caption": "Fitting new parts to Leo's camera at the bench."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "The cabin keeps what each trip brings back: postcards, carvings and camera parts. The interface looks like a travel journal, except the wrist phone."
           },
           {
             "kicker": "NEXT",
@@ -463,7 +704,18 @@
               "The hedgehog comes out towards dusk and deer are easiest to find early in the morning, so requests that mention a time depend on it.",
               "An owl that roosts during the day, so players who never stay out after dark can still find one asleep in a tree.",
               "Ambient occlusion for the faceted rock and the cave, and depth of field in the viewfinder."
-            ]
+            ],
+            "summary": "Next, I want the time of day to matter when planning a trip, not only for the owl."
+          }
+        ],
+        "gallery": [
+          {
+            "src": "works/x-003/study/g1.jpg",
+            "caption": "The cabin with its bed, coats and island map."
+          },
+          {
+            "src": "works/x-003/study/g2.jpg",
+            "caption": "Photos and postcards pinned up on the cabin wall."
           }
         ]
       },
@@ -561,6 +813,13 @@
               "The board counts parcels, so a crate counts the same as a coffee.",
               "Each machine fixes one problem and leaves another.",
               "AO-6, the assistant from day 6, never overrules the player."
+            ],
+            "summary": "Riders are paid by the drop, so I have the player hand out every order by hand. Over ten days headquarters moves the station onto machines.",
+            "media": [
+              {
+                "src": "works/x-004/study/e11.jpg",
+                "caption": "The title screen: a ten-day trial at the delivery station."
+              }
             ]
           },
           {
@@ -579,9 +838,28 @@
               {
                 "src": "works/x-004/study/02.jpg",
                 "caption": "The plan between waves on day 2, and what each choice does to funds, deadlines, fatigue and the target."
+              },
+              {
+                "src": "works/x-004/study/e21.jpg",
+                "caption": "A day 2 shift report: delivered against target, wages ¥30 per rider."
               }
             ],
-            "layout": "side"
+            "layout": "side",
+            "summary": "Each day the station gets ¥180 and runs two 90-second waves of orders. At night each rider costs ¥30, and a station that can't pay closes.",
+            "stats": [
+              {
+                "value": "¥180",
+                "label": "Morning budget"
+              },
+              {
+                "value": "2 × 90 s",
+                "label": "Waves per shift"
+              },
+              {
+                "value": "16",
+                "label": "Daily orders by day 7"
+              }
+            ]
           },
           {
             "kicker": "DISPATCH",
@@ -601,9 +879,28 @@
               {
                 "src": "works/x-004/study/03.jpg",
                 "caption": "Day 2: Xiaoyu is about to take an express document order, 58 seconds early, while the other three riders are out."
+              },
+              {
+                "src": "works/x-004/study/e31.jpg",
+                "caption": "Day 1: Chen's arrival estimate for breakfast, with the clock paused."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "The player picks a courier for each order. The deadline is set by the fastest rested courier, so a slower pick or a wait makes it late.",
+            "stats": [
+              {
+                "value": "×1.4",
+                "label": "Deadline slack on day 2"
+              },
+              {
+                "value": "25 s",
+                "label": "Late until it cancels"
+              },
+              {
+                "value": "70%",
+                "label": "Speed when tired"
+              }
+            ]
           },
           {
             "kicker": "MACHINES AND AO-6",
@@ -621,9 +918,28 @@
               {
                 "src": "works/x-004/study/05.jpg",
                 "caption": "Day 8 with three robots on the roster: R-01 can take an ¥80 ID scanner."
+              },
+              {
+                "src": "works/x-004/study/e41.jpg",
+                "caption": "Hiring: robots unlock on day 3, drones on day 4."
               }
             ],
-            "layout": "side"
+            "layout": "side",
+            "summary": "Robots arrive on day 3 and drones on day 4, each taking a rider's place. From day 6 AO-6 recommends someone for each order and learns from every choice.",
+            "stats": [
+              {
+                "value": "Day 3",
+                "label": "Robot arrives"
+              },
+              {
+                "value": "4 of 6",
+                "label": "Machines required on day 10"
+              },
+              {
+                "value": "96",
+                "label": "Choices AO-6 keeps"
+              }
+            ]
           },
           {
             "kicker": "THE RIDERS",
@@ -641,9 +957,28 @@
               {
                 "src": "works/x-004/study/07.jpg",
                 "caption": "A call from the road about a sixth floor with no lift; the illustration is AI-generated."
+              },
+              {
+                "src": "works/x-004/study/e51.jpg",
+                "caption": "Chen's scores in the roster bar: Streets 9, Strength 4, Judgment 9."
               }
             ],
-            "layout": "side"
+            "layout": "side",
+            "summary": "Each of the four riders needs money for one thing by a set evening, and a fair share of the work just covers it.",
+            "stats": [
+              {
+                "value": "¥30",
+                "label": "Xiaoyu's deposit, day 4"
+              },
+              {
+                "value": "¥80",
+                "label": "Chen's medicine, day 9"
+              },
+              {
+                "value": "3",
+                "label": "Scores out of 10"
+              }
+            ]
           },
           {
             "kicker": "THE CITY",
@@ -661,9 +996,28 @@
               {
                 "src": "works/x-004/study/09.jpg",
                 "caption": "The same map in the evening light, with the pins and rider cards unchanged."
+              },
+              {
+                "src": "works/x-004/study/e61.jpg",
+                "caption": "A closer look at the blocks and landmarks near the central crossing."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "The map is a road graph modelled on Xujiahui: 26 hand-placed junctions and eight generated districts, with blocks and ordinary buildings filled in by code.",
+            "stats": [
+              {
+                "value": "26",
+                "label": "Hand-placed junctions"
+              },
+              {
+                "value": "8",
+                "label": "Generated outer districts"
+              },
+              {
+                "value": "5×5",
+                "label": "Street grid per district"
+              }
+            ]
           },
           {
             "kicker": "INTERFACE AND TESTING",
@@ -676,9 +1030,42 @@
               {
                 "src": "works/x-004/study/10.jpg",
                 "caption": "The Strength lesson on day 2: the cartons need Strength 8, and everyone but Ajie is marked Too heavy."
+              },
+              {
+                "src": "works/x-004/study/e71.jpg",
+                "caption": "Day 1: watching Chen make the first delivery while other orders wait."
+              },
+              {
+                "src": "works/x-004/study/e72.jpg",
+                "caption": "The fatigue lesson after a heavy delivery points to Rest."
               }
             ],
-            "layout": "side"
+            "layout": "side",
+            "summary": "Day 1 teaches through a guided first dispatch, and the editor can play all ten days itself to check that all 132 orders end in a delivery or cancellation.",
+            "stats": [
+              {
+                "value": "Day 1",
+                "label": "Guided first dispatch"
+              },
+              {
+                "value": "10",
+                "label": "Days played by script"
+              },
+              {
+                "value": "132",
+                "label": "Orders checked per run"
+              }
+            ]
+          }
+        ],
+        "gallery": [
+          {
+            "src": "works/x-004/study/g1.jpg",
+            "caption": "Morning rush: dispatching a breakfast order to Chen."
+          },
+          {
+            "src": "works/x-004/study/g2.jpg",
+            "caption": "Morning light over the district, with three orders waiting."
           }
         ]
       }
@@ -752,9 +1139,28 @@
               {
                 "src": "works/x-007/study/01.jpg",
                 "caption": "Character select: each player picks a mugshot card."
+              },
+              {
+                "src": "works/x-007/study/e11.jpg",
+                "caption": "Fia's mugshot card on the character select screen."
               }
             ],
-            "layout": "side"
+            "layout": "side",
+            "summary": "Lyra and Fia escape a magic prison together. Each player takes one, and their different heights, jumps and skills give most rooms a separate route for each.",
+            "stats": [
+              {
+                "value": "1.8 m",
+                "label": "Lyra's height"
+              },
+              {
+                "value": "1.4 m",
+                "label": "Fia's jump"
+              },
+              {
+                "value": "3.5 m",
+                "label": "Fia's dash"
+              }
+            ]
           },
           {
             "kicker": "TWO PLAYERS",
@@ -769,7 +1175,8 @@
                 "caption": "The success screen, shown when both players reach their exits."
               }
             ],
-            "layout": "wide"
+            "layout": "wide",
+            "summary": "Lyra and Fia work in parallel, then regroup. The next quest step, winning the level and saving a checkpoint all wait for both players."
           },
           {
             "kicker": "GUARDS",
@@ -778,6 +1185,21 @@
               "I built the guard AI. Each guard is one state machine with 18 states and a suspicion meter from 0 to 1. He sees 12.3 m in a 120 degree cone. An unmasked player within 2.8 m fills the meter in one second, and at the edge of his sight in about 1.8 seconds.",
               "Hearing is a separate system. Crouching carries 4 m, walking 10 m and running 16 m. The first 5 m of a sound pass through walls at full strength, and each wall after that halves what is left, so Fia running behind one wall is heard out to 10.5 m instead of 16.",
               "A noise can pull a guard off his patrol, but it cannot interrupt a guard who is already watching someone. I set it up this way so a thrown coin has to be planned before a guard looks at you; once he is watching, it does nothing."
+            ],
+            "summary": "I built the guard AI: one state machine per guard that sees in a cone and hears through walls, with each wall halving what is left past 5 m.",
+            "stats": [
+              {
+                "value": "18",
+                "label": "guard states"
+              },
+              {
+                "value": "12.3 m",
+                "label": "sight range"
+              },
+              {
+                "value": "16 m",
+                "label": "running footsteps heard"
+              }
             ]
           },
           {
@@ -792,9 +1214,28 @@
               {
                 "src": "works/x-007/study/03.jpg",
                 "caption": "The game over screen when the partner is not rescued in time."
+              },
+              {
+                "src": "works/x-007/study/e41.jpg",
+                "caption": "Fia's game over card: \"You have been captured.\""
               }
             ],
-            "layout": "side"
+            "layout": "side",
+            "summary": "Getting caught puts a player in a gas cage instead of ending the run. The partner has 15 seconds to free them, and the lock is loud.",
+            "stats": [
+              {
+                "value": "15 s",
+                "label": "to reach the cage"
+              },
+              {
+                "value": "1.5 s",
+                "label": "hold E to open"
+              },
+              {
+                "value": "14 m",
+                "label": "noise from the lock"
+              }
+            ]
           },
           {
             "kicker": "CO-OP MECHANISMS",
@@ -803,6 +1244,21 @@
               "The latch door has one lever locked to Lyra and one to Fia, and opens only while both are down. The push box has a handle for each at their own height. Once both have grabbed, either player's W fills one shared ring, and ten taps slide the box 2.5 m. Pushed off a ledge, it becomes a step, and the landing reaches guards 25 m away. The lift door is a heavy gate they raise together, walk under, and let slam shut behind them for good.",
               "The takedown needs both players too. A masked Lyra presses a seal onto an unaware guard, which weakens him for 6 seconds. In that window Fia drops onto him from at least 1.4 m above, and he is out for 12 seconds unless another guard walks up and wakes him.",
               "For these mechanisms the server writes only who is gripping, how many taps have landed and when a sequence starts. Each machine works out the door height and the players' animations from that start time, so a player who joins late sees the same door and no animation has to be sent."
+            ],
+            "summary": "Latch doors, push boxes, the lift door and the takedown all need both players. The server syncs only grips, taps and start times; each machine animates the rest.",
+            "stats": [
+              {
+                "value": "10",
+                "label": "taps slide box 2.5 m"
+              },
+              {
+                "value": "6 s",
+                "label": "seal weakens a guard"
+              },
+              {
+                "value": "12 s",
+                "label": "guard out after drop"
+              }
             ]
           },
           {
@@ -812,6 +1268,21 @@
               "Middle mouse drops a ping on whatever is under the crosshair. Each player has one ping at a time, and it lasts 8 seconds. A ping on a guard sticks to him and moves with him, so the partner knows which guard is meant after he turns a corner.",
               "Holding E lifts a crate overhead. A tap of the left mouse button tosses it 4 m, and holding for half a second throws it 8 m. The crate sits a set height above each character's own head, because a height measured on Lyra left Fia's crate floating a metre above her.",
               "A teammate set up the first quest data and HUD. I turned each level's quests into node graphs of reach, interact and acquire steps, each assigned to Lyra, Fia, either or both, with the server deciding who completed each step. Character select is server-owned as well, and a player who drops out mid-level rejoins in whichever role is free."
+            ],
+            "summary": "Middle mouse pings a spot or a guard for 8 seconds, E lifts a crate to throw 4 or 8 m, and I turned quests into server-checked node graphs.",
+            "stats": [
+              {
+                "value": "8 s",
+                "label": "ping lifetime"
+              },
+              {
+                "value": "1",
+                "label": "ping per player"
+              },
+              {
+                "value": "8 m",
+                "label": "held crate throw"
+              }
             ]
           },
           {
@@ -820,7 +1291,8 @@
             "body": [
               "Coins still use an older flat noise radius that ignores walls, and I want them on the same hearing model as footsteps. Lyra and Fia have separate entries in the noise table with the same values, and quieter steps for Fia would give the players a reason to send her ahead.",
               "Every guard has a hearing multiplier, set to 1 in the current levels; I want to use it for a guard dog at 2.5. I also built a slow curse for guards who cannot reach a player, which slows the player to 45% speed for 3.5 seconds, and I want to place it where a player can stand out of reach."
-            ]
+            ],
+            "summary": "Next, I want coins on the wall-aware hearing model, quieter steps for Fia, a guard dog with 2.5x hearing, and the slow curse placed in a level."
           }
         ]
       }
