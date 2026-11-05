@@ -111,8 +111,7 @@
       "menu": "lockdown",
       "soon": [
         "play",
-        "playthrough",
-        "download"
+        "playthrough"
       ],
       "study": {
         "pitch": "LockDown is a household survival game set in one small apartment during a city lockdown with no announced end. Each day the player fits the delivered food into a pan as a spatial puzzle, stores what is left in a fridge that can rot, and answers the family and the building on the phone.",
@@ -247,6 +246,11 @@
             ]
           }
         ]
+      },
+      "download": {
+        "url": "https://drive.google.com/file/d/1kzXAnCxaNB51dKCUC6r2uStsOHaqU0as/view",
+        "label": "Windows build v0.1.0 (Google Drive). Unzip and run LockDown.exe.",
+        "size": "194 MB"
       }
     },
     {
@@ -297,8 +301,7 @@
       "menu": "trail",
       "soon": [
         "play",
-        "playthrough",
-        "download"
+        "playthrough"
       ],
       "trailer": "works/x-003/trailer.mp4",
       "study": {
@@ -463,6 +466,11 @@
             ]
           }
         ]
+      },
+      "download": {
+        "url": "https://drive.google.com/file/d/1w_2j-iSiIVIgy7f_oNSN7eaSV2JEk4MO/view",
+        "label": "Windows build, 1 Nov 2026 (Google Drive). Unzip and run Trail Adventure.exe.",
+        "size": "233 MB"
       }
     },
     {
