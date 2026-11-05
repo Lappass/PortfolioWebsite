@@ -46,6 +46,10 @@ abstract class TitleMenu {
   private toast: HTMLElement;
   private toastTimer = 0;
   private shot = 0;
+  /** The case-study slide on screen, cover = 0, and where the last key press is taking it. */
+  private slide = 0;
+  private aim = -1;
+  private aimTimer = 0;
   private timers: number[] = [];
   private onResize = () => this.resize();
   /** Selection order, first to last, by item key. */
@@ -168,9 +172,11 @@ abstract class TitleMenu {
       const poster = r.hero ?? r.cover;
       body = `<div class="pp-frame"><div class="pp-unity" data-src="${media(r.unity!)}">${poster ? `<img src="${media(poster)}" alt="">` : ""}<button type="button" class="pp-play" data-page="unity">▶ <span>Load the game</span><small>Unity WebGL · large download</small></button></div></div>`;
     }
-    this.panel.innerHTML = `<div class="tm-sheet tm-sheet-${item.key}" role="dialog" aria-modal="true" aria-label="${e(item.name)}">
+    const study = item.key === "about" && r.study;
+    this.panel.innerHTML = `<div class="tm-sheet tm-sheet-${item.key}${study ? " cs-mode" : ""}" role="dialog" aria-modal="true" aria-label="${e(item.name)}">
       <header><span class="tm-sheet-k">${e(this.r.title)}</span><h2>${e(item.name)}</h2><button type="button" data-tm="close"><b>B</b> CLOSE</button></header>
-      <div class="tm-sheet-body">${body}</div></div>`;
+      <div class="tm-sheet-body">${body}</div>${study ? this.studyDots(r.study!) : ""}</div>`;
+    this.panel.classList.toggle("cs-panel", Boolean(study));
     this.panel.hidden = false;
     this.el.classList.add("paneled");
     if (item.key === "shots") this.showShot(0);
@@ -179,48 +185,61 @@ abstract class TitleMenu {
   }
 
   /**
-   * "About the game" as a portfolio case study: the pitch and facts, the key art, then numbered
-   * sections of text with their pictures beside or under them, and a contents column that stays
-   * in view while the sheet scrolls.
+   * "About the game" as a portfolio case study, one section to a screen: a cover on the key art
+   * (title, pitch, facts), then a slide per section with the text on the menu's own panel colour
+   * and the pictures large beside it. Screens snap as they scroll; dots on the right jump.
    */
   private studyMarkup(s: CaseStudy) {
-    const r = this.r, hero = r.hero ?? r.cover;
+    const r = this.r, hero = r.hero ?? r.cover, total = pad(s.sections.length);
     const links = [...(r.links ?? []), ...(r.links?.some((link) => link.url === r.source) ? [] : [{ label: "Project link", url: r.source }])];
-    const figure = (m: CaseStudyMedia) => `<figure><img src="${media(m.src)}" alt="${e(m.caption ?? r.title)}" decoding="async">${m.caption ? `<figcaption>${e(m.caption)}</figcaption>` : ""}</figure>`;
-    const section = (x: CaseStudySection, i: number) => {
-      const shots = x.media ?? [];
-      const layout = shots.length ? x.layout ?? "side" : "text";
-      return `<section class="cs-sec cs-${layout}" data-sec="${i}">
-        <div class="cs-text"><div class="cs-k"><b>${pad(i + 1)}</b>${e(x.kicker)}</div><h3>${e(x.heading)}</h3>
-          ${x.body.map((p) => `<p>${e(p)}</p>`).join("")}
-          ${x.points?.length ? `<ul class="cs-points">${x.points.map((p) => `<li>${e(p)}</li>`).join("")}</ul>` : ""}</div>
-        ${shots.length ? `<div class="cs-media cs-n${Math.min(3, shots.length)}">${shots.map(figure).join("")}</div>` : ""}
-      </section>`;
+    // The whole screenshot, over a blurred, darkened copy of itself that fills the space.
+    const picture = (m: CaseStudyMedia, inset?: CaseStudyMedia) => `<figure class="cs-pic">
+      <img class="cs-fill" src="${media(m.src)}" alt="" aria-hidden="true" decoding="async">
+      <img class="cs-shot" src="${media(m.src)}" alt="${e(m.caption ?? r.title)}" decoding="async">
+      ${inset ? `<img class="cs-inset" src="${media(inset.src)}" alt="${e(inset.caption ?? r.title)}" decoding="async">` : ""}
+      ${m.caption || inset?.caption ? `<figcaption>${e(m.caption ?? "")}${inset?.caption ? `<span>Inset: ${e(inset.caption)}</span>` : ""}</figcaption>` : ""}</figure>`;
+    const slide = (x: CaseStudySection, i: number) => {
+      const [first, second] = x.media ?? [];
+      const text = `<div class="cs-text"><div class="cs-inner"><div class="cs-n">${pad(i + 1)} / ${total}</div><div class="cs-k">${e(x.kicker)}</div><h3>${e(x.heading)}</h3>
+        ${x.body.map((p) => `<p>${e(p)}</p>`).join("")}
+        ${x.points?.length ? `<ul class="cs-points">${x.points.map((p) => `<li>${e(p)}</li>`).join("")}</ul>` : ""}
+        ${i === s.sections.length - 1 ? `<div class="tm-links">${links.map((link) => `<a href="${e(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} ↗</a>`).join("")}</div>` : ""}</div></div>`;
+      return first
+        ? `<section class="cs-slide" data-sec="${i + 1}">${text}${picture(first, second)}</section>`
+        : `<section class="cs-slide cs-solo" data-sec="${i + 1}">${hero ? `<img class="cs-fill" src="${media(hero)}" alt="" aria-hidden="true" decoding="async">` : ""}${text}</section>`;
     };
-    return `<article class="cs">
-      <nav class="cs-toc" aria-label="Sections">${s.sections.map((x, i) => `<button type="button" data-tm="toc" data-i="${i}"><span>${pad(i + 1)}</span>${e(x.kicker)}</button>`).join("")}</nav>
-      <div class="cs-main">
-        <div class="cs-head"><div class="tm-en">${e(r.en)}</div><p class="cs-pitch">${e(s.pitch)}</p>
+    return `<div class="cs">
+      <section class="cs-slide cs-cover" data-sec="0">${hero ? `<img class="cs-hero" src="${media(hero)}" alt="${e(r.title)}" decoding="async">` : ""}
+        <div class="cs-inner"><div class="cs-k">${e(r.en)}</div><h3 class="cs-title">${e(r.title)}</h3><p class="cs-pitch">${e(s.pitch)}</p>
           <dl class="cs-facts">${s.facts.map((f) => `<div><dt>${e(f.label)}</dt><dd>${e(f.value)}</dd></div>`).join("")}</dl>
-          ${r.tags?.length ? `<ul class="tm-tags">${r.tags.map((tag) => `<li>${e(tag)}</li>`).join("")}</ul>` : ""}</div>
-        ${hero ? `<figure class="cs-hero"><img src="${media(hero)}" alt="${e(r.title)}" decoding="async"></figure>` : ""}
-        ${s.sections.map(section).join("")}
-        <div class="cs-end"><div class="tm-links">${links.map((link) => `<a href="${e(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} ↗</a>`).join("")}</div></div>
-      </div>
-    </article>`;
+          ${r.tags?.length ? `<ul class="tm-tags">${r.tags.map((tag) => `<li>${e(tag)}</li>`).join("")}</ul>` : ""}
+          <div class="cs-more">${total} SECTIONS · SCROLL ↓</div></div></section>
+      ${s.sections.map(slide).join("")}
+    </div>`;
   }
 
-  /** Marks the section being read in the contents column. */
+  /** The dots down the right edge: the cover and one per section. */
+  private studyDots(s: CaseStudy) {
+    return `<nav class="cs-dots" aria-label="Sections">${["Cover", ...s.sections.map((x) => x.kicker)].map((label, i) => `<button type="button" data-tm="toc" data-i="${i}" aria-label="${e(label)}" title="${e(label)}"></button>`).join("")}</nav>`;
+  }
+
+  private studyScroller() { return this.panel.querySelector<HTMLElement>(".cs-mode .tm-sheet-body"); }
+
+  /** Jumps to a slide, cover = 0. */
+  private toSlide(i: number) {
+    const slides = this.panel.querySelectorAll<HTMLElement>(".cs-slide");
+    slides[Math.max(0, Math.min(slides.length - 1, i))]?.scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
+  }
+
+  /** Lights the dot of the slide on screen. */
   private trackStudy() {
-    const sheet = this.panel.querySelector<HTMLElement>(".tm-sheet"), toc = this.panel.querySelectorAll(".cs-toc button");
-    if (!sheet || !toc.length) return;
-    const sections = [...this.panel.querySelectorAll<HTMLElement>(".cs-sec")];
+    const scroller = this.studyScroller(), dots = this.panel.querySelectorAll(".cs-dots button");
+    if (!scroller || !dots.length) return;
     const mark = () => {
-      const line = sheet.getBoundingClientRect().top + sheet.clientHeight * 0.35;
-      const at = sections.reduce((found, el, i) => (el.getBoundingClientRect().top <= line ? i : found), 0);
-      toc.forEach((el, i) => el.classList.toggle("on", i === at));
+      this.slide = Math.round(scroller.scrollTop / scroller.clientHeight);
+      dots.forEach((el, i) => el.classList.toggle("on", i === this.slide));
     };
-    sheet.addEventListener("scroll", mark, { passive: true });
+    scroller.addEventListener("scroll", mark, { passive: true });
     mark();
   }
 
@@ -244,6 +263,7 @@ abstract class TitleMenu {
     // Stops any video or game in it.
     this.panel.innerHTML = "";
     this.panel.hidden = true;
+    this.panel.classList.remove("cs-panel");
     this.el.classList.remove("paneled");
     this.sound("back");
     this.el.querySelector<HTMLElement>(`button[data-item="${this.sel}"]`)?.focus({ preventScroll: true });
@@ -254,6 +274,19 @@ abstract class TitleMenu {
   handleKey(event: KeyboardEvent) {
     if (this.panelOpen) {
       if (event.key === "Escape") return this.closePanel();
+      // The case study turns a screen at a time.
+      if (this.studyScroller()) {
+        const step = { ArrowDown: 1, PageDown: 1, " ": 1, ArrowUp: -1, PageUp: -1 }[event.key];
+        if (step) {
+          // Count from where the last press is headed, so quick presses add up mid-scroll.
+          const total = this.panel.querySelectorAll(".cs-slide").length;
+          this.aim = Math.max(0, Math.min(total - 1, (this.aim >= 0 ? this.aim : this.slide) + step));
+          clearTimeout(this.aimTimer);
+          this.aimTimer = window.setTimeout(() => (this.aim = -1), 800);
+          this.toSlide(this.aim);
+          return true;
+        }
+      }
       if (this.panel.querySelector(".tm-shots") && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
         this.showShot(this.shot + (event.key === "ArrowRight" ? 1 : -1));
         return true;
@@ -281,8 +314,7 @@ abstract class TitleMenu {
     const control = target.closest<HTMLElement>("[data-tm]");
     if (control?.dataset.tm === "close") this.closePanel();
     if (control?.dataset.tm === "shot") this.showShot(Number(control.dataset.i));
-    if (control?.dataset.tm === "toc")
-      this.panel.querySelectorAll<HTMLElement>(".cs-sec")[Number(control.dataset.i)]?.scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
+    if (control?.dataset.tm === "toc") this.toSlide(Number(control.dataset.i));
     if (control?.dataset.tm === "seek") {
       const video = this.panel.querySelector("video");
       if (video) { video.currentTime = Number(control.dataset.at); void video.play().catch(() => {}); }
