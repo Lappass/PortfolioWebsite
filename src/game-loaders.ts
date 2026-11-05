@@ -401,7 +401,64 @@ const lastmile: GameLoader = (c, w, h, t, art) => {
   c.globalAlpha = alpha;
 };
 
-const LOADERS: Record<string, GameLoader> = { lockdown, trail, lastmile };
+// Sniff & Snitch: a spy-film style opening, in the game's own terms. White dots roll across the
+// dark one after another; the last opens into a prison searchlight that sweeps the lineup wall
+// of the key art (public/works/x-007/hero.jpg) and finds the two of them. The booking camera
+// flashes, the light holds on them a beat, then opens out to the whole key art for the page.
+// Only the rhythm is borrowed: no barrel, gun or film marks.
+const SN_DARK = "#0c0a0d", SN_WALL = "#d8d5cf";
+// The two of them in the key art (art/sniff_poster.mjs HERO: Lyra at 1120, Fia at 1560, floor 960).
+const SN_FOCUS: [number, number] = [1340 / 1920, 600 / 1080];
+const SN_DOTS = 4;
+
+const sniff: GameLoader = (c, w, h, t, art) => {
+  const alpha = c.globalAlpha;
+  const R = h * 0.34, cy = h / 2;
+  c.fillStyle = SN_DARK;
+  c.fillRect(0, 0, w, h);
+  // Dots roll in one after another, each out from behind the one before, and stop in a row;
+  // the last one is the light.
+  const stops = Array.from({ length: SN_DOTS }, (_, i) => w * (0.14 + i * 0.12));
+  const r0 = h * 0.045;
+  const grow = inOut(span(t, 0.2, 0.3));
+  for (let i = 0; i < SN_DOTS; i++) {
+    const k = ease(span(t, 0.02 + i * 0.045, 0.1 + i * 0.045));
+    if (!k) continue;
+    const last = i === SN_DOTS - 1;
+    // The last dot becomes the light; the others fade as it grows.
+    if (last ? grow > 0 : grow >= 1) continue;
+    c.globalAlpha = alpha * (1 - grow);
+    c.fillStyle = "#f4f1ea";
+    c.beginPath(); c.arc(lerp(i ? stops[i - 1] : -r0, stops[i], k), cy, r0, 0, Math.PI * 2); c.fill();
+  }
+  c.globalAlpha = alpha;
+  if (!grow) return;
+  // The light: grows out of the last dot, then sweeps right along the wall to the two of them,
+  // a touch past and back, as if hand-held. At the end it opens out to the full frame.
+  const sweep = inOut(span(t, 0.28, 0.56)), settle = Math.sin(span(t, 0.5, 0.62) * Math.PI) * w * 0.012;
+  const open = inOut(span(t, 0.8, 1));
+  const focusX = SN_FOCUS[0] * w, focusY = SN_FOCUS[1] * h;
+  const wobble = Math.sin(span(t, 0.62, 0.82) * Math.PI * 3) * h * 0.012 * (1 - open);
+  const lx = lerp(lerp(lerp(stops[SN_DOTS - 1], w * 0.3, grow), focusX + settle, sweep), w / 2, open);
+  const ly = lerp(lerp(cy, focusY, sweep) + Math.sin(sweep * Math.PI) * -h * 0.06 + wobble, h / 2, open);
+  const r = lerp(lerp(r0, R, grow), Math.hypot(w, h) * 0.6, open);
+  c.save();
+  c.beginPath(); c.arc(lx, ly, r, 0, Math.PI * 2); c.clip();
+  if (art) c.drawImage(art, 0, 0, w, h);
+  else { c.fillStyle = SN_WALL; c.fillRect(0, 0, w, h); }
+  // Falloff towards the rim, gone once the light has opened out.
+  const fall = c.createRadialGradient(lx, ly, r * 0.55, lx, ly, r);
+  fall.addColorStop(0, "rgba(12,10,13,0)");
+  fall.addColorStop(1, `rgba(12,10,13,${0.55 * (1 - open)})`);
+  c.fillStyle = fall;
+  c.fillRect(0, 0, w, h);
+  c.restore();
+  // The booking camera's flash when the light has them.
+  const flash = Math.max(0, 1 - Math.abs(t - 0.6) / 0.035);
+  if (flash) { c.globalAlpha = alpha * flash * 0.9; c.fillStyle = "#ffffff"; c.fillRect(0, 0, w, h); c.globalAlpha = alpha; }
+};
+
+const LOADERS: Record<string, GameLoader> = { lockdown, trail, lastmile, sniff };
 
 export function loaderFor(record: ArchiveRecord): GameLoader | undefined {
   return record.loader ? LOADERS[record.loader] : undefined;

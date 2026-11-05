@@ -7,11 +7,7 @@
   ],
   "categories": [
     "Games",
-    "Web",
-    "3D Graphics",
-    "Interaction",
-    "Visual Design",
-    "Experiments"
+    "Web"
   ],
   "records": [
     {
@@ -167,10 +163,10 @@
       "menu": "trail",
       "soon": [
         "play",
-        "trailer",
         "playthrough",
         "download"
-      ]
+      ],
+      "trailer": "works/x-003/trailer.mp4"
     },
     {
       "id": "X-004",
@@ -226,140 +222,38 @@
       ]
     },
     {
-      "id": "X-005",
-      "title": "3D Graphics Work 02",
-      "en": "3D GRAPHICS WORK 02",
-      "department": "Placeholder: your role",
-      "category": "3D Graphics",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: stack / collaborators",
-      "clearance": "PUBLIC",
-      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
-      "findings": [
-        "Highlight one: placeholder",
-        "Highlight two: placeholder",
-        "Highlight three: placeholder"
-      ],
-      "source": "https://github.com/Lappass"
-    },
-    {
-      "id": "X-006",
-      "title": "3D Graphics Work 03",
-      "en": "3D GRAPHICS WORK 03",
-      "department": "Placeholder: your role",
-      "category": "3D Graphics",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: stack / collaborators",
-      "clearance": "PUBLIC",
-      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
-      "findings": [
-        "Highlight one: placeholder",
-        "Highlight two: placeholder",
-        "Highlight three: placeholder"
-      ],
-      "source": "https://github.com/Lappass"
-    },
-    {
       "id": "X-007",
-      "title": "Interaction Work 01",
-      "en": "INTERACTION WORK 01",
-      "department": "Placeholder: your role",
-      "category": "Interaction",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: stack / collaborators",
+      "title": "Sniff & Snitch",
+      "en": "A TWO-PLAYER PRISON BREAK",
+      "department": "Programmer & designer · Capstone team",
+      "category": "Games",
+      "date": "2026",
+      "lead": "Unity · C# · Netcode for GameObjects",
       "clearance": "PUBLIC",
-      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
+      "abstract": "An online co-op stealth game for two. Lyra, a witch, and Fia, a red panda, are both in for theft, and the only way out of the magic prison is together: split up to take each one's own route, slip past guards who can see and hear you, and meet again at doors that need you both. Get caught and you are marched to a cage; your partner has until the gas fills it to break you out.",
       "findings": [
-        "Highlight one: placeholder",
-        "Highlight two: placeholder",
-        "Highlight three: placeholder"
+        "Guard AI that sees and hears: noise from jailbreaks and thrown objects draws guards over, some cast curses that slow you, and the two players can mark a guard and take them down together.",
+        "Capture and rescue: a caught player is escorted to a gas cage and the partner has to hold to break them out in time, with its own HUD, escape UI and game-over flow.",
+        "Co-op systems over Netcode with the server deciding shared state: doors, lifts and boxes that need both players, a ping system, throwing, quests, save points and the character select."
       ],
-      "source": "https://github.com/Lappass"
-    },
-    {
-      "id": "X-008",
-      "title": "Interaction Work 02",
-      "en": "INTERACTION WORK 02",
-      "department": "Placeholder: your role",
-      "category": "Interaction",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: stack / collaborators",
-      "clearance": "PUBLIC",
-      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
-      "findings": [
-        "Highlight one: placeholder",
-        "Highlight two: placeholder",
-        "Highlight three: placeholder"
+      "source": "https://github.com/Lappass",
+      "tags": [
+        "Co-op",
+        "Stealth",
+        "Online multiplayer"
       ],
-      "source": "https://github.com/Lappass"
-    },
-    {
-      "id": "X-009",
-      "title": "Visual Design Work 01",
-      "en": "VISUAL DESIGN WORK 01",
-      "department": "Placeholder: your role",
-      "category": "Visual Design",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: stack / collaborators",
-      "clearance": "PUBLIC",
-      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
-      "findings": [
-        "Highlight one: placeholder",
-        "Highlight two: placeholder",
-        "Highlight three: placeholder"
-      ],
-      "source": "https://github.com/Lappass"
-    },
-    {
-      "id": "X-010",
-      "title": "Visual Design Work 02",
-      "en": "VISUAL DESIGN WORK 02",
-      "department": "Placeholder: your role",
-      "category": "Visual Design",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: stack / collaborators",
-      "clearance": "PUBLIC",
-      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
-      "findings": [
-        "Highlight one: placeholder",
-        "Highlight two: placeholder",
-        "Highlight three: placeholder"
-      ],
-      "source": "https://github.com/Lappass"
-    },
-    {
-      "id": "X-011",
-      "title": "Experiments Work 01",
-      "en": "EXPERIMENTS WORK 01",
-      "department": "Placeholder: your role",
-      "category": "Experiments",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: stack / collaborators",
-      "clearance": "PUBLIC",
-      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
-      "findings": [
-        "Highlight one: placeholder",
-        "Highlight two: placeholder",
-        "Highlight three: placeholder"
-      ],
-      "source": "https://github.com/Lappass"
-    },
-    {
-      "id": "X-012",
-      "title": "Experiments Work 02",
-      "en": "EXPERIMENTS WORK 02",
-      "department": "Placeholder: your role",
-      "category": "Experiments",
-      "date": "Placeholder: year",
-      "lead": "Placeholder: stack / collaborators",
-      "clearance": "PUBLIC",
-      "abstract": "Placeholder. Describe what this project is, what problem it solves, and how it turned out.",
-      "findings": [
-        "Highlight one: placeholder",
-        "Highlight two: placeholder",
-        "Highlight three: placeholder"
-      ],
-      "source": "https://github.com/Lappass"
+      "cover": "works/x-007/cover.jpg",
+      "spine": "works/x-007/spine.jpg",
+      "disc": "works/x-007/disc.jpg",
+      "loader": "sniff",
+      "hero": "works/x-007/hero.jpg",
+      "menu": "sniff",
+      "soon": [
+        "play",
+        "trailer",
+        "playthrough",
+        "download"
+      ]
     }
   ]
 }

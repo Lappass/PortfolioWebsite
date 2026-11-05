@@ -38,8 +38,8 @@ function validateMedia(record, label, errors) {
   if (record.links !== undefined && (!Array.isArray(record.links) ||
     !record.links.every((item) => item && isText(item.label) && isWebUrl(item.url))))
     errors.push(`${label}.links：每项需要 label 和 HTTP(S) url`);
-  if (record.menu !== undefined && !["lastmile", "trail", "lockdown"].includes(record.menu))
-    errors.push(`${label}.menu：只能是 lastmile、trail 或 lockdown`);
+  if (record.menu !== undefined && !["lastmile", "trail", "lockdown", "sniff"].includes(record.menu))
+    errors.push(`${label}.menu：只能是 lastmile、trail、lockdown 或 sniff`);
   const run = record.playthrough;
   if (run !== undefined && (!run || !isMediaPath(run.src) || (run.chapters !== undefined && (!Array.isArray(run.chapters) ||
     !run.chapters.every((c) => c && /^\d+:\d{2}(:\d{2})?$/.test(c.at) && isText(c.label))))))
@@ -66,6 +66,7 @@ export function validateContent(content) {
   const records = Array.isArray(content.records) ? content.records : [];
   if (records.length === 0) errors.push("records：至少需要一份作品");
   const ids = new Set();
+  let previousId = "";
   records.forEach((record, index) => {
     const label = `records[${index}]`;
     if (!record || typeof record !== "object" || Array.isArray(record)) {
@@ -75,11 +76,13 @@ export function validateContent(content) {
     for (const key of requiredFields) {
       if (!isText(record[key])) errors.push(`${label}.${key}：必须是非空文本`);
     }
-    const expectedId = `X-${String(index + 1).padStart(3, "0")}`;
-    if (record.id !== expectedId)
-      errors.push(`${label}.id：应为 ${expectedId}，编号须按顺序保持稳定`);
-    if (ids.has(record.id)) errors.push(`${label}.id：重复编号 ${record.id}`);
-    ids.add(record.id);
+    // IDs never change once given: a removed work leaves a gap rather than renumbering the rest.
+    if (typeof record.id !== "string" || !/^X-\d{3}$/.test(record.id))
+      errors.push(`${label}.id：应为 X- 加三位数字，例如 X-001`);
+    else if (ids.has(record.id)) errors.push(`${label}.id：重复编号 ${record.id}`);
+    else if (previousId && record.id < previousId)
+      errors.push(`${label}.id：${record.id} 应排在 ${previousId} 之前，编号须按顺序保持稳定`);
+    if (typeof record.id === "string") { ids.add(record.id); previousId = record.id; }
     if (!categories.includes(record.category))
       errors.push(`${label}.category：未知分类 ${record.category}`);
     if (

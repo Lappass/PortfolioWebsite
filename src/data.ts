@@ -27,7 +27,7 @@ export interface ArchiveRecord {
   unity?: string;
   links?: { label: string; url: string }[];
   /** Title-menu theme for the project page (src/title-menus.ts); without it the page uses the standard layout. */
-  menu?: "lastmile" | "trail" | "lockdown";
+  menu?: "lastmile" | "trail" | "lockdown" | "sniff";
   /** Trailer video; falls back to `video`. */
   trailer?: string;
   /** A full run of the game, with optional chapter marks ("m:ss"). */

@@ -574,7 +574,67 @@ class LockdownMenu extends TitleMenu {
   }
 }
 
-const THEMES = { lastmile: LastMileMenu, trail: TrailMenu, lockdown: LockdownMenu };
+/* ---------------------------------------------------------------------------------------- */
+/* Sniff & Snitch: the lineup wall from the key art, each option a booking placard. Fia's paw */
+/* (the game's own icon) hops to the chosen one, and the booking camera flashes.               */
+
+const ROW = 64;
+
+class SniffMenu extends TitleMenu {
+  protected order: Key[] = ["play", "trailer", "playthrough", "download", "about", "shots"];
+  protected hints: [string, string][] = [["↑↓", "PICK A CHARGE"], ["A", "BOOK IT"], ["B", "BACK TO SHELF"]];
+  private walk = 0;
+
+  constructor(r: ArchiveRecord, nav: MenuNav, sound: (name: Sound) => void) { super(r, nav, sound); this.build("sniff"); }
+
+  protected markup() {
+    return `<div class="tm-art"><div class="sn-frame"><img src="${this.asset("lineup.jpg")}" alt=""></div>${this.heroArt()}</div>
+      <div class="sn-board tm-in">
+        <div class="sn-head"><span>${e(this.r.id)} · BOOKING</span><span>HOLDING BLOCK C</span></div>
+        ${this.title(`<img src="${this.asset("title.png")}" alt="${e(this.r.title)}">`)}
+        <div class="sn-row"><span class="sn-tag">TWO THIEVES. ONE WAY OUT.</span><span>${this.items.length} CHARGES</span></div>
+        <div class="sn-list">
+          ${this.items.map((item, i) => `<button type="button" class="sn-charge${item.soon ? " soon" : ""}" data-item="${i}"><span class="sn-n">CHARGE ${pad(i + 1)}</span><span class="sn-name">${e(item.name.toUpperCase())}</span>${item.meta ? `<span class="sn-meta">${e(item.meta)}</span>` : ""}<span class="sn-stamp">BOOKED</span></button>`).join("")}
+          <img class="sn-paw" src="${this.asset("paw.png")}" alt="" aria-hidden="true">
+        </div>
+      </div>
+      <div class="sn-flash"></div>`;
+  }
+
+  protected layout() {
+    // The wall covers the window the way the key art does, so the handover lines up.
+    const frame = this.el.querySelector<HTMLElement>(".sn-frame")!;
+    const k = Math.max(innerWidth / 1920, innerHeight / 1080);
+    Object.assign(frame.style, { width: `${1920 * k}px`, height: `${1080 * k}px`, left: `${(innerWidth - 1920 * k) / 2}px`, top: `${(innerHeight - 1080 * k) / 2}px` });
+  }
+
+  protected show(from: number, instant: boolean) {
+    this.el.querySelectorAll(".sn-charge").forEach((el, i) => el.classList.toggle("on", i === this.sel));
+    const paw = this.el.querySelector<HTMLElement>(".sn-paw")!;
+    paw.style.transition = instant ? "none" : "";
+    paw.style.top = `${this.sel * ROW + 4}px`;
+    if (instant || from === this.sel) return;
+    // The paw hops while it moves, and each new charge gets its photo taken.
+    this.el.classList.add("walking");
+    clearTimeout(this.walk);
+    this.walk = window.setTimeout(() => this.el.classList.remove("walking"), 360);
+    const flash = this.el.querySelector<HTMLElement>(".sn-flash")!;
+    flash.classList.remove("on");
+    void flash.offsetWidth;
+    flash.classList.add("on");
+  }
+
+  protected pulse() {
+    const row = this.el.querySelector(`.sn-charge[data-item="${this.sel}"]`)!;
+    row.classList.remove("go");
+    void (row as HTMLElement).offsetWidth;
+    row.classList.add("go");
+  }
+
+  destroy() { clearTimeout(this.walk); super.destroy(); }
+}
+
+const THEMES = { lastmile: LastMileMenu, trail: TrailMenu, lockdown: LockdownMenu, sniff: SniffMenu };
 export type TitleMenuView = TitleMenu;
 
 export function createTitleMenu(r: ArchiveRecord, nav: MenuNav, sound: (name: Sound) => void): TitleMenu | null {

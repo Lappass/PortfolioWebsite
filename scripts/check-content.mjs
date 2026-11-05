@@ -56,6 +56,13 @@ const invalidCases = [
     /X-001/,
   ],
   [
+    "malformed ID",
+    (c) => {
+      c.records[0].id = "X-1";
+    },
+    /X- 加三位数字/,
+  ],
+  [
     "unknown category",
     (c) => {
       c.records[0].category = "未知";
@@ -129,7 +136,7 @@ for (const [name, mutate, error] of invalidCases) {
 
 test("featured projects preserve their explicit display order", () => {
   const edited = structuredClone(content);
-  edited.featured = ["X-010", "X-007", "X-004", "X-001"];
+  edited.featured = ["X-007", "X-004", "X-002", "X-001"];
   assert.deepEqual(validateContent(edited).featured, edited.featured);
 });
 for (const featured of [["X-001"], ["X-001","X-001","X-004","X-007"], ["X-001","X-004","X-007","X-999"]]) {

@@ -12,4 +12,9 @@ for (const record of records) {
     "utf8",
   );
 }
+// Drop downloads of works that are no longer in the archive.
+const keep = new Set(records.map((record) => `LAPPAS-${record.id}.txt`));
+for (const name of await fs.readdir(output)) {
+  if (/^LAPPAS-X-\d{3}\.txt$/.test(name) && !keep.has(name)) await fs.rm(new URL(name, output));
+}
 console.log(`Prepared ${records.length} downloadable archive records.`);

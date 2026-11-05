@@ -1,17 +1,17 @@
 ﻿SHUHANG CHEN · PORTFOLIO ARCHIVE
-FILE X-007 / Interaction Work 01
-INTERACTION WORK 01
+FILE X-007 / Sniff & Snitch
+A TWO-PLAYER PRISON BREAK
 
-Role: Placeholder: your role
-Date: Placeholder: year
-Stack: Placeholder: stack / collaborators
+Role: Programmer & designer · Capstone team
+Date: 2026
+Stack: Unity · C# · Netcode for GameObjects
 Status: PUBLIC
 
-Placeholder. Describe what this project is, what problem it solves, and how it turned out.
+An online co-op stealth game for two. Lyra, a witch, and Fia, a red panda, are both in for theft, and the only way out of the magic prison is together: split up to take each one's own route, slip past guards who can see and hear you, and meet again at doors that need you both. Get caught and you are marched to a cage; your partner has until the gas fills it to break you out.
 
 Highlights
-1. Highlight one: placeholder
-2. Highlight two: placeholder
-3. Highlight three: placeholder
+1. Guard AI that sees and hears: noise from jailbreaks and thrown objects draws guards over, some cast curses that slow you, and the two players can mark a guard and take them down together.
+2. Capture and rescue: a caught player is escorted to a gas cage and the partner has to hold to break them out in time, with its own HUD, escape UI and game-over flow.
+3. Co-op systems over Netcode with the server deciding shared state: doors, lifts and boxes that need both players, a ping system, throwing, quests, save points and the character select.
 
 Link: https://github.com/Lappass

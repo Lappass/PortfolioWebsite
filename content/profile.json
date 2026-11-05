@@ -3,16 +3,16 @@
   "alias": "Shuhang Chen",
   "role": "Game Developer",
   "roleEn": "GAME DEVELOPER",
-  "tagline": "Placeholder: one or two sentences about what games you make, your strengths, and the role you are looking for.",
+  "tagline": "Game developer working mostly in Unity and C#: systems, interfaces and the feel that ties them together.",
   "avatar": "",
   "bio": [
-    "Placeholder: first paragraph about your focus and why you make games.",
-    "Placeholder: second paragraph about how you work, the genres you love, or the tech you are exploring."
+    "Three of the games here, LOCKDOWN, Trail Adventure and Last Mile, are solo projects I designed, wrote and programmed end to end. Sniff & Snitch is an online two-player capstone game, where I worked as a programmer and designer on a team.",
+    "This site is a small game too: every work sits on the shelf as a game case, and opening one sends its disc into the console on the desk."
   ],
   "skills": [
     { "group": "Engines", "items": ["Unity", "UE"] },
     { "group": "Languages", "items": ["C#", "Java", "C++"] },
-    { "group": "Tools", "items": [] }
+    { "group": "Tools", "items": ["Blender", "Git", "Unity Netcode"] }
   ],
   "experience": [
     { "time": "2023", "title": "New York University", "detail": "", "logo": "assets/experience-logos/nyu.svg" },
@@ -21,8 +21,7 @@
     { "time": "Future", "title": "What's next?", "detail": "", "logo": "assets/experience-logos/next.svg", "upcoming": true }
   ],
   "contact": [
-    { "label": "GitHub", "url": "https://github.com/Lappass" },
-    { "label": "Email", "url": "mailto:you@example.com" }
+    { "label": "GitHub", "url": "https://github.com/Lappass" }
   ],
   "resume": "",
   "status": { "availability": "", "location": "", "timeZone": "" },
