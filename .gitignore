@@ -3,6 +3,8 @@ backups/
 dist/
 .tools/
 *.mp4
+# Web-sized videos the project pages play are published with the site.
+!public/works/**/*.mp4
 *.blend1
 optix7cache.db
 reference/*.jpg

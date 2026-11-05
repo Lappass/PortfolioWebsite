@@ -45,7 +45,8 @@
 .tm-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; }
 .tm-tags li { padding: 4px 9px; border: 1px solid var(--sheet-line); font-size: 11px; letter-spacing: 0.1em; }
 .tm-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
-.tm-links a { display: inline-flex; align-items: center; min-height: 42px; padding: 0 16px; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-size: 13px; letter-spacing: 0.08em; }
+/* a[href] keeps these above the site's dark-surface link colour (theme.css). */
+.tm .tm-sheet-body .tm-links a[href] { display: inline-flex; align-items: center; min-height: 42px; padding: 0 16px; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-size: 13px; letter-spacing: 0.08em; }
 .tm-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 22px; margin: 0 0 22px; }
 .tm-meta dt { margin-bottom: 4px; font-size: 11px; letter-spacing: 0.12em; opacity: 0.6; }
 .tm-meta dd { margin: 0; font-size: 15px; line-height: 1.5; }
@@ -70,6 +71,42 @@
 .tm-thumbs button.on { border-color: var(--accent); opacity: 1; }
 .tm-thumbs img { display: block; width: 100%; height: 100%; object-fit: cover; }
 @keyframes tm-fade { from { opacity: 0; } }
+
+/* "About the game" as a case study: a tall sheet, contents on the left that stay in view, the
+   pitch and facts, the key art, then numbered sections with their pictures beside or under. */
+.tm-sheet-about { width: min(1280px, 100%); height: 100%; }
+.tm-sheet-about .tm-sheet-body { padding: 0; }
+.cs { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 56px; padding: 40px 48px 72px; }
+.cs-toc { position: sticky; top: 96px; align-self: start; display: flex; flex-direction: column; gap: 2px; }
+.tm .cs-toc button { display: flex; gap: 12px; padding: 9px 12px; border-left: 2px solid var(--sheet-line); font-size: 11px; letter-spacing: 0.16em; line-height: 1.4; opacity: 0.55; transition: opacity 0.2s, border-color 0.2s; }
+.cs-toc button span { font-variant-numeric: tabular-nums; }
+.tm .cs-toc button:hover { opacity: 0.85; }
+.tm .cs-toc button.on { opacity: 1; border-left-color: var(--accent); }
+.cs-pitch { margin: 14px 0 30px; max-width: 32em; font-size: 26px; line-height: 1.45; letter-spacing: 0.005em; }
+.cs-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px 28px; margin: 0; padding: 20px 0; border-top: 1px solid var(--sheet-line); border-bottom: 1px solid var(--sheet-line); }
+.cs-facts dt { margin-bottom: 6px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.6; }
+.cs-facts dd { margin: 0; font-size: 15px; line-height: 1.5; }
+.cs-head .tm-tags { margin-top: 20px; }
+.cs-hero { margin: 40px 0 0; }
+.cs-hero img, .cs-media img { display: block; width: 100%; height: auto; background: rgba(0, 0, 0, 0.2); }
+.cs-hero img { aspect-ratio: 16 / 9; object-fit: cover; }
+.cs-sec { margin-top: 64px; padding-top: 40px; border-top: 1px solid var(--sheet-line); scroll-margin-top: 80px; }
+.cs-side { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 44px; align-items: start; }
+.cs-wide .cs-media { margin-top: 30px; }
+.cs-wide .cs-n2 { grid-template-columns: 1fr 1fr; }
+.cs-wide .cs-n3 { grid-template-columns: repeat(3, 1fr); }
+.cs-media { display: grid; gap: 22px; }
+.cs-media figure { margin: 0; }
+.cs-media figcaption { margin-top: 10px; font-size: 13px; line-height: 1.55; opacity: 0.7; }
+.cs-k { display: flex; gap: 12px; font-size: 12px; letter-spacing: 0.2em; color: var(--accent); }
+.cs-k b { font-weight: 500; font-variant-numeric: tabular-nums; }
+.cs-text h3 { margin: 12px 0 20px; font-size: 30px; font-weight: 600; line-height: 1.2; }
+.cs-text p { max-width: 38em; margin: 0 0 16px; font-size: 16px; line-height: 1.8; }
+.cs-points { margin: 22px 0 0; padding: 0; list-style: none; }
+.cs-points li { position: relative; max-width: 38em; padding: 10px 0 10px 22px; border-top: 1px solid var(--sheet-line); font-size: 15px; line-height: 1.6; }
+.cs-points li::before { content: ""; position: absolute; left: 0; top: 19px; width: 8px; height: 8px; background: var(--accent); }
+.cs-end { margin-top: 64px; padding-top: 28px; border-top: 1px solid var(--sheet-line); }
+.cs-end .tm-links { margin-top: 0; }
 
 /* ---- Last Mile: a dispatch board over the printed machine. ---- */
 .tm-lastmile { --paper: #ede6d6; --card: #f6f1e6; --ink: #272c30; --amber: #f1b05f; --ui: var(--ink); --accent: var(--amber); --accent-ink: var(--ink);
@@ -126,7 +163,7 @@
 .tm-lastmile .tm-help b { padding: 2px 8px; background: var(--amber); color: var(--ink); }
 .tm-lastmile .tm-toast { background: var(--ink); color: var(--paper); }
 .tm-lastmile .tm-panel { background: rgba(237, 230, 214, 0.7); }
-.tm-lastmile .tm-links a { background: var(--ink); color: var(--paper); }
+.tm-lastmile .tm-sheet-body .tm-links a[href] { background: var(--ink); color: var(--paper); }
 .lm-grain { position: absolute; inset: 0; z-index: 9; pointer-events: none; opacity: 0.5; mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .27  0 0 0 0 .2  0 0 0 .18 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>"); }
 
@@ -253,8 +290,7 @@
 .tm-sniff .tm-help b { padding: 2px 8px; background: var(--mustard); color: var(--ink); }
 .tm-sniff .tm-toast { background: var(--ink); color: var(--bone); }
 .tm-sniff .tm-panel { background: rgba(216, 213, 207, 0.7); }
-/* Specific enough to beat the site's dark-surface link colour (theme.css). */
-.tm.tm-sniff .tm-sheet .tm-links a { background: var(--mustard); color: var(--ink); }
+.tm-sniff .tm-sheet-body .tm-links a[href] { background: var(--mustard); color: var(--ink); }
 
 @media (max-width: 760px) {
   .sn-board { left: 24px; top: 70px; width: 600px; }
@@ -271,6 +307,12 @@
   .ld-list { left: 24px; right: 24px; top: 250px; bottom: auto; }
   .ld-block { left: 24px; }
   .tm-about { grid-template-columns: 1fr; gap: 24px; }
+  .cs { grid-template-columns: 1fr; gap: 0; padding: 24px 20px 48px; }
+  .cs-toc { display: none; }
+  .cs-pitch { font-size: 20px; }
+  .cs-side, .cs-wide .cs-n2, .cs-wide .cs-n3 { grid-template-columns: 1fr; }
+  .cs-side { gap: 24px; }
+  .cs-text h3 { font-size: 24px; }
   .tm-sheet-body { padding: 18px; }
 }
 @media (prefers-reduced-motion: reduce) {

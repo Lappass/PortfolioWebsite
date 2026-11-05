@@ -49,6 +49,33 @@ function validateMedia(record, label, errors) {
     errors.push(`${label}.download：需要 url，label 和 size 为可选文本`);
   if (record.soon !== undefined && (!Array.isArray(record.soon) || !record.soon.every((key) => ["play", "trailer", "playthrough", "download"].includes(key))))
     errors.push(`${label}.soon：只能包含 play、trailer、playthrough、download`);
+  validateStudy(record.study, `${label}.study`, errors);
+}
+
+/** The long-form case study: a pitch, a few facts, and sections of text with optional pictures. */
+function validateStudy(study, label, errors) {
+  if (study === undefined) return;
+  const texts = (list) => Array.isArray(list) && list.length > 0 && list.every(isText);
+  if (!study || typeof study !== "object" || Array.isArray(study)) {
+    errors.push(`${label}：必须是对象`);
+    return;
+  }
+  if (!isText(study.pitch)) errors.push(`${label}.pitch：必须是非空文本`);
+  if (!Array.isArray(study.facts) || !study.facts.every((fact) => fact && isText(fact.label) && isText(fact.value)))
+    errors.push(`${label}.facts：每项需要 label 和 value`);
+  if (!Array.isArray(study.sections) || study.sections.length === 0) {
+    errors.push(`${label}.sections：至少需要一节`);
+    return;
+  }
+  study.sections.forEach((section, i) => {
+    const at = `${label}.sections[${i}]`;
+    if (!section || !isText(section.kicker) || !isText(section.heading) || !texts(section.body))
+      errors.push(`${at}：需要 kicker、heading 和至少一段 body`);
+    if (section?.points !== undefined && !texts(section.points)) errors.push(`${at}.points：必须是非空文本数组`);
+    if (section?.media !== undefined && (!Array.isArray(section.media) || !section.media.every((item) => item && isMediaPath(item.src) && (item.caption === undefined || isText(item.caption)))))
+      errors.push(`${at}.media：每项需要有效的 src，caption 为可选文本`);
+    if (section?.layout !== undefined && !["side", "wide"].includes(section.layout)) errors.push(`${at}.layout：只能是 side 或 wide`);
+  });
 }
 
 export function validateContent(content) {
@@ -115,5 +142,7 @@ export async function loadContent() {
 }
 
 export function archiveText(r) {
-  return `\uFEFFSHUHANG CHEN · PORTFOLIO ARCHIVE\nFILE ${r.id} / ${r.title}\n${r.en}\n\nRole: ${r.department}\nDate: ${r.date}\nStack: ${r.lead}\nStatus: ${r.clearance}\n\n${r.abstract}\n\nHighlights\n${r.findings.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n\nLink: ${r.source}\n`;
+  // The case study, when there is one, follows the highlights as plain sections.
+  const study = r.study ? `\n${r.study.sections.map((s) => `${s.kicker} / ${s.heading}\n\n${[...s.body, ...(s.points ?? []).map((p) => `- ${p}`)].join("\n\n")}\n`).join("\n")}` : "";
+  return `\uFEFFSHUHANG CHEN · PORTFOLIO ARCHIVE\nFILE ${r.id} / ${r.title}\n${r.en}\n\nRole: ${r.department}\nDate: ${r.date}\nStack: ${r.lead}\nStatus: ${r.clearance}\n\n${r.abstract}\n\nHighlights\n${r.findings.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n${study}\nLink: ${r.source}\n`;
 }

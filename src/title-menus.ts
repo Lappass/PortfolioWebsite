@@ -1,5 +1,5 @@
 import "./title-menus.css";
-import type { ArchiveRecord } from "./data";
+import type { ArchiveRecord, CaseStudy, CaseStudyMedia, CaseStudySection } from "./data";
 import type { Sound } from "./audio";
 import { escapeHtml as e } from "./html";
 
@@ -26,7 +26,8 @@ function menuItems(r: ArchiveRecord): MenuItem[] {
   const add = (key: Key, has: boolean, name: string, meta: string, text: [string, string], go: string) => {
     if (has || soon.has(key)) items.push({ key, name, soon: !has, meta: has ? meta : "COMING SOON", text: has ? text[0] : text[1], go: has ? go : "COMING SOON" });
   };
-  const words = [r.abstract, ...r.findings].join(" ").split(/\s+/).length;
+  const study = r.study ? [r.study.pitch, ...r.study.sections.flatMap((s) => [s.heading, ...s.body, ...(s.points ?? [])])] : [];
+  const words = [r.abstract, ...r.findings, ...study].join(" ").split(/\s+/).length;
   const shots = r.gallery?.length ?? 0, chapters = r.playthrough?.chapters?.length ?? 0;
   add("play", Boolean(r.unity), "Play in browser", "WEBGL", ["Runs right here, with keyboard and mouse.", "A browser build is on its way."], "▶ PLAY");
   add("trailer", Boolean(r.trailer ?? r.video), "Watch trailer", "VIDEO", ["A short cut of the game.", "The trailer is still being cut."], "▶ WATCH");
@@ -148,7 +149,9 @@ abstract class TitleMenu {
   private openPanel(item: MenuItem) {
     const r = this.r;
     let body = "";
-    if (item.key === "about") {
+    if (item.key === "about" && r.study) {
+      body = this.studyMarkup(r.study);
+    } else if (item.key === "about") {
       const links = [...(r.links ?? []), ...(r.links?.some((link) => link.url === r.source) ? [] : [{ label: "Project link", url: r.source }])];
       body = `<div class="tm-about"><div><div class="tm-en">${e(r.en)}</div><p>${e(r.abstract)}</p>
         ${r.tags?.length ? `<ul class="tm-tags">${r.tags.map((tag) => `<li>${e(tag)}</li>`).join("")}</ul>` : ""}
@@ -171,7 +174,54 @@ abstract class TitleMenu {
     this.panel.hidden = false;
     this.el.classList.add("paneled");
     if (item.key === "shots") this.showShot(0);
+    if (item.key === "about" && r.study) this.trackStudy();
     this.panel.querySelector<HTMLElement>("[data-tm=close]")?.focus({ preventScroll: true });
+  }
+
+  /**
+   * "About the game" as a portfolio case study: the pitch and facts, the key art, then numbered
+   * sections of text with their pictures beside or under them, and a contents column that stays
+   * in view while the sheet scrolls.
+   */
+  private studyMarkup(s: CaseStudy) {
+    const r = this.r, hero = r.hero ?? r.cover;
+    const links = [...(r.links ?? []), ...(r.links?.some((link) => link.url === r.source) ? [] : [{ label: "Project link", url: r.source }])];
+    const figure = (m: CaseStudyMedia) => `<figure><img src="${media(m.src)}" alt="${e(m.caption ?? r.title)}" decoding="async">${m.caption ? `<figcaption>${e(m.caption)}</figcaption>` : ""}</figure>`;
+    const section = (x: CaseStudySection, i: number) => {
+      const shots = x.media ?? [];
+      const layout = shots.length ? x.layout ?? "side" : "text";
+      return `<section class="cs-sec cs-${layout}" data-sec="${i}">
+        <div class="cs-text"><div class="cs-k"><b>${pad(i + 1)}</b>${e(x.kicker)}</div><h3>${e(x.heading)}</h3>
+          ${x.body.map((p) => `<p>${e(p)}</p>`).join("")}
+          ${x.points?.length ? `<ul class="cs-points">${x.points.map((p) => `<li>${e(p)}</li>`).join("")}</ul>` : ""}</div>
+        ${shots.length ? `<div class="cs-media cs-n${Math.min(3, shots.length)}">${shots.map(figure).join("")}</div>` : ""}
+      </section>`;
+    };
+    return `<article class="cs">
+      <nav class="cs-toc" aria-label="Sections">${s.sections.map((x, i) => `<button type="button" data-tm="toc" data-i="${i}"><span>${pad(i + 1)}</span>${e(x.kicker)}</button>`).join("")}</nav>
+      <div class="cs-main">
+        <div class="cs-head"><div class="tm-en">${e(r.en)}</div><p class="cs-pitch">${e(s.pitch)}</p>
+          <dl class="cs-facts">${s.facts.map((f) => `<div><dt>${e(f.label)}</dt><dd>${e(f.value)}</dd></div>`).join("")}</dl>
+          ${r.tags?.length ? `<ul class="tm-tags">${r.tags.map((tag) => `<li>${e(tag)}</li>`).join("")}</ul>` : ""}</div>
+        ${hero ? `<figure class="cs-hero"><img src="${media(hero)}" alt="${e(r.title)}" decoding="async"></figure>` : ""}
+        ${s.sections.map(section).join("")}
+        <div class="cs-end"><div class="tm-links">${links.map((link) => `<a href="${e(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} ↗</a>`).join("")}</div></div>
+      </div>
+    </article>`;
+  }
+
+  /** Marks the section being read in the contents column. */
+  private trackStudy() {
+    const sheet = this.panel.querySelector<HTMLElement>(".tm-sheet"), toc = this.panel.querySelectorAll(".cs-toc button");
+    if (!sheet || !toc.length) return;
+    const sections = [...this.panel.querySelectorAll<HTMLElement>(".cs-sec")];
+    const mark = () => {
+      const line = sheet.getBoundingClientRect().top + sheet.clientHeight * 0.35;
+      const at = sections.reduce((found, el, i) => (el.getBoundingClientRect().top <= line ? i : found), 0);
+      toc.forEach((el, i) => el.classList.toggle("on", i === at));
+    };
+    sheet.addEventListener("scroll", mark, { passive: true });
+    mark();
   }
 
   private videoMarkup(src: string) {
@@ -231,6 +281,8 @@ abstract class TitleMenu {
     const control = target.closest<HTMLElement>("[data-tm]");
     if (control?.dataset.tm === "close") this.closePanel();
     if (control?.dataset.tm === "shot") this.showShot(Number(control.dataset.i));
+    if (control?.dataset.tm === "toc")
+      this.panel.querySelectorAll<HTMLElement>(".cs-sec")[Number(control.dataset.i)]?.scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
     if (control?.dataset.tm === "seek") {
       const video = this.panel.querySelector("video");
       if (video) { video.currentTime = Number(control.dataset.at); void video.play().catch(() => {}); }

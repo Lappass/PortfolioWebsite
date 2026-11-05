@@ -34,6 +34,28 @@
 | `playthrough` | 完整流程视频 `{ "src": "...", "chapters": [{ "at": "3:20", "label": "第二天" }] }`，章节可省略 |
 | `download` | 下载 `{ "url": "https://...", "label": "可选说明", "size": "可选大小" }` |
 | `soon`    | 已预告但还没有内容的菜单项，可含 `play`、`trailer`、`playthrough`、`download`；菜单里显示 COMING SOON |
+| `study`   | 作品集式长文，主菜单的“About the game”打开它；缺省时显示 `abstract` 与 `findings`。写法见下 |
+
+`study` 的结构：
+
+```json
+{
+  "pitch": "一两句话：这是什么游戏，玩家做什么",
+  "facts": [{ "label": "Role", "value": "Solo developer" }, { "label": "Engine", "value": "Unity 6" }],
+  "sections": [
+    {
+      "kicker": "CORE LOOP",
+      "heading": "一节的标题",
+      "body": ["第一段", "第二段"],
+      "points": ["可选的要点"],
+      "media": [{ "src": "works/x-002/study/01.jpg", "caption": "可选图注" }],
+      "layout": "side"
+    }
+  ]
+}
+```
+
+每节按顺序编号，左侧目录随滚动标出正在读的一节。`layout` 为 `side` 时文字与图片并排，`wide` 时图片通栏放在文字下方（两三张并排）；没有图片的节只排文字。长文的配图放在 `public/works/<编号>/study/`。TXT 下载会附上各节正文。
 
 封面区按 Unity、视频、封面图的顺序选择第一个可用项；有 Unity 时视频单独显示在下方。
 

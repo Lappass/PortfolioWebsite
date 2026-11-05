@@ -35,6 +35,24 @@ export interface ArchiveRecord {
   download?: { url: string; label?: string; size?: string };
   /** Menu items announced but not out yet: play, trailer, playthrough, download. */
   soon?: string[];
+  /** The long-form case study the title menu's "About the game" opens (content/README.md). */
+  study?: CaseStudy;
+}
+
+export interface CaseStudyMedia { src: string; caption?: string }
+export interface CaseStudySection {
+  kicker: string;
+  heading: string;
+  body: string[];
+  points?: string[];
+  media?: CaseStudyMedia[];
+  /** "side": text beside the pictures; "wide": pictures full width under the text. */
+  layout?: "side" | "wide";
+}
+export interface CaseStudy {
+  pitch: string;
+  facts: { label: string; value: string }[];
+  sections: CaseStudySection[];
 }
 
 // JSON types `menu` as a plain string; scripts/archive-content.mjs checks it is one of the themes.
