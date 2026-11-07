@@ -8,7 +8,6 @@ const requiredFields = [
   "category",
   "date",
   "lead",
-  "clearance",
   "abstract",
   "source",
 ];
@@ -41,6 +40,9 @@ function validateMedia(record, label, errors) {
   if (record.menu !== undefined && !["lastmile", "trail", "lockdown", "sniff"].includes(record.menu))
     errors.push(`${label}.menu：只能是 lastmile、trail、lockdown 或 sniff`);
   if (record.soon !== undefined) errors.push(`${label}.soon：已废弃，没有的内容会自动显示为 not yet`);
+  if (record.clearance !== undefined) errors.push(`${label}.clearance：已废弃，进行中的作品写 status，例如 "In development"`);
+  if (record.status !== undefined && !isText(record.status)) errors.push(`${label}.status：必须是非空文本`);
+  validateVoice(record, label, errors);
   const run = record.playthrough;
   if (run !== undefined && (!run || !isMediaPath(run.src) || (run.chapters !== undefined && (!Array.isArray(run.chapters) ||
     !run.chapters.every((c) => c && /^\d+:\d{2}(:\d{2})?$/.test(c.at) && isText(c.label))))))
@@ -49,6 +51,35 @@ function validateMedia(record, label, errors) {
   if (build !== undefined && (!build || !isMediaPath(build.url) || (build.label !== undefined && !isText(build.label)) || (build.size !== undefined && !isText(build.size))))
     errors.push(`${label}.download：需要 url，label 和 size 为可选文本`);
   validateStudy(record.study, `${label}.study`, errors);
+}
+
+// Words and shapes that read as template copy rather than the author's own.
+const BANNED = ["COMING SOON", "A GAME BY", "SOLO DEVELOPER", "MIN READ", "RESTRICTED", "What I'd build next", "meaningful choices"];
+const shouting = (text) => /[A-Z]/.test(text) && text === text.toUpperCase();
+const words = (text) => text.trim().split(/\s+/).length;
+
+/** Plain-language checks on the copy a reader sees: no shouting, no template phrases, summaries of a readable length. */
+function validateVoice(record, label, errors) {
+  const check = (at, text) => {
+    if (!isText(text)) return;
+    for (const phrase of BANNED) if (text.includes(phrase)) errors.push(`${at}：不要用“${phrase}”这类套话`);
+  };
+  check(`${label}.en`, record.en);
+  check(`${label}.abstract`, record.abstract);
+  (Array.isArray(record.findings) ? record.findings : []).forEach((f, i) => check(`${label}.findings[${i}]`, f));
+  if (isText(record.en) && shouting(record.en)) errors.push(`${label}.en：用正常大小写，不要全大写`);
+  const study = record.study;
+  if (!study || !Array.isArray(study.sections)) return;
+  check(`${label}.study.pitch`, study.pitch);
+  study.sections.forEach((s, i) => {
+    const at = `${label}.study.sections[${i}]`;
+    if (!s) return;
+    check(`${at}.heading`, s.heading);
+    check(`${at}.summary`, s.summary);
+    if (isText(s.heading) && shouting(s.heading)) errors.push(`${at}.heading：用正常大小写，不要全大写`);
+    if (isText(s.heading) && / that /.test(s.heading)) errors.push(`${at}.heading：标题写成名词或平常的句子，不要“X that Y”`);
+    if (isText(s.summary) && (words(s.summary) < 25 || words(s.summary) > 90)) errors.push(`${at}.summary：25 到 90 个词（现在 ${words(s.summary)} 个）`);
+  });
 }
 
 /** The case study a game's page is built from: a pitch, a few facts, and sections of text with pictures. */
@@ -144,5 +175,5 @@ export async function loadContent() {
 export function archiveText(r) {
   // The case study, when there is one, follows the highlights as plain sections.
   const study = r.study ? `\n${r.study.sections.map((s) => `${s.heading}\n\n${[...s.body, ...(s.points ?? []).map((p) => `- ${p}`)].join("\n\n")}\n`).join("\n")}` : "";
-  return `\uFEFFSHUHANG CHEN · PORTFOLIO ARCHIVE\nFILE ${r.id} / ${r.title}\n${r.en}\n\nRole: ${r.department}\nDate: ${r.date}\nStack: ${r.lead}\nStatus: ${r.clearance}\n\n${r.abstract}\n\nHighlights\n${r.findings.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n${study}\nLink: ${r.source}\n`;
+  return `\uFEFF${r.title}\n${r.en}\n\nShuhang Chen · ${r.department} · ${r.lead} · ${r.date}${r.status ? ` · ${r.status}` : ""}\n\n${r.abstract}\n\n${r.findings.map((f) => `- ${f}`).join("\n")}\n${study}\nLink: ${r.source}\n`;
 }

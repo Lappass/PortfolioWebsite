@@ -394,7 +394,7 @@ export class ProjectPage {
     full.type = "button";
     full.className = "pp-fullscreen";
     full.dataset.page = "fullscreen";
-    full.textContent = "Fullscreen ⤢";
+    full.textContent = "Full screen ⤢";
     host.replaceChildren(frame, full);
     frame.focus();
   }

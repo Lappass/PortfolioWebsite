@@ -6,7 +6,7 @@ export type Chapter = 'identity' | 'about' | 'skills' | 'experience';
 const chapters: Chapter[] = ['identity', 'about', 'skills', 'experience'];
 const COUNT = 30000;
 const groups = profile.skills.map((skill, sourceIndex) => ({ ...skill, sourceIndex })).filter(skill => skill.items.length);
-const captions = ['A mark of my own.', 'The person behind the work.', 'Different tools. Connected ideas.', 'One step leads to the next.'];
+const captions = ['My mark.', 'About me.', 'What I work with.', 'Where I have been.'];
 const skillIcons: Record<string, string> = { Unity: 'unity', UE: 'unrealengine', 'C#': 'csharp', Java: 'java', 'C++': 'cplusplus' };
 const skillMarks = groups.flatMap((group, groupIndex) => {
   const items = group.items.filter(item => skillIcons[item]), center = skillCenter(groupIndex, groups.length);

@@ -2,38 +2,81 @@
   "name": "Shuhang Chen",
   "alias": "Shuhang Chen",
   "role": "Game Developer",
-  "roleEn": "GAME DEVELOPER",
-  "tagline": "Game developer working mostly in Unity and C#: systems, interfaces and the feel that ties them together.",
+  "roleEn": "Game developer",
+  "tagline": "I make games in Unity and C#. Three of the ones here are solo projects, and the fourth is a team capstone.",
   "avatar": "",
   "bio": [
-    "Three of the games here, LOCKDOWN, Trail Adventure and Last Mile, are solo projects I designed, wrote and programmed end to end. Sniff & Snitch is an online two-player capstone game, where I worked as a programmer and designer on a team.",
-    "This site is a small game too: every work sits on the shelf as a game case, and opening one sends its disc into the console on the desk."
+    "LOCKDOWN, Trail Adventure and Last Mile are solo projects. I designed, wrote and programmed each of them. Sniff & Snitch is an online two-player capstone game, where I am a programmer and designer on a team.",
+    "This site is a small game too. Every work sits on the shelf as a game case, and opening one sends its disc into the console on the desk."
   ],
   "skills": [
-    { "group": "Engines", "items": ["Unity", "UE"] },
-    { "group": "Languages", "items": ["C#", "Java", "C++"] },
-    { "group": "Tools", "items": ["Blender", "Git", "Unity Netcode"] }
+    {
+      "group": "Engines",
+      "items": [
+        "Unity",
+        "UE"
+      ]
+    },
+    {
+      "group": "Languages",
+      "items": [
+        "C#",
+        "Java",
+        "C++"
+      ]
+    },
+    {
+      "group": "Tools",
+      "items": [
+        "Blender",
+        "Git",
+        "Unity Netcode"
+      ]
+    }
   ],
   "experience": [
-    { "time": "2023", "title": "New York University", "detail": "", "logo": "assets/experience-logos/nyu.svg" },
-    { "time": "2024–2025", "title": "Yahaha Studios", "detail": "", "logo": "assets/experience-logos/yahaha.svg" },
-    { "time": "Summer 2026", "title": "Hypergryph", "detail": "", "logo": ["assets/experience-logos/hypergryph.svg", "assets/experience-logos/endfield.svg"] },
-    { "time": "Future", "title": "What's next?", "detail": "", "logo": "assets/experience-logos/next.svg", "upcoming": true }
+    {
+      "time": "2023",
+      "title": "New York University",
+      "detail": "",
+      "logo": "assets/experience-logos/nyu.svg"
+    },
+    {
+      "time": "2024–2025",
+      "title": "Yahaha Studios",
+      "detail": "",
+      "logo": "assets/experience-logos/yahaha.svg"
+    },
+    {
+      "time": "Summer 2026",
+      "title": "Hypergryph",
+      "detail": "",
+      "logo": [
+        "assets/experience-logos/hypergryph.svg",
+        "assets/experience-logos/endfield.svg"
+      ]
+    },
+    {
+      "time": "Future",
+      "title": "What's next?",
+      "detail": "",
+      "logo": "assets/experience-logos/next.svg",
+      "upcoming": true
+    }
   ],
   "contact": [
-    { "label": "GitHub", "url": "https://github.com/Lappass" }
+    {
+      "label": "GitHub",
+      "url": "https://github.com/Lappass"
+    }
   ],
   "resume": "",
-  "status": { "availability": "", "location": "", "timeZone": "" },
+  "status": {
+    "availability": "",
+    "location": "",
+    "timeZone": ""
+  },
   "boot": {
-    "greeting": "HELLO, I'M SHUHANG CHEN",
-    "identityLabel": "PLAYER",
-    "identity": "SHUHANG CHEN",
-    "role": "GAME DEVELOPER",
-    "loading": "LOADING SELECTED WORKS",
-    "ready": "PRESS START",
-    "welcome": "WELCOME TO",
-    "studio": "SHUHANG CHEN",
-    "subtitle": "SELECTED WORKS"
+    "ready": "Press any key to start"
   }
 }

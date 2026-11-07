@@ -1,17 +1,12 @@
-﻿SHUHANG CHEN · PORTFOLIO ARCHIVE
-FILE X-001 / Portfolio Archive
-PORTFOLIO ARCHIVE
+﻿Portfolio Site
+The site you are looking at
 
-Role: Derivative work (based on RhineLabUI)
-Date: 2026
-Stack: TypeScript / Three.js / Vite / Blender
-Status: PUBLIC
+Shuhang Chen · Solo, based on RhineLabUI · TypeScript / Three.js / Vite / Blender · 2026
 
-An open-source 3D archive terminal, RhineLabUI, rebuilt as a game developer portfolio: works stand on a shelf as game cases, the disc goes into a console and loads on a monitor, and an original console-style boot sequence opens the site.
+This website is a small game. Each work stands on a shelf as a game case. Open one and the figure carries its disc to the console on the desk, the monitor reads it, and the work's page grows out of the picture on the screen. It started from RhineLabUI, an open-source 3D archive interface, and keeps its shelf and drag interaction. The cases, the console, the monitor and the boot sequence are mine, built from Blender scripts.
 
-Highlights
-1. Built on the upstream project's 3D array, glass materials and drag interaction.
-2. Added game case, console and monitor models generated from Blender scripts, the disc insert and loading flow, and the boot sequence.
-3. Reworked the palette, particles, profile and project pages, and removed all third-party IP content.
+- The shelf, the glass materials and the drag interaction come from the upstream project.
+- I added the game case, console and monitor models from Blender scripts, the disc insert and the boot sequence.
+- The palette, the particles and the profile and work pages are new, and no third-party IP content remains.
 
 Link: https://github.com/Lappass/PortfolioWebsite

@@ -20,5 +20,5 @@ export function paintTheme(amount: number) {
   }
 }
 export function themeSettingsMarkup(dark: boolean) {
-  return `<div class="theme-settings"><div><strong>COLOR THEME</strong><span>Game cases and background transition one by one</span></div><div class="theme-choices" role="group" aria-label="Color theme"><button data-color-theme="light" aria-pressed="${!dark}">Light</button><button data-color-theme="dark" aria-pressed="${dark}">Dark</button></div></div>`;
+  return `<div class="theme-settings"><div><strong>Colour theme</strong><span>Game cases and background transition one by one</span></div><div class="theme-choices" role="group" aria-label="Color theme"><button data-color-theme="light" aria-pressed="${!dark}">Light</button><button data-color-theme="dark" aria-pressed="${dark}">Dark</button></div></div>`;
 }

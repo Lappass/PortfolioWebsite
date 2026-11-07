@@ -14,17 +14,8 @@ export interface Profile {
   resume: string;
   /** Status bar: availability (e.g. "Open to internships"), city, and an IANA time zone for your local time. */
   status?: { availability?: string; location?: string; timeZone?: string };
-  boot: {
-    greeting: string;
-    identityLabel: string;
-    identity: string;
-    role: string;
-    loading: string;
-    ready: string;
-    welcome: string;
-    studio: string;
-    subtitle: string;
-  };
+  /** The one line on the intro screen's start button. */
+  boot: { ready: string };
 }
 
 export const profile: Profile = profileData;

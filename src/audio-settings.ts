@@ -3,8 +3,8 @@ import type { AudioPreferences } from "./audio";
 export function audioSettingsMarkup(prefs: AudioPreferences) {
   return `<div class="audio-settings">${(
     [
-      ["sound", "soundVolume", "INTERFACE SOUND", "Interface and startup sounds"],
-      ["music", "musicVolume", "BACKGROUND MUSIC", "Background music"],
+      ["sound", "soundVolume", "Interface sound", "Interface and startup sounds"],
+      ["music", "musicVolume", "Background music", "Background music"],
     ] as const
   )
     .map(

@@ -111,7 +111,7 @@ export class Intro {
           <div class="intro-face spine"><span>${e(cover.record.title)}</span></div>
         </div>
       </div>
-      <button class="intro-prompt" type="button"><i></i>${e(profile.boot.ready)}<small>Press any key to start</small></button>`;
+      <button class="intro-prompt" type="button"><i></i>${e(profile.boot.ready)}</button>`;
     this.root.prepend(this.canvas);
     this.leaf = this.root.querySelector(".intro-leaf")!;
     this.fish = this.root.querySelector(".intro-fish")!;

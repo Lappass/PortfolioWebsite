@@ -40,9 +40,9 @@ export class Workbench {
       if (saved?.date === this.date && Array.isArray(saved.done)) this.done = saved.done.filter((s: unknown) => typeof s === "string").slice(0, 3);
     } catch { this.storageOK = false; }
     stage.insertAdjacentHTML("beforeend", `<section class="workbench" hidden aria-label="桌面工作台">
-      <div class="wb-overview"><div class="wb-time"><div class="wb-kicker">SHUHANG CHEN / DAILY TERMINAL</div><time class="wb-clock"></time><div class="wb-date"></div></div>
+      <div class="wb-overview"><div class="wb-time"><div class="wb-kicker">Shuhang Chen</div><time class="wb-clock"></time><div class="wb-date"></div></div>
       <section class="wb-today"><div class="wb-heading"><h2>今日事项</h2><span class="wb-task-count"></span></div><div class="wb-tasks"></div></section></div>
-      <section class="wb-module"><div class="wb-kicker">PERSONAL WORKSPACE <span class="wb-index">01 / 05</span></div><h2 class="wb-title"></h2><div class="wb-content"></div><p class="wb-storage" role="status"></p></section>
+      <section class="wb-module"><div class="wb-kicker">Workspace</div><h2 class="wb-title"></h2><div class="wb-content"></div><p class="wb-storage" role="status"></p></section>
       <nav class="wb-nav" aria-label="工作台功能">${names.map((n, i) => `<button data-wb-lane="${i}" aria-pressed="false"><small>0${i + 1}</small>${n}<span>↗</span></button>`).join("")}</nav>
     </section>`);
     this.root = stage.querySelector(".workbench")!;
@@ -200,9 +200,9 @@ export class Workbench {
     if (this.lane === 0) {
       const now = new Date(), end = new Date(now.getFullYear() + 1, 0, 1).getTime(), start = new Date(now.getFullYear(), 0, 1).getTime();
       const percent = (now.getTime() - start) / (end - start) * 100;
-      html = `<div class="wb-large">${now.getFullYear()}<small>YEAR</small></div><div class="wb-rule"><i style="width:${percent}%"></i></div><p class="wb-muted">今年已走过 ${percent.toFixed(1)}%</p>`;
+      html = `<div class="wb-large">${now.getFullYear()}<small>Year</small></div><div class="wb-rule"><i style="width:${percent}%"></i></div><p class="wb-muted">今年已走过 ${percent.toFixed(1)}%</p>`;
     }
-    if (this.lane === 1) html = '<div class="wb-large">03<small>PRIORITIES</small></div><p class="wb-muted">把今天留给最重要的三件事。<br>点击左侧事项标记完成，再点一次撤销。完成状态每天重置。</p>';
+    if (this.lane === 1) html = '<div class="wb-large">03<small>Priorities</small></div><p class="wb-muted">把今天留给最重要的三件事。<br>点击左侧事项标记完成，再点一次撤销。完成状态每天重置。</p>';
     if (this.lane === 2) {
       const text = this.text("eventdate"), target = parseTarget(text), title = this.text("eventname");
       const delta = target === null ? 0 : target - Date.now();

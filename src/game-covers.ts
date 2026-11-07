@@ -104,7 +104,6 @@ const GEARS = [
   { file: "gear-slips.jpg", x: 1212.6, y: 718.2, r: 380.6, teeth: 12, dir: -1 },
   { file: "gear-pins.jpg", x: 1639, y: 464, r: 258.6, teeth: 9, dir: 1 },
 ];
-const SLIP = 52;
 
 class LastMileCover extends GameCover {
   private turn = 0;
@@ -118,11 +117,6 @@ class LastMileCover extends GameCover {
       <div class="lm-board tm-in">
         ${this.title(`<img src="${this.asset("title.png")}" alt="${e(this.r.title)}">`)}
         ${this.text}
-        <div class="lm-slips"><div class="lm-track"></div>
-          ${this.nav.map((_, i) => `<div class="lm-stop" style="top:${15 + i * SLIP}px"></div>`).join("")}
-          ${this.nav.map((s, i) => `<button type="button" class="lm-slip" data-sec="${e(s.id)}"><span class="lm-n">${pad(i + 1)}</span>${e(s.heading)}</button>`).join("")}
-          <svg class="lm-runner" width="78" height="104" viewBox="-110 -290 200 300" aria-hidden="true"><g class="lm-rider">${riderMarkup(false)}</g></svg>
-        </div>
       </div>`;
   }
 
@@ -135,9 +129,6 @@ class LastMileCover extends GameCover {
 
   protected show(from: number, instant: boolean) {
     const at = Math.max(0, this.sel);
-    this.el.querySelectorAll(".lm-slip").forEach((el, i) => el.classList.toggle("on", i === this.sel));
-    this.el.querySelectorAll(".lm-stop").forEach((el, i) => el.classList.toggle("on", i === this.sel));
-    this.el.querySelector<SVGElement>(".lm-runner")!.style.top = `${15 + at * SLIP - 96}px`;
     // Every change is one more tooth forward, whichever way the page moved: the treadmill never reverses.
     const steps = Math.min(3, Math.abs(at - Math.max(0, from)));
     if (!steps) return;
@@ -313,18 +304,11 @@ class LockdownCover extends GameCover {
       const i = owner.get(`${c},${r}`);
       grid += i === undefined ? "<i></i>" : `<i class="ld-piece" data-sec="${e(this.nav[i].id)}" data-i="${i}" style="--c:${PIECES[i % PIECES.length].c}"></i>`;
     }
-    const list = this.nav.map((s, i) => {
-      const piece = PIECES[i % PIECES.length];
-      const minC = Math.min(...piece.cells.map((p) => p[0])), minR = Math.min(...piece.cells.map((p) => p[1]));
-      const mini = piece.cells.map(([c, r]) => `<b style="grid-column:${c - minC + 1};grid-row:${r - minR + 1}"></b>`).join("");
-      return `<button type="button" class="ld-opt" data-sec="${e(s.id)}" data-i="${i}" style="--c:${piece.c}"><span class="ld-mini">${mini}</span><span>${e(s.heading)}</span></button>`;
-    }).join("");
     return `<div class="tm-art">${this.r.hero ? `<img class="ld-bg" src="${media(this.r.hero)}" alt="">` : ""}${this.heroArt()}</div>
       <div class="ld-head tm-in">${this.title(`<canvas width="620" height="90" aria-hidden="true"></canvas><span class="tm-sr">${e(this.r.title)}</span>`)}${this.text}</div>
       <div class="ld-block tm-in"><div class="ld-roof"><div class="ld-tank"></div><div class="ld-vent"></div>
         <svg class="ld-steam" viewBox="0 0 60 100" aria-hidden="true"><path d="M18 98 C4 80 30 66 16 48 S30 18 20 2" fill="none" stroke="rgba(236,229,207,.75)" stroke-width="4" stroke-linecap="round"/></svg></div>
-        <div class="ld-face"><div class="ld-grid">${grid}</div></div><div class="ld-door"><i></i></div></div>
-      <div class="ld-list tm-in">${list}</div>`;
+        <div class="ld-face"><div class="ld-grid">${grid}</div></div><div class="ld-door"><i></i></div></div>`;
   }
 
   mount() {
@@ -354,14 +338,9 @@ class LockdownCover extends GameCover {
 }
 
 /* ---------------------------------------------------------------------------------------- */
-/* Sniff & Snitch: the lineup wall from the key art, each section a booking placard. Fia's   */
-/* paw (the game's own icon) hops to the one on screen.                                       */
-
-const ROW = 56;
+/* Sniff & Snitch: the lineup wall from the key art.                                          */
 
 class SniffCover extends GameCover {
-  private walk = 0;
-
   constructor(r: ArchiveRecord, nav: CoverSection[], text: string, onPick: (id: string) => void) { super(r, nav, text, onPick); this.build("sniff"); }
 
   protected markup() {
@@ -369,10 +348,6 @@ class SniffCover extends GameCover {
       <div class="sn-board tm-in">
         ${this.title(`<img src="${this.asset("title.png")}" alt="${e(this.r.title)}">`)}
         ${this.text}
-        <div class="sn-list">
-          ${this.nav.map((s) => `<button type="button" class="sn-charge" data-sec="${e(s.id)}"><span class="sn-name">${e(s.heading)}</span></button>`).join("")}
-          <img class="sn-paw" src="${this.asset("paw.png")}" alt="" aria-hidden="true">
-        </div>
       </div>`;
   }
 
@@ -383,19 +358,7 @@ class SniffCover extends GameCover {
     Object.assign(frame.style, { width: `${1920 * k}px`, height: `${1080 * k}px`, left: `${(innerWidth - 1920 * k) / 2}px`, top: `${(innerHeight - 1080 * k) / 2}px` });
   }
 
-  protected show(from: number, instant: boolean) {
-    this.el.querySelectorAll(".sn-charge").forEach((el, i) => el.classList.toggle("on", i === this.sel));
-    const paw = this.el.querySelector<HTMLElement>(".sn-paw")!;
-    paw.style.transition = instant ? "none" : "";
-    paw.style.top = `${Math.max(0, this.sel) * ROW + 2}px`;
-    paw.style.opacity = this.sel < 0 ? "0" : "1";
-    if (instant || from === this.sel) return;
-    this.el.classList.add("walking");
-    clearTimeout(this.walk);
-    this.walk = window.setTimeout(() => this.el.classList.remove("walking"), 360);
-  }
-
-  destroy() { clearTimeout(this.walk); super.destroy(); }
+  protected show() {}
 }
 
 const THEMES = { lastmile: LastMileCover, trail: TrailCover, lockdown: LockdownCover, sniff: SniffCover };

@@ -1,20 +1,15 @@
-﻿SHUHANG CHEN · PORTFOLIO ARCHIVE
-FILE X-004 / Last Mile
-A DELIVERY STATION MANAGEMENT GAME
+﻿Last Mile
+Ten days running a delivery station
 
-Role: Solo developer · Indie
-Date: 2026
-Stack: Unity · C#
-Status: PUBLIC
+Shuhang Chen · Solo project · Unity · C# · 2026
 
-A ten-day management game about running a neighbourhood delivery station. Each wave of orders lands on a live 3D city as countdown pins, and you decide who takes them: riders, robots or drones. Speed is only half the job; heavy loads, stairs, fatigue and the riders' own lives all weigh on every assignment.
+Ten days running Lanting, a small food-delivery station. Orders land on a 3D city as countdown pins, and for each one you pick who goes: a rider paid by the drop, a ground robot or a drone. Sending Chen instead of Xiaoyu on an ID check decides who gets closer to the bill they are saving for. Over the ten days headquarters moves the station onto machines, one rider's place at a time.
 
-Highlights
-1. Real-time dispatch on a 3D city: routing modes, traffic, rush hours, fatigue and heavy loads all change who should take an order.
-2. A small cast of riders with their own stories, written in a dry corporate voice, and choices that carry from one day to the next.
-3. A procedurally laid-out city with a day-night cycle and automated play-through checks in the editor; the illustrations and landmark models are AI-generated and assembled by editor scripts.
+- Each order is dispatched by hand to a courier with a name, and the deadline comes from the fastest rested courier, so a slower pick is what makes it late.
+- Four riders each need money for one thing by one evening, and a fair share of the work just covers it.
+- The district is one road graph modelled on Xujiahui, filled in by editor scripts, and the editor can play all ten days by itself to check the 132 orders.
 
-Each order is someone's pay
+The orders
 
 The riders are paid by the drop, so sending Chen instead of Xiaoyu on an ID check decides which of them gets closer to the bill they are saving for. Over the ten days headquarters moves the station onto robots and drones.
 
@@ -26,7 +21,7 @@ The first version was a policy game with sliders for pay and late fees, and a pa
 
 - AO-6, the assistant from day 6, never overrules the player.
 
-A day at the station
+A day
 
 The station gets ¥180 each morning. The player can save it, or spend ¥80 to coach the rider who knows the streets least, ¥90 on breakfast and a rest, or ¥50 to add 15 seconds to the first four orders.
 
@@ -34,7 +29,7 @@ A shift is two 90-second waves. On day 1 six orders arrive one at a time. From d
 
 Each rider costs ¥30 in wages at night. The report puts delivered against target next to what each rider took home, so a good day for the station and a bad day for one rider sit on the same page. A station that can't pay wages closes, and the player replays that morning.
 
-Choosing who takes the order
+Dispatch
 
 Clicking a pin lists who could take the order, with an arrival estimate. A card for someone who can't go is locked and says why, and the clock holds until the player chooses.
 
@@ -50,7 +45,7 @@ Each drop costs a rider 8 stamina on top of the ride, and a tired rider slows to
 
 - Heavy restock: Strength 8. ¥10 and ¥6. A late drop halves both.
 
-Robots, drones and an assistant that learns
+The machines
 
 The robot arrives on day 3. It is never paid per drop, but it can't climb stairs or check an ID. That night headquarters compares it with the riders on standard orders. If the riders were on time more often, the player can send it back. A tie goes to the robot.
 
@@ -58,7 +53,7 @@ The drone comes on day 4. It flies straight over the blocks and is the fastest c
 
 From day 6 AO-6 recommends someone for every order. Each Confirm, or each time the player picks someone else, is saved as an example. It keeps the last 96 and cites them: "This follows what you did on Day 6, #1058." I wanted the player to train it willingly, one Confirm at a time.
 
-Four riders and what they are saving for
+The riders
 
 Each rider has three scores out of 10: Streets for speed, Strength for load, Judgment for tricky handovers. Chen is 9, 4 and 9. Ajie is 5, 9 and 5. Lin is 8, 6 and 6. Xiaoyu joins on day 2 at 4, 6 and 8.
 
@@ -66,7 +61,7 @@ Each is short of money for one thing by one evening: Xiaoyu ¥30 for a room depo
 
 From day 2 one rider calls each evening about something the board doesn't count. Ajie asks for small parcels, because "the board counts parcels, not weight." I kept one rule for the writing: the riders talk about crates, rent and doorbells, and only AO-6 and headquarters carry the satire.
 
-A district built from one road graph
+The district
 
 The map is modelled on Xujiahui: 26 hand-placed junctions around a six-armed crossing, with eight outer districts generated as five-by-five street grids. Orders go to four of them, among them Willow Bend and Heron Road.
 
@@ -74,7 +69,7 @@ An editor script finds each closed block in the road graph, lines its edges with
 
 The light follows the shift from warm morning to blue evening, but the interface keeps its colours, so a red countdown at dusk looks the same as one at breakfast.
 
-Lessons on the map, and ten days played by the editor
+Teaching and testing
 
 Day 1 teaches by doing. Zhou Heng, the regional manager, walks the player through the first dispatch, and later lessons appear the first time they are needed, such as Strength on the first full crate.
 

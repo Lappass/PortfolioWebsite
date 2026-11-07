@@ -26,72 +26,72 @@ export const MOTION_LABELS: Record<
   { title: string; description: string; group: string }
 > = {
   boot: {
-    title: "BOOT SEQUENCE",
+    title: "Boot sequence",
     description: "Boot logo, scan and welcome screen",
     group: "Intro",
   },
   selectionWave: {
-    title: "SELECTION WAVE",
+    title: "Selection wave",
     description: "Wave that ripples through the array on selection",
     group: "Array",
   },
   idleWave: {
-    title: "IDLE MOTION",
+    title: "Idle motion",
     description: "Gentle array motion while idle",
     group: "Array",
   },
   pointerParallax: {
-    title: "POINTER PARALLAX",
+    title: "Pointer parallax",
     description: "Slight camera drift following the pointer",
     group: "Array",
   },
   dragMomentum: {
-    title: "DRAG MOMENTUM",
+    title: "Drag momentum",
     description: "Keep gliding at release speed after a drag",
     group: "Array",
   },
   selectionTransition: {
-    title: "SELECTION TRANSITION",
+    title: "Selection transition",
     description: "Camera travel when switching works or columns",
     group: "Array",
   },
   detailTransition: {
-    title: "DETAIL TRANSITION",
+    title: "Detail transition",
     description: "Lift, turn, return and detail camera",
     group: "Details",
   },
   modelDecryption: {
-    title: "MODEL DECRYPTION",
+    title: "Model decryption",
     description: "Decrypt lines and frosted reveal",
     group: "Details",
   },
   documentReveal: {
-    title: "DOCUMENT REVEAL",
+    title: "Document reveal",
     description: "Masked reveal of body text",
     group: "Details",
   },
   rollingText: {
-    title: "ROLLING TEXT",
+    title: "Rolling text",
     description: "Rolling titles, categories and status labels",
     group: "Interface",
   },
   rollingNumbers: {
-    title: "ROLLING NUMBERS",
+    title: "Rolling numbers",
     description: "Rolling numbers and work IDs",
     group: "Interface",
   },
   surfaceTransitions: {
-    title: "SURFACE TRANSITIONS",
+    title: "Surface transitions",
     description: "Transitions for details, search, saved and settings",
     group: "Interface",
   },
   viewerNavigation: {
-    title: "VIEWER NAVIGATION",
+    title: "Viewer navigation",
     description: "360° rotate, pan, zoom and reset easing",
     group: "360° Viewer",
   },
   viewerModelTransition: {
-    title: "VIEWER MODEL TRANSITION",
+    title: "Viewer model transition",
     description: "Explode, reassemble and clarity changes",
     group: "360° Viewer",
   },
@@ -194,7 +194,7 @@ export function motionSettingsMarkup(
   const selected = preset ?? motionPresetFor(motion);
   const presetButton = (value: "full" | "reduced" | "custom", label: string) =>
     `<button type="button" data-action="motion-preset" data-preset="${value}" aria-pressed="${selected === value}"${value === "custom" ? " disabled" : ""}>${label}</button>`;
-  return `<section id="motion-settings" class="motion-settings" aria-label="Motion settings"><div class="motion-settings-head"><div><strong>ANIMATION CONTROLS</strong><span>Full, reduced, or customize each item; disabled animations settle immediately (intro changes apply on the next replay)</span></div>${presetButton("full", "Full")}${presetButton("reduced", "Reduced")}${presetButton("custom", "Custom")}</div><details class="motion-advanced"><summary>Advanced <span>Intro / Array / Details / Interface</span></summary><div class="motion-groups">${groups
+  return `<section id="motion-settings" class="motion-settings" aria-label="Motion settings"><div class="motion-settings-head"><div><strong>Animation</strong><span>Full, reduced, or customize each item; disabled animations settle immediately (intro changes apply on the next replay)</span></div>${presetButton("full", "Full")}${presetButton("reduced", "Reduced")}${presetButton("custom", "Custom")}</div><details class="motion-advanced"><summary>Advanced <span>Intro / Array / Details / Interface</span></summary><div class="motion-groups">${groups
     .map(
       (group) =>
         `<fieldset><legend>${group}</legend>${(

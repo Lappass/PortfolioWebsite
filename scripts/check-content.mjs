@@ -125,7 +125,49 @@ const invalidCases = [
     },
     /All/,
   ],
+  [
+    "shouting one-liner",
+    (c) => {
+      c.records[0].en = "A HOUSEHOLD SURVIVAL GAME";
+    },
+    /全大写/,
+  ],
+  [
+    "template phrase",
+    (c) => {
+      c.records[0].abstract = "A game by me. COMING SOON.";
+    },
+    /套话/,
+  ],
+  [
+    "X that Y heading",
+    (c) => {
+      c.records[1].study.sections[0].heading = "Guards that see and hear";
+    },
+    /X that Y/,
+  ],
+  [
+    "summary too short",
+    (c) => {
+      c.records[1].study.sections[0].summary = "Too short.";
+    },
+    /25 到 90/,
+  ],
+  [
+    "retired clearance field",
+    (c) => {
+      c.records[0].clearance = "PUBLIC";
+    },
+    /clearance/,
+  ],
 ];
+
+test("a plain status and a readable summary pass", () => {
+  const edited = structuredClone(content);
+  edited.records[0].status = "In development";
+  edited.records[1].study.sections[0].summary = Array(40).fill("word").join(" ");
+  assert.doesNotThrow(() => validateContent(edited));
+});
 for (const [name, mutate, error] of invalidCases) {
   test(`rejects ${name}`, () => {
     const invalid = structuredClone(content);

@@ -1050,20 +1050,13 @@ export class ArchiveScene {
     c.fillRect(12, 12, 1000, 6);
     c.fillRect(12, 419, 1000, 3);
     c.font = "bold 81px MiSans";
-    c.fillText("SHUHANG CHEN", 22, 116);
+    c.fillText("Shuhang Chen", 22, 116);
     c.font = "32px MiSans";
     c.fillStyle = "#878476";
-    c.fillText("SELECTED WORKS", 25, 174);
+    c.fillText("Works", 25, 174);
     c.fillStyle = "#171713";
     c.font = "bold 130px MiSans";
-    c.fillText("NO." + String(index + 1).padStart(3, "0"), 22, 360);
-    c.fillRect(782, 32, 221, 39);
-    c.fillStyle = "#eee9de";
-    c.font = "24px MiSans";
-    c.fillText("P F / A R", 809, 61);
-    c.fillStyle = "#171713";
-    c.font = "bold 64px MiSans";
-    c.fillText("INFO", 830, 143);
+    c.fillText(String(index + 1).padStart(2, "0"), 22, 360);
     // Keep the mark's own proportions inside the old 210×98 slot.
     const markW = 98 * MARK_ASPECT;
     c.drawImage(this.labelMark, 790 + (210 - markW) / 2, 242, markW, 98);

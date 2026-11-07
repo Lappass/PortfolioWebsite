@@ -8,7 +8,8 @@ export interface ArchiveRecord {
   category: string;
   date: string;
   lead: string;
-  clearance: string;
+  /** Shown instead of "View" in the list and on the shelf card, e.g. "In development". */
+  status?: string;
   abstract: string;
   findings: string[];
   source: string;

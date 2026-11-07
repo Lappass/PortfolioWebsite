@@ -71,23 +71,23 @@ $("#stage").innerHTML = `
   <div class="scene-atmosphere archive-atmosphere"></div>
   <header class="brand">${brandHeading}</header>
   <nav class="system-nav" aria-label="System navigation">
-    <button data-action="about" aria-label="About me"><span aria-hidden="true">◉</span> ABOUT</button>
-    <button data-action="saved" aria-label="View saved works" title="Saved">＋ SAVED <span id="saved-count">00</span></button>
+    <button data-action="about" aria-label="About me">About me</button>
+    <button data-action="saved" aria-label="View saved works" title="Saved">Saved <span id="saved-count">0</span></button>
   </nav>
   <svg id="inspection-marks" viewBox="0 0 1920 1080" aria-hidden="true"><path id="inspection-lines"/><g id="inspection-corners"></g><circle id="inspection-point" r="1.8"/></svg>
   <div id="inspection-text" aria-hidden="true"><strong></strong></div>
   <section id="archive-ui" class="archive-ui" aria-label="Work selection">
-    <div class="archive-callout"><div class="eyebrow"><i aria-hidden="true"></i><span id="archive-category"></span></div><button class="file-title" data-action="open"><span id="selected-id">X-<span id="selected-code">001</span></span><span class="file-open">↗</span></button><div class="callout-rule"><i></i></div><div class="file-summary"><span id="selected-title">Portfolio</span><span id="selected-clearance"></span></div><p id="selected-abstract" class="callout-abstract"></p><ul id="selected-tags" class="callout-tags"></ul><button class="read-file" data-action="open">VIEW PROJECT <span>→</span></button></div>
+    <div class="archive-callout"><div class="eyebrow"><i aria-hidden="true"></i><span id="archive-category"></span></div><button class="file-title" data-action="open"><span id="selected-id">X-<span id="selected-code">001</span></span><span class="file-open">↗</span></button><div class="callout-rule"><i></i></div><div class="file-summary"><span id="selected-title">Portfolio</span><span id="selected-clearance"></span></div><p id="selected-abstract" class="callout-abstract"></p><ul id="selected-tags" class="callout-tags"></ul><button class="read-file" data-action="open">Open <span>→</span></button></div>
     <div id="hover-label" class="hover-label" hidden>X-<span id="hover-code">001</span> / <span id="hover-title"></span></div>
-    <div class="archive-counter"><span class="tiny-label">SELECTED WORKS</span><div><span id="selected-number">01</span><i>/</i><span class="count-total">04</span></div></div>
+    <div class="archive-counter"><span class="tiny-label">Works</span><div><span id="selected-number">01</span><i>/</i><span class="count-total">04</span></div></div>
     <div class="archive-navigation"><button data-action="prev" aria-label="Previous work">↑</button><div id="file-ticks" class="file-ticks"></div><button data-action="next" aria-label="Next work">↓</button></div>
-    <div class="column-navigation"><button data-action="column-prev" aria-label="Previous column">←</button><div><span id="column-number">COLUMN <span id="column-index">03</span> / 05</span><strong id="column-name"></strong></div><button data-action="column-next" aria-label="Next column">→</button></div>
-    <div class="archive-hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> Browse <span>／</span> Drag to glide <span>／</span> <kbd>ENTER</kbd> Open</div>
+    <div class="column-navigation"><button data-action="column-prev" aria-label="Previous column">←</button><div><strong id="column-name"></strong></div><button data-action="column-next" aria-label="Next column">→</button></div>
+    <div class="archive-hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> Browse <span>·</span> Drag to glide <span>·</span> <kbd>Enter</kbd> Open</div>
   </section>
-  <footer class="system-footer"><span><i class="status-light"></i> SHUHANG CHEN · PORTFOLIO${isWallpaper ? '<button type="button" class="three-toggle" data-action="toggle-three" aria-pressed="true" title="Unload 3D models, keep the 2D interface">3D ON</button>' : ''}</span><span><span id="clock">00:00:00</span></span><button data-action="replay" title="Replay intro">REPLAY INTRO ↻</button></footer>
+  <footer class="system-footer"><span><i class="status-light"></i> Shuhang Chen${isWallpaper ? '<button type="button" class="three-toggle" data-action="toggle-three" aria-pressed="true" title="Unload 3D models, keep the 2D interface">3D on</button>' : ''}</span><span><span id="clock">00:00:00</span></span><button data-action="replay" title="Replay intro">Replay intro ↻</button></footer>
   <div id="pwa-update-notice" class="pwa-update-notice" role="status" hidden><span>New version ready</span><button data-pwa-action="update">Update and restart ↻</button></div>
   <div id="modal-root"></div><div id="toast" class="toast" role="status"></div>
-  <div id="loading" class="loading"><div class="loading-mark">${logo}</div><span>LOADING</span><i></i></div>
+  <div id="loading" class="loading"><div class="loading-mark">${logo}</div><span>Loading</span><i></i></div>
 `;
 
 
@@ -157,10 +157,6 @@ const numberOptions = {
 const fileCounter = createRollingNumber($("#selected-number"), {
   ...numberOptions,
   value: 1,
-});
-const columnCounter = createRollingNumber($("#column-index"), {
-  ...numberOptions,
-  value: 3,
 });
 const codeOptions = {
   ...numberOptions,
@@ -340,7 +336,7 @@ function effectiveRenderQuality() { return superPerformanceEnabled() ? superPerf
 function savePrefs() {
   saveAudioPrefs();
   if (!motionActive("rollingText")) rollingTitles.forEach(title => title.finish());
-  if (!motionActive("rollingNumbers")) [fileCounter, columnCounter, selectedCode, hoverCode].forEach(counter => counter.finish());
+  if (!motionActive("rollingNumbers")) [fileCounter, selectedCode, hoverCode].forEach(counter => counter.finish());
   if (!motionActive("surfaceTransitions")) modalTransition?.finish();
   scene?.setMotion(prefs.motion);
   scene?.setTheme(prefs.colorTheme === "dark", !motionActive("surfaceTransitions") || !started);
@@ -351,7 +347,6 @@ function savePrefs() {
   updateQualitySummary();
   fileCounter.update({ animated: motionActive("rollingNumbers") && mode === "archive" });
   rollingTitles.forEach(title => title.update({ animated: motionActive("rollingText") && mode === "archive" }));
-  columnCounter.update({ animated: motionActive("rollingNumbers") && mode === "archive" });
   selectedCode.update({ animated: motionActive("rollingNumbers") && mode === "archive" });
   hoverCode.update({ animated: motionActive("rollingNumbers") && mode === "archive" });
   $("#stage").classList.toggle("reduce-motion", motionIsReduced());
@@ -494,7 +489,7 @@ function updateSelection(navigation?: ArchiveNavigation) {
   const { lane } = fileLocation(selected);
   const files = columnFiles(lane);
   selectionTitle.update({ text: r.title, animated: motionActive("rollingText") && mode === "archive" });
-  clearanceTitle.update({ text: r.clearance, animated: motionActive("rollingText") && mode === "archive" });
+  clearanceTitle.update({ text: r.status ?? "", animated: motionActive("rollingText") && mode === "archive" });
   categoryTitle.update({ text: r.category, animated: motionActive("rollingText") && mode === "archive" });
   $("#selected-abstract").textContent = r.abstract;
   const tags = r.tags?.length ? r.tags : r.lead.split(/\s*[/·]\s*/).filter(Boolean);
@@ -521,14 +516,6 @@ function updateSelection(navigation?: ArchiveNavigation) {
   $(".count-total").textContent = String(files.length).padStart(2, "0");
   $<HTMLButtonElement>('[data-action="prev"]').disabled = files.indexOf(selected) === 0;
   $<HTMLButtonElement>('[data-action="next"]').disabled = files.indexOf(selected) === files.length - 1;
-  columnCounter.update({
-    value: lane + 1,
-    animated: motionActive("rollingNumbers") && mode === "archive",
-    direction:
-      navigation && "axis" in navigation && navigation.axis === "lane"
-        ? direction
-        : "auto",
-  });
   columnTitle.update({ text: archiveColumns[0], animated: motionActive("rollingText") && mode === "archive" });
   $<HTMLButtonElement>('[data-action="column-prev"]').disabled = false;
   $<HTMLButtonElement>('[data-action="column-next"]').disabled = false;
@@ -540,7 +527,7 @@ function updateSelection(navigation?: ArchiveNavigation) {
     button.classList.toggle("selected", index === selected);
     button.setAttribute("aria-pressed", String(index === selected));
   });
-  $("#saved-count").textContent = String(saved.size).padStart(2, "0");
+  $("#saved-count").textContent = String(saved.size);
 }
 /** The console-style opening: the archive waits hidden underneath, then rises in. */
 function playIntro() {
@@ -589,7 +576,7 @@ function toggleSaved(id: string) {
   try {
     localStorage.setItem("rhine-saved", JSON.stringify([...saved]));
   } catch {}
-  $("#saved-count").textContent = String(saved.size).padStart(2, "0");
+  $("#saved-count").textContent = String(saved.size);
   audio.play("confirm");
   notify(saved.has(id) ? "Saved" : "Removed from saved");
   return saved.has(id);
@@ -639,11 +626,11 @@ function closeModal(afterClose?: () => void) {
 }
 function renderModal() {
   if (!modal) return;
-  const directoryTitle = modal === "experiments" ? "EXPERIMENTS" : modal === "saved" ? "SAVED" : "SEARCH";
+  const directoryTitle = modal === "experiments" ? "Experiments" : modal === "saved" ? "Saved" : "Search";
   const directoryLabel = modal === "experiments" ? "Experiments / small projects and practice" : modal === "saved" ? "Saved works" : "Search works";
   modalTransition?.dispose();
   $("#modal-root").innerHTML =
-    `<div class="modal-backdrop"><section class="terminal-modal ${modal === "settings" ? "settings-modal" : modal === "experiments" ? "experiments-modal" : ""}" role="dialog" aria-modal="true" aria-label="${modal === "settings" ? "Settings" : directoryLabel}"><div class="modal-top"><span>SHUHANG CHEN / ${modal === "settings" ? "PREFERENCES" : "WORKS"}</span><button data-action="close-modal" aria-label="Close window">CLOSE <span>×</span></button></div>${modal === "settings" ? settingsMarkup() : `<h2>${directoryTitle}<small>${directoryLabel}</small></h2><div class="search-field"><span>⌕</span><input id="archive-search" type="search" autocomplete="off" placeholder="Search by ID, title or role" aria-label="Search works"/><span class="key">ESC</span></div><div class="category-filters">${categories.map((c, i) => `<button data-filter="${escapeHtml(c)}" class="${i === 0 ? "active" : ""}">${escapeHtml(c)}</button>`).join("")}</div><div class="result-header"><span>Work</span><span>Role</span><span></span></div><div id="search-results" class="search-results"></div><div class="modal-bottom"><span id="result-count"></span><span></span></div>`}</section></div>`;
+    `<div class="modal-backdrop"><section class="terminal-modal ${modal === "settings" ? "settings-modal" : modal === "experiments" ? "experiments-modal" : ""}" role="dialog" aria-modal="true" aria-label="${modal === "settings" ? "Settings" : directoryLabel}"><div class="modal-top"><span>Shuhang Chen · ${modal === "settings" ? "Settings" : "Works"}</span><button data-action="close-modal" aria-label="Close window">Close <span>×</span></button></div>${modal === "settings" ? settingsMarkup() : `<h2>${directoryTitle}<small>${directoryLabel}</small></h2><div class="search-field"><span>⌕</span><input id="archive-search" type="search" autocomplete="off" placeholder="Search by ID, title or role" aria-label="Search works"/><span class="key">Esc</span></div><div class="category-filters">${categories.map((c, i) => `<button data-filter="${escapeHtml(c)}" class="${i === 0 ? "active" : ""}">${escapeHtml(c)}</button>`).join("")}</div><div class="result-header"><span>Work</span><span>Role</span><span></span></div><div id="search-results" class="search-results"></div><div class="modal-bottom"><span id="result-count"></span><span></span></div>`}</section></div>`;
   const backdrop = $(".modal-backdrop");
   backdrop.hidden = true;
   modalTransition = new SurfaceTransition(backdrop, $(".terminal-modal"));
@@ -680,10 +667,10 @@ function renderResults() {
     ? results
         .map(
           ({ r, i }) =>
-            `<button class="result-row" data-result="${i}"><span class="result-name"><b>${r.id}</b><span>${escapeHtml(r.title)}<small>${escapeHtml(r.en)}</small></span>${saved.has(r.id) ? "<i>＋</i>" : ""}</span><span>${escapeHtml(r.department)}</span><span>${r.clearance === "RESTRICTED" ? "In progress" : "View"} <i>↗</i></span></button>`,
+            `<button class="result-row" data-result="${i}"><span class="result-name"><b>${r.id}</b><span>${escapeHtml(r.title)}<small>${escapeHtml(r.en)}</small></span>${saved.has(r.id) ? "<i>＋</i>" : ""}</span><span>${escapeHtml(r.department)}</span><span>${r.status ? escapeHtml(r.status) : "View"} <i>↗</i></span></button>`,
         )
         .join("")
-    : `<div class="empty-results"><img src="${import.meta.env.BASE_URL}assets/figure.webp" alt="" width="145" height="320"><strong>${modal === "saved" && !searchQuery ? "No saved works yet" : "No matching works"}</strong><p>${modal === "saved" && !searchQuery ? "Press SAVE on a work's details and it will appear here." : "Try another title or ID, or switch the category."}</p><button data-action="reset-search">${modal === "saved" ? "View all works →" : "Reset search →"}</button></div>`;
+    : `<div class="empty-results"><img src="${import.meta.env.BASE_URL}assets/figure.webp" alt="" width="145" height="320"><strong>${modal === "saved" && !searchQuery ? "No saved works yet" : "No matching works"}</strong><p>${modal === "saved" && !searchQuery ? "Press Save on a work's page and it will appear here." : "Try another title or ID, or switch the category."}</p><button data-action="reset-search">${modal === "saved" ? "View all works →" : "Reset search →"}</button></div>`;
   $("#result-count").textContent =
     `${results.length} ${results.length === 1 ? "work" : "works"}`;
 }
@@ -701,7 +688,7 @@ function motionPreferenceNoteMarkup() {
   return `<div id="motion-preference-note" class="motion-preference-note"><p>${motionSummary(prefs.motion)}</p><span>Preset: ${preset === "full" ? "Full motion" : preset === "reduced" ? "Reduced motion" : "Custom"} · saved on this site</span>${allEnabled ? "" : '<button data-action="enable-motion">Enable full motion and replay ↻</button>'}</div>`;
 }
 function settingsMarkup() {
-  return `<h2>PREFERENCES<small>Display and sound</small></h2>${isWallpaper ? '<p class="wallpaper-settings-note">Settings are read from Wallpaper Engine on every launch. Changes here last only for this session; to keep them, adjust the wallpaper properties in Wallpaper Engine.</p>' : ""}<div class="settings-list">${themeSettingsMarkup(prefs.colorTheme === "dark")}${!isWallpaper ? `<label><div><strong>SUPER PERFORMANCE</strong><span>Lowers 3D quality and resolution while keeping full motion; turning it off restores your quality settings</span></div><input type="checkbox" data-pref="superPerformance" ${prefs.superPerformance ? "checked" : ""}/><i class="toggle"></i></label>` : ""}${workbench?.settingsMarkup() ?? ""}${audioSettingsMarkup(prefs)}</div>${motionPreferenceNoteMarkup()}${motionSettingsMarkup(prefs.motion, prefs.motionPreset)}${qualityMarkup(prefs.rendering)}${pwaSettingsMarkup()}<div class="settings-shortcuts">${isWallpaper ? '<span>DESKTOP CONTROLS</span><p>Drag or use the on-screen buttons to browse. On the desktop, arrow keys and the mouse wheel may not reach the wallpaper.</p>' : '<span>KEYBOARD CONTROLS</span><p><kbd>←</kbd><kbd>→</kbd> Column <kbd>↑</kbd><kbd>↓</kbd> Work <kbd>ENTER</kbd> Open <kbd>/</kbd> Search <kbd>ESC</kbd> Back</p>'}</div><div class="settings-bottom">${!isWallpaper && document.fullscreenEnabled ? '<button data-action="fullscreen">FULLSCREEN <span>↗</span></button>' : ''}<button data-action="restart">REPLAY INTRO <span>↻</span></button></div><div class="modal-bottom"><span>Set in MiSans (Xiaomi) <a href="${assetUrl("fonts/MiSans-license.pdf")}" target="_blank" rel="noopener">Font license</a></span><span>SHUHANG CHEN · PORTFOLIO</span></div>`;
+  return `<h2>Settings<small>Display and sound</small></h2>${isWallpaper ? '<p class="wallpaper-settings-note">Settings are read from Wallpaper Engine on every launch. Changes here last only for this session; to keep them, adjust the wallpaper properties in Wallpaper Engine.</p>' : ""}<div class="settings-list">${themeSettingsMarkup(prefs.colorTheme === "dark")}${!isWallpaper ? `<label><div><strong>Super performance</strong><span>Lowers 3D quality and resolution while keeping full motion; turning it off restores your quality settings</span></div><input type="checkbox" data-pref="superPerformance" ${prefs.superPerformance ? "checked" : ""}/><i class="toggle"></i></label>` : ""}${workbench?.settingsMarkup() ?? ""}${audioSettingsMarkup(prefs)}</div>${motionPreferenceNoteMarkup()}${motionSettingsMarkup(prefs.motion, prefs.motionPreset)}${qualityMarkup(prefs.rendering)}${pwaSettingsMarkup()}<div class="settings-shortcuts">${isWallpaper ? '<span>Desktop controls</span><p>Drag or use the on-screen buttons to browse. On the desktop, arrow keys and the mouse wheel may not reach the wallpaper.</p>' : '<span>Keyboard</span><p><kbd>←</kbd><kbd>→</kbd> Column <kbd>↑</kbd><kbd>↓</kbd> Work <kbd>Enter</kbd> Open <kbd>/</kbd> Search <kbd>Esc</kbd> Back</p>'}</div><div class="settings-bottom">${!isWallpaper && document.fullscreenEnabled ? '<button data-action="fullscreen">Full screen <span>↗</span></button>' : ''}<button data-action="restart">Replay intro <span>↻</span></button></div><div class="modal-bottom"><span>Set in MiSans (Xiaomi) <a href="${assetUrl("fonts/MiSans-license.pdf")}" target="_blank" rel="noopener">Font license</a></span><span>Shuhang Chen</span></div>`;
 }
 
 document.addEventListener("input", (e) => {
@@ -864,7 +851,7 @@ attachPadInput({
     scene?.setPad({ home: 1 });
     clearTimeout(cheatLight);
     cheatLight = window.setTimeout(() => scene?.setPad({ home: 0 }), 1600);
-    notify("Cheat code accepted. Thanks for playing.");
+    notify("Cheat code. Thanks for playing.");
   },
 });
 document.addEventListener("keydown", (e) => {
@@ -1032,7 +1019,7 @@ function syncThreeButton() {
   syncWallpaperBackground();
   const button = document.querySelector<HTMLButtonElement>('[data-action="toggle-three"]');
   if (!button) return;
-  button.textContent = threeState === "loading" ? "3D LOADING…" : threeState === "closing" ? "3D CLOSING…" : threeState === "off" ? "3D OFF" : "3D ON";
+  button.textContent = threeState === "loading" ? "3D loading…" : threeState === "closing" ? "3D closing…" : threeState === "off" ? "3D off" : "3D on";
   button.disabled = threeState === "loading";
   button.setAttribute("aria-pressed", String(threeState === "on"));
   button.title = threeState === "off" ? "Reload 3D models" : threeState === "closing" ? "Cancel and restore the 3D view" : "Unload 3D models, keep the 2D interface";
@@ -1078,7 +1065,7 @@ async function toggleThree() {
   } catch (error) {
     next?.dispose(); scene = undefined;
     threeState = "off"; syncThreeButton();
-    notify("3D models failed to load. Click 3D OFF to retry.");
+    notify("3D models failed to load. Click 3D off to retry.");
     console.error(error);
   }
 }
@@ -1098,10 +1085,9 @@ async function start() {
       scene?.load(),
       // With unicode-range faces, preload the opening's actual characters,
       // not every font shard. Other archive text loads on demand.
-      document.fonts.load("300 20px MiSans", "LOADING SHUHANG CHEN GAME DEVELOPER"),
-      document.fonts.load("400 20px MiSans", "Identity request received processing access granted Portfolio Selected Works Saved Search Role Timeline Stack: 0123456789"),
-      document.fonts.load("600 20px MiSans", "SYNTHESIZE INFORMATION ANALYSIS OS"),
-      document.fonts.load("700 20px MiSans", "SHUHANG CHEN PRESS START"),
+      document.fonts.load("300 20px MiSans", "Loading Shuhang Chen Game developer"),
+      document.fonts.load("400 20px MiSans", "Works Saved Search About me Press any key to start Open: 0123456789"),
+            document.fonts.load("700 20px MiSans", "Shuhang Chen Press any key to start"),
     ]);
     if (scene) bindScene(scene);
     savePrefs();
@@ -1118,7 +1104,7 @@ async function start() {
   } catch (error) {
     console.error(error);
     $("#loading").innerHTML =
-      '<div class="error-state"><strong>Loading failed</strong><p>3D resources could not be loaded. Make sure hardware acceleration is enabled in your browser, then reconnect.</p><button onclick="location.reload()">RECONNECT →</button></div>';
+      '<div class="error-state"><strong>Loading failed</strong><p>3D resources could not be loaded. Make sure hardware acceleration is enabled in your browser, then reconnect.</p><button onclick="location.reload()">Reload →</button></div>';
   }
 }
 function completeStartup(silent: boolean) {

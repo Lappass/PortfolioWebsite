@@ -259,10 +259,7 @@ export class ConsoleSetup {
     c.fillStyle = "#eef3ff";
     c.textAlign = "center";
     c.font = "700 64px MiSans, sans-serif";
-    c.fillText("SHUHANG CHEN", 0, 0);
-    c.font = "500 18px MiSans, sans-serif";
-    c.fillStyle = "#cbb797";
-    c.fillText("W O R K S   /   C O N S O L E", 0, 42);
+    c.fillText("Shuhang Chen", 0, 0);
     c.restore();
 
     const art = record && workImage(record.id, record.hero ? "hero" : "cover");
@@ -286,7 +283,7 @@ export class ConsoleSetup {
       c.fillRect(w * 0.3, h * 0.65, w * 0.4 * (progress < 0.85 ? system * 0.12 : 0.12 + read * 0.88), 4);
       c.font = "500 22px MiSans, sans-serif";
       c.fillStyle = "rgba(238, 243, 255, 0.55)";
-      c.fillText(progress < 0.85 ? "BOOT / Initializing…" : progress < 0.98 ? "DISC / Reading works…" : "READY", w / 2, h * 0.73);
+      c.fillText(progress < 0.85 ? "Starting" : progress < 0.98 ? "Reading the disc" : "Ready", w / 2, h * 0.73);
     }
     // Last beat: the project's key art, so the page grows out of the same picture.
     const handoff = ease(progress, 0.95, 0.995);
@@ -316,8 +313,6 @@ export class ConsoleSetup {
     c.fillStyle = "#dac39b"; c.font = "500 20px MiSans, sans-serif";
     c.fillStyle = "#edeae4"; c.font = "600 34px MiSans, sans-serif";
     c.fillText(profile.name, w / 2, h * .82);
-    c.fillStyle = "#95958e"; c.font = "400 20px MiSans, sans-serif";
-    c.fillText("Connected", w / 2, h * .89);
     c.restore();
     this.readGlow();
   }

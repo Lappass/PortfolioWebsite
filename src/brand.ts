@@ -7,4 +7,4 @@ export const labelMarkSvg = mark('color="#171713"');
 export const MARK_ASPECT = 840 / 1320;
 export const logo = mark('aria-label="Shuhang Chen" role="img"');
 
-export const brandHeading = `<span class="brand-mark" aria-hidden="true">${mark()}</span><h1>SHUHANG CHEN</h1><div>GAME DEVELOPER</div>`;
+export const brandHeading = `<span class="brand-mark" aria-hidden="true">${mark()}</span><h1>Shuhang Chen</h1><div>Game developer</div>`;

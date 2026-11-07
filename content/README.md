@@ -11,11 +11,11 @@
 | 字段                        | 内容                                                        |
 | --------------------------- | ----------------------------------------------------------- |
 | `id`                        | 稳定编号，用于收藏、定位和下载文件名                        |
-| `title`、`en`               | 中文标题、英文标题                                          |
-| `department`、`category`    | 科室、所属分类；分类须与上面的名称完全一致                  |
-| `date`、`lead`、`clearance` | 编目范围、相关人物、访问范围；`RESTRICTED` 对应目录访问状态 |
-| `abstract`                  | 摘要                                                        |
-| `findings`                  | 至少一条研究记录，使用字符串数组                            |
+| `title`、`en`               | 标题、一句话说明（正常大小写，10 个词以内）                   |
+| `department`、`category`    | 角色与团队（如 "Solo project"）、所属分类；分类须与上面的名称完全一致 |
+| `date`、`lead`、`status`    | 年份、引擎与技术；`status` 可选，进行中的作品写 "In development" |
+| `abstract`                  | 50 到 80 个词，用一个具体场景说清这是什么游戏               |
+| `findings`                  | 至少一条，每条一句话，字符串数组                            |
 | `source`                    | 设定参考的完整 HTTP 或 HTTPS 链接                           |
 
 以下字段可选，用于独立项目页（网址形如 `#/work/x-001`）。媒体放在 `public/works/<编号>/` 下并写相对路径，也可以写 HTTPS 链接：
@@ -44,7 +44,7 @@
   "sections": [
     {
       "heading": "一节的标题",
-      "summary": "页面上显示的一段话，数字写在句子里",
+      "summary": "页面上显示的一段话，25 到 90 个词，数字写在句子里",
       "body": ["第一段", "第二段"],
       "points": ["可选的要点"],
       "media": [{ "src": "works/x-002/study/01.jpg", "caption": "可选图注" }]
@@ -54,6 +54,8 @@
 ```
 
 插盘后打开的是一整页往下滚的页面。第一屏是封面：有 `menu` 的游戏用它自己的造型，否则用主视觉；封面上有标题、`en` 一句、`pitch`、`facts` 连成的一行，以及 Play（`unity`）、Trailer（`trailer`，缺省用 `video`）、Download（`download`）三个按钮，没有的灰显为 not yet。往下依次是试玩、预告片、`sections` 每节一块（标题、`summary`，第一张 `media` 大图、第二张小图）、截图（`gallery`）、Full write-up（全部 `body` 与 `points`）和链接。封面造型里的部件（营地、订单条、窗格、名牌）各对应一节，点击跳过去，滚动时点亮当前一节；右侧圆点可以跳到任何一块，↑↓ 与 PageUp/PageDown 逐块移动。没有 `summary` 时取 `body` 的第一句。配图放在 `public/works/<编号>/study/`。TXT 下载会附上各节正文。
+
+文字一律用自己的口吻：短句，具体的人名、地名和数字写在句子里，讲意图用第一人称；标题是名词或平常的句子。校验会拒绝全大写的 `en` 和标题、含 " that " 的标题、COMING SOON / A GAME BY / SOLO DEVELOPER / MIN READ / RESTRICTED 这类套话，以及不在 25 到 90 个词之间的 `summary`。
 
 封面区按 Unity、视频、封面图的顺序选择第一个可用项；有 Unity 时视频单独显示在下方。
 
