@@ -817,8 +817,8 @@
             "summary": "Riders are paid by the drop, so I have the player hand out every order by hand. Over ten days headquarters moves the station onto machines.",
             "media": [
               {
-                "src": "works/x-004/study/e11.jpg",
-                "caption": "The title screen: a ten-day trial at the delivery station."
+                "src": "works/x-004/study/01.jpg",
+                "caption": "The title screen: the desk in the depot, with Zhou Heng's first text on the phone."
               }
             ]
           },
@@ -832,16 +832,16 @@
             ],
             "media": [
               {
-                "src": "works/x-004/study/01.jpg",
-                "caption": "The day 1 briefing: six orders, a target of four, and three morning plans."
-              },
-              {
                 "src": "works/x-004/study/02.jpg",
-                "caption": "The plan between waves on day 2, and what each choice does to funds, deadlines, fatigue and the target."
+                "caption": "One day: orders, calls and dispatches repeat through both waves, the report closes the shift, and the next morning starts on the phone."
               },
               {
-                "src": "works/x-004/study/e21.jpg",
-                "caption": "A day 2 shift report: delivered against target, wages ¥30 per rider."
+                "src": "works/x-004/study/03.jpg",
+                "caption": "The morning on day 4: the day's facts, the team and the morning plans on the phone."
+              },
+              {
+                "src": "works/x-004/study/04.jpg",
+                "caption": "The report on day 4: 12 delivered against a target of 10, and what each rider was paid."
               }
             ],
             "layout": "side",
@@ -852,8 +852,8 @@
                 "label": "Morning budget"
               },
               {
-                "value": "2 × 90 s",
-                "label": "Waves per shift"
+                "value": "90 s",
+                "label": "Each of two waves"
               },
               {
                 "value": "16",
@@ -877,12 +877,8 @@
             ],
             "media": [
               {
-                "src": "works/x-004/study/03.jpg",
-                "caption": "Day 2: Xiaoyu is about to take an express document order, 58 seconds early, while the other three riders are out."
-              },
-              {
-                "src": "works/x-004/study/e31.jpg",
-                "caption": "Day 1: Chen's arrival estimate for breakfast, with the clock paused."
+                "src": "works/x-004/study/05.jpg",
+                "caption": "Day 4: a breakfast for an old building without a lift. The drone is fastest, and the robot is locked because it can't climb stairs."
               }
             ],
             "layout": "wide",
@@ -912,16 +908,8 @@
             ],
             "media": [
               {
-                "src": "works/x-004/study/04.jpg",
-                "caption": "Hiring on day 2: a borrowed rider costs ¥120, and the ¥180 robot stays locked until day 3."
-              },
-              {
-                "src": "works/x-004/study/05.jpg",
-                "caption": "Day 8 with three robots on the roster: R-01 can take an ¥80 ID scanner."
-              },
-              {
-                "src": "works/x-004/study/e41.jpg",
-                "caption": "Hiring: robots unlock on day 3, drones on day 4."
+                "src": "works/x-004/study/06.jpg",
+                "caption": "How AO-6 learns: each Confirm, or each time the player picks someone else, is saved as an example for that kind of order."
               }
             ],
             "layout": "side",
@@ -951,16 +939,12 @@
             ],
             "media": [
               {
-                "src": "works/x-004/study/06.jpg",
-                "caption": "Talking to Chen between runs: listening is free, coaching costs ¥30, a meal and a break ¥40."
-              },
-              {
                 "src": "works/x-004/study/07.jpg",
-                "caption": "A call from the road about a sixth floor with no lift; the illustration is AI-generated."
+                "caption": "Day 4: Xiaoyu asks for an order on the evening her deposit is due."
               },
               {
-                "src": "works/x-004/study/e51.jpg",
-                "caption": "Chen's scores in the roster bar: Streets 9, Strength 4, Judgment 9."
+                "src": "works/x-004/study/08.jpg",
+                "caption": "Lin asks to finish what he is carrying and skip the evening rush to pick up his daughter."
               }
             ],
             "layout": "side",
@@ -990,16 +974,12 @@
             ],
             "media": [
               {
-                "src": "works/x-004/study/08.jpg",
-                "caption": "The six-armed crossing at the centre, with AI-generated landmarks among the blocks laid out in code."
-              },
-              {
                 "src": "works/x-004/study/09.jpg",
-                "caption": "The same map in the evening light, with the pins and rider cards unchanged."
+                "caption": "The rain alert on day 4, over the map."
               },
               {
-                "src": "works/x-004/study/e61.jpg",
-                "caption": "A closer look at the blocks and landmarks near the central crossing."
+                "src": "works/x-004/study/10.jpg",
+                "caption": "Ajie on the walkie-talkie about a moved drop-off, out in the city."
               }
             ],
             "layout": "wide",
@@ -1028,16 +1008,8 @@
             ],
             "media": [
               {
-                "src": "works/x-004/study/10.jpg",
-                "caption": "The Strength lesson on day 2: the cartons need Strength 8, and everyone but Ajie is marked Too heavy."
-              },
-              {
-                "src": "works/x-004/study/e71.jpg",
-                "caption": "Day 1: watching Chen make the first delivery while other orders wait."
-              },
-              {
-                "src": "works/x-004/study/e72.jpg",
-                "caption": "The fatigue lesson after a heavy delivery points to Rest."
+                "src": "works/x-004/study/11.jpg",
+                "caption": "The ticket before the evening wave: keep it standard, buy extra time or take rush pay."
               }
             ],
             "layout": "side",
@@ -1056,16 +1028,6 @@
                 "label": "Orders checked per run"
               }
             ]
-          }
-        ],
-        "gallery": [
-          {
-            "src": "works/x-004/study/g1.jpg",
-            "caption": "Morning rush: dispatching a breakfast order to Chen."
-          },
-          {
-            "src": "works/x-004/study/g2.jpg",
-            "caption": "Morning light over the district, with three orders waiting."
           }
         ]
       }
