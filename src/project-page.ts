@@ -49,14 +49,14 @@ interface Neighbours { previous: ArchiveRecord; next: ArchiveRecord; position: n
 
 /** One block of the page below the cover. */
 type Section =
-  | { id: string; heading: string; kind: "play" | "trailer" | "shots" | "full" | "about" }
+  | { id: string; heading: string; kind: "play" | "trailer" | "shots" | "about" }
   | { id: string; heading: string; kind: "study"; study: CaseStudySection };
 
 /**
  * The page a work opens on once its disc is read: one scrolling page. The first screen is the
  * cover (the game's own shape for works with a `menu` theme, the key art otherwise) with the
  * title, a pitch and the Play / Trailer / Download buttons; below it, the trailer, one block per
- * case-study section, the screenshots, the full write-up and the links. Dots down the right edge
+ * case-study section, the screenshots and the links. Dots down the right edge
  * and the cover's own parts jump between blocks; ↑↓ step through them.
  */
 export class ProjectPage {
@@ -190,7 +190,6 @@ export class ProjectPage {
     r.study?.sections.forEach((study, i) => out.push({ id: `s${i + 1}`, heading: study.heading, kind: "study", study }));
     if (!r.study) out.push({ id: "about", heading: "About", kind: "about" });
     if (r.gallery?.length) out.push({ id: "shots", heading: "Screenshots", kind: "shots" });
-    if (r.study) out.push({ id: "full", heading: "Full write-up", kind: "full" });
     return out;
   }
 
@@ -223,11 +222,8 @@ export class ProjectPage {
     if (s.kind === "shots") {
       return `${open}<h2>Screenshots</h2><div class="pg-shots"><figure class="pg-shot"></figure><div class="pg-thumbs">${r.gallery!.map((shot, k) => `<button type="button" data-page="shot" data-i="${k}" aria-label="Screenshot ${k + 1}"><img src="${media(shot.src)}" alt="" loading="lazy"></button>`).join("")}</div></div></section>`;
     }
-    if (s.kind === "about") {
-      return `${open}<h2>About</h2><div class="pg-prose"><p>${e(r.abstract)}</p><ol class="pg-list">${r.findings.map((f) => `<li>${e(f)}</li>`).join("")}</ol>
+    return `${open}<h2>About</h2><div class="pg-prose"><p>${e(r.abstract)}</p><ol class="pg-list">${r.findings.map((f) => `<li>${e(f)}</li>`).join("")}</ol>
         ${r.tags?.length ? `<p class="pg-tags">${r.tags.map(e).join(" · ")}</p>` : ""}</div></section>`;
-    }
-    return `${open}<h2>Full write-up</h2><div class="pg-prose">${r.study!.sections.map((x) => `<h3>${e(x.heading)}</h3>${x.body.map((p) => `<p>${e(p)}</p>`).join("")}${x.points?.length ? `<ul class="pg-list">${x.points.map((p) => `<li>${e(p)}</li>`).join("")}</ul>` : ""}`).join("")}</div></section>`;
   }
 
   /** Keeps the cover, the dots and the top bar in step with the block on screen. */

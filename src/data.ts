@@ -41,7 +41,7 @@ export interface ArchiveRecord {
 export interface CaseStudyMedia { src: string; caption?: string }
 export interface CaseStudySection {
   heading: string;
-  /** The paragraph shown beside the pictures; `body` and `points` make up the full write-up. */
+  /** The paragraph shown beside the pictures. `body` and `points` are kept for the TXT download. */
   summary?: string;
   body: string[];
   points?: string[];
