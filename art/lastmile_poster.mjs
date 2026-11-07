@@ -166,12 +166,8 @@ function cover() {
   const W = 1350, H = 1700, m = machine(0, 40, 1);
   let ink = m.ink, amber = m.amber;
   ink += text(78, 214, 196, "LAST MILE", INK, 'font-weight="700" letter-spacing="2"');
-  amber += `<rect x="84" y="246" width="338" height="54" fill="${AMBER}"/>` + text(100, 284, 30, "A TEN-DAY TRIAL", NONE, 'letter-spacing="4"');
-  ink += text(84, 1532, 40, "DELIVER THE ORDERS.", INK, 'letter-spacing="4"');
-  ink += text(84, 1580, 40, "LOOK AFTER THE PEOPLE.", INK, 'letter-spacing="4"');
-  amber += `<rect x="78" y="1548" width="560" height="44" fill="url(#dots)"/>`;
+  ink += text(84, 1580, 38, "Ten days running a delivery station", INK);
   ink += `<rect x="84" y="1606" width="${W - 168}" height="3" fill="${INK}"/>`;
-  ink += text(84, 1648, 23, "A GAME BY SHUHANG CHEN   ·   DELIVERY STATION MANAGEMENT   ·   UNITY 2026", INK, 'letter-spacing="4"');
   return { W, H, ink, amber };
 }
 
@@ -189,10 +185,6 @@ function spine() {
   ink += `<rect y="300" width="${W}" height="5" fill="${INK}"/>`;
   // Rotated 90°, glyphs grow to the right of their baseline.
   ink += `<g transform="translate(20 350) rotate(90)">${text(0, 0, 84, "LAST MILE", INK, 'font-weight="700" letter-spacing="4"')}</g>`;
-  amber += `<rect x="94" y="346" width="34" height="240" fill="${AMBER}"/>`;
-  amber += `<g transform="translate(100 360) rotate(90)">${text(0, 0, 22, "A TEN-DAY TRIAL", NONE, 'letter-spacing="3"')}</g>`;
-  ink += `<g transform="translate(${W / 2 + 8} 1180) rotate(90)">${text(0, 0, 24, "SHUHANG CHEN", INK, 'letter-spacing="5"')}</g>`;
-  ink += text(W / 2, H - 120, 24, "UNITY", INK, 'text-anchor="middle" letter-spacing="3"');
   amber += `<rect x="${W / 2 - 44}" y="${H - 104}" width="88" height="46" fill="${AMBER}"/>`;
   ink += text(W / 2, H - 70, 32, "2026", INK, 'text-anchor="middle" letter-spacing="2"');
   return { W, H, ink, amber };
@@ -248,20 +240,18 @@ function disc() {
   ink += place(r.ink + speed(-44, -82, 0.8, 64));
   amber += place(r.amber);
   amber += `<circle cx="${c}" cy="${c}" r="194" fill="none" stroke="${AMBER}" stroke-width="12"/>`;
-  ink += arcText(c, 488, Math.PI / 2, "A TEN-DAY TRIAL  ·  UNITY 2026", 20, INK, COND, 0.62, 'letter-spacing="3"');
+  ink += arcText(c, 488, Math.PI / 2, "2026", 20, INK, COND, 0.62, 'letter-spacing="3"');
   return { W, H: W, ink, amber };
 }
 
-/** Back cover, 1350×1700: a headline, pitch, screenshots printed in ink, three verbs, gear footer. */
+/** Back cover, 1350×1700: pitch, screenshots printed in ink, gear footer. */
 async function back() {
   const W = 1350, H = 1700, M = 96;
   let ink = "", amber = "";
-  amber += `<rect x="${M - 8}" y="114" width="200" height="44" fill="${AMBER}"/>`;
-  ink += text(M, 146, 26, "DAY 01  /  06:00", INK, 'letter-spacing="4"');
-  ink += text(M, 236, 70, "Somebody has to", INK);
-  ink += text(M, 312, 70, "be on time.", INK);
-  ["Ten days running a neighbourhood delivery station.", "Dispatch riders, robots and drones against the clock,", "and keep an eye on the people doing the delivering."]
-    .forEach((l, i) => { ink += text(M, 396 + i * 44, 30, l, INK, "", "Segoe UI, Arial, sans-serif"); });
+  ["Ten days running a neighbourhood delivery station, with orders", "rising to 16 a day by day 7. The riders are paid by the drop, so",
+    "sending Chen instead of Xiaoyu on an ID check decides who gets", "closer to the bill they are saving for. Over the ten days",
+    "headquarters moves the station onto robots and drones."]
+    .forEach((l, i) => { ink += text(M, 230 + i * 44, 30, l, INK, "", "Segoe UI, Arial, sans-serif"); });
   // Screenshot frames: slips with notches and a tear line; the pictures go on as one-colour prints.
   const half = (W - M * 2 - 30) / 2;
   const frames = [[M, 560, W - M * 2, 520, "dispatch.jpg"], [M, 1110, half, 300, "briefing.jpg"], [M + half + 30, 1110, half, 300, "title.jpg"]];
@@ -273,15 +263,8 @@ async function back() {
     const pic = await sharp(readFileSync(resolve(WORKS, img))).resize(iw, ih, { fit: "cover" }).grayscale().linear(1.15, 10).png().toBuffer();
     images.push({ input: pic, left: Math.round(x + 14), top: Math.round(y + 14), blend: "multiply" });
   }
-  [["Dispatch.", 0], ["Look after them.", 330], ["Beat the clock.", 770]].forEach(([t, dx], i) => {
-    if (i === 1) amber += `<rect x="${M + dx - 8}" y="1452" width="300" height="40" fill="url(#dots)"/>`;
-    ink += text(M + dx, 1488, 46, t, INK, 'font-weight="700"');
-  });
   ink += `<rect y="1560" width="${W}" height="${H - 1560}" fill="${INK}"/>`;
   for (let x = -20; x < W + 40; x += 56) ink += `<path d="M${x} 1561 l10 -22 h26 l10 22 Z" fill="${INK}"/>`;
-  ink += text(M, 1636, 26, "UNITY 6 · URP · 2026 · SOLO DEVELOPER", NONE, 'letter-spacing="5"');
-  amber += `<rect x="${W - M - 282}" y="1606" width="296" height="42" fill="${AMBER}"/>`;
-  ink += text(W - M, 1636, 26, "SHUHANG CHEN", NONE, 'text-anchor="end" letter-spacing="6"');
   return { W, H, ink, amber, images };
 }
 

@@ -72,10 +72,6 @@ const lockdown: GameLoader = (c, w, h, t) => {
     }
     c.globalAlpha = 1;
   }
-  c.textAlign = "center";
-  c.font = `500 ${h * 0.032}px MiSans, sans-serif`;
-  c.fillStyle = "rgba(242,236,228,.55)";
-  c.fillText(t < 0.78 ? "Preparing today's meal…" : "STAY HOME. KEEP EVERYONE FED.", w / 2, h * 0.92);
 };
 
 // Trail Adventure: the monitor becomes Leo's camera. The live view is the key art
@@ -137,10 +133,9 @@ const trail: GameLoader = (c, w, h, t, art) => {
   c.fillStyle = "#1f2a27";
   c.fillRect(0, 0, w, h);
   c.drawImage(view, vx, vy, w * zoom, h * zoom);
-  // Viewfinder chrome, as in the game: a dark rounded mask, corner brackets, thirds,
-  // the exposure strip and the shot counter. It clears away after the shot.
+  // Viewfinder chrome, as in the game: a dark rounded mask, corner brackets, thirds
+  // and the exposure strip. It clears away after the shot.
   const ui = 1 - ease(span(t, 0.66, 0.74));
-  const fired = t >= 0.62;
   if (ui) {
     c.globalAlpha = alpha * ui;
     const ix = w * 0.07, iy = h * 0.08, iw = w - ix * 2, ih = h * 0.8, r = h * 0.06;
@@ -174,16 +169,8 @@ const trail: GameLoader = (c, w, h, t, art) => {
       const px = fx + (sx * fs) / 2, py = fy + (sy * fs) / 2;
       c.beginPath(); c.moveTo(px, py - sy * q); c.lineTo(px, py); c.lineTo(px - sx * q, py); c.stroke();
     }
-    c.font = `500 ${h * 0.032}px MiSans, sans-serif`;
-    c.textAlign = "left";
-    c.fillStyle = locked ? TRAIL_GREEN : "rgba(255,255,255,.75)";
-    c.fillText(locked ? "●  HIKER   STILL" : "●  FOCUSING…", ix + r * 0.4, iy - h * 0.022);
     c.fillStyle = "rgba(18,26,24,.6)";
     c.fillRect(ix, iy + ih + h * 0.025, iw, h * 0.065);
-    c.fillStyle = TRAIL_GREEN;
-    c.fillText(`1/250   F5.6   ISO 200   ${Math.round(35 * zoom)}MM`, ix + h * 0.025, iy + ih + h * 0.068);
-    c.textAlign = "right";
-    c.fillText(fired ? "[ 15 ]" : "[ 16 ]", ix + iw - h * 0.025, iy + ih + h * 0.068);
     c.globalAlpha = alpha;
   }
   // Shutter: two curtains meet in the middle and part again, with a soft flash.
@@ -221,22 +208,18 @@ const trail: GameLoader = (c, w, h, t, art) => {
       }
       c.fill();
     }
-    c.textAlign = "left";
-    c.fillStyle = "#43362a";
-    c.font = `600 ${h * 0.03}px MiSans, sans-serif`;
-    c.fillText("SUMMIT  ·  GOLDEN HOUR", x + cw * 0.08, y + ch * 0.8);
     c.globalAlpha = alpha;
   }
 };
 
 // Last Mile: the monitor becomes the station's dispatch board, printed in the cover's
 // three inks. Order slips come in with their countdowns running, the rider runs the track
-// along the bottom as the progress bar, and each order is stamped as they pass its stop.
-// With the last one in, ON TIME goes across the board; then the view pulls back from the
-// rider on the key art (public/works/x-004/hero.jpg) to the whole frame. Shapes follow
-// art/lastmile_poster.mjs.
+// along the bottom as the progress bar, and each order's countdown stops as they pass its stop.
+// With the last one in, the view pulls back from the rider on the key art
+// (public/works/x-004/hero.jpg) to the whole frame. Shapes follow art/lastmile_poster.mjs.
 const LM_PAPER = "#ede6d6", LM_CARD = "#f6f1e6", LM_INK = "#272c30", LM_AMBER = "#f1b05f";
-const LM_ORDERS: [string, number][] = [["BREAKFAST", 46], ["MILK", 31], ["SNACKS", 58], ["NOODLES", 22], ["COFFEE", 40], ["MEDS", 24]];
+// Each order's countdown, in seconds.
+const LM_ORDERS: number[] = [46, 31, 58, 22, 40, 24];
 // Where the rider stands in the key art (hero(): machine(860, -110, 0.82), rider at 420, 574).
 const LM_RIDER_ART: [number, number] = [(860 + 420 * 0.82) / 1920, (-110 + 574 * 0.82 - 130) / 1080];
 // The cover's running rider, ~270 units tall, feet at the origin, facing right.
@@ -303,17 +286,11 @@ const lastmile: GameLoader = (c, w, h, t, art) => {
   // The rider's run is the progress bar; each stop on the track is one order.
   const run = span(t, 0.08, 0.6), stops = LM_ORDERS.length + 1;
   const tx0 = w * 0.08, tx1 = w * 0.92, ty = h * 0.86;
-  const delivered = LM_ORDERS.filter((_, i) => run >= (i + 1) / stops).length;
-  c.font = `600 ${h * 0.03}px MiSans, sans-serif`;
   c.fillStyle = LM_INK;
-  c.textAlign = "left";
-  c.fillText("DAY 01  ·  06:00", w * 0.08, h * 0.1);
-  c.textAlign = "right";
-  c.fillText(`DELIVERED  ${delivered} / ${LM_ORDERS.length}`, w * 0.92, h * 0.1);
   c.fillRect(w * 0.08, h * 0.125, w * 0.84, 3);
-  // Order slips: in they come, countdowns running, stamped as the rider passes their stop.
+  // Order slips: in they come, countdowns running until the rider passes their stop.
   const cw = w * 0.25, ch = h * 0.2, gx = (w * 0.84 - cw * 3) / 2;
-  LM_ORDERS.forEach(([name, secs], i) => {
+  LM_ORDERS.forEach((secs, i) => {
     const appear = ease(span(t, i * 0.03, 0.06 + i * 0.03));
     if (!appear) return;
     const x = w * 0.08 + (i % 3) * (cw + gx), y = h * 0.19 + Math.floor(i / 3) * (ch + h * 0.06) + (1 - appear) * 24;
@@ -330,10 +307,6 @@ const lastmile: GameLoader = (c, w, h, t, art) => {
     c.setLineDash([10, 8]);
     c.beginPath(); c.moveTo(x + ch * 0.14, ny); c.lineTo(x + cw - ch * 0.14, ny); c.stroke();
     c.setLineDash([]);
-    c.fillStyle = LM_INK;
-    c.textAlign = "left";
-    c.font = `700 ${h * 0.036}px MiSans, sans-serif`;
-    c.fillText(name, x + cw * 0.07, y + ch * 0.4);
     const done = run >= (i + 1) / stops;
     if (!done) {
       // The countdown keeps running until the order is in.
@@ -345,21 +318,6 @@ const lastmile: GameLoader = (c, w, h, t, art) => {
       c.textAlign = "center";
       c.font = `700 ${ph * 0.6}px MiSans, sans-serif`;
       c.fillText(`${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`, px + pw / 2, py + ph * 0.72);
-    } else {
-      const k = ease(span(run, (i + 1) / stops, (i + 1) / stops + 0.05));
-      c.save();
-      c.translate(x + cw * 0.79, y + ch * 0.3);
-      c.rotate(-0.14);
-      c.scale(1 + (1 - k) * 0.6, 1 + (1 - k) * 0.6);
-      c.globalAlpha = alpha * ui * appear * k;
-      c.strokeStyle = LM_INK;
-      c.lineWidth = 3;
-      c.strokeRect(-cw * 0.16, -ch * 0.13, cw * 0.32, ch * 0.26);
-      c.fillStyle = LM_INK;
-      c.textAlign = "center";
-      c.font = `700 ${ch * 0.12}px MiSans, sans-serif`;
-      c.fillText("DELIVERED", 0, ch * 0.045);
-      c.restore();
     }
     c.globalAlpha = alpha * ui;
   });
@@ -379,25 +337,6 @@ const lastmile: GameLoader = (c, w, h, t, art) => {
     c.beginPath(); c.moveTo(rx - h * (0.16 - i * 0.03), ty - h * (0.1 - i * 0.025)); c.lineTo(rx - h * 0.06, ty - h * (0.1 - i * 0.025)); c.stroke();
   });
   lmRider(c, rx, ty - 2 - bob, h * 0.00052);
-  // Every order in: ON TIME goes across the board.
-  const stamp = ease(span(t, 0.6, 0.66));
-  if (stamp) {
-    c.save();
-    c.translate(w / 2, h * 0.43);
-    c.rotate(-0.12);
-    c.scale(1 + (1 - stamp) * 0.5, 1 + (1 - stamp) * 0.5);
-    c.globalAlpha = alpha * ui * stamp;
-    c.fillStyle = LM_AMBER;
-    c.fillRect(-w * 0.2, -h * 0.08, w * 0.4, h * 0.16);
-    c.strokeStyle = LM_PAPER;
-    c.lineWidth = 5;
-    c.strokeRect(-w * 0.19, -h * 0.065, w * 0.38, h * 0.13);
-    c.fillStyle = LM_PAPER;
-    c.textAlign = "center";
-    c.font = `700 ${h * 0.09}px MiSans, sans-serif`;
-    c.fillText("ON TIME", 0, h * 0.032);
-    c.restore();
-  }
   c.globalAlpha = alpha;
 };
 

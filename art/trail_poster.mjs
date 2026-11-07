@@ -170,11 +170,8 @@ function cover() {
   s += range(W, art, 560, 470, { bands: [1010, 1110, 1200, 1290, 1370] });
   s += camera(W / 2, 1210, 640, 330);
   s += `</g>`;
-  s += text(W / 2, 170, 46, "A CABIN.  A CAMERA.  A MOUNTAIN.", `text-anchor="middle" letter-spacing="4"`, C.brown, COND);
-  // Billing block on the paper.
-  s += text(W / 2, 1572, 30, "A GAME BY SHUHANG CHEN", `text-anchor="middle" letter-spacing="8"`, C.ink, COND);
-  s += text(W / 2, 1614, 19, "DESIGN, PROGRAMMING AND NARRATIVE BY SHUHANG CHEN  ·  MADE WITH UNITY 6  ·  24 SPECIES  ·  16 PEOPLE", `text-anchor="middle" letter-spacing="2"`, C.muted, COND);
-  s += text(W / 2, 1650, 19, "CLIMBING · WILDLIFE PHOTOGRAPHY · SOLO DEVELOPER · 2026", `text-anchor="middle" letter-spacing="3"`, C.muted, COND);
+  // One line on the paper below the picture.
+  s += text(W / 2, 1610, 30, "A first-person game about climbing and photographing a mountain island", `text-anchor="middle"`, C.ink);
   s += grain(W, H) + `</svg>`;
   return { svg: s, W, H };
 }
@@ -198,7 +195,7 @@ function menuTitle() {
   return { svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${text(4, 86, 80, "Trail Adventure", 'font-weight="700"', "#ffffff", HAND)}</svg>`, W, H };
 }
 
-/** Spine strip, 148×1700: summit and climber at the head, title running down, engine and year at the foot. */
+/** Spine strip, 148×1700: summit and climber at the head, title running down, the year at the foot. */
 function spine() {
   const W = 148, H = 1700;
   seed = 20261007;
@@ -210,9 +207,6 @@ function spine() {
   s += ridge(line(-10, 160, 300, 5, 30), 330, LAYERS[4]);
   s += climber(74, 86, 0.29, "#ffffff", LAYERS[2]);
   s += `<g transform="translate(${W / 2 + 18} 380) rotate(90)">${text(0, 0, 58, "TRAIL ADVENTURE", 'font-weight="700"', C.cream, HAND)}</g>`;
-  s += `<rect x="${W / 2 - 22}" y="1050" width="44" height="4" fill="${C.orange}"/>`;
-  s += `<g transform="translate(${W / 2 + 8} 1090) rotate(90)">${text(0, 0, 24, "SHUHANG CHEN", 'letter-spacing="5"', C.mint, COND)}</g>`;
-  s += text(W / 2, H - 120, 24, "UNITY", 'text-anchor="middle" letter-spacing="3"', C.mint, COND);
   s += text(W / 2, H - 70, 32, "2026", 'text-anchor="middle" letter-spacing="2"', C.orange, COND);
   s += grain(W, H) + `</svg>`;
   return { svg: s, W, H };
@@ -250,10 +244,9 @@ function disc() {
   // Focus ring: cream band with distance scale.
   s += `<circle cx="${c}" cy="${c}" r="474" fill="${C.paper}"/><circle cx="${c}" cy="${c}" r="420" fill="#2c3936"/>`;
   s += arcText(c, 447, -Math.PI / 2, "∞   10   5   3   2   1.5   1 m", 30, C.ink, COND, 0.58);
-  s += arcText(c, 447, Math.PI / 2, "A CABIN · A CAMERA · A MOUNTAIN", 26, C.muted, COND, 0.62, 'letter-spacing="2"');
   // Aperture ring with the title engraved.
   s += arcText(c, 392, -Math.PI / 2, "TRAIL ADVENTURE", 40, C.cream, HAND, 0.66, 'font-weight="700"');
-  s += arcText(c, 392, Math.PI / 2, "LEO 35mm  1:5.6  ·  UNITY 2026", 24, C.mint, COND, 0.62, 'letter-spacing="2"');
+  s += arcText(c, 392, Math.PI / 2, "2026", 24, C.mint, COND, 0.62, 'letter-spacing="2"');
   s += `<path d="M${c} ${c - 424} l-12 -18 h24 Z" fill="${C.orange}"/>`;
   // Glass, with the ranges reflected in it and a highlight.
   s += `<clipPath id="lens"><circle cx="${c}" cy="${c}" r="360"/></clipPath><circle cx="${c}" cy="${c}" r="366" fill="#0f1716"/><circle cx="${c}" cy="${c}" r="420" fill="none" stroke="#56635f" stroke-width="2"/>`;
@@ -270,7 +263,7 @@ function disc() {
   return { svg: s, W, H: W };
 }
 
-/** Back cover, 1350×1700: Leo's line, pitch, photos pegged on a line, features, a ridge footer. */
+/** Back cover, 1350×1700: pitch, photos pegged on a line, a ridge footer. */
 function back() {
   const W = 1350, H = 1700, M = 96;
   seed = 20261009;
@@ -278,11 +271,11 @@ function back() {
   let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${defs}`;
   s += `<rect width="${W}" height="${H}" fill="${C.paper}"/>`;
   for (let y = 60; y < 1380; y += 34) for (let x = 48; x < W; x += 34) s += `<circle cx="${x}" cy="${y}" r="1.6" fill="${C.muted}" opacity=".18"/>`;
-  // Leo's letter.
-  s += text(M, 190, 84, "It’s yours now.", 'font-weight="700"', C.ink, HAND);
-  s += text(M + 6, 245, 30, "— Leo", "", C.stamp, HAND);
-  const pitch = ["An old photographer left you his cabin, his camera and a mountain.", "Pack your bag, climb any rock face, creep up on the wildlife,", "and send your best shots to the people who live on the island."];
-  pitch.forEach((l, i) => { s += text(M, 330 + i * 46, 29, l, "", C.brown); });
+  // Pitch.
+  const pitch = ["Leo, an old photographer, has left you his cabin, his camera", "and a mountain island. Any face steeper than 50 degrees can be",
+    "climbed, on one stamina bar that hunger, cold and the weight of", "the bag eat into. 24 species fill the field guide. I made walking",
+    "free so that players look at the mountain, not at the bar."];
+  pitch.forEach((l, i) => { s += text(M, 200 + i * 46, 29, l, "", C.brown); });
   // Photos pegged on a line, as at the game's campfires.
   s += `<path d="M30 500 Q${W / 2} 560 ${W - 30} 500" fill="none" stroke="${C.muted}" stroke-width="4"/>`;
   const photos = [["viewfinder.jpg", "The deer by the pond", -4], ["campfire.jpg", "Dusk at the campfire", 3], ["cabin.jpg", "Leo’s cabin", -2]];
@@ -295,19 +288,10 @@ function back() {
     s += text(x + 8 + pw / 2, y + ph + 64, 26, cap, 'text-anchor="middle"', C.brown, HAND);
     s += `<rect x="${x + pw / 2 - 2}" y="${y - 30}" width="16" height="52" rx="3" fill="#b88a5a"/></g>`;
   });
-  // Three verbs, each on a scrap of tape.
-  const feats = [["Climb.", C.orange], ["Take photos.", C.mint], ["Make friends.", C.pink]];
-  feats.forEach(([t, col], i) => {
-    const y = 1020 + i * 82;
-    s += `<rect x="${M}" y="${y - 36}" width="54" height="34" fill="${col}" opacity=".9" transform="rotate(-6 ${M + 27} ${y - 19})"/>`;
-    s += text(M + 84, y, 48, t, 'font-weight="700"', C.ink, HAND);
-  });
-  // Footer: the ranges again, darkest at the bottom, with billing on top.
+  // Footer: the ranges again, darkest at the bottom.
   s += ridge(line(-40, W + 40, 1300, 11, 90, 40), H + 10, LAYERS[3]);
   s += ridge(line(-40, W + 40, 1400, 13, 70, -40), H + 10, LAYERS[4]);
   s += ridge(line(-40, W + 40, 1490, 15, 50, 30), H + 10, LAYERS[5]);
-  s += text(M, 1620, 26, "UNITY 6 · URP · 2026 · SOLO DEVELOPER", 'letter-spacing="5"', C.mint, COND);
-  s += text(W - M, 1620, 26, "SHUHANG CHEN", 'text-anchor="end" letter-spacing="6"', C.cream, COND);
   s += grain(W, H) + `</svg>`;
   return { svg: s, W, H };
 }

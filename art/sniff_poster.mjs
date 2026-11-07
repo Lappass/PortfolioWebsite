@@ -18,8 +18,7 @@ mkdirSync(resolve(OUT, "menu"), { recursive: true });
 // The game UI's colours (Assets/Sniff/art/2d: EndScreenUI, SelectionUI).
 const INK = "#1d171f", PLUM2 = "#4a3345", MUSTARD = "#d3a24f", CRIMSON = "#b8232f", SHADOW = "#4a0e14",
   BONE = "#ece6da", BOARD = "#4a4448", WALL = "#d8d5cf", LINE = "#3b373a";
-const TITLE = "Sniff & Snitch", LINEUP = "TWO THIEVES. ONE WAY OUT.";
-const CREDIT = "A TEAM CAPSTONE GAME  ·  SHUHANG CHEN: PROGRAMMING & DESIGN  ·  ONLINE CO-OP  ·  2026";
+const TITLE = "Sniff & Snitch", LINE1 = "An online co-op prison break for two";
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const text = (x, y, size, str, fill, opts = "", family = "Bahnschrift") =>
   `<text x="${x}" y="${y}" font-family="${family}" font-size="${size}" fill="${fill}" ${opts}>${esc(str)}</text>`;
@@ -97,11 +96,10 @@ const COVER = { floor: 1430, ft: 150, lyra: 400, fia: 930, cards: { lyra: [640, 
 function cover() {
   const W = 1350, H = 1700, { floor, ft } = COVER;
   return `<rect width="${W}" height="${H}" fill="${WALL}"/>${chart(floor, ft, 96, 1254, 1270)}
-    ${text(W / 2, 150, 46, LINEUP, LINE, 'text-anchor="middle" font-weight="700" letter-spacing="7"')}
     ${shadows(floor, [[COVER.lyra, 190], [COVER.fia, 170]])}
     <rect y="${floor}" width="${W}" height="${H - floor}" fill="${INK}"/>
     ${brush(150, floor + 36, 1050, 128, MUSTARD, -3)}${title(W / 2, floor + 130, 104)}
-    ${text(W / 2, H - 44, 22, CREDIT, BONE, 'text-anchor="middle" letter-spacing="3" opacity=".8"')}`;
+    ${text(W / 2, H - 44, 28, LINE1, BONE, 'text-anchor="middle" opacity=".85"')}`;
 }
 
 /**
@@ -130,7 +128,6 @@ function spine() {
     <g transform="translate(${W / 2} 0)">${brush(-52, 330, 104, 980, MUSTARD, 0)}</g>
     <g transform="translate(${W / 2 - 28} 820) rotate(90)">${text(0, 0, 76, TITLE, SHADOW, 'text-anchor="middle" font-weight="700" font-style="italic"', "Georgia")}</g>
     <g transform="translate(${W / 2 - 32} 816) rotate(90)">${text(0, 0, 76, TITLE, CRIMSON, 'text-anchor="middle" font-weight="700" font-style="italic"', "Georgia")}</g>
-    ${text(W / 2, H - 170, 24, "CO-OP", BONE, 'text-anchor="middle" letter-spacing="3"')}
     <rect x="${W / 2 - 44}" y="${H - 132}" width="88" height="46" fill="${CRIMSON}"/>
     ${text(W / 2, H - 98, 30, "2026", BONE, 'text-anchor="middle" letter-spacing="2"')}`;
 }
@@ -144,15 +141,14 @@ function arcText(c, r, at, str, size, fill, spacing = 0.6, opts = "") {
   }).join("");
 }
 
-/** Disc label, 1024²: the height chart runs across the whole disc, the title rides a stroke above the hole. */
+/** Disc label, 1024²: the height chart runs across the whole disc, the title rides a stroke above the hole, the year under it. */
 function disc() {
   const W = 1024, c = W / 2;
   return `<rect width="${W}" height="${W}" fill="${WALL}"/>${chart(W * 0.98, 92, 0, W, undefined, 0, 132)}
     <circle cx="${c}" cy="${c}" r="150" fill="${WALL}"/><circle cx="${c}" cy="${c}" r="150" fill="none" stroke="${INK}" stroke-width="12"/>
     <circle cx="${c}" cy="${c}" r="468" fill="none" stroke="${INK}" stroke-width="20"/>
     ${brush(150, 176, 724, 104, MUSTARD, -3)}${title(c, 258, 82)}
-    ${text(c, 326, 26, "X-007 · CHARGE: THEFT", INK, 'text-anchor="middle" font-weight="700" letter-spacing="4"')}
-    ${arcText(c, 432, Math.PI / 2, "TWO THIEVES · ONE WAY OUT · ONLINE CO-OP · 2026", 22, INK, 0.52, 'font-weight="700"')}`;
+    ${text(c, 326, 26, "2026", INK, 'text-anchor="middle" font-weight="700" letter-spacing="4"')}`;
 }
 
 await render("cover", 1350, 1700, cover(), 1350, await lineup(COVER.floor, COVER.ft, COVER));

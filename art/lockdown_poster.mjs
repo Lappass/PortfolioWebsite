@@ -216,9 +216,8 @@ function cover() {
   // Billing block, on the balcony floor.
   const cell = 27, title = "LOCKDOWN", tw = wordWidth(title, cell);
   s += blockWord(title, (W - tw) / 2, 1282, cell, 1, C.ink).svg;
-  s += text(W / 2, 1545, 34, "A HOUSEHOLD SURVIVAL GAME", `text-anchor="middle" letter-spacing="10"`);
+  s += text(W / 2, 1545, 34, "Cooking for three through a twenty-day lockdown", `text-anchor="middle"`);
   s += `<rect x="${W / 2 - 60}" y="1578" width="120" height="4" fill="${C.warm}"/>`;
-  s += text(W / 2, 1636, 22, "A GAME BY SHUHANG CHEN", `text-anchor="middle" letter-spacing="8"`, C.muted);
   s += `<rect width="${W}" height="${H}" filter="url(#grain)"/></svg>`;
   return { svg: s, W, H };
 }
@@ -233,7 +232,7 @@ function hero() {
 }
 
 /** Spine strip, 148×1700 (the case spine is 0.148 × 1.7 units): a sliver of the night view
- *  with the household block steaming, the cell-built title running down, engine and year at the foot. */
+ *  with the household block steaming, the cell-built title running down, the year at the foot. */
 function spine() {
   const W = 148, H = 1700, L = 300;
   seed = 20200410;
@@ -247,10 +246,6 @@ function spine() {
   // Title down the spine, letters stacked top to bottom (read by tilting the head right).
   const cell = 15, tw = wordWidth("LOCKDOWN", cell), t0 = L + 90;
   s += `<g transform="translate(${W / 2 + 3.5 * cell} ${t0}) rotate(90)">${blockWord("LOCKDOWN", 0, 0, cell, 1, C.ink).svg}</g>`;
-  const foot = t0 + tw + 70;
-  s += `<rect x="${W / 2 - 22}" y="${foot}" width="44" height="4" fill="${C.warm}"/>`;
-  s += `<g transform="translate(${W / 2 + 8} ${foot + 40}) rotate(90)">${text(0, 0, 22, "SHUHANG CHEN", 'letter-spacing="5"', C.muted)}</g>`;
-  s += text(W / 2, H - 120, 22, "UNITY", 'text-anchor="middle" letter-spacing="3"', C.muted);
   s += text(W / 2, H - 70, 30, "2026", 'text-anchor="middle" font-weight="700" letter-spacing="2"', C.warm);
   s += `<rect width="${W}" height="${H}" filter="url(#grain)"/></svg>`;
   return { svg: s, W, H };
@@ -294,13 +289,13 @@ function disc() {
   const tc = 7, tw = wordWidth("LOCKDOWN", tc);
   s += blockWord("LOCKDOWN", R - tw / 2, 791, tc, 1, "#151a1c").svg.replaceAll(C.pork, "#b4483f");
   s += `</g>`;
-  s += text(R, 925, 18, "UNITY · 2026", 'text-anchor="middle" letter-spacing="6"', C.ink);
+  s += text(R, 925, 18, "2026", 'text-anchor="middle" letter-spacing="6"', C.ink);
   s += `<rect width="${W}" height="${W}" filter="url(#grain)"/></svg>`;
   return { svg: s, W, H: W };
 }
 
-/** Back cover, 1350×1700: pitch under the night sky, a screenshot strip, features, and the
- *  balcony ledge as the footer. */
+/** Back cover, 1350×1700: pitch under the night sky, a screenshot strip, and the balcony
+ *  ledge as the footer. */
 function back() {
   const W = 1350, H = 1700, M = 96;
   const shot = (name) => "data:image/jpeg;base64," + readFileSync(resolve(WORKS, name)).toString("base64");
@@ -313,23 +308,18 @@ function back() {
   s += home.svg + steam(...home.steam, 120, 50, 5);
   s += `<rect x="0" y="380" width="${W}" height="${H - 380}" fill="url(#dusk)" opacity=".9"/><rect x="0" y="420" width="${W}" height="${H - 420}" fill="${C.night}"/>`;
   // Pitch.
-  s += text(M, 170, 30, "STAY HOME. KEEP EVERYONE FED.", 'letter-spacing="6" font-weight="700"', C.warm);
-  const pitch = ["The city has gone quiet. Every day the delivery arrives,", "the family group chat fills up, and the news gets worse.", "Fit what you have into the pan, and make it last."];
-  pitch.forEach((l, i) => { s += text(M, 240 + i * 46, 30, l, "", C.ink); });
+  const pitch = ["Twenty days at home with Grandpa and Daughter.", "Each morning a package arrives, and by Day 7 it can be",
+    "just noodles, a cabbage and some rice. You fit what came", "into the pan and keep the rest in the fridge before it rots.",
+    "I built the game around a pan because every problem", "in the house ends up at dinner."];
+  pitch.forEach((l, i) => { s += text(M, 176 + i * 44, 30, l, "", C.ink); });
   // Screenshot strip: one wide, two below.
   const frame = (img, x, y, w, h) => `<rect x="${x - 6}" y="${y - 6}" width="${w + 12}" height="${h + 12}" fill="${C.frame}"/><image href="${shot(img)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice"/>`;
   const fw = W - M * 2;
   s += frame("kitchen.jpg", M, 420, fw, 470);
   const sw = (fw - 24) / 2, sh = Math.round(sw * 9 / 16), sy = 420 + 470 + 26;
   s += frame("prep.jpg", M, sy, sw, sh) + frame("fridge.jpg", M + sw + 24, sy, sw, sh);
-  // Features, each marked with a small ingredient cell.
-  const feats = ["Cook by fitting ingredient pieces into the pan", "Keep the fridge in order before food spoils", "Deliveries, messages and news shape each day"];
-  const cols = [C.pork, C.green, C.tan];
-  feats.forEach((t, i) => { const y = sy + sh + 84 + i * 54; s += `<rect x="${M}" y="${y - 24}" width="26" height="26" rx="3" fill="${cols[i]}"/>`; s += text(M + 50, y - 2, 30, t, "", C.ink); });
-  // Footer: the balcony ledge, then billing over the balusters.
+  // Footer: the balcony ledge.
   s += ledge(0, W, 1490, W / 2, 0.8).svg;
-  s += text(M, 1640, 24, "UNITY · 2026 · SOLO DEVELOPER", 'letter-spacing="6"', C.muted);
-  s += text(W - M, 1640, 24, "SHUHANG CHEN", 'text-anchor="end" letter-spacing="6"', C.ink);
   s += `<rect width="${W}" height="${H}" filter="url(#grain)"/></svg>`;
   return { svg: s, W, H };
 }
