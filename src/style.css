@@ -115,7 +115,7 @@ button {
 .brand > div {
   font-size: 19px;
   line-height: 23px;
-  letter-spacing: 0.587px;
+  letter-spacing: 0.3px;
   font-weight: 600;
 }
 .brand p {
@@ -322,7 +322,7 @@ button {
   top: 121px;
   z-index: 10;
   font-size: 14px;
-  letter-spacing: 1.1px;
+  letter-spacing: 0.3px;
   opacity: 0.55;
   padding: 10px 0;
 }
@@ -364,7 +364,7 @@ button {
   font-size: 14px;
   line-height: 1;
   min-height: 28px;
-  letter-spacing: 0.7px;
+  letter-spacing: 0.3px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -407,14 +407,14 @@ button {
 }
 .eyebrow {
   font-size: 12px;
-  letter-spacing: 1.3px;
+  letter-spacing: 0.3px;
   margin-bottom: 22px;
   color: #77756d;
   opacity: 0;
   transition: opacity 0.7s;
 }
 .eyebrow > span {
-  margin-left: 16px;
+  margin-left: 0;
 }
 .file-title {
   font-size: 28px;
@@ -500,7 +500,7 @@ button {
 }
 .tiny-label {
   font-size: 11px;
-  letter-spacing: 1.7px;
+  letter-spacing: 0.3px;
 }
 .archive-counter > div {
   font-size: 58px;
@@ -566,8 +566,8 @@ button {
   min-width: 140px;
 }
 .column-navigation > div > span {
-  font-size: 10px;
-  letter-spacing: 1.2px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
   color: #726f67;
 }
 .column-navigation strong {
@@ -591,6 +591,8 @@ button {
   height: 40px;
   position: relative;
 }
+/* The number is for screen readers; the tick itself is the mark. */
+.file-ticks button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .file-ticks button:before {
   content: "";
   position: absolute;
@@ -619,8 +621,8 @@ button {
   bottom: 60px;
   left: 505px;
   color: #858077;
-  font-size: 10px;
-  letter-spacing: 0.9px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
 }
 .archive-hint > span {
   margin: 0 12px;
@@ -641,8 +643,8 @@ button {
   bottom: 35px;
   left: 59px;
   right: 59px;
-  font-size: 10px;
-  letter-spacing: 0.9px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
   display: flex;
   gap: 44px;
   color: #78776e;
@@ -670,7 +672,7 @@ button {
   margin: 0 5px;
 }
 .system-footer button {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 1px;
 }
 .system-footer button:hover {
@@ -759,7 +761,7 @@ button {
   padding-top: 35px;
 }
 .modal-top button {
-  font-size: 10px;
+  font-size: 11px;
   display: flex;
   gap: 24px;
   align-items: center;
@@ -856,7 +858,7 @@ button {
 .search-field input::placeholder {
   color: #9f988a;
   font-size: 17px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 .search-field .key {
   width: 37px;
@@ -903,7 +905,7 @@ button {
   scrollbar-width: thin;
   border-top: 1px solid #bfb7a7;
   border-bottom: 1px solid #bfb7a7;
-  font-size: 9px;
+  font-size: 11px;
   color: #82796a;
   letter-spacing: 1px;
 }
@@ -947,8 +949,8 @@ button {
 }
 .result-name small {
   display: block;
-  font-size: 9px;
-  letter-spacing: 0.7px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
   color: #9b907e;
   margin-top: 7px;
 }
@@ -962,8 +964,8 @@ button {
   color: #7d7565;
 }
 .result-row > span:last-child {
-  font-size: 9px;
-  letter-spacing: 0.5px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
   color: #6b6d54;
   display: flex;
   align-items: center;
@@ -986,14 +988,14 @@ button {
   right: 53px;
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1px;
   color: #8d8575;
 }
 .modal-bottom i {
   font-style: normal;
   color: #858a6b;
-  font-size: 8px;
+  font-size: 11px;
   margin: 0 8px;
 }
 .empty-results {
@@ -1043,7 +1045,7 @@ button {
   font-size: 33px;
 }
 .settings-intro {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 1px;
   color: #87806f;
   margin: 0 0 34px;
@@ -1058,9 +1060,9 @@ button {
 .settings-list .audio-toggle { padding: 20px 0 12px; border-bottom: 0; }
 .settings-list .audio-toggle span { margin-top: 7px; }
 .settings-list .audio-volume { justify-content: flex-start; gap: 12px; padding: 8px 0 18px; }
-.settings-list .audio-volume span { margin: 0; font-size: 10px; white-space: nowrap; }
+.settings-list .audio-volume span { margin: 0; font-size: 11px; white-space: nowrap; }
 .settings-list .audio-volume input { position: static; width: 100%; min-width: 60px; height: 22px; opacity: 1; accent-color: #565c46; }
-.audio-volume output { min-width: 36px; text-align: right; font-size: 10px; font-variant-numeric: tabular-nums; }
+.audio-volume output { min-width: 36px; text-align: right; font-size: 11px; font-variant-numeric: tabular-nums; }
 .audio-volume input:focus-visible { outline: 2px solid #a67d48; outline-offset: 4px; }
 .settings-list label {
   display: flex;
@@ -1073,7 +1075,7 @@ button {
 }
 .settings-list strong {
   font-size: 12px;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.3px;
   font-weight: 400;
   display: block;
 }
@@ -1138,7 +1140,7 @@ button {
 .motion-settings-head strong {
   display: block;
   font-size: 12px;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.3px;
   font-weight: 400;
 }
 .motion-settings-head span {
@@ -1152,7 +1154,7 @@ button {
   padding: 0 9px;
   border: 1px solid #c9c1b2;
   color: #6f695b;
-  font-size: 10px;
+  font-size: 11px;
   white-space: nowrap;
 }
 .motion-settings-head button[aria-pressed="true"] {
@@ -1188,7 +1190,7 @@ button {
 .motion-settings legend {
   padding: 0;
   color: #8e826f;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1px;
 }
 .motion-setting {
@@ -1206,8 +1208,8 @@ button {
 }
 .motion-setting strong {
   display: block;
-  font-size: 10px;
-  letter-spacing: 0.6px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
   font-weight: 400;
 }
 .motion-setting span {
@@ -1232,7 +1234,7 @@ button {
   margin-top: 26px;
 }
 .settings-shortcuts > span {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1px;
   color: #8e826f;
 }
@@ -1245,7 +1247,7 @@ button {
   font-family: inherit;
   padding: 5px;
   border: 1px solid #c9c1b2;
-  font-size: 9px;
+  font-size: 11px;
   margin: 0 9px 0 18px;
 }
 .settings-shortcuts kbd:first-child {
@@ -1258,7 +1260,7 @@ button {
 }
 .settings-bottom button {
   font-size: 11px;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.3px;
   display: flex;
   align-items: center;
   gap: 20px;

@@ -49,8 +49,7 @@
 .intro-fish { transform-origin: 420px 850px; }
 .intro-name { display: flex; font-size: clamp(30px, 3.6vw, 56px); font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; }
 .intro-name span { display: inline-block; opacity: 0; will-change: transform, opacity, filter; }
-.intro-role { display: flex; align-items: center; gap: 0.9em; font-size: clamp(11px, 0.85vw, 13px); color: #b9b1a6; opacity: 0; text-transform: uppercase; white-space: nowrap; }
-.intro-role i { width: 4px; height: 4px; border-radius: 50%; background: #e0b878; }
+.intro-role { display: flex; align-items: center; gap: 0.9em; font-size: clamp(11px, 0.85vw, 13px); color: #b9b1a6; opacity: 0; letter-spacing: 0.04em; white-space: nowrap; }
 
 /* The case: a front cover and a spine in 3D, lit from above. */
 .intro-stage { position: absolute; left: 50%; top: 56%; width: 0; height: 0; opacity: 0; perspective: 1100px; pointer-events: none; transform-origin: 0 0; will-change: transform, opacity; }
@@ -90,7 +89,7 @@
   display: grid;
   place-items: center;
 }
-.intro-face.spine span { writing-mode: vertical-rl; font-size: 10px; letter-spacing: 0.1em; color: #b9b1a6; white-space: nowrap; overflow: hidden; max-height: 88%; }
+.intro-face.spine span { writing-mode: vertical-rl; font-size: 11px; letter-spacing: 0.04em; color: #b9b1a6; white-space: nowrap; overflow: hidden; max-height: 88%; }
 .intro-ring {
   position: absolute;
   left: 0;
@@ -115,13 +114,12 @@
   background: none;
   color: #f2ece4;
   font: inherit;
-  font-size: 13px;
-  letter-spacing: 0.4em;
+  font-size: 14px;
+  letter-spacing: 0.04em;
   opacity: 0;
   cursor: pointer;
 }
 .intro-prompt i { display: none; }
-.intro-prompt small { font-size: 11px; letter-spacing: 0.2em; color: #a9a39b; }
 .intro-prompt:focus-visible { outline: none; }
 
 .intro-stage { display: none; }

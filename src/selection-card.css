@@ -32,9 +32,8 @@
   align-items: center;
   gap: 10px;
   font-size: 12px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.02em;
 }
-.eyebrow > i { width: 7px; height: 7px; background: var(--theme-accent, #9b7247); flex: none; }
 #stage[data-mode="archive"] .eyebrow > span { margin: 0; }
 #stage[data-mode="archive"] .file-title {
   grid-area: 1 / 1 / 7 / 2;
@@ -44,7 +43,7 @@
   border-right: 1px solid rgba(var(--theme-ink-rgb, 8, 10, 8), 0.2);
   font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.02em;
   color: var(--theme-muted, #77756d);
   min-height: 0;
   gap: 0;
@@ -91,7 +90,7 @@
   padding: 0;
 }
 .callout-tags li {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   padding: 0;
   border: 0;
@@ -108,7 +107,7 @@
   background: transparent;
   color: var(--theme-ink, #080a08);
   font-size: 12px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.02em;
 }
 #stage[data-mode="archive"] .read-file:hover { background: transparent; color: var(--theme-accent, #9b7247); }
 #stage[data-mode="archive"] .read-file > span { transition: transform 180ms; }

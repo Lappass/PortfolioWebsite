@@ -12,7 +12,7 @@
 [data-mobile-boot="true"] [data-layout="opening"] .powered { left: var(--edge); right: auto; bottom: 50px; }
 .mobile-entry { display: none; }
 .system-nav .settings-button { position: relative; }
-.settings-label { position: absolute; left: 50%; top: calc(100% + 3px); transform: translateX(-50%); font-size: 10px; white-space: nowrap; letter-spacing: 1px; }
+.settings-label { position: absolute; left: 50%; top: calc(100% + 3px); transform: translateX(-50%); font-size: 11px; white-space: nowrap; letter-spacing: 0.3px; }
 .pwa-update-notice { position: absolute; z-index: 12; right: var(--edge); bottom: var(--bottom-edge, 32px); max-width: calc(100% - 2 * var(--edge)); min-height: 44px; display: flex; align-items: center; gap: 20px; padding: 0 16px; background: #30362a; color: #f1efdf; font-size: 12px; }
 .pwa-update-notice button { min-height: 44px; color: inherit; white-space: nowrap; border-left: 1px solid #737767; padding-left: 16px; font-size: inherit; }
 .pwa-update-notice[hidden], .pwa-update-notice[inert], [data-mode="boot"] .pwa-update-notice { display: none; }
@@ -48,21 +48,21 @@
 :is([data-layout="compact"], [data-layout="portrait"]) .system-nav { top: var(--top-edge); right: var(--edge); gap: 18px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .system-nav button { min-height: 44px; min-width: 44px; font-size: 11px; justify-content: center; gap: 7px; }
 :is([data-layout="compact"], [data-layout="portrait"]) :is(.key, .powered, .archive-hint, .hover-label) { display: none; }
-:is([data-layout="compact"], [data-layout="portrait"]) .system-footer { left: var(--edge); right: var(--edge); bottom: var(--bottom-edge); font-size: 8px; gap: 12px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .system-footer { left: var(--edge); right: var(--edge); bottom: var(--bottom-edge); font-size: 10px; gap: 12px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .system-footer > span:nth-child(2) { display: none; }
-:is([data-layout="compact"], [data-layout="portrait"]) .system-footer button { margin-left: auto; font-size: 9px; min-height: 28px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .system-footer button { margin-left: auto; font-size: 11px; min-height: 28px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .archive-callout { left: 53%; top: 35%; width: calc(47% - var(--edge)); }
-:is([data-layout="compact"], [data-layout="portrait"]) .eyebrow { font-size: 9px; letter-spacing: .4px; margin-bottom: 12px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .eyebrow { font-size: 11px; letter-spacing: .3px; margin-bottom: 12px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .eyebrow > span { margin-left: 5px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .file-title { font-size: 20px; gap: 6px; min-height: 44px; white-space: nowrap; }
 :is([data-layout="compact"], [data-layout="portrait"]) .file-open { font-size: 20px; margin-left: auto; opacity: 1; }
 :is([data-layout="compact"], [data-layout="portrait"]) .callout-rule { margin: 8px 0 0 20px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .callout-rule i { left: -20px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .file-summary { margin: 12px 0 0; width: 100%; gap: 8px; font-size: 15px; flex-wrap: wrap; }
-:is([data-layout="compact"], [data-layout="portrait"]) .file-summary > span:last-child { font-size: 8px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .file-summary > span:last-child { font-size: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .read-file { margin: 8px 0 0; min-height: 44px; font-size: 11px; gap: 36px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .archive-counter { left: var(--edge); bottom: 61px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .archive-counter .tiny-label { font-size: 8px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .archive-counter .tiny-label { font-size: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .archive-counter > div { font-size: 34px; margin-top: 4px; gap: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .archive-counter i { font-size: 20px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .count-total { font-size: 15px; }
@@ -73,13 +73,13 @@
 :is([data-layout="compact"], [data-layout="portrait"]) .column-navigation { left: auto; right: var(--edge); bottom: 62px; gap: 8px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .column-navigation > div { min-width: 100px; gap: 4px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .column-navigation strong { font-size: 13px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .column-navigation > div > span { font-size: 8px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .column-navigation > div > span { font-size: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .back-button { left: var(--edge); top: 84px; min-height: 44px; gap: 8px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .back-button span { font-size: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .back-button small { display: none; }
 :is([data-layout="compact"], [data-layout="portrait"]) .tab-panel { height: auto; overflow: visible; padding-top: 12px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .tab-panel p { font-size: 15px; text-align: left; }
-:is([data-layout="compact"], [data-layout="portrait"]) .solid-button { font-size: 9px; padding: 0 12px; gap: 10px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .solid-button { font-size: 11px; padding: 0 12px; gap: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .export-button { width: 88px; font-size: 10px; }
 
 /* Portrait keeps the specimen above an independently scrollable document. */
@@ -103,7 +103,7 @@
 /* Top inset moves to the sticky .modal-top; the container must not keep its
    own padding-top or scrolling content peeks out above the bar. */
 :is([data-layout="compact"], [data-layout="portrait"]) .terminal-modal { padding: 0 20px 16px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .modal-top { padding-top: 16px; padding-bottom: 8px; font-size: 9px; gap: 12px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .modal-top { padding-top: 16px; padding-bottom: 8px; font-size: 11px; gap: 12px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .modal-top button { min-height: 44px; min-width: 44px; gap: 8px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .terminal-modal h2 { font-size: 25px; margin: 18px 0; flex-wrap: wrap; gap: 8px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .terminal-modal h2 small { font-size: 12px; }
@@ -116,7 +116,7 @@
 :is([data-layout="compact"], [data-layout="portrait"]) .result-name { gap: 10px; padding-right: 12px; font-size: 14px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .result-name > b { font-size: 12px; flex-basis: 48px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .search-results { height: auto; overflow: visible; }
-:is([data-layout="compact"], [data-layout="portrait"]) .modal-bottom { position: static; margin-top: 22px; gap: 12px; font-size: 8px; flex-wrap: wrap; }
+:is([data-layout="compact"], [data-layout="portrait"]) .modal-bottom { position: static; margin-top: 22px; gap: 12px; font-size: 10px; flex-wrap: wrap; }
 :is([data-layout="compact"], [data-layout="portrait"]) .audio-settings { grid-template-columns: 1fr; gap: 0; }
 :is([data-layout="compact"], [data-layout="portrait"]) .settings-list label { gap: 16px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .motion-settings-head { align-items: flex-start; flex-wrap: wrap; gap: 8px; }
@@ -140,9 +140,9 @@
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-back span { font-size: 13px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-back kbd { display: none; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-heading { margin-left: 24px; padding-top: 4px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .viewer-heading > span { font-size: 8px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .viewer-heading > span { font-size: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-heading h2 { font-size: 20px; margin: 5px 0; }
-:is([data-layout="compact"], [data-layout="portrait"]) .viewer-heading p { font-size: 9px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .viewer-heading p { font-size: 11px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-index { font-size: 30px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-index > span { font-size: 18px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-surface { top: 68px; right: var(--edge); }
@@ -153,9 +153,9 @@
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-reset span { margin-left: 8px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-actions button { min-width: 100px; min-height: 44px; padding: 10px 12px; font-size: 12px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-actions button span { margin-right: 4px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .viewer-state { bottom: var(--bottom-edge); font-size: 9px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .viewer-state { bottom: var(--bottom-edge); font-size: 11px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-parts { top: 130px; right: var(--edge); width: 110px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .viewer-parts > div { font-size: 8px; margin-bottom: 10px; }
+:is([data-layout="compact"], [data-layout="portrait"]) .viewer-parts > div { font-size: 10px; margin-bottom: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-parts p { margin: 0 0 6px; padding: 0 0 6px 20px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-parts strong { font-size: 11px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .viewer-parts small { display: none; }

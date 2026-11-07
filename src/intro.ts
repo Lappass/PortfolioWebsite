@@ -264,7 +264,6 @@ export class Intro {
     });
     const role = outExpo(span(t, T.role, T.role + 1));
     this.roleEl.style.opacity = role.toFixed(3);
-    this.roleEl.style.letterSpacing = `${(0.42 + (1 - role) * 0.5).toFixed(3)}em`;
     // The heading lifts to the top while the case comes up in the light.
     const lift = inOutCubic(span(t, T.lift, T.lift + 1.1));
     this.head.style.transform = `translate(-50%, calc(-50% - ${(lift * 31).toFixed(2)}vh)) scale(${(1 - 0.36 * lift).toFixed(3)})`;
