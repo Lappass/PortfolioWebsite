@@ -155,10 +155,6 @@
               {
                 "value": "20",
                 "label": "Days in a run"
-              },
-              {
-                "value": "Tangram",
-                "label": "Root of the puzzle"
               }
             ],
             "media": [
@@ -240,8 +236,8 @@
             "summary": "I built the game around a pan, because every problem in the house ends at dinner. From Day 6 a knife cuts along the grid and the pan turns irregular.",
             "stats": [
               {
-                "value": "470 kcal",
-                "label": "Meal calorie target"
+                "value": "470",
+                "label": "Calories a meal aims for"
               },
               {
                 "value": "12",

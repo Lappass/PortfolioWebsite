@@ -193,28 +193,30 @@ abstract class TitleMenu {
    */
   private studyMarkup(s: CaseStudy) {
     const r = this.r, hero = r.hero ?? r.cover, count = s.sections.length, total = pad(count);
+    const calm = r.menu !== "trail";
     const links = [...(r.links ?? []), ...(r.links?.some((link) => link.url === r.source) ? [] : [{ label: "Project link", url: r.source }])];
     const figure = (m: CaseStudyMedia, i: number) => `<figure class="cs-fig cs-f${i + 1}"><img src="${media(m.src)}" alt="${e(m.caption ?? r.title)}" decoding="async">${m.caption ? `<figcaption>${e(m.caption)}</figcaption>` : ""}</figure>`;
     // Where the reader is, drawn by the theme: tents on a trail, stops on a track, lit windows, paws.
     const track = (at: number) => `<div class="cs-track" aria-hidden="true">${Array.from({ length: count }, (_, i) => `<i class="${i < at ? "done" : i === at ? "on" : ""}"></i>`).join("")}</div>`;
     const first = (x: CaseStudySection) => x.body[0].split(/(?<=\.)\s/)[0];
     const slide = (x: CaseStudySection, i: number) => {
-      const shots = (x.media ?? []).slice(0, 4);
+      // The journal can take a page of four photos; the other games keep to one large picture and one small.
+      const shots = (x.media ?? []).slice(0, calm ? 2 : 4);
       const text = `<div class="cs-text"><div class="cs-inner">
         <div class="cs-k"><span class="cs-n">${pad(i + 1)} / ${total}</span><span>${e(x.kicker)}</span></div>
         <h3>${e(x.heading)}</h3>
         <p class="cs-sum">${e(x.summary ?? first(x))}</p>
-        ${x.stats?.length ? `<div class="cs-stats">${x.stats.map((st) => `<div><b>${e(st.value)}</b><span>${e(st.label)}</span></div>`).join("")}</div>` : ""}
+        ${x.stats?.length ? `<div class="cs-stats">${x.stats.map((st) => `<div><b${st.value.length > 4 ? ' class="cs-long"' : ""}>${e(st.value)}</b><span>${e(st.label)}</span></div>`).join("")}</div>` : ""}
         <button type="button" class="cs-more" data-tm="more" aria-expanded="false">Read more</button>
         <div class="cs-full" hidden>${x.body.map((p) => `<p>${e(p)}</p>`).join("")}
           ${x.points?.length ? `<ul class="cs-points">${x.points.map((p) => `<li>${e(p)}</li>`).join("")}</ul>` : ""}</div>
         ${i === count - 1 ? `<div class="tm-links">${links.map((link) => `<a href="${e(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} ↗</a>`).join("")}</div>` : ""}</div></div>`;
       return shots.length
         ? `<section class="cs-slide" data-sec="${i + 1}">${text}<div class="cs-pics cs-n${shots.length}">${shots.map(figure).join("")}</div>${track(i)}</section>`
-        : `<section class="cs-slide cs-solo" data-sec="${i + 1}">${hero ? `<img class="cs-fill" src="${media(hero)}" alt="" aria-hidden="true" decoding="async">` : ""}${text}${track(i)}</section>`;
+        : `<section class="cs-slide cs-solo" data-sec="${i + 1}">${text}${track(i)}</section>`;
     };
     const strip = (s.gallery ?? []).slice(0, 4);
-    return `<div class="cs">
+    return `<div class="cs${calm ? " cs-calm" : ""}">
       <section class="cs-slide cs-cover" data-sec="0">${hero ? `<img class="cs-hero" src="${media(hero)}" alt="${e(r.title)}" decoding="async">` : ""}
         <div class="cs-inner"><div class="cs-k">${e(r.en)}</div><h3 class="cs-title">${e(r.title)}</h3><p class="cs-pitch">${e(s.pitch)}</p>
           <dl class="cs-facts">${s.facts.map((f) => `<div><dt>${e(f.label)}</dt><dd>${e(f.value)}</dd></div>`).join("")}</dl>
