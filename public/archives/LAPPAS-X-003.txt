@@ -14,7 +14,7 @@ Highlights
 2. Photos are scored from one to three stars (close-ups, flight, eye contact, golden hour) and fill a field guide of 24 species.
 3. The island, its cave and the old mine are generated in the editor, and the whole journal-style interface is drawn in code.
 
-DESIGN INTENT / A climb that costs something
+A climb that costs something
 
 The part I care about is the climb. I want it to cost something, so that a goat photographed on a high ledge is remembered together with the way up to it.
 
@@ -28,7 +28,7 @@ The idea comes from my own trips. On Mount Rainier a marmot watched me from a ri
 
 - What I keep from a trip is what I brought back, so the game has a cabin that keeps it.
 
-THE CORE LOOP / A trip
+A trip
 
 Every trip starts and ends in the cabin. She packs up to four tools at the bench, reads the weather card in the window, and picks a start on the wall map, at the trailhead or at a fire she has found. I put this at home on purpose. By the time she opens the door she has already made a few decisions about the day.
 
@@ -40,7 +40,7 @@ On the mountain she climbs, creeps up on animals and takes photos. People at the
 
 - Shoot or wait: a roll has ten shots, and a blurred photo scores half.
 
-CLIMBING AND STAMINA / The mountain is the obstacle
+The mountain is the obstacle
 
 The first version had set obstacles on the trails and a die roll to get past each one, and the walking between them was dead time. I replaced all of that with climbing. Any face steeper than 50 degrees can be climbed by holding the left mouse button.
 
@@ -52,7 +52,7 @@ Five afflictions each take a coloured slice off the end of the bar: hunger, tire
 
 - The Flashlight is the only light in the cave. If it pushes the Down Jacket out of the bag, the snow above the mine is a much harder climb.
 
-PHOTOGRAPHY / Keeping still and waiting
+Keeping still and waiting
 
 The right mouse button brings the camera up and the left button takes the shot. The score comes from what is in the frame: getting close, a bird in flight, an animal looking at the lens, a mother with her young, golden hour. The points add up to one, two or three stars. Moving shakes the camera and a blurred photo scores half, so the good photos come from keeping still.
 
@@ -60,7 +60,7 @@ Each species in the field guide has a row of moments, from first sight and a clo
 
 The 24 species do not all react the same way. A boar charges, a squirrel runs up a tree, foxes steal snacks, and the owl only comes out between 17:30 and 6:30. If every animal ran off the same way, players would learn one trick and use it on all of them.
 
-THE ISLAND / Sixteen people and Leo's camera
+Sixteen people and Leo's camera
 
 The player is a young woman with no name. Leo, an old photographer who walked this mountain for forty years, has left her his camera and a letter, and she lives in his cabin. "It's yours now," he writes. Sixteen people on the island make 38 requests between them. The eight tools come out of six of those stories, so every new ability has a person behind it.
 
@@ -68,13 +68,13 @@ Nell waits at the cave mouth and will not go past the daylight. She tells the pl
 
 Old Marten knew Leo. His last request is a ptarmigan close enough to count its feathers. When the photo works, his postcard is waiting at home: "We never did get that ptarmigan. You did."
 
-THE CABIN AND THE JOURNAL / What the cabin keeps
+What the cabin keeps
 
 After a real trip I come home with photos and a few things to remember it by, so the cabin keeps them. A finished story sends a postcard, with her photo on the front and a note and a crayon drawing on the back. A carving of a species can be ordered for the Carver's Shelf once every moment of it is in the guide, and stars buy parts for Leo's camera at the bench.
 
 The interface follows the same idea. The HUD, the panels and the field guide look like a travel journal, with paper, washi tape, rubber stamps and sticker icons where text labels would normally go. The wrist phone is a device, so it keeps a clean screen.
 
-NEXT / What I'd build next
+What I'd build next
 
 At the moment only the owl keeps set hours. The next build makes the time of day part of planning a trip.
 

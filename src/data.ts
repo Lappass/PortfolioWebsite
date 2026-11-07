@@ -26,38 +26,30 @@ export interface ArchiveRecord {
   video?: string;
   unity?: string;
   links?: { label: string; url: string }[];
-  /** Title-menu theme for the project page (src/title-menus.ts); without it the page uses the standard layout. */
+  /** The game's own cover for its page (src/game-covers.ts); without it the page opens on the key art. */
   menu?: "lastmile" | "trail" | "lockdown" | "sniff";
   /** Trailer video; falls back to `video`. */
   trailer?: string;
   /** A full run of the game, with optional chapter marks ("m:ss"). */
   playthrough?: { src: string; chapters?: { at: string; label: string }[] };
   download?: { url: string; label?: string; size?: string };
-  /** Menu items announced but not out yet: play, trailer, playthrough, download. */
-  soon?: string[];
-  /** The long-form case study the title menu's "About the game" opens (content/README.md). */
+  /** The case study the page is built from (content/README.md). */
   study?: CaseStudy;
 }
 
 export interface CaseStudyMedia { src: string; caption?: string }
 export interface CaseStudySection {
-  kicker: string;
   heading: string;
-  /** The line shown on the slide; `body` and `points` sit behind "Read more". */
+  /** The paragraph shown beside the pictures; `body` and `points` make up the full write-up. */
   summary?: string;
-  /** Up to three figures from the section, shown large. */
-  stats?: { value: string; label: string }[];
   body: string[];
   points?: string[];
+  /** The first picture is shown large, the second small. */
   media?: CaseStudyMedia[];
-  /** "side": text beside the pictures; "wide": pictures full width under the text. */
-  layout?: "side" | "wide";
 }
 export interface CaseStudy {
   pitch: string;
   facts: { label: string; value: string }[];
-  /** More shots for a strip on the cover. */
-  gallery?: CaseStudyMedia[];
   sections: CaseStudySection[];
 }
 

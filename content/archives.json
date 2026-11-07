@@ -109,10 +109,6 @@
         }
       ],
       "menu": "lockdown",
-      "soon": [
-        "play",
-        "playthrough"
-      ],
       "study": {
         "pitch": "LockDown is a household survival game set in one small apartment during a city lockdown with no announced end. Each day the player fits the delivered food into a pan as a spatial puzzle, stores what is left in a fridge that can rot, and answers the family and the building on the phone.",
         "facts": [
@@ -139,7 +135,6 @@
         ],
         "sections": [
           {
-            "kicker": "DESIGN INTENT",
             "heading": "Where the rules come from",
             "body": [
               "LockDown is about slowly losing control while you wait for something with no announced end. The idea comes from my family's 2022 lockdown in Shanghai. We ate whatever came in the supply package, my grandparents needed medicine that nobody was allowed to go and get, and nobody told us when it would end.",
@@ -147,16 +142,6 @@
               "The cooking puzzle starts from the traditional Chinese tangram. Here the shapes are ingredients and the space is a pan or a fridge, and the gaps and leftovers show the shortage without a line of dialogue."
             ],
             "summary": "LockDown comes from my family's 2022 Shanghai lockdown. I turned those memories into rules: supplies arrive instead of shopping, the flat never grows, and twenty days pass with no countdown.",
-            "stats": [
-              {
-                "value": "2022",
-                "label": "Family lockdown in Shanghai"
-              },
-              {
-                "value": "20",
-                "label": "Days in a run"
-              }
-            ],
             "media": [
               {
                 "src": "works/x-002/study/e11.jpg",
@@ -165,7 +150,6 @@
             ]
           },
           {
-            "kicker": "CORE LOOP",
             "heading": "One day, one meal",
             "body": [
               "Each morning starts with yesterday's consequences. Everyone loses 2 morale and 1 health, the fridge is checked for rot, and a package arrives. By Day 7 the bag can be just noodles, a cabbage and some rice.",
@@ -189,25 +173,9 @@
                 "caption": "Day 6 after dinner: time to rest before the next day."
               }
             ],
-            "layout": "wide",
-            "summary": "Each morning carries yesterday's consequences. The player reads the phone, fits food into the pan, serves, and stores the leftovers that fit. Sleep moves the day on but resets nothing.",
-            "stats": [
-              {
-                "value": "-2",
-                "label": "Morale lost each morning"
-              },
-              {
-                "value": "-1",
-                "label": "Health lost each morning"
-              },
-              {
-                "value": "Day 3",
-                "label": "Fridge becomes usable"
-              }
-            ]
+            "summary": "Each morning carries yesterday's consequences. The player reads the phone, fits food into the pan, serves, and stores the leftovers that fit. Sleep moves the day on but resets nothing."
           },
           {
-            "kicker": "COOKING",
             "heading": "A pan that is never big enough",
             "body": [
               "I built the game around a pan rather than a resource screen, because every problem in the house ends up at dinner. A resource screen would turn Grandpa's tablets into a number. The pan turns them into a space that is too small.",
@@ -232,25 +200,9 @@
                 "caption": "Later, pork, tofu and egg share an irregular pan."
               }
             ],
-            "layout": "wide",
-            "summary": "I built the game around a pan, because every problem in the house ends at dinner. From Day 6 a knife cuts along the grid and the pan turns irregular.",
-            "stats": [
-              {
-                "value": "470",
-                "label": "Calories a meal aims for"
-              },
-              {
-                "value": "12",
-                "label": "Ingredients, 3 to 7 cells"
-              },
-              {
-                "value": "38%",
-                "label": "Grade weight on balance"
-              }
-            ]
+            "summary": "I built the game around a pan, because every problem in the house ends at dinner. From Day 6 a knife cuts along the grid and the pan turns irregular."
           },
           {
-            "kicker": "FRIDGE AND SPOILAGE",
             "heading": "Storage that turns into a chore",
             "body": [
               "Each new rule arrives through something in the house. On Day 1 the fridge is broken, and the next day Aunt Li complains in the building group about Grandpa dragging it around at midnight. On Day 3 he gets it working and storage unlocks. After two days of cooking everything at once, the player knows what a fridge is for.",
@@ -271,25 +223,9 @@
                 "caption": "The repaired fridge on Day 3: 48 empty cells."
               }
             ],
-            "layout": "side",
-            "summary": "The fridge unlocks on Day 3. From Day 8 stored food rots and spreads. The grade ignores rot, so an S meal can still make the family ill.",
-            "stats": [
-              {
-                "value": "6×8",
-                "label": "Fridge grid"
-              },
-              {
-                "value": "62%",
-                "label": "Daily spread within an item"
-              },
-              {
-                "value": "-4",
-                "label": "Health per rotten cell"
-              }
-            ]
+            "summary": "The fridge unlocks on Day 3. From Day 8 stored food rots and spreads. The grade ignores rot, so an S meal can still make the family ill."
           },
           {
-            "kicker": "NARRATIVE",
             "heading": "Three at home, five in the building chat",
             "body": [
               "In 2022 there were five of us at home. For the game I cut the household to three: Grandpa, whose health depends on things from outside, Daughter, who says out loud what everyone feels, and the player, with no name or face, who makes the decisions. Director Zhang, Mr. Wang, Aunt Li, Uncle Yu and the 6F Stranger reach the flat through the building chat.",
@@ -314,25 +250,9 @@
                 "caption": "Day 18: take Daughter downstairs early, or wait for the assigned time."
               }
             ],
-            "layout": "wide",
-            "summary": "I cut my real household of five to three: Grandpa, Daughter and a faceless player. Five neighbors reach the flat through the building chat, and their requests cost food.",
-            "stats": [
-              {
-                "value": "60",
-                "label": "Grandpa's starting health"
-              },
-              {
-                "value": "38.2°",
-                "label": "Daughter's fever, Day 8"
-              },
-              {
-                "value": "60%",
-                "label": "Day 18 downstairs trip works"
-              }
-            ]
+            "summary": "I cut my real household of five to three: Grandpa, Daughter and a faceless player. Five neighbors reach the flat through the building chat, and their requests cost food."
           },
           {
-            "kicker": "INFORMATION",
             "heading": "The phone and the screen",
             "body": [
               "The phone has three channels at three distances: the city newspaper, the building group and the family chat. Often they cover the same problem. On Day 4 Zhang asks every flat for its medicine doses, on Day 5 the paper reports refills running late, and that morning Grandpa finds his box empty.",
@@ -352,45 +272,15 @@
                 "caption": "After dinner, one family member answers in a single line."
               }
             ],
-            "layout": "side",
-            "summary": "The phone's three channels often report the same problem from different distances. The HUD shows the day and health, and the family's reaction comes as one line after dinner.",
-            "stats": [
-              {
-                "value": "3",
-                "label": "Phone channels"
-              },
-              {
-                "value": "1",
-                "label": "Family reply after dinner"
-              },
-              {
-                "value": "Day 20",
-                "label": "Lockdown ends, final report"
-              }
-            ]
+            "summary": "The phone's three channels often report the same problem from different distances. The HUD shows the day and health, and the family's reaction comes as one line after dinner."
           },
           {
-            "kicker": "NEXT BUILD",
             "heading": "What I'd build next",
             "body": [
               "In the next build the knife slowly goes blunt. Hard ingredients wear it down faster, a blunt knife only cuts soft food like tofu or cabbage, and sharpening it depends on a neighbor lending a stone. Cut surfaces spoil faster than whole ingredients. On outage days the spoilage clock advances twice and the fridge hum cuts out.",
               "Choices should also reach further. In that build the player picks which two items go to the 6F Stranger, and he comes back on Day 13 expecting the same deal. If Daughter was left to rest, her fever returns on Day 14. 7F sends something back on Day 17 only if they were helped. If the patrol catches the family on Day 18, no package arrives on Day 19."
             ],
             "summary": "Next I want the knife to wear out and choices to come back later: the 6F Stranger returns, the fever recurs, and a failed Day 18 trip costs a package."
-          }
-        ],
-        "gallery": [
-          {
-            "src": "works/x-002/study/g1.jpg",
-            "caption": "The dining table where every meal ends up."
-          },
-          {
-            "src": "works/x-002/study/g2.jpg",
-            "caption": "Day 7, the apartment before cooking at the counter."
-          },
-          {
-            "src": "works/x-002/study/g3.jpg",
-            "caption": "Day 5: Grandpa finds his medicine box empty."
           }
         ]
       },
@@ -446,10 +336,6 @@
         }
       ],
       "menu": "trail",
-      "soon": [
-        "play",
-        "playthrough"
-      ],
       "trailer": "works/x-003/trailer.mp4",
       "study": {
         "pitch": "Trail Adventure is a first-person game about climbing a mountain island with an old camera. The player packs a bag in the cabin, climbs any rock face on one stamina bar, and photographs 24 species for the people who live on the island.",
@@ -477,7 +363,6 @@
         ],
         "sections": [
           {
-            "kicker": "DESIGN INTENT",
             "heading": "A climb that costs something",
             "body": [
               "The part I care about is the climb. I want it to cost something, so that a goat photographed on a high ledge is remembered together with the way up to it.",
@@ -499,11 +384,9 @@
                 "caption": "Leo's cabin, where every trip starts and ends."
               }
             ],
-            "layout": "side",
             "summary": "I want the climb to cost something, so a photo is remembered with the way up. The rules come from my own mountain trips."
           },
           {
-            "kicker": "THE CORE LOOP",
             "heading": "A trip",
             "body": [
               "Every trip starts and ends in the cabin. She packs up to four tools at the bench, reads the weather card in the window, and picks a start on the wall map, at the trailhead or at a fire she has found. I put this at home on purpose. By the time she opens the door she has already made a few decisions about the day.",
@@ -528,25 +411,9 @@
                 "caption": "A fire on the mountain, where a night brings fresh film."
               }
             ],
-            "layout": "wide",
-            "summary": "Each trip starts and ends in the cabin, so the player makes the day's choices before opening the door.",
-            "stats": [
-              {
-                "value": "4",
-                "label": "tools in the bag"
-              },
-              {
-                "value": "10",
-                "label": "shots per roll"
-              },
-              {
-                "value": "50%",
-                "label": "score for a blurred photo"
-              }
-            ]
+            "summary": "Each trip starts and ends in the cabin, so the player makes the day's choices before opening the door."
           },
           {
-            "kicker": "CLIMBING AND STAMINA",
             "heading": "The mountain is the obstacle",
             "body": [
               "The first version had set obstacles on the trails and a die roll to get past each one, and the walking between them was dead time. I replaced all of that with climbing. Any face steeper than 50 degrees can be climbed by holding the left mouse button.",
@@ -567,25 +434,9 @@
                 "caption": "Evening at the Snow Fire, where hunger and cold have each taken a marked slice off the end of the bar."
               }
             ],
-            "layout": "wide",
-            "summary": "Climbing replaced set obstacles. Any face over 50° can be climbed, walking is free, and five afflictions each take a visible slice off the stamina bar.",
-            "stats": [
-              {
-                "value": "50°",
-                "label": "steepness you can climb"
-              },
-              {
-                "value": "20/s",
-                "label": "stamina regained"
-              },
-              {
-                "value": "5",
-                "label": "afflictions on the bar"
-              }
-            ]
+            "summary": "Climbing replaced set obstacles. Any face over 50° can be climbed, walking is free, and five afflictions each take a visible slice off the stamina bar."
           },
           {
-            "kicker": "PHOTOGRAPHY",
             "heading": "Keeping still and waiting",
             "body": [
               "The right mouse button brings the camera up and the left button takes the shot. The score comes from what is in the frame: getting close, a bird in flight, an animal looking at the lens, a mother with her young, golden hour. The points add up to one, two or three stars. Moving shakes the camera and a blurred photo scores half, so the good photos come from keeping still.",
@@ -602,25 +453,9 @@
                 "caption": "The field guide open at the fox, with all eight of its moments on film."
               }
             ],
-            "layout": "wide",
-            "summary": "The score comes from what is in the frame, and moving blurs the shot, so good photos come from keeping still. Each of the 24 species reacts differently.",
-            "stats": [
-              {
-                "value": "3",
-                "label": "stars at most"
-              },
-              {
-                "value": "24",
-                "label": "species"
-              },
-              {
-                "value": "17:30",
-                "label": "when the owl appears"
-              }
-            ]
+            "summary": "The score comes from what is in the frame, and moving blurs the shot, so good photos come from keeping still. Each of the 24 species reacts differently."
           },
           {
-            "kicker": "THE ISLAND",
             "heading": "Sixteen people and Leo's camera",
             "body": [
               "The player is a young woman with no name. Leo, an old photographer who walked this mountain for forty years, has left her his camera and a letter, and she lives in his cabin. \"It's yours now,\" he writes. Sixteen people on the island make 38 requests between them. The eight tools come out of six of those stories, so every new ability has a person behind it.",
@@ -645,25 +480,9 @@
                 "caption": "A reward coming down on a paper parachute."
               }
             ],
-            "layout": "wide",
-            "summary": "Sixteen islanders make 38 requests, and the eight tools come from six of their stories, so every new ability has a person behind it.",
-            "stats": [
-              {
-                "value": "16",
-                "label": "people on the island"
-              },
-              {
-                "value": "38",
-                "label": "photo requests"
-              },
-              {
-                "value": "8",
-                "label": "tools from their stories"
-              }
-            ]
+            "summary": "Sixteen islanders make 38 requests, and the eight tools come from six of their stories, so every new ability has a person behind it."
           },
           {
-            "kicker": "THE CABIN AND THE JOURNAL",
             "heading": "What the cabin keeps",
             "body": [
               "After a real trip I come home with photos and a few things to remember it by, so the cabin keeps them. A finished story sends a postcard, with her photo on the front and a note and a crayon drawing on the back. A carving of a species can be ordered for the Carver's Shelf once every moment of it is in the guide, and stars buy parts for Leo's camera at the bench.",
@@ -687,11 +506,9 @@
                 "caption": "Fitting new parts to Leo's camera at the bench."
               }
             ],
-            "layout": "wide",
             "summary": "The cabin keeps what each trip brings back: postcards, carvings and camera parts. The interface looks like a travel journal, except the wrist phone."
           },
           {
-            "kicker": "NEXT",
             "heading": "What I'd build next",
             "body": [
               "At the moment only the owl keeps set hours. The next build makes the time of day part of planning a trip."
@@ -702,16 +519,6 @@
               "Ambient occlusion for the faceted rock and the cave, and depth of field in the viewfinder."
             ],
             "summary": "Next, I want the time of day to matter when planning a trip, not only for the owl."
-          }
-        ],
-        "gallery": [
-          {
-            "src": "works/x-003/study/g1.jpg",
-            "caption": "The cabin with its bed, coats and island map."
-          },
-          {
-            "src": "works/x-003/study/g2.jpg",
-            "caption": "Photos and postcards pinned up on the cabin wall."
           }
         ]
       },
@@ -767,12 +574,6 @@
         }
       ],
       "menu": "lastmile",
-      "soon": [
-        "play",
-        "trailer",
-        "playthrough",
-        "download"
-      ],
       "study": {
         "pitch": "Last Mile is a ten-day management game about running Lanting, a small food-delivery station. Orders land on a 3D city as countdown pins, and for each one the player decides who takes it: a rider who is paid by the drop, a ground robot or a drone.",
         "facts": [
@@ -799,7 +600,6 @@
         ],
         "sections": [
           {
-            "kicker": "DESIGN INTENT",
             "heading": "Each order is someone's pay",
             "body": [
               "The riders are paid by the drop, so sending Chen instead of Xiaoyu on an ID check decides which of them gets closer to the bill they are saving for. Over the ten days headquarters moves the station onto robots and drones.",
@@ -819,7 +619,6 @@
             ]
           },
           {
-            "kicker": "CORE LOOP",
             "heading": "A day at the station",
             "body": [
               "The station gets ¥180 each morning. The player can save it, or spend ¥80 to coach the rider who knows the streets least, ¥90 on breakfast and a rest, or ¥50 to add 15 seconds to the first four orders.",
@@ -840,25 +639,9 @@
                 "caption": "The report on day 4: 12 delivered against a target of 10, and what each rider was paid."
               }
             ],
-            "layout": "side",
-            "summary": "Each day the station gets ¥180 and runs two 90-second waves of orders. At night each rider costs ¥30, and a station that can't pay closes.",
-            "stats": [
-              {
-                "value": "¥180",
-                "label": "Morning budget"
-              },
-              {
-                "value": "90 s",
-                "label": "Each of two waves"
-              },
-              {
-                "value": "16",
-                "label": "Daily orders by day 7"
-              }
-            ]
+            "summary": "Each day the station gets ¥180 and runs two 90-second waves of orders. At night each rider costs ¥30, and a station that can't pay closes."
           },
           {
-            "kicker": "DISPATCH",
             "heading": "Choosing who takes the order",
             "body": [
               "Clicking a pin lists who could take the order, with an arrival estimate. A card for someone who can't go is locked and says why, and the clock holds until the player chooses.",
@@ -877,25 +660,9 @@
                 "caption": "Day 4: a breakfast for an old building without a lift. The drone is fastest, and the robot is locked because it can't climb stairs."
               }
             ],
-            "layout": "wide",
-            "summary": "The player picks a courier for each order. The deadline is set by the fastest rested courier, so a slower pick or a wait makes it late.",
-            "stats": [
-              {
-                "value": "×1.4",
-                "label": "Deadline slack on day 2"
-              },
-              {
-                "value": "25 s",
-                "label": "Late until it cancels"
-              },
-              {
-                "value": "70%",
-                "label": "Speed when tired"
-              }
-            ]
+            "summary": "The player picks a courier for each order. The deadline is set by the fastest rested courier, so a slower pick or a wait makes it late."
           },
           {
-            "kicker": "MACHINES AND AO-6",
             "heading": "Robots, drones and an assistant that learns",
             "body": [
               "The robot arrives on day 3. It is never paid per drop, but it can't climb stairs or check an ID. That night headquarters compares it with the riders on standard orders. If the riders were on time more often, the player can send it back. A tie goes to the robot.",
@@ -908,25 +675,9 @@
                 "caption": "How AO-6 learns: each Confirm, or each time the player picks someone else, is saved as an example for that kind of order."
               }
             ],
-            "layout": "side",
-            "summary": "Robots arrive on day 3 and drones on day 4, each taking a rider's place. From day 6 AO-6 recommends someone for each order and learns from every choice.",
-            "stats": [
-              {
-                "value": "Day 3",
-                "label": "Robot arrives"
-              },
-              {
-                "value": "4 of 6",
-                "label": "Machines required on day 10"
-              },
-              {
-                "value": "96",
-                "label": "Choices AO-6 keeps"
-              }
-            ]
+            "summary": "Robots arrive on day 3 and drones on day 4, each taking a rider's place. From day 6 AO-6 recommends someone for each order and learns from every choice."
           },
           {
-            "kicker": "THE RIDERS",
             "heading": "Four riders and what they are saving for",
             "body": [
               "Each rider has three scores out of 10: Streets for speed, Strength for load, Judgment for tricky handovers. Chen is 9, 4 and 9. Ajie is 5, 9 and 5. Lin is 8, 6 and 6. Xiaoyu joins on day 2 at 4, 6 and 8.",
@@ -943,25 +694,9 @@
                 "caption": "Lin asks to finish what he is carrying and skip the evening rush to pick up his daughter."
               }
             ],
-            "layout": "side",
-            "summary": "Each of the four riders needs money for one thing by a set evening, and a fair share of the work just covers it.",
-            "stats": [
-              {
-                "value": "¥30",
-                "label": "Xiaoyu's deposit, day 4"
-              },
-              {
-                "value": "¥80",
-                "label": "Chen's medicine, day 9"
-              },
-              {
-                "value": "3",
-                "label": "Scores out of 10"
-              }
-            ]
+            "summary": "Each of the four riders needs money for one thing by a set evening, and a fair share of the work just covers it."
           },
           {
-            "kicker": "THE CITY",
             "heading": "A district built from one road graph",
             "body": [
               "The map is modelled on Xujiahui: 26 hand-placed junctions around a six-armed crossing, with eight outer districts generated as five-by-five street grids. Orders go to four of them, among them Willow Bend and Heron Road.",
@@ -978,25 +713,9 @@
                 "caption": "Ajie on the walkie-talkie about a moved drop-off, out in the city."
               }
             ],
-            "layout": "wide",
-            "summary": "The map is a road graph modelled on Xujiahui: 26 hand-placed junctions and eight generated districts, with blocks and ordinary buildings filled in by code.",
-            "stats": [
-              {
-                "value": "26",
-                "label": "Hand-placed junctions"
-              },
-              {
-                "value": "8",
-                "label": "Generated outer districts"
-              },
-              {
-                "value": "5×5",
-                "label": "Street grid per district"
-              }
-            ]
+            "summary": "The map is a road graph modelled on Xujiahui: 26 hand-placed junctions and eight generated districts, with blocks and ordinary buildings filled in by code."
           },
           {
-            "kicker": "INTERFACE AND TESTING",
             "heading": "Lessons on the map, and ten days played by the editor",
             "body": [
               "Day 1 teaches by doing. Zhou Heng, the regional manager, walks the player through the first dispatch, and later lessons appear the first time they are needed, such as Strength on the first full crate.",
@@ -1008,22 +727,7 @@
                 "caption": "The ticket before the evening wave: keep it standard, buy extra time or take rush pay."
               }
             ],
-            "layout": "side",
-            "summary": "Day 1 teaches through a guided first dispatch, and the editor can play all ten days itself to check that all 132 orders end in a delivery or cancellation.",
-            "stats": [
-              {
-                "value": "Day 1",
-                "label": "Guided first dispatch"
-              },
-              {
-                "value": "10",
-                "label": "Days played by script"
-              },
-              {
-                "value": "132",
-                "label": "Orders checked per run"
-              }
-            ]
+            "summary": "Day 1 teaches through a guided first dispatch, and the editor can play all ten days itself to check that all 132 orders end in a delivery or cancellation."
           }
         ]
       }
@@ -1055,12 +759,6 @@
       "loader": "sniff",
       "hero": "works/x-007/hero.jpg",
       "menu": "sniff",
-      "soon": [
-        "play",
-        "trailer",
-        "playthrough",
-        "download"
-      ],
       "study": {
         "pitch": "An online co-op stealth game for two: Lyra, a witch, and Fia, a red panda, are both in for theft and have to break out of a magic prison together. I was a programmer and designer on the capstone team and built the guard AI, the capture and rescue loop, and many of the co-op systems.",
         "facts": [
@@ -1087,7 +785,6 @@
         ],
         "sections": [
           {
-            "kicker": "THE GAME",
             "heading": "Two thieves, one way out",
             "body": [
               "Lyra and Fia are both in for theft, and neither of them gets out of the prison alone. Each player claims one of them on the character select screen, and the run starts once both roles are taken.",
@@ -1103,25 +800,9 @@
                 "caption": "Fia's mugshot card on the character select screen."
               }
             ],
-            "layout": "side",
-            "summary": "Lyra and Fia escape a magic prison together. Each player takes one, and their different heights, jumps and skills give most rooms a separate route for each.",
-            "stats": [
-              {
-                "value": "1.8 m",
-                "label": "Lyra's height"
-              },
-              {
-                "value": "1.4 m",
-                "label": "Fia's jump"
-              },
-              {
-                "value": "3.5 m",
-                "label": "Fia's dash"
-              }
-            ]
+            "summary": "Lyra and Fia escape a magic prison together. Each player takes one, and their different heights, jumps and skills give most rooms a separate route for each."
           },
           {
-            "kicker": "TWO PLAYERS",
             "heading": "Split up, then meet at the door",
             "body": [
               "The first stretch of Level 1 gives Lyra and Fia a \"Find a way out\" step each. The two run in parallel, and only when both are done does the next step appear: \"Meet at the door\".",
@@ -1133,35 +814,18 @@
                 "caption": "The success screen, shown when both players reach their exits."
               }
             ],
-            "layout": "wide",
             "summary": "Lyra and Fia work in parallel, then regroup. The next quest step, winning the level and saving a checkpoint all wait for both players."
           },
           {
-            "kicker": "GUARDS",
             "heading": "Guards that see and hear",
             "body": [
               "I built the guard AI. Each guard is one state machine with 18 states and a suspicion meter from 0 to 1. He sees 12.3 m in a 120 degree cone. An unmasked player within 2.8 m fills the meter in one second, and at the edge of his sight in about 1.8 seconds.",
               "Hearing is a separate system. Crouching carries 4 m, walking 10 m and running 16 m. The first 5 m of a sound pass through walls at full strength, and each wall after that halves what is left, so Fia running behind one wall is heard out to 10.5 m instead of 16.",
               "A noise can pull a guard off his patrol, but it cannot interrupt a guard who is already watching someone. I set it up this way so a thrown coin has to be planned before a guard looks at you; once he is watching, it does nothing."
             ],
-            "summary": "I built the guard AI: one state machine per guard that sees in a cone and hears through walls, with each wall halving what is left past 5 m.",
-            "stats": [
-              {
-                "value": "18",
-                "label": "guard states"
-              },
-              {
-                "value": "12.3 m",
-                "label": "sight range"
-              },
-              {
-                "value": "16 m",
-                "label": "running footsteps heard"
-              }
-            ]
+            "summary": "I built the guard AI: one state machine per guard that sees in a cone and hears through walls, with each wall halving what is left past 5 m."
           },
           {
-            "kicker": "CAPTURE AND RESCUE",
             "heading": "Fifteen seconds in the gas cage",
             "body": [
               "Getting caught does not end the run. The guard cuffs the player and walks them to his cage. During the escort their camera sits 35 degrees off the guard's right shoulder, because from straight behind, the guard hides the player walking in front of him.",
@@ -1178,73 +842,27 @@
                 "caption": "Fia's game over card: \"You have been captured.\""
               }
             ],
-            "layout": "side",
-            "summary": "Getting caught puts a player in a gas cage instead of ending the run. The partner has 15 seconds to free them, and the lock is loud.",
-            "stats": [
-              {
-                "value": "15 s",
-                "label": "to reach the cage"
-              },
-              {
-                "value": "1.5 s",
-                "label": "hold E to open"
-              },
-              {
-                "value": "14 m",
-                "label": "noise from the lock"
-              }
-            ]
+            "summary": "Getting caught puts a player in a gas cage instead of ending the run. The partner has 15 seconds to free them, and the lock is loud."
           },
           {
-            "kicker": "CO-OP MECHANISMS",
             "heading": "Doors and boxes that need both of you",
             "body": [
               "The latch door has one lever locked to Lyra and one to Fia, and opens only while both are down. The push box has a handle for each at their own height. Once both have grabbed, either player's W fills one shared ring, and ten taps slide the box 2.5 m. Pushed off a ledge, it becomes a step, and the landing reaches guards 25 m away. The lift door is a heavy gate they raise together, walk under, and let slam shut behind them for good.",
               "The takedown needs both players too. A masked Lyra presses a seal onto an unaware guard, which weakens him for 6 seconds. In that window Fia drops onto him from at least 1.4 m above, and he is out for 12 seconds unless another guard walks up and wakes him.",
               "For these mechanisms the server writes only who is gripping, how many taps have landed and when a sequence starts. Each machine works out the door height and the players' animations from that start time, so a player who joins late sees the same door and no animation has to be sent."
             ],
-            "summary": "Latch doors, push boxes, the lift door and the takedown all need both players. The server syncs only grips, taps and start times; each machine animates the rest.",
-            "stats": [
-              {
-                "value": "10",
-                "label": "taps slide box 2.5 m"
-              },
-              {
-                "value": "6 s",
-                "label": "seal weakens a guard"
-              },
-              {
-                "value": "12 s",
-                "label": "guard out after drop"
-              }
-            ]
+            "summary": "Latch doors, push boxes, the lift door and the takedown all need both players. The server syncs only grips, taps and start times; each machine animates the rest."
           },
           {
-            "kicker": "PING, THROW, QUESTS",
             "heading": "Pointing, throwing and keeping track",
             "body": [
               "Middle mouse drops a ping on whatever is under the crosshair. Each player has one ping at a time, and it lasts 8 seconds. A ping on a guard sticks to him and moves with him, so the partner knows which guard is meant after he turns a corner.",
               "Holding E lifts a crate overhead. A tap of the left mouse button tosses it 4 m, and holding for half a second throws it 8 m. The crate sits a set height above each character's own head, because a height measured on Lyra left Fia's crate floating a metre above her.",
               "A teammate set up the first quest data and HUD. I turned each level's quests into node graphs of reach, interact and acquire steps, each assigned to Lyra, Fia, either or both, with the server deciding who completed each step. Character select is server-owned as well, and a player who drops out mid-level rejoins in whichever role is free."
             ],
-            "summary": "Middle mouse pings a spot or a guard for 8 seconds, E lifts a crate to throw 4 or 8 m, and I turned quests into server-checked node graphs.",
-            "stats": [
-              {
-                "value": "8 s",
-                "label": "ping lifetime"
-              },
-              {
-                "value": "1",
-                "label": "ping per player"
-              },
-              {
-                "value": "8 m",
-                "label": "held crate throw"
-              }
-            ]
+            "summary": "Middle mouse pings a spot or a guard for 8 seconds, E lifts a crate to throw 4 or 8 m, and I turned quests into server-checked node graphs."
           },
           {
-            "kicker": "NEXT",
             "heading": "What I'd build next",
             "body": [
               "Coins still use an older flat noise radius that ignores walls, and I want them on the same hearing model as footsteps. Lyra and Fia have separate entries in the noise table with the same values, and quieter steps for Fia would give the players a reason to send her ahead.",

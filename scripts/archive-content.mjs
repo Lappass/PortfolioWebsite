@@ -40,6 +40,7 @@ function validateMedia(record, label, errors) {
     errors.push(`${label}.links：每项需要 label 和 HTTP(S) url`);
   if (record.menu !== undefined && !["lastmile", "trail", "lockdown", "sniff"].includes(record.menu))
     errors.push(`${label}.menu：只能是 lastmile、trail、lockdown 或 sniff`);
+  if (record.soon !== undefined) errors.push(`${label}.soon：已废弃，没有的内容会自动显示为 not yet`);
   const run = record.playthrough;
   if (run !== undefined && (!run || !isMediaPath(run.src) || (run.chapters !== undefined && (!Array.isArray(run.chapters) ||
     !run.chapters.every((c) => c && /^\d+:\d{2}(:\d{2})?$/.test(c.at) && isText(c.label))))))
@@ -47,12 +48,10 @@ function validateMedia(record, label, errors) {
   const build = record.download;
   if (build !== undefined && (!build || !isMediaPath(build.url) || (build.label !== undefined && !isText(build.label)) || (build.size !== undefined && !isText(build.size))))
     errors.push(`${label}.download：需要 url，label 和 size 为可选文本`);
-  if (record.soon !== undefined && (!Array.isArray(record.soon) || !record.soon.every((key) => ["play", "trailer", "playthrough", "download"].includes(key))))
-    errors.push(`${label}.soon：只能包含 play、trailer、playthrough、download`);
   validateStudy(record.study, `${label}.study`, errors);
 }
 
-/** The long-form case study: a pitch, a few facts, and sections of text with optional pictures. */
+/** The case study a game's page is built from: a pitch, a few facts, and sections of text with pictures. */
 function validateStudy(study, label, errors) {
   if (study === undefined) return;
   const texts = (list) => Array.isArray(list) && list.length > 0 && list.every(isText);
@@ -63,23 +62,19 @@ function validateStudy(study, label, errors) {
   if (!isText(study.pitch)) errors.push(`${label}.pitch：必须是非空文本`);
   if (!Array.isArray(study.facts) || !study.facts.every((fact) => fact && isText(fact.label) && isText(fact.value)))
     errors.push(`${label}.facts：每项需要 label 和 value`);
-  if (study.gallery !== undefined && (!Array.isArray(study.gallery) || !study.gallery.every((item) => item && isMediaPath(item.src) && (item.caption === undefined || isText(item.caption)))))
-    errors.push(`${label}.gallery：每项需要有效的 src，caption 为可选文本`);
   if (!Array.isArray(study.sections) || study.sections.length === 0) {
     errors.push(`${label}.sections：至少需要一节`);
     return;
   }
   study.sections.forEach((section, i) => {
     const at = `${label}.sections[${i}]`;
-    if (!section || !isText(section.kicker) || !isText(section.heading) || !texts(section.body))
-      errors.push(`${at}：需要 kicker、heading 和至少一段 body`);
+    if (!section || !isText(section.heading) || !texts(section.body))
+      errors.push(`${at}：需要 heading 和至少一段 body`);
     if (section?.points !== undefined && !texts(section.points)) errors.push(`${at}.points：必须是非空文本数组`);
     if (section?.summary !== undefined && !isText(section.summary)) errors.push(`${at}.summary：必须是非空文本`);
-    if (section?.stats !== undefined && (!Array.isArray(section.stats) || section.stats.length > 3 || !section.stats.every((s) => s && isText(s.value) && isText(s.label))))
-      errors.push(`${at}.stats：最多三项，每项需要 value 和 label`);
+    for (const key of ["kicker", "stats", "layout"]) if (section?.[key] !== undefined) errors.push(`${at}.${key}：已废弃，请删除`);
     if (section?.media !== undefined && (!Array.isArray(section.media) || !section.media.every((item) => item && isMediaPath(item.src) && (item.caption === undefined || isText(item.caption)))))
       errors.push(`${at}.media：每项需要有效的 src，caption 为可选文本`);
-    if (section?.layout !== undefined && !["side", "wide"].includes(section.layout)) errors.push(`${at}.layout：只能是 side 或 wide`);
   });
 }
 
@@ -148,6 +143,6 @@ export async function loadContent() {
 
 export function archiveText(r) {
   // The case study, when there is one, follows the highlights as plain sections.
-  const study = r.study ? `\n${r.study.sections.map((s) => `${s.kicker} / ${s.heading}\n\n${[...s.body, ...(s.points ?? []).map((p) => `- ${p}`)].join("\n\n")}\n`).join("\n")}` : "";
+  const study = r.study ? `\n${r.study.sections.map((s) => `${s.heading}\n\n${[...s.body, ...(s.points ?? []).map((p) => `- ${p}`)].join("\n\n")}\n`).join("\n")}` : "";
   return `\uFEFFSHUHANG CHEN · PORTFOLIO ARCHIVE\nFILE ${r.id} / ${r.title}\n${r.en}\n\nRole: ${r.department}\nDate: ${r.date}\nStack: ${r.lead}\nStatus: ${r.clearance}\n\n${r.abstract}\n\nHighlights\n${r.findings.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n${study}\nLink: ${r.source}\n`;
 }

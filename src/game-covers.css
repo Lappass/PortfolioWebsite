@@ -1,0 +1,151 @@
+/* Game covers (src/game-covers.ts): the first screen of a game's page, in the game's own shape.
+   Drawn for a 1440×900 window; the blocks anchored to its edges scale with --tmz. */
+.tm { position: relative; height: 100vh; height: 100dvh; overflow: hidden; --tmz: 1; font-family: MiSans, system-ui, sans-serif; }
+.tm button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.tm-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.tm-title { margin: 0; outline: none; }
+.tm-art { position: absolute; inset: 0; overflow: hidden; }
+/* The key art the monitor handed over, on top until the cover's own art has taken its place. */
+.tm-hero { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.project-page.visible .tm-hero { animation: tm-handoff 1s 0.25s both; }
+.project-page.visible .tm-in { animation: tm-rise 0.7s 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.project-page.instant .tm-hero { display: none; }
+.project-page.instant .tm-in { animation: none; }
+@keyframes tm-handoff { to { opacity: 0; visibility: hidden; } }
+@keyframes tm-rise { from { opacity: 0; transform: translateY(16px); } }
+.lm-board, .sn-board, .tr-head, .ld-head, .ld-block, .ld-list { zoom: var(--tmz); }
+
+/* The page's own text block inside a cover (title line, pitch, facts, buttons). */
+.tm .pg-intro { margin-top: 14px; max-width: 34em; }
+.tm .pg-en { margin: 0 0 10px; font-size: 14px; opacity: 0.75; }
+.tm .pg-pitch { margin: 0; font-size: 15px; line-height: 1.6; }
+.tm .pg-facts { margin: 10px 0 0; font-size: 13px; opacity: 0.7; }
+.tm .pg-actions { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 14px 0 22px; font-size: 14px; }
+.tm .pg-actions > * { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1.5px solid currentColor; color: inherit; text-decoration: none; }
+.tm .pg-actions > .pg-off { opacity: 0.45; border-style: dashed; cursor: default; }
+.tm .pg-actions > a:hover, .tm .pg-actions > button:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* ---- Last Mile: a dispatch board over the printed machine. ---- */
+.tm-lastmile { --paper: #ede6d6; --card: #f6f1e6; --ink: #272c30; --amber: #f1b05f; --accent: var(--amber); --accent-ink: var(--ink);
+  background: var(--paper); color: var(--ink); font-family: Bahnschrift, "Arial Narrow", sans-serif; font-stretch: condensed; }
+.tm-lastmile .tm-art { background: var(--paper); }
+.lm-frame { position: absolute; }
+.lm-frame > img, .lm-frame > svg { position: absolute; mix-blend-mode: multiply; }
+.lm-frame > svg { inset: 0; width: 100%; height: 100%; }
+/* One tooth per step, steady in and out, so the rider's stride can match it. */
+.lm-gear { transition: transform 0.6s cubic-bezier(0.45, 0, 0.55, 1); will-change: transform; }
+/* Still in the cover's pose; while the gears turn the rider runs in place on the slip gear,
+   two strides per tooth, knees bending through contact, push-off, tuck and reach. */
+.tm-lastmile { --cycle: 0.3s; }
+.tm-lastmile.sprint .lm-bob { animation: lm-bob calc(var(--cycle) / 2) ease-in-out infinite alternate; }
+.tm-lastmile.sprint .lm-leg-f { animation: lm-leg-f var(--cycle) linear infinite; }
+.tm-lastmile.sprint .lm-leg-b { animation: lm-leg-b var(--cycle) linear infinite; animation-delay: calc(var(--cycle) / -2); }
+.tm-lastmile.sprint .lm-arm-f { animation: lm-arm-f var(--cycle) ease-in-out infinite; }
+.tm-lastmile.sprint .lm-arm-b { animation: lm-arm-b var(--cycle) ease-in-out infinite; }
+.lm-lines { opacity: 0; transition: opacity 0.25s; }
+.tm-lastmile.sprint .lm-lines { opacity: 1; animation: lm-flicker 0.12s steps(2) infinite; }
+@keyframes lm-leg-f { 0% { d: path("M-8 -110 L28 -64 L22 -4"); } 20% { d: path("M-8 -110 L8 -60 L-6 -4"); } 45% { d: path("M-8 -110 L-28 -66 L-62 -30"); } 65% { d: path("M-8 -110 L-34 -80 L-74 -70"); } 85% { d: path("M-8 -110 L32 -92 L18 -46"); } 100% { d: path("M-8 -110 L28 -64 L22 -4"); } }
+@keyframes lm-leg-b { 0% { d: path("M-14 -112 L22 -66 L16 -6"); } 20% { d: path("M-14 -112 L2 -62 L-12 -6"); } 45% { d: path("M-14 -112 L-34 -68 L-68 -32"); } 65% { d: path("M-14 -112 L-40 -82 L-80 -72"); } 85% { d: path("M-14 -112 L26 -94 L12 -48"); } 100% { d: path("M-14 -112 L22 -66 L16 -6"); } }
+@keyframes lm-arm-f { 0%, 100% { d: path("M12 -192 L-12 -160 L-30 -140"); } 50% { d: path("M12 -192 L44 -160 L70 -176"); } }
+@keyframes lm-arm-b { 0%, 100% { d: path("M-2 -194 L28 -166 L52 -182"); } 50% { d: path("M-2 -194 L-32 -150 L-22 -122"); } }
+@keyframes lm-bob { to { transform: translateY(-7px); } }
+@keyframes lm-flicker { 50% { transform: translateX(-8px); } }
+.lm-board { position: absolute; left: 64px; top: 40px; z-index: 2; width: 560px; }
+.tm-lastmile .tm-title { margin: 0 0 6px; }
+.tm-lastmile .tm-title img { display: block; height: 140px; mix-blend-mode: multiply; }
+.lm-slips { position: relative; padding-left: 64px; }
+.lm-track { position: absolute; left: 22px; top: 20px; bottom: 20px; width: 3px; background: var(--ink); }
+.lm-stop { position: absolute; left: 13px; width: 21px; height: 21px; border: 3px solid var(--ink); border-radius: 50%; background: var(--paper); transition: background 0.2s; }
+.lm-stop.on { background: var(--amber); }
+.tm .lm-slip { position: relative; display: flex; align-items: center; gap: 14px; width: 100%; height: 44px; margin-bottom: 8px; padding: 0 14px 0 18px; background: var(--card); border: 3px solid var(--ink); font-size: 18px; transition: transform 0.25s, background 0.2s, color 0.2s; }
+.lm-slip:hover:not(.on) { transform: translateX(8px); }
+.lm-slip::before, .lm-slip::after { content: ""; position: absolute; top: 50%; width: 14px; height: 14px; margin-top: -7px; border: 3px solid var(--ink); border-radius: 50%; background: var(--paper); }
+.lm-slip::before { left: -9px; clip-path: inset(0 0 0 50%); }
+.lm-slip::after { right: -9px; clip-path: inset(0 50% 0 0); }
+.lm-n { font-size: 12px; opacity: 0.55; font-variant-numeric: tabular-nums; }
+.tm .lm-slip.on { transform: translateX(30px); background: var(--ink); color: var(--paper); }
+.lm-runner { position: absolute; left: -30px; overflow: visible; pointer-events: none; transition: top 0.3s cubic-bezier(0.3, 1.3, 0.5, 1); }
+
+/* ---- Trail Adventure: camps up the mountain. ---- */
+.tm-trail { --cream: #fbf4e2; --fire: #e08e3c; --text: #25322e; --accent: var(--fire); --accent-ink: #1a1408; background: #2c4640; color: var(--text); }
+.tm-trail.high { --text: var(--cream); }
+.tr-map { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* The camera: a slow crane move to the chosen camp. */
+.tr-cam { transition: transform 1.1s cubic-bezier(0.45, 0, 0.2, 1); }
+.tr-dusk, .tr-stars { transition: opacity 1.1s ease; }
+.tr-camp, .tr-summit { cursor: pointer; }
+.tr-tent { transition: opacity 0.4s; }
+.tr-camp.ahead .tr-tent { opacity: 0.55; }
+.tr-glow { opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+.tr-camp.on .tr-glow { opacity: 1; animation: tr-pulse 1.6s ease-in-out infinite; }
+.tr-flame { transform-box: fill-box; transform-origin: 50% 100%; animation: tr-flame 0.5s ease-in-out infinite alternate; }
+.tr-camp.ahead .tr-flame { display: none; }
+@keyframes tr-flame { from { transform: scale(0.85, 0.9); } to { transform: scale(1.05, 1.15); } }
+@keyframes tr-pulse { 50% { opacity: 0.55; } }
+.tr-label { font-family: MiSans, system-ui, sans-serif; font-size: 22px; font-weight: 500; fill: #fbf4e2; paint-order: stroke; stroke: rgba(20, 30, 28, 0.55); stroke-width: 6px; stroke-linejoin: round; cursor: pointer; }
+.tr-head { position: absolute; left: 64px; top: 46px; z-index: 2; width: 480px; color: var(--text); transition: color 1.1s; }
+/* The title is the hand-lettered art, coloured like the rest of the text for the time of day. */
+.tr-title { display: block; width: 380px; height: 60px; font-size: 0; color: transparent; background: var(--text); transition: background-color 1.1s;
+  -webkit-mask: var(--src) left center / contain no-repeat; mask: var(--src) left center / contain no-repeat; }
+.tm-trail .pg-intro { text-shadow: 0 1px 10px rgba(251, 244, 226, 0.6); }
+.tm-trail.high .pg-intro { text-shadow: 0 1px 8px rgba(20, 30, 28, 0.6); }
+
+/* ---- LOCKDOWN: a block of flats, each section a piece of its windows. ---- */
+.tm-lockdown { --warm: #f2c879; --wall: #2c3438; --wall2: #252c30; --frame: #151a1c; --cell: 44px; --accent: var(--warm); --accent-ink: #141a1d; background: #141a1d; color: #f2ece4; }
+.ld-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.62); }
+.ld-head { position: absolute; left: 64px; top: 52px; z-index: 2; width: 520px; }
+.ld-head canvas { display: block; }
+.ld-block { position: absolute; left: 64px; bottom: 0; z-index: 2; }
+.ld-roof { position: relative; height: 24px; background: var(--wall2); border-top: 4px solid var(--frame); }
+.ld-tank { position: absolute; right: 36px; top: -44px; width: 42px; height: 40px; background: var(--wall2); border: 4px solid var(--frame); border-bottom: 0; }
+.ld-vent { position: absolute; left: 64px; top: -20px; width: 16px; height: 20px; background: var(--frame); }
+.ld-steam { position: absolute; left: 52px; top: -118px; width: 60px; height: 100px; animation: ld-steam 4s ease-in-out infinite; }
+@keyframes ld-steam { 50% { transform: translate(4px, -6px); opacity: 0.6; } }
+.ld-face { padding: 16px 18px 0; background: var(--wall); }
+.ld-grid { display: grid; grid-template-columns: repeat(7, var(--cell)); grid-auto-rows: var(--cell); gap: 6px; }
+.ld-grid i { background: #20282b; border: 4px solid var(--frame); transition: background 0.25s, box-shadow 0.25s; }
+.ld-grid i.ld-piece { cursor: pointer; background: color-mix(in srgb, var(--c) 22%, #20282b); }
+.ld-grid i.hover:not(.on) { background: color-mix(in srgb, var(--c) 50%, #20282b); }
+.ld-grid i.on { background: var(--c); box-shadow: 0 0 24px color-mix(in srgb, var(--c) 60%, transparent); }
+.ld-door { display: flex; justify-content: center; align-items: end; height: 64px; background: var(--wall); }
+.ld-door i { width: 66px; height: 52px; background: var(--frame); }
+.ld-list { position: absolute; left: 470px; bottom: 96px; z-index: 2; display: grid; gap: 8px; }
+.tm .ld-opt { display: flex; align-items: center; gap: 16px; padding: 8px 16px; background: rgba(16, 21, 23, 0.88); border: 1px solid rgba(242, 236, 228, 0.12); color: #a9b0aa; font-size: 15px; transition: color 0.2s, background 0.2s, transform 0.2s; }
+.ld-mini { display: grid; grid-template-columns: repeat(4, 9px); grid-auto-rows: 9px; gap: 2px; width: 42px; }
+.ld-mini b { background: color-mix(in srgb, var(--c) 45%, #20282b); }
+.ld-opt:hover:not(.on) { color: #d9d3cb; transform: translateX(4px); }
+.tm .ld-opt.on { color: #fff; background: rgba(36, 30, 18, 0.95); border-left: 4px solid var(--c); transform: translateX(10px); }
+.ld-opt.on .ld-mini b { background: var(--c); }
+
+/* ---- Sniff & Snitch: booking placards on the lineup wall. ---- */
+.tm-sniff { --wall: #d8d5cf; --ink: #1d171f; --board: #4a4448; --bone: #ece6da; --mustard: #d3a24f; --accent: var(--mustard); --accent-ink: var(--ink);
+  background: var(--wall); color: var(--ink); font-family: Bahnschrift, "Arial Narrow", sans-serif; }
+.tm-sniff .tm-art { background: var(--wall); }
+.sn-frame { position: absolute; }
+.sn-frame img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sn-board { position: absolute; left: 64px; top: 40px; z-index: 2; width: 600px; }
+.tm-sniff .tm-title { margin: 0 0 0 -18px; }
+.tm-sniff .tm-title img { display: block; height: 130px; }
+.sn-list { position: relative; padding-left: 112px; }
+.tm .sn-charge { position: relative; display: flex; align-items: center; gap: 14px; width: 100%; height: 46px; margin-bottom: 10px; padding: 0 16px; background: var(--board); border: 3px solid var(--bone); outline: 2px solid var(--board); color: var(--bone); font-size: 18px; font-weight: 700; transition: transform 0.25s, background 0.2s, color 0.2s; }
+.sn-charge:hover:not(.on) { transform: translateX(8px); }
+.sn-name { white-space: nowrap; }
+.tm .sn-charge.on { transform: translateX(22px); background: var(--mustard); color: var(--ink); border-color: var(--ink); outline-color: var(--mustard); }
+/* Fia's paw beside the placard on screen, turned to point at it; it hops on the way. */
+.sn-paw { position: absolute; left: 54px; width: auto; height: 42px; transform: rotate(90deg); pointer-events: none; transition: top 0.36s cubic-bezier(0.45, 0, 0.55, 1), opacity 0.3s; }
+.tm-sniff.walking .sn-paw { animation: sn-hop 0.18s ease-in-out 2 alternate; }
+@keyframes sn-hop { to { transform: rotate(90deg) translateX(-10px) scale(0.9); } }
+
+@media (max-width: 760px) {
+  .sn-board { left: 24px; top: 70px; width: 600px; }
+  .lm-board { left: 24px; top: 70px; width: 560px; }
+  .tr-head { left: 24px; top: 70px; }
+  .ld-head { left: 24px; top: 70px; }
+  .ld-list { left: 24px; right: 24px; top: 250px; bottom: auto; }
+  .ld-block { left: 24px; }
+  .tr-label { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tm *, .tm *::before, .tm *::after { animation: none !important; transition: none !important; }
+  .tm .tm-hero { display: none; }
+}

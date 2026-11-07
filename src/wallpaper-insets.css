@@ -6,7 +6,7 @@
   --ui-viewer-top: 58px; --ui-viewer-bottom: 68px; --ui-viewer-side: 60px; --ui-viewer-state: 37px;
   --ui-modal-clearance: 100px;
 }
-#stage[data-ui-insets="true"]:not([data-mode="boot"]) > :is(#archive-ui, #detail-ui) {
+#stage[data-ui-insets="true"]:not([data-mode="boot"]) > #archive-ui {
   inset: var(--ui-top) var(--ui-right) var(--ui-bottom) var(--ui-left);
 }
 #stage[data-ui-insets="true"]:not([data-mode="boot"]) > .workbench { inset: var(--ui-top) var(--ui-right) 0 var(--ui-left); }

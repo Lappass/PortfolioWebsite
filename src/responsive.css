@@ -35,7 +35,6 @@
 [data-layout="desktop"] .archive-navigation { left: 26.25%; }
 [data-layout="desktop"] .column-navigation { left: 52.34375%; }
 [data-layout="desktop"] .archive-hint { left: 26.302083%; }
-[data-layout="desktop"] .detail-content { left: 60.104167%; width: min(636px, 33.125%); max-height: calc(100% - 369px); overflow-y: auto; scrollbar-width: thin; }
 [data-layout="desktop"] .terminal-modal { max-width: calc(100% - 100px); }
 [data-layout="desktop"] .viewer-help, [data-layout="desktop"] .viewer-reset { width: 25%; }
 
@@ -78,26 +77,10 @@
 :is([data-layout="compact"], [data-layout="portrait"]) .back-button { left: var(--edge); top: 84px; min-height: 44px; gap: 8px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .back-button span { font-size: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .back-button small { display: none; }
-:is([data-layout="compact"], [data-layout="portrait"]) .object-caption { left: var(--edge); bottom: 55px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .object-caption > span { font-size: 20px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .object-caption > div { font-size: 8px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .object-caption > small { display: none; }
-:is([data-layout="compact"], [data-layout="portrait"]) .detail-content { left: 53%; top: 84px; width: calc(47% - var(--edge)); bottom: 53px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 0 3px 12px 0; }
-:is([data-layout="compact"], [data-layout="portrait"]) .detail-kicker { font-size: 9px; gap: 8px; flex-wrap: wrap; }
-:is([data-layout="compact"], [data-layout="portrait"]) .detail-content h2 { font-size: 27px; margin: 14px 0 8px; letter-spacing: -.6px; overflow-wrap: anywhere; }
-:is([data-layout="compact"], [data-layout="portrait"]) .detail-title-cn { font-size: 18px; gap: 10px; flex-wrap: wrap; }
-:is([data-layout="compact"], [data-layout="portrait"]) .detail-rule { margin-top: 18px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .metadata { margin: 18px 0; gap: 14px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .metadata dd { font-size: 13px; margin-top: 5px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .detail-tabs { gap: 16px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .detail-tabs button { min-height: 44px; padding: 8px 0; font-size: 9px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .detail-tabs button span { font-size: 12px; margin-left: 4px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .tab-panel { height: auto; overflow: visible; padding-top: 12px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .tab-panel p { font-size: 15px; text-align: left; }
-:is([data-layout="compact"], [data-layout="portrait"]) .detail-actions { gap: 12px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .solid-button { font-size: 9px; padding: 0 12px; gap: 10px; }
 :is([data-layout="compact"], [data-layout="portrait"]) .export-button { width: 88px; font-size: 10px; }
-:is([data-layout="compact"], [data-layout="portrait"]) .detail-footnote { gap: 12px; line-height: 1.8; flex-wrap: wrap; }
 
 /* Portrait keeps the specimen above an independently scrollable document. */
 [data-layout="portrait"] .brand { transform: scale(.42) !important; }
@@ -111,10 +94,6 @@
 [data-layout="portrait"] .file-ticks button { width: 27px; }
 [data-layout="portrait"] .file-ticks button:before { left: 12px; }
 [data-layout="portrait"] .back-button { top: 77px; }
-[data-layout="portrait"] .detail-content { left: var(--edge); right: var(--edge); width: auto; top: 54%; bottom: 40px; padding-top: 12px; border-top: 1px solid #aaa496; }
-[data-layout="portrait"] .object-caption { left: var(--edge); right: var(--edge); bottom: 46%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-[data-layout="portrait"] .object-caption > div { display: none; }
-[data-layout="portrait"] .object-caption > span { font-size: 15px; }
 [data-layout="portrait"] .archive-atmosphere::after { background: linear-gradient(180deg, transparent 28%, rgba(232,229,225,.2) 39%, rgba(232,229,225,.96) 51%, #e8e5e1 60%); }
 [data-layout="portrait"] .archive-atmosphere::before { background: linear-gradient(180deg, rgba(234,231,226,.35), transparent 25%, transparent 46%, rgba(232,229,225,.8) 65%, #e8e5e1 82%); }
 
@@ -207,7 +186,6 @@
   [data-layout="compact"] .archive-callout { top: 25%; }
   [data-layout="compact"] .eyebrow { display: none; }
   [data-layout="compact"] .back-button { top: 60px; }
-  [data-layout="compact"] .detail-content { top: 70px; bottom: 40px; }
   [data-layout="compact"] .archive-navigation { left: 17%; bottom: 44px; }
   [data-layout="compact"] .column-navigation, [data-layout="compact"] .archive-counter { bottom: 44px; }
   [data-layout="compact"] .viewer-heading > span, [data-layout="compact"] .viewer-parts { display: none; }

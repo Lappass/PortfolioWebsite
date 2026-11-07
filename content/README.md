@@ -29,35 +29,31 @@
 | `video`   | `.mp4` / `.webm` 文件路径，或 B 站、YouTube 等嵌入播放器的 HTTPS 地址      |
 | `unity`   | Unity WebGL 构建的 `index.html` 路径，例如 `works/x-002/unity/index.html`；页面先显示封面，点击后才加载 |
 | `links`   | 链接数组，每项 `{ "label": "GitHub", "url": "https://..." }`               |
-| `menu`    | 游戏主菜单主题：`lastmile`、`trail`、`lockdown` 或 `sniff`。设置后详情页整屏换成该游戏自己的主菜单，素材在 `public/works/<编号>/menu/`（由 `art/` 下的海报脚本生成） |
+| `menu`    | 游戏页的封面造型：`lastmile`、`trail`、`lockdown` 或 `sniff`。设置后页面第一屏是这款游戏自己的造型（齿轮、山路、公寓、证物墙），造型里的部件对应 `study` 的各节；素材在 `public/works/<编号>/menu/`（由 `art/` 下的海报脚本生成）。缺省时第一屏是主视觉 |
 | `trailer` | 预告片，写法同 `video`；缺省时用 `video` |
 | `playthrough` | 完整流程视频 `{ "src": "...", "chapters": [{ "at": "3:20", "label": "第二天" }] }`，章节可省略 |
 | `download` | 下载 `{ "url": "https://...", "label": "可选说明", "size": "可选大小" }` |
-| `soon`    | 已预告但还没有内容的菜单项，可含 `play`、`trailer`、`playthrough`、`download`；菜单里显示 COMING SOON |
-| `study`   | 作品集式长文，主菜单的“About the game”打开它；缺省时显示 `abstract` 与 `findings`。写法见下 |
+| `study`   | 这款游戏的页面正文，写法见下。缺省时页面用 `abstract` 与 `findings` |
 
 `study` 的结构：
 
 ```json
 {
-  "pitch": "一两句话：这是什么游戏，玩家做什么",
+  "pitch": "一段话：这是什么游戏，玩家做什么",
   "facts": [{ "label": "Role", "value": "Solo developer" }, { "label": "Engine", "value": "Unity 6" }],
   "sections": [
     {
-      "kicker": "CORE LOOP",
       "heading": "一节的标题",
-      "summary": "幻灯片上显示的一两句话",
-      "stats": [{ "value": "50°", "label": "可攀爬的坡度" }],
+      "summary": "页面上显示的一段话，数字写在句子里",
       "body": ["第一段", "第二段"],
       "points": ["可选的要点"],
-      "media": [{ "src": "works/x-002/study/01.jpg", "caption": "可选图注" }],
-      "layout": "side"
+      "media": [{ "src": "works/x-002/study/01.jpg", "caption": "可选图注" }]
     }
   ]
 }
 ```
 
-长文整屏显示，一节一屏，并按游戏的 `menu` 主题换装（Trail 是旅行日记、Last Mile 是订单条、LOCKDOWN 是夜里亮灯的窗户、Sniff & Snitch 是证物墙）。第一屏是铺满的主视觉与标题、`pitch`、`facts`，`gallery` 可再放最多四张截图排在右下。之后每节左边是 `summary` 与最多三个 `stats`（大号数字与短标签），右边是 `media` 前四张图的拼贴；`body` 与 `points` 收在“Read more”里，点开才显示。没有 `summary` 时取 `body` 的第一句。没有图片的节把文字放在模糊的主视觉上。右侧圆点可以跳转，↑↓、PageUp/PageDown 与空格逐屏翻页。`layout` 目前不影响版式，可以省略。长文的配图放在 `public/works/<编号>/study/`。TXT 下载会附上各节正文。
+插盘后打开的是一整页往下滚的页面。第一屏是封面：有 `menu` 的游戏用它自己的造型，否则用主视觉；封面上有标题、`en` 一句、`pitch`、`facts` 连成的一行，以及 Play（`unity`）、Trailer（`trailer`，缺省用 `video`）、Download（`download`）三个按钮，没有的灰显为 not yet。往下依次是试玩、预告片、`sections` 每节一块（标题、`summary`，第一张 `media` 大图、第二张小图）、截图（`gallery`）、Full write-up（全部 `body` 与 `points`）和链接。封面造型里的部件（营地、订单条、窗格、名牌）各对应一节，点击跳过去，滚动时点亮当前一节；右侧圆点可以跳到任何一块，↑↓ 与 PageUp/PageDown 逐块移动。没有 `summary` 时取 `body` 的第一句。配图放在 `public/works/<编号>/study/`。TXT 下载会附上各节正文。
 
 封面区按 Unity、视频、封面图的顺序选择第一个可用项；有 Unity 时视频单独显示在下方。
 

@@ -567,6 +567,7 @@ export class ArchiveScene {
     this.workspace.target = active ? 1 : 0;
     if (instant) this.workspace.value = this.workspace.target;
   }
+  private ejectDone?: () => void;
   private insertDone?: () => void;
   private setup = new ConsoleSetup();
   private figure = new Figure();
@@ -690,7 +691,11 @@ export class ArchiveScene {
   }
   private terminalArrayVisibility = { value: 1 };
   get insertProgress() { return this.insert.value; }
-  /** Resolves once the disc is read and the monitor fills the frame. */
+  /**
+   * Resolves once the disc is read and the monitor fills the frame. Called as the case is still
+   * opening (one Enter on the shelf), the disc waits until the case has swung open before it
+   * sets off, so open, carry and insert run as one sequence.
+   */
   insertDisc(immediate = false) {
     this.insert.target = 1;
     this.targetRotation = 0;
@@ -713,10 +718,15 @@ export class ArchiveScene {
     const quad: [number, number][] = [pick(([x, y]) => -x - y), pick(([x, y]) => x - y), pick(([x, y]) => x + y), pick(([x, y]) => y - x)];
     return { left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys), quad };
   }
+  /** Resolves once the disc is back in the case. */
   ejectDisc(immediate = false) {
     this.insert.target = 0;
     this.insertDone = undefined;
     if (immediate) this.insert.value = 0;
+    return new Promise<void>((resolve) => {
+      if (this.insert.value <= 0) resolve();
+      else this.ejectDone = resolve;
+    });
   }
   private updateInsert(dt: number) {
     const { insert } = this;
@@ -729,10 +739,16 @@ export class ArchiveScene {
       seconds = THREE.MathUtils.lerp(before, after, THREE.MathUtils.smoothstep(insert.value, from, to));
       break;
     }
-    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? dt / seconds : -dt / 1.1), 0, 1);
+    // Going in, nothing moves until the case has opened and the camera has settled on it.
+    const opened = this.detail > 0.97 && this.modelClarity() > 0.98;
+    insert.value = THREE.MathUtils.clamp(insert.value + (insert.target ? (opened ? dt / seconds : 0) : -dt / 1.1), 0, 1);
     if (insert.value >= 1 && this.insertDone) {
       this.insertDone();
       this.insertDone = undefined;
+    }
+    if (insert.value <= 0 && this.ejectDone) {
+      this.ejectDone();
+      this.ejectDone = undefined;
     }
   }
   /** Mirror live keyboard or gamepad input on the desk controller. */

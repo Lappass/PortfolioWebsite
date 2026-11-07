@@ -1,11 +1,10 @@
 import "./project-page.css";
-import type { ArchiveRecord } from "./data";
+import type { ArchiveRecord, CaseStudySection } from "./data";
 import { escapeHtml } from "./html";
 import { logo } from "./brand";
 import { paintArtwork } from "./case-art";
-import { PageChapters } from "./page-chapters";
 import type { Sound } from "./audio";
-import { createTitleMenu, type TitleMenuView } from "./title-menus";
+import { createGameCover, type CoverSection, type GameCoverView } from "./game-covers";
 
 const heroArt = new Map<string, string>();
 type ScreenRect = { left: number; top: number; right: number; bottom: number; quad?: [number, number][] };
@@ -20,7 +19,7 @@ function quadMatrix(W: number, H: number, q: [number, number][]) {
   const a = x1 - x0 + g * x1, b = x3 - x0 + h * x3, d = y1 - y0 + g * y1, e = y3 - y0 + h * y3;
   return `matrix3d(${[a / W, d / W, 0, g / W, b / H, e / H, 0, h / H, 0, 0, 1, 0, x0, y0, 0, 1].join(",")})`;
 }
-/** Key art for the hub: the work's own image, or its generated cover art at screen size. */
+/** Key art for the cover: the work's own image, or its generated cover art at screen size. */
 function heroSource(r: ArchiveRecord) {
   const own = r.hero ?? r.cover;
   if (own) return media(own);
@@ -38,6 +37,7 @@ const isWeb = (value: string) => /^https?:\/\//i.test(value);
 const media = (value: string) => escapeHtml(isWeb(value) ? value : `${import.meta.env.BASE_URL}${value.replace(/^\//, "")}`);
 const isFile = (value: string) => /\.(mp4|webm|ogv|mov)(\?|#|$)/i.test(value);
 const pad = (value: number) => String(value).padStart(2, "0");
+const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export const workHash = (id: string) => `#/work/${id.toLowerCase()}`;
 export function workIdFromHash(hash = location.hash) {
@@ -47,21 +47,37 @@ export function workIdFromHash(hash = location.hash) {
 
 interface Neighbours { previous: ArchiveRecord; next: ArchiveRecord; position: number; total: number }
 
-/** Full, scrollable project page shown after the archive card has been drawn out. */
+/** One block of the page below the cover. */
+type Section =
+  | { id: string; heading: string; kind: "play" | "trailer" | "shots" | "full" | "about" }
+  | { id: string; heading: string; kind: "study"; study: CaseStudySection };
+
+/**
+ * The page a work opens on once its disc is read: one scrolling page. The first screen is the
+ * cover (the game's own shape for works with a `menu` theme, the key art otherwise) with the
+ * title, a pitch and the Play / Trailer / Download buttons; below it, the trailer, one block per
+ * case-study section, the screenshots, the full write-up and the links. Dots down the right edge
+ * and the cover's own parts jump between blocks; ↑↓ step through them.
+ */
 export class ProjectPage {
   readonly root = document.createElement("div");
   private record: ArchiveRecord | null = null;
+  private sections: Section[] = [];
   private state: "closed" | "opening" | "open" | "closing" = "closed";
   private timer = 0;
   private pushed = false;
   private returnFocus: HTMLElement | null = null;
   private introTimer = 0;
   private lift?: HTMLImageElement;
-  private chapters = new PageChapters(this.root);
-  /** Games with a `menu` theme get their own title menu instead of the standard page. */
-  private menu: TitleMenuView | null = null;
+  private cover: GameCoverView | null = null;
+  private watcher: IntersectionObserver | null = null;
+  /** The block on screen (-1: the cover) and where the last key press is taking it. */
+  private at = -1;
+  private aim = -2;
+  private aimTimer = 0;
+  private shot = 0;
 
-  constructor(private handlers: { close: () => void; navigate: (direction: 1 | -1) => void; sound: (name: Sound) => void }) {
+  constructor(private handlers: { close: () => void; navigate: (direction: 1 | -1) => void; save: (id: string) => boolean; sound: (name: Sound) => void }) {
     this.root.id = "project-page";
     this.root.className = "project-page";
     this.root.setAttribute("role", "dialog");
@@ -78,8 +94,9 @@ export class ProjectPage {
       if (action === "prev") this.handlers.navigate(-1);
       if (action === "next") this.handlers.navigate(1);
       if (action === "unity") this.loadUnity(button);
-      if (action === "more") this.root.querySelector(".pp-body")?.scrollIntoView({ behavior: "smooth" });
-      if (action === "start") this.start();
+      if (action === "go") this.goTo(button.dataset.to!);
+      if (action === "shot") this.showShot(Number(button.dataset.i));
+      if (action === "save" && this.record) this.setSaved(this.handlers.save(this.record.id));
       if (action === "fullscreen") void this.root.querySelector<HTMLIFrameElement>(".pp-unity iframe")?.requestFullscreen?.().catch(() => {});
     });
     this.root.addEventListener("keydown", (event) => this.trapFocus(event));
@@ -90,9 +107,9 @@ export class ProjectPage {
   get covering() { return this.state === "open"; }
   get currentId() { return this.record?.id ?? null; }
 
-  open(record: ArchiveRecord, neighbours: Neighbours, options: { instant?: boolean; push?: boolean; intro?: boolean; from?: ScreenRect | null } = {}) {
-    if (this.isOpen) { this.render(record, neighbours); return; }
-    this.render(record, neighbours);
+  open(record: ArchiveRecord, neighbours: Neighbours, options: { instant?: boolean; push?: boolean; intro?: boolean; from?: ScreenRect | null; saved?: boolean } = {}) {
+    if (this.isOpen) { this.render(record, neighbours, options.saved); return; }
+    this.render(record, neighbours, options.saved);
     if (options.push !== false && location.hash !== workHash(record.id)) {
       history.pushState({ work: record.id }, "", workHash(record.id));
       this.pushed = true;
@@ -110,103 +127,191 @@ export class ProjectPage {
     const reveal = () => {
       this.root.classList.toggle("intro", Boolean(options.intro));
       if (options.intro) this.introTimer = window.setTimeout(() => this.root.classList.remove("intro"), 2600);
-      this.menu?.begin(Boolean(options.instant));
+      this.cover?.begin(Boolean(options.instant));
       // Commit the hidden state first so the fade actually runs.
       void this.root.offsetWidth;
       this.root.classList.add("visible");
     };
     if (quad) this.liftFromScreen(record, quad, reveal);
     else reveal();
-    this.chapters.sync();
     this.root.querySelector<HTMLElement>("#pp-title")?.focus({ preventScroll: true });
     this.timer = window.setTimeout(() => { this.state = "open"; }, options.instant ? 0 : quad ? LIFT_MS + 340 : 340);
   }
 
   /** Replace the content in place, e.g. for previous/next. */
-  render(record: ArchiveRecord, { previous, next, position, total }: Neighbours) {
+  render(record: ArchiveRecord, { previous, next, position, total }: Neighbours, saved = false) {
     const changed = this.record?.id !== record.id;
     this.record = record;
     if (changed && this.isOpen && location.hash !== workHash(record.id))
       history.replaceState({ work: record.id }, "", workHash(record.id));
-    this.menu?.destroy();
-    this.menu = createTitleMenu(record, { previous, next, position, total }, this.handlers.sound);
-    this.root.classList.toggle("menu-mode", Boolean(this.menu));
-    if (this.menu) {
-      this.root.replaceChildren(this.menu.el);
-      this.menu.mount();
-      // Switched to another work while open: its menu starts straight away.
-      if (this.isOpen) this.menu.begin(matchMedia("(prefers-reduced-motion: reduce)").matches);
-      return;
-    }
-    const r = record, e = escapeHtml;
-    const tags = r.tags?.length ? `<ul class="pp-tags">${r.tags.map((tag) => `<li>${e(tag)}</li>`).join("")}</ul>` : "";
-    const links = [...(r.links ?? []), ...(r.links?.some((link) => link.url === r.source) ? [] : [{ label: "Project link", url: r.source }])];
-    const gallery = r.gallery?.length
-      ? `<section class="pp-section" data-section="gallery" tabindex="-1" aria-label="Visual records"><div class="pp-label"><span class="pp-section-number">${r.unity && r.video ? "04" : "03"}</span>VISUAL RECORDS</div><div class="pp-gallery">${r.gallery.map((item, i) => `<figure><div class="pp-record-image"><img src="${media(item.src)}" alt="${e(item.caption ?? r.title)}" loading="lazy" decoding="async"><span class="pp-image-index" aria-hidden="true">${pad(i + 1)}</span></div><figcaption>${item.note ? `<details class="pp-image-note"><summary><span class="pp-note-number">${pad(i + 1)}</span><span>${e(item.caption ?? "Image note")}</span><span class="pp-note-plus" aria-hidden="true">＋</span></summary><p>${e(item.note)}</p></details>` : `<span class="pp-note-number">${pad(i + 1)}</span>${e(item.caption ?? r.title)}`}</figcaption></figure>`).join("")}</div></section>`
-      : "";
-    const heroIsVideo = !r.unity && r.video;
-    const video = r.video && !heroIsVideo ? `<section class="pp-section" data-section="video" tabindex="-1" aria-label="Demo video"><div class="pp-label">VIDEO</div><div class="pp-frame">${this.videoMarkup(r)}</div></section>` : "";
-    const chapters = [["overview", "Work"], ["info", "Overview"], ...(video ? [["video", "Demo"]] : []), ...(gallery ? [["gallery", "Gallery"]] : []), ["findings", "Highlights"]];
+    const e = escapeHtml;
+    this.watcher?.disconnect();
+    this.cover?.destroy();
+    this.at = -1;
+    this.aim = -2;
+    this.shot = 0;
+    this.sections = this.sectionsFor(record);
+    const nav: CoverSection[] = this.sections.filter((s) => s.kind === "study").map((s) => ({ id: s.id, heading: s.heading }));
+    const intro = this.introMarkup(record);
+    this.cover = createGameCover(record, nav, intro, (id) => this.goTo(id));
+    this.root.dataset.theme = record.menu ?? "";
+    const links = [...(record.links ?? []), ...(record.links?.some((link) => link.url === record.source) ? [] : [{ label: "Project link", url: record.source }])];
     this.root.innerHTML = `
       <header class="pp-bar">
-        <button type="button" data-page="back">← <span>Back to array</span><small>ESC</small></button>
-        <span class="pp-brand" aria-hidden="true">SHUHANG CHEN</span>
-        <nav aria-label="Switch work"><button type="button" data-page="prev" aria-label="Previous work: ${e(previous.title)}">← <span>Prev</span></button><span class="pp-count">${pad(position)} / ${pad(total)}</span><button type="button" data-page="next" aria-label="Next work: ${e(next.title)}"><span>Next</span> →</button></nav>
+        <button type="button" data-page="back">← <span>Back</span><small>Esc</small></button>
+        <span class="pp-brand" aria-hidden="true">Shuhang Chen</span>
+        <nav aria-label="Switch work"><button type="button" class="pp-save" data-page="save" aria-pressed="${saved}">${saved ? "Saved" : "Save"}</button><button type="button" data-page="prev" aria-label="Previous work: ${e(previous.title)}">← <span>Prev</span></button><span class="pp-count">${pad(position)} / ${pad(total)}</span><button type="button" data-page="next" aria-label="Next work: ${e(next.title)}"><span>Next</span> →</button></nav>
       </header>
-      <nav class="pp-chapters" aria-label="Project sections"><span class="pp-index-label">WORK / ${e(r.id)}</span>${chapters.map(([id, label], i) => `<button type="button" data-chapter="${id}"><small>${pad(i + 1)}</small>${label}</button>`).join("")}</nav>
-      <section class="pp-hub" data-section="overview" tabindex="-1" aria-label="Work cover">
-        <div class="pp-field-index" aria-hidden="true">SELECTED WORK / ${pad(position)}<span>${e(r.clearance)}</span></div>
-        <div class="pp-hub-art"><img src="${heroSource(r)}" alt="" decoding="async"></div>
-        <div class="pp-hub-content">
-          <div class="pp-kicker"><i></i>${e(r.category)} <span>·</span> ${e(r.id)}</div>
-          <h1 id="pp-title" tabindex="-1">${e(r.title)}</h1>
-          <div class="pp-en">${e(r.en)}</div>
-          <div class="pp-hub-actions">
-            <button type="button" class="pp-start" data-page="start">▶ <span>${r.unity ? "Play demo" : r.video ? "Play video" : "Visit project"}</span></button>
-            <button type="button" data-page="more">Project info <span>↓</span></button>
-          </div>
-        </div>
-      </section>
-      <article class="pp-body">
-        <section class="pp-hero" data-section="info" tabindex="-1" aria-label="Project overview">
-          <div><div class="pp-label"><span class="pp-section-number">02</span>PROJECT</div><div class="pp-frame pp-hero-media">${this.heroMarkup(r)}</div><div class="pp-media-caption"><span>FIG. 01</span>${e(r.unity ? "Interactive demo" : r.video ? "Demo video" : r.title)}</div></div>
-          <div class="pp-info">
-            <div class="pp-kicker"><i></i>${e(r.category)} <span>·</span> ${e(r.id)}</div>
-            <h2>${e(r.title)}</h2>
-            <div class="pp-en">${e(r.en)}</div>
-            <dl class="pp-meta">
-              <div><dt>Role</dt><dd>${e(r.department)}</dd></div>
-              <div><dt>Timeline</dt><dd>${e(r.date)}</dd></div>
-              <div><dt>Stack</dt><dd>${e(r.lead)}</dd></div>
-              <div><dt>Status</dt><dd>${e(r.clearance)}</dd></div>
-            </dl>
-            <p class="pp-abstract">${e(r.abstract)}</p>
-            ${tags}
-            <div class="pp-links">${links.map((link) => `<a href="${e(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} <span>↗</span></a>`).join("")}</div>
-          </div>
-        </section>
-        ${video}
-        ${gallery}
-        <section class="pp-section pp-highlights" data-section="findings" tabindex="-1" aria-label="Highlights">
-          <div class="pp-label"><span class="pp-section-number">${pad(chapters.length)}</span>FIELD NOTES</div>
-          <ol>${r.findings.map((item, i) => `<li><span>${pad(i + 1)}</span>${e(item)}</li>`).join("")}</ol>
-        </section>
-      </article>
-      <footer class="pp-next"><button type="button" data-page="next"><span>NEXT PROJECT</span><strong>${e(next.title)} →</strong></button></footer>`;
+      <section class="pg-cover${this.cover ? "" : " pg-plain"}" data-block="cover" aria-label="Cover">${this.cover ? "" : `
+        <div class="pp-hub-art"><img src="${heroSource(record)}" alt="" decoding="async"></div>
+        <div class="pg-plain-content"><h1 id="pp-title" tabindex="-1">${e(record.title)}</h1>${intro}</div>`}</section>
+      <main class="pg-body">
+        ${this.sections.map((s, i) => this.sectionMarkup(record, s, i)).join("")}
+        <div class="pg-end"><div class="pp-links">${links.map((link) => `<a href="${e(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} <span>↗</span></a>`).join("")}</div></div>
+      </main>
+      <footer class="pp-next"><button type="button" data-page="next"><span>Next</span><strong>${e(next.title)} →</strong></button></footer>
+      <nav class="pg-dots" aria-label="Sections"><button type="button" data-page="go" data-to="cover" title="Top" aria-label="Top"></button>${this.sections.map((s) => `<button type="button" data-page="go" data-to="${e(s.id)}" title="${e(s.heading)}" aria-label="${e(s.heading)}"></button>`).join("")}</nav>`;
+    if (this.cover) {
+      this.root.querySelector(".pg-cover")!.append(this.cover.el);
+      this.cover.mount();
+      // Switched to another work while open: its cover starts straight away.
+      if (this.isOpen) this.cover.begin(reduced());
+    }
+    if (this.sections.some((s) => s.kind === "shots")) this.showShot(0);
+    this.watch();
     if (changed) this.root.scrollTop = 0;
-    this.chapters.sync();
+  }
+
+  /** The blocks below the cover, in reading order. */
+  private sectionsFor(r: ArchiveRecord): Section[] {
+    const out: Section[] = [];
+    if (r.unity) out.push({ id: "play", heading: "Play", kind: "play" });
+    if (r.trailer ?? r.video) out.push({ id: "trailer", heading: "Trailer", kind: "trailer" });
+    r.study?.sections.forEach((study, i) => out.push({ id: `s${i + 1}`, heading: study.heading, kind: "study", study }));
+    if (!r.study) out.push({ id: "about", heading: "About", kind: "about" });
+    if (r.gallery?.length) out.push({ id: "shots", heading: "Screenshots", kind: "shots" });
+    if (r.study) out.push({ id: "full", heading: "Full write-up", kind: "full" });
+    return out;
+  }
+
+  /** The cover's text block: one line, the pitch, the facts, and the Play / Trailer / Download buttons. */
+  private introMarkup(r: ArchiveRecord) {
+    const e = escapeHtml;
+    const facts = r.study ? r.study.facts.map((f) => f.value) : [r.department, r.lead, r.date];
+    const button = (has: boolean, label: string, inner: string) => has ? inner : `<span class="pg-off">${label} · not yet</span>`;
+    return `<div class="pg-intro">
+      <p class="pg-en">${e(r.en)}</p>
+      <p class="pg-pitch">${e(r.study?.pitch ?? r.abstract)}</p>
+      <p class="pg-facts">${facts.map(e).join(" · ")}</p>
+      <div class="pg-actions">
+        ${button(Boolean(r.unity), "Play", `<button type="button" data-page="go" data-to="play">Play</button>`)}
+        ${button(Boolean(r.trailer ?? r.video), "Trailer", `<button type="button" data-page="go" data-to="trailer">Trailer</button>`)}
+        ${button(Boolean(r.download), "Download", `<a href="${e(r.download?.url ?? "")}" target="_blank" rel="noopener noreferrer">Download${r.download?.size ? ` · ${e(r.download.size)}` : ""}</a>`)}
+      </div></div>`;
+  }
+
+  private sectionMarkup(r: ArchiveRecord, s: Section, i: number) {
+    const e = escapeHtml, open = `<section class="pg-sec pg-${s.kind}" id="sec-${e(s.id)}" data-block="${e(s.id)}" data-i="${i}" tabindex="-1">`;
+    if (s.kind === "study") {
+      const [big, small] = s.study.media ?? [];
+      const figure = (m: { src: string; caption?: string }, cls: string) => `<figure class="${cls}"><img src="${media(m.src)}" alt="${e(m.caption ?? s.heading)}" loading="lazy" decoding="async">${m.caption ? `<figcaption>${e(m.caption)}</figcaption>` : ""}</figure>`;
+      return `${open}<div class="pg-text"><h2>${e(s.heading)}</h2><p>${e(s.study.summary ?? s.study.body[0])}</p></div>
+        ${big ? `<div class="pg-pics">${figure(big, "pg-big")}${small ? figure(small, "pg-small") : ""}</div>` : ""}</section>`;
+    }
+    if (s.kind === "play") return `${open}<h2>Play</h2><div class="pp-frame">${this.unityMarkup(r)}</div></section>`;
+    if (s.kind === "trailer") return `${open}<h2>Trailer</h2><div class="pp-frame">${this.videoMarkup(r, (r.trailer ?? r.video)!)}</div></section>`;
+    if (s.kind === "shots") {
+      return `${open}<h2>Screenshots</h2><div class="pg-shots"><figure class="pg-shot"></figure><div class="pg-thumbs">${r.gallery!.map((shot, k) => `<button type="button" data-page="shot" data-i="${k}" aria-label="Screenshot ${k + 1}"><img src="${media(shot.src)}" alt="" loading="lazy"></button>`).join("")}</div></div></section>`;
+    }
+    if (s.kind === "about") {
+      return `${open}<h2>About</h2><div class="pg-prose"><p>${e(r.abstract)}</p><ol class="pg-list">${r.findings.map((f) => `<li>${e(f)}</li>`).join("")}</ol>
+        ${r.tags?.length ? `<p class="pg-tags">${r.tags.map(e).join(" · ")}</p>` : ""}</div></section>`;
+    }
+    return `${open}<h2>Full write-up</h2><div class="pg-prose">${r.study!.sections.map((x) => `<h3>${e(x.heading)}</h3>${x.body.map((p) => `<p>${e(p)}</p>`).join("")}${x.points?.length ? `<ul class="pg-list">${x.points.map((p) => `<li>${e(p)}</li>`).join("")}</ul>` : ""}`).join("")}</div></section>`;
+  }
+
+  /** Keeps the cover, the dots and the top bar in step with the block on screen. */
+  private watch() {
+    const blocks = [...this.root.querySelectorAll<HTMLElement>("[data-block]")];
+    // A band across the middle of the window: the block inside it is the one being read.
+    this.watcher = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const el = entry.target as HTMLElement;
+        this.at = el.dataset.block === "cover" ? -1 : Number(el.dataset.i);
+      }
+      this.sync();
+    }, { root: this.root, rootMargin: "-45% 0px -45% 0px", threshold: 0 });
+    blocks.forEach((b) => this.watcher!.observe(b));
+    this.sync();
+  }
+
+  private sync() {
+    const current = this.sections[this.at];
+    this.root.classList.toggle("scrolled", this.at >= 0);
+    this.root.querySelectorAll<HTMLElement>(".pg-dots button").forEach((dot, i) => dot.classList.toggle("on", i === this.at + 1));
+    // The cover marks its own sections and keeps the last one when the page comes back up to it,
+    // so the hiker, the gears or the paw show where the reader got to.
+    const study = this.sections.filter((s) => s.kind === "study");
+    if (current?.kind === "study") this.cover?.current(study.indexOf(current));
+  }
+
+  /** Scroll to a block by id ("cover" for the top). */
+  private goTo(id: string) {
+    const behavior: ScrollBehavior = reduced() || this.root.classList.contains("instant") ? "instant" : "smooth";
+    if (id === "cover") { this.root.scrollTo({ top: 0, behavior }); return; }
+    this.root.querySelector<HTMLElement>(`#sec-${CSS.escape(id)}`)?.scrollIntoView({ behavior, block: "start" });
+  }
+
+  /** ↑↓ and Page keys step through the blocks; ←→ turn the screenshots; false when the page has no use for the key. */
+  handleKey(event: KeyboardEvent) {
+    if (event.target instanceof HTMLElement && event.target.closest("video, iframe, input")) return false;
+    const step = { ArrowDown: 1, PageDown: 1, ArrowUp: -1, PageUp: -1 }[event.key];
+    if (step) {
+      // Count from where the last press is headed, so quick presses add up mid-scroll.
+      const from = this.aim > -2 ? this.aim : this.at;
+      this.aim = Math.max(-1, Math.min(this.sections.length - 1, from + step));
+      clearTimeout(this.aimTimer);
+      this.aimTimer = window.setTimeout(() => (this.aim = -2), 800);
+      this.goTo(this.aim < 0 ? "cover" : this.sections[this.aim].id);
+      return true;
+    }
+    if ((event.key === "ArrowLeft" || event.key === "ArrowRight") && this.sections[this.at]?.kind === "shots") {
+      this.showShot(this.shot + (event.key === "ArrowRight" ? 1 : -1));
+      return true;
+    }
+    return false;
+  }
+
+  private showShot(i: number) {
+    const shots = this.record?.gallery;
+    if (!shots?.length) return;
+    this.shot = (i + shots.length) % shots.length;
+    const shot = shots[this.shot], e = escapeHtml;
+    const figure = this.root.querySelector(".pg-shot");
+    if (!figure) return;
+    figure.innerHTML = `<div class="pp-frame"><img src="${media(shot.src)}" alt="${e(shot.caption ?? this.record!.title)}"></div>
+      <figcaption><span>${this.shot + 1} / ${shots.length}</span>${e(shot.caption ?? "")}${shot.note ? `<p>${e(shot.note)}</p>` : ""}</figcaption>`;
+    this.root.querySelectorAll("[data-page=shot]").forEach((el, k) => el.classList.toggle("on", k === this.shot));
+  }
+
+  setSaved(saved: boolean) {
+    const button = this.root.querySelector<HTMLElement>(".pp-save");
+    if (!button) return;
+    button.textContent = saved ? "Saved" : "Save";
+    button.setAttribute("aria-pressed", String(saved));
   }
 
   /**
    * The key art lifts off the monitor: a 16:9 image pinned to the screen's four
    * projected corners (perspective included) eases out until it sits exactly where
-   * the page's hub art will be, cropped the same way, then hands over to the page,
+   * the page's cover art will be, cropped the same way, then hands over to the page,
    * whose text rises in around it. The handover itself is invisible.
    */
   private liftFromScreen(record: ArchiveRecord, quad: [number, number][], done: () => void) {
     this.lift?.remove();
     const img = Object.assign(document.createElement("img"), { src: heroSource(record), alt: "", className: "pp-lift" });
-    // The hub art's box once the page shows, and the 16:9 frame that covers it as object-fit does.
+    // The cover art's box once the page shows, and the 16:9 frame that covers it as object-fit does.
     const R = this.root.querySelector(".pp-hub-art, .tm-art")?.getBoundingClientRect() ?? new DOMRect(0, 0, innerWidth, innerHeight);
     const ew = Math.max(R.width, (R.height * 16) / 9), eh = (ew * 9) / 16;
     const ex = R.left + (R.width - ew) / 2, ey = R.top + (R.height - eh) / 2;
@@ -254,8 +359,10 @@ export class ProjectPage {
       this.state = "closed";
       this.root.hidden = true;
       // Stop video and Unity playback.
-      this.menu?.destroy();
-      this.menu = null;
+      this.watcher?.disconnect();
+      this.watcher = null;
+      this.cover?.destroy();
+      this.cover = null;
       this.root.innerHTML = "";
       this.record = null;
       this.returnFocus?.focus({ preventScroll: true });
@@ -263,50 +370,24 @@ export class ProjectPage {
     return true;
   }
 
-  /** Keys for the title menu (choose, open, close a panel); false when it has no use for them. */
-  handleKey(event: KeyboardEvent) { return this.menu?.handleKey(event) ?? false; }
-
   setInstant(instant: boolean) { this.root.classList.toggle("instant", instant); }
 
-  private heroMarkup(r: ArchiveRecord) {
-    const e = escapeHtml;
-    if (r.unity) {
-      const poster = r.cover ? `<img src="${media(r.cover)}" alt="" decoding="async">` : `<div class="pp-mark">${logo}</div>`;
-      return `<div class="pp-unity" data-src="${media(r.unity)}">${poster}<button type="button" class="pp-play" data-page="unity">▶ <span>Load interactive demo</span><small>Unity WebGL · large download</small></button></div>`;
-    }
-    if (r.video) return this.videoMarkup(r);
-    if (r.cover) return `<img src="${media(r.cover)}" alt="${e(r.title)} cover" decoding="async">`;
-    return `<div class="pp-mark">${logo}<span>Cover coming soon</span></div>`;
+  private unityMarkup(r: ArchiveRecord) {
+    const poster = r.hero ?? r.cover;
+    return `<div class="pp-unity" data-src="${media(r.unity!)}">${poster ? `<img src="${media(poster)}" alt="">` : `<div class="pp-mark">${logo}</div>`}<button type="button" class="pp-play" data-page="unity">▶ <span>Load the game</span><small>Unity WebGL, a large download</small></button></div>`;
   }
 
-  private videoMarkup(r: ArchiveRecord) {
-    const src = r.video!;
+  private videoMarkup(r: ArchiveRecord, src: string) {
     if (isFile(src)) return `<video controls playsinline preload="metadata"${r.cover ? ` poster="${media(r.cover)}"` : ""} src="${media(src)}"></video>`;
     if (isWeb(src)) return `<iframe src="${escapeHtml(src)}" title="${escapeHtml(r.title)} video" loading="lazy" allow="fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe>`;
     return "";
-  }
-
-  /** The hub's primary action: play the demo or video, otherwise open the project. */
-  private start() {
-    const r = this.record;
-    if (!r) return;
-    const media = this.root.querySelector<HTMLElement>(".pp-hero-media");
-    if (r.unity || r.video) {
-      media?.scrollIntoView({ behavior: "smooth", block: "center" });
-      const play = this.root.querySelector<HTMLElement>(".pp-play");
-      if (play) this.loadUnity(play);
-      else void this.root.querySelector<HTMLVideoElement>(".pp-hero-media video")?.play().catch(() => {});
-      return;
-    }
-    const url = r.links?.[0]?.url ?? r.source;
-    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   private loadUnity(button: HTMLElement) {
     const host = button.closest<HTMLElement>(".pp-unity")!;
     const frame = document.createElement("iframe");
     frame.src = host.dataset.src!;
-    frame.title = `${this.record?.title ?? ""} interactive demo`;
+    frame.title = `${this.record?.title ?? ""}`;
     frame.allow = "fullscreen; autoplay; gamepad; xr-spatial-tracking";
     frame.allowFullscreen = true;
     const full = document.createElement("button");

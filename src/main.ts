@@ -1,7 +1,6 @@
 import { attachPadInput } from "./pad-input";
 import { createRollingClock } from "./rolling-clock";
 import { InspectionOverlay } from "./inspection-overlay";
-import { DocumentDecryption } from "./document-decryption";
 import "./document-decryption.css";
 import "./decryption.css";
 import { escapeHtml } from "./html";
@@ -23,7 +22,7 @@ import { assetUrl } from "./asset-url";
 import { initPwa, pwaSettingsMarkup } from "./pwa";
 import { createRollingNumber, createRollingText } from "@kitlangton/rolling-number";
 import { ArchiveScene } from "./scene";
-import { ContentTransition, SurfaceTransition } from "./ui-transitions";
+import { SurfaceTransition } from "./ui-transitions";
 import { wrap, type ArchiveNavigation } from "./archive-loop";
 import {
   records,
@@ -85,11 +84,6 @@ $("#stage").innerHTML = `
     <div class="column-navigation"><button data-action="column-prev" aria-label="Previous column">←</button><div><span id="column-number">COLUMN <span id="column-index">03</span> / 05</span><strong id="column-name"></strong></div><button data-action="column-next" aria-label="Next column">→</button></div>
     <div class="archive-hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> Browse <span>／</span> Drag to glide <span>／</span> <kbd>ENTER</kbd> Open</div>
   </section>
-  <section id="detail-ui" class="detail-ui" aria-label="Work details" hidden>
-    <button class="back-button" data-action="back">← <span>Back to works</span><small>ESC</small></button>
-    <div class="object-caption"><span id="object-id">NO.001</span><small>Drag to rotate <span>↔</span></small></div>
-    <article id="detail-content" class="detail-content"></article>
-  </section>
   <footer class="system-footer"><span><i class="status-light"></i> SHUHANG CHEN · PORTFOLIO${isWallpaper ? '<button type="button" class="three-toggle" data-action="toggle-three" aria-pressed="true" title="Unload 3D models, keep the 2D interface">3D ON</button>' : ''}</span><span><span id="clock">00:00:00</span></span><button data-action="replay" title="Replay intro">REPLAY INTRO ↻</button></footer>
   <div id="pwa-update-notice" class="pwa-update-notice" role="status" hidden><span>New version ready</span><button data-pwa-action="update">Update and restart ↻</button></div>
   <div id="modal-root"></div><div id="toast" class="toast" role="status"></div>
@@ -104,18 +98,13 @@ let mode: Mode = "boot",
 let modal: "search" | "saved" | "settings" | "experiments" | null = null,
   searchQuery = "",
   filter = "All";
-let activeTab = "overview";
 const reviewParams = new URLSearchParams(location.search);
 const frozenTime: number | null = null;
 let toastTimer: ReturnType<typeof setTimeout>;
 let previousFocus: HTMLElement | null = null;
-const detailTransition = new SurfaceTransition($("#detail-ui"), undefined, 180, 180);
-const tabTransition = new ContentTransition();
 let modalTransition: SurfaceTransition | undefined;
 let modalClosing = false;
 let modalSiblings: { node: HTMLElement; inert: boolean }[] = [];
-let pendingDetailFocus = false;
-let bookmarkFeedback: Animation | undefined;
 function readLocal<T>(key: string, fallback: T): T {
   try {
     return JSON.parse(localStorage.getItem(key) ?? "null") ?? fallback;
@@ -230,7 +219,6 @@ let scene: ArchiveScene | undefined;
 let threeState: "on" | "closing" | "off" | "loading" = "on";
 let resumeCell: { lane: number; row: number } | undefined;
 let resumeSelection = -1;
-const accessLog: { id: string; time: string }[] = [];
 const columnMemory = archiveColumns.map((_, lane) => columnFiles(lane)[0]);
 let projectIndex = featuredFiles[0];
 const projectOrderFor = (index: number) => featuredFiles.includes(index) ? featuredFiles : experimentFiles;
@@ -248,6 +236,7 @@ function showProjectPage(options: { instant?: boolean; push?: boolean; intro?: b
     push: options.push,
     intro: options.intro,
     from: options.from,
+    saved: saved.has(records[selected].id),
   });
 }
 // The disc goes into the slot bar first; the hub opens once it has been read.
@@ -275,19 +264,29 @@ async function insertDiscAndOpen() {
 }
 function ejectDisc(sound = true) {
   discInserting = false;
-  if (!$("#stage").dataset.inserting) return;
+  if (!$("#stage").dataset.inserting) return Promise.resolve();
   delete $("#stage").dataset.inserting;
-  scene?.ejectDisc();
   if (sound && mode === "detail") audio.play("disc-eject");
+  return scene?.ejectDisc() ?? Promise.resolve();
 }
+/** Back from a work: the disc comes out of the console, then the case closes and returns to the shelf. */
+async function ejectAndReturn() {
+  if (ejecting) return;
+  ejecting = true;
+  projectPage.close();
+  await ejectDisc();
+  ejecting = false;
+  if (mode === "detail") { setMode("archive"); audio.play("back"); }
+}
+let ejecting = false;
 function closeProjectPage() {
-  if (projectPage.close()) ejectDisc();
+  if (projectPage.isOpen) void ejectAndReturn();
 }
 function openProjectAt(index: number, options: { instant?: boolean; push?: boolean } = {}) {
   if (!featuredFiles.includes(index)) {
     ejectDisc(false);
     projectIndex = index;
-    projectPage.open(records[index], projectNeighbours(index), { instant: options.instant ?? !motionActive("surfaceTransitions"), push: options.push });
+    projectPage.open(records[index], projectNeighbours(index), { instant: options.instant ?? !motionActive("surfaceTransitions"), push: options.push, saved: saved.has(records[index].id) });
     return;
   }
   pageNavigating = true;
@@ -305,6 +304,7 @@ const profilePage = new ProfilePage(() => { if (profilePage.close()) audio.play(
 }, () => ({ ready: !scene || scene.workspaceProgress >= 1, from: scene?.screenRect() ?? null }));
 const projectPage = new ProjectPage({
   close: closeProjectPage,
+  save: toggleSaved,
   navigate: (direction) => {
     const projectOrder = projectOrderFor(projectIndex);
     const position = projectOrder.indexOf(projectIndex);
@@ -329,12 +329,6 @@ window.addEventListener("popstate", () => {
     }
   } else if (index !== projectIndex || !projectPage.isOpen) openProjectAt(index, { push: false });
 });
-function recordAccess() {
-  accessLog.unshift({
-    id: records[selected].id,
-    time: new Date().toLocaleTimeString("en-GB"),
-  });
-}
 function saveAudioPrefs() {
   try {
     localStorage.setItem("rhine-settings", JSON.stringify(prefs));
@@ -347,12 +341,7 @@ function savePrefs() {
   saveAudioPrefs();
   if (!motionActive("rollingText")) rollingTitles.forEach(title => title.finish());
   if (!motionActive("rollingNumbers")) [fileCounter, columnCounter, selectedCode, hoverCode].forEach(counter => counter.finish());
-  if (!motionActive("surfaceTransitions")) {
-    detailTransition.finish();
-    modalTransition?.finish();
-    tabTransition.finish();
-    bookmarkFeedback?.cancel();
-  }
+  if (!motionActive("surfaceTransitions")) modalTransition?.finish();
   scene?.setMotion(prefs.motion);
   scene?.setTheme(prefs.colorTheme === "dark", !motionActive("surfaceTransitions") || !started);
   document.querySelectorAll<HTMLElement>("[data-color-theme]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.colorTheme === prefs.colorTheme)));
@@ -407,7 +396,6 @@ function fit() {
   updateQualitySummary();
   // Re-measure line covers and tab underline after wrapping changes.
   requestAnimationFrame(() => {
-    documentDecryption.refresh();
     const tab = document.querySelector<HTMLElement>(".detail-tabs button.active");
     const indicator = document.querySelector<HTMLElement>(".tab-indicator");
     if (tab && indicator) indicator.style.transform = `translateX(${tab.offsetLeft}px) scaleX(${tab.offsetWidth})`;
@@ -434,7 +422,6 @@ function setMode(next: Mode) {
     hoverCode.finish();
     $("#hover-label").hidden = true;
   }
-  if (next === "detail" && mode !== "detail") recordAccess();
   if (next !== "detail" && !pageNavigating) {
     projectPage.close();
     ejectDisc(false);
@@ -454,35 +441,17 @@ function setMode(next: Mode) {
   $("#archive-ui").setAttribute("aria-hidden", String(next !== "archive" || Boolean(workbench?.enabled)));
   $(".system-nav").inert = next === "boot" || Boolean(modal);
   $(".system-footer").inert = next === "boot" || Boolean(modal);
-  if (next === "detail") {
-    if (previousMode !== "detail") detailTransition.show(!motionActive("surfaceTransitions"));
-  } else if (previousMode === "detail" || (next === "boot" && !$("#detail-ui").hidden)) {
-    pendingDetailFocus = false;
-    tabTransition.cancel();
-    detailTransition.hide(!motionActive("surfaceTransitions") || next === "boot");
-    if (!modal && next === "archive") $(".read-file").focus({ preventScroll: true });
-  }
-  $("#detail-ui").inert = next !== "detail" || Boolean(modal);
+  if (previousMode === "detail" && !modal && next === "archive") $(".read-file").focus({ preventScroll: true });
   scene?.setMode(next === "boot" ? "hidden" : next);
   if (next !== "boot") {
     $(".file-title").firstChild!.textContent = "";
     $("#stage").dataset.boot = "done";
-  }
-  if (next === "detail" && previousMode !== "detail") {
-    renderDetail();
-    pendingDetailFocus = true;
-    if (!scene) {
-      $("#detail-content").style.opacity = "1";
-      $("#detail-content").style.translate = "0 0";
-      $("#detail-content").inert = false;
-    }
   }
 }
 function select(index: number, navigation?: ArchiveNavigation) {
   selected = (index + records.length) % records.length;
   columnMemory[fileLocation(selected).lane] = selected;
   if (mode === "detail") setMode("archive");
-  activeTab = "overview";
   scene?.select(selected, navigation);
   updateSelection(navigation);
   const columnMove = navigation && "axis" in navigation && navigation.axis === "lane";
@@ -610,87 +579,20 @@ function openFile() {
   closeModal(() => {
     setMode("detail");
     audio.play("open");
+    void insertDiscAndOpen();
   });
 }
-function toggleSaved() {
-  const id = records[selected].id;
+/** Saves or unsaves a work (the page's Save button); returns whether it is saved now. */
+function toggleSaved(id: string) {
   if (saved.has(id)) saved.delete(id);
   else saved.add(id);
   try {
     localStorage.setItem("rhine-saved", JSON.stringify([...saved]));
   } catch {}
   $("#saved-count").textContent = String(saved.size).padStart(2, "0");
-  const button = $<HTMLButtonElement>('[data-action="bookmark"]');
-  const added = saved.has(id);
-  button.firstChild!.textContent = added ? "− UNSAVE" : "＋ SAVE";
-  button.querySelector("span")!.textContent = "";
-  button.setAttribute("aria-pressed", String(added));
-  bookmarkFeedback?.cancel();
-  if (motionActive("surfaceTransitions")) bookmarkFeedback = button.animate(
-    [{ backgroundColor: "#67634c" }, { backgroundColor: "#252820" }],
-    { duration: 220, easing: "ease-out" },
-  );
   audio.play("confirm");
   notify(saved.has(id) ? "Saved" : "Removed from saved");
-}
-function renderDetail() {
-  tabTransition.cancel();
-  const r = records[selected];
-  $("#object-id").textContent = "NO." + String(selected + 1).padStart(3, "0");
-  $("#detail-content").innerHTML = `
-  <div class="detail-kicker"><span>${r.id}</span><span>${escapeHtml(r.clearance)}</span></div>
-  <h2>${escapeHtml(r.en)}</h2><div class="detail-title-cn">${escapeHtml(r.title)}<span>${escapeHtml(r.category)}</span></div>
-  <div class="detail-rule"></div>
-  <dl class="metadata"><div><dt>ROLE</dt><dd>${escapeHtml(r.department)}</dd></div><div><dt>TIMELINE</dt><dd>${escapeHtml(r.date)}</dd></div><div><dt>STACK</dt><dd>${escapeHtml(r.lead)}</dd></div><div><dt>STATUS</dt><dd><i></i>${r.clearance === "RESTRICTED" ? "In progress" : "Completed"}</dd></div></dl>
-  <div class="detail-tabs" role="tablist"><button id="tab-overview" class="active" role="tab" aria-controls="tab-panel" aria-selected="true" data-tab="overview">01 <span>Overview</span></button><button id="tab-notes" role="tab" aria-controls="tab-panel" aria-selected="false" data-tab="notes">02 <span>Highlights</span></button><i class="tab-indicator" aria-hidden="true"></i></div>
-  <div id="tab-panel" class="tab-panel" role="tabpanel">${overview()}</div>
-  <button class="detail-more" data-action="project-page">MORE DETAILS<span>→</span></button>
-  <div class="detail-actions"><button class="solid-button" data-action="bookmark">${saved.has(r.id) ? "− UNSAVE" : "＋ SAVE"}<span>${""}</span></button></div>
-  <div class="detail-footnote"><a href="${escapeHtml(r.source)}" target="_blank" rel="noopener">Project link ↗</a><span>${String(selected + 1).padStart(3, "0")} / ${String(records.length).padStart(3, "0")}</span></div>`;
-  $("#detail-content").setAttribute("tabindex", "-1");
-  $('[data-action="bookmark"]').setAttribute("aria-pressed", String(saved.has(r.id)));
-  documentDecryption.reset($("#detail-content"), !motionActive("documentReveal") || !scene || scene.decryptionFrame.phase === "clear");
-  setTab(activeTab, false);
-}
-function overview() {
-  return `<div class="panel-label">ABSTRACT</div><p>${escapeHtml(records[selected].abstract)}</p>`;
-}
-function setTab(tab: string, sound = true) {
-  if (sound && tab === activeTab) return;
-  activeTab = tab;
-  document.querySelectorAll("[data-tab]").forEach((b) => {
-    const active = (b as HTMLElement).dataset.tab === tab;
-    b.classList.toggle("active", active);
-    b.setAttribute("aria-selected", String(active));
-    b.setAttribute("tabindex", active ? "0" : "-1");
-  });
-  const r = records[selected];
-  const tabButton = $<HTMLButtonElement>(`[data-tab="${tab}"]`);
-  const indicator = $(".tab-indicator");
-  indicator.style.transition = sound && motionActive("surfaceTransitions") ? "" : "none";
-  indicator.style.transform = `translateX(${tabButton.offsetLeft}px) scaleX(${tabButton.offsetWidth})`;
-  $("#tab-panel").setAttribute("aria-labelledby", tabButton.id);
-  $("#tab-panel").innerHTML =
-    tab === "overview"
-      ? overview()
-      : tab === "notes"
-        ? `<div class="panel-label">HIGHLIGHTS</div><ol class="research-notes">${r.findings.map((f, i) => `<li><span>${String(i + 1).padStart(2, "0")}</span>${escapeHtml(f)}</li>`).join("")}</ol>`
-        : `<div class="panel-label">ACCESS LOG</div>${accessLog
-            .filter((entry) => entry.id === r.id)
-            .slice(0, 4)
-            .map(
-              (entry) =>
-                `<div class="log-row"><span>${entry.time}</span><span>VISITOR</span><b>READ AUTHORIZED</b></div>`,
-            )
-            .join(
-              "",
-            )}<p class="log-note">Session verified. Showing everything available to this visitor.</p>`;
-  $("#tab-panel").scrollTop = 0;
-  documentDecryption.refresh();
-  if (sound) {
-    tabTransition.reveal($("#tab-panel"), !motionActive("surfaceTransitions"));
-    audio.play("ui-tick");
-  }
+  return saved.has(id);
 }
 function notify(message: string) {
   clearTimeout(toastTimer);
@@ -731,7 +633,6 @@ function closeModal(afterClose?: () => void) {
     modalSiblings.forEach(({ node, inert }) => (node.inert = inert));
     modalSiblings = [];
     $("#archive-ui").inert = mode !== "archive" || Boolean(workbench?.enabled);
-    $("#detail-ui").inert = mode !== "detail";
     previousFocus?.focus({ preventScroll: true });
     afterClose?.();
   });
@@ -899,10 +800,6 @@ document.addEventListener("click", (e) => {
     renderResults();
     return;
   }
-  if (el.dataset.tab) {
-    setTab(el.dataset.tab);
-    return;
-  }
   const action = el.dataset.action;
   if (action === "toggle-three") { void toggleThree(); return; }
   if (action === "sound-preview") audio.play("confirm");
@@ -911,7 +808,6 @@ document.addEventListener("click", (e) => {
   if (action === "column-prev") stepColumn(-1);
   if (action === "column-next") stepColumn(1);
   if (action === "open") openFile();
-  if (action === "project-page" && mode === "detail") void insertDiscAndOpen();
   if (action === "about") closeModal(() => {
     profilePage.open({ instant: !motionActive("surfaceTransitions") });
     audio.play("page-open");
@@ -925,7 +821,6 @@ document.addEventListener("click", (e) => {
     openModal(action);
   }
   if (action === "close-modal") closeModal();
-  if (action === "bookmark") toggleSaved();
   if (action === "reset-search") {
     modal = modal === "experiments" ? "experiments" : "search";
     searchQuery = "";
@@ -958,11 +853,9 @@ attachPadInput({
   confirm() {
     lastInput = performance.now();
     if (!started || $("#stage").dataset.intro || mode === "boot") padKey("Enter");
-    // A game's title menu takes A as Enter.
     else if (projectPage.isOpen) padKey("Enter");
     else if (profilePage.isOpen || modal) return;
     else if (mode === "archive") openFile();
-    else if (mode === "detail") void insertDiscAndOpen();
   },
   back: () => { lastInput = performance.now(); padKey("Escape"); },
   connected: () => notify("Controller connected"),
@@ -997,8 +890,8 @@ document.addEventListener("keydown", (e) => {
   const typing = e.target instanceof HTMLInputElement;
   if (e.key === "Escape") {
     if (modal) closeModal();
-    else if (discInserting) ejectDisc();
-    else if (mode === "detail" || (mode === "boot" && ready)) { const sound = mode === "detail" ? "back" : "ui-tick"; setMode("archive"); audio.play(sound); }
+    else if (mode === "detail") void ejectAndReturn();
+    else if (mode === "boot" && ready) { setMode("archive"); audio.play("ui-tick"); }
     return;
   }
   if (modal && e.key === "Tab") {
@@ -1020,18 +913,6 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   if (typing || modal || !ready) return;
-  if (
-    (e.target as HTMLElement).dataset.tab &&
-    ["ArrowLeft", "ArrowRight"].includes(e.key)
-  ) {
-    e.preventDefault();
-    const tabs = ["overview", "notes"];
-    setTab(
-      tabs[(tabs.indexOf(activeTab) + (e.key === "ArrowRight" ? 1 : 1)) % 2],
-    );
-    $<HTMLButtonElement>(`[data-tab="${activeTab}"]`).focus();
-    return;
-  }
   if (e.key === "/") {
     e.preventDefault();
     if (mode === "boot") setMode("archive");
@@ -1052,7 +933,6 @@ document.addEventListener("keydown", (e) => {
   if (
     e.key === "Enter" &&
     (document.activeElement === document.body ||
-      document.activeElement?.id === "detail-content" ||
       ["prev", "next", "column-prev", "column-next"].includes(
         (document.activeElement as HTMLElement)?.dataset.action ?? "",
       ) ||
@@ -1069,10 +949,8 @@ const ease = (t: number) => {
   return t * t * (3 - 2 * t);
 };
 const inspectionOverlay = new InspectionOverlay();
-const documentDecryption = new DocumentDecryption();
 // A newly opened archive can introduce another font shard. Re-measure its
 // redaction lines after font swap while retaining the current reveal progress.
-document.fonts.addEventListener("loadingdone", () => documentDecryption.refresh());
 
 let lastTime = 0,
   frameCount = 0,
@@ -1099,17 +977,6 @@ function frame(ms: number) {
   }
   if (threeState === "closing" && scene?.presentationHidden) releaseThree();
   playground?.position();
-  if (scene && mode === "detail") {
-    documentDecryption.update(time, scene.decryptionFrame, !motionActive("documentReveal"));
-    $("#detail-content").style.opacity = String(scene.detailVisibility);
-    $("#detail-content").style.translate =
-      `0 ${(1 - scene.detailVisibility) * 18}px`;
-    $("#detail-content").inert = scene.detailVisibility < 0.1;
-    if (pendingDetailFocus && scene.detailVisibility >= 0.1 && !modal) {
-      $("#detail-content").focus({ preventScroll: true });
-      pendingDetailFocus = false;
-    }
-  }
   $("#stage").style.setProperty("--detail-shade", String(mode === "boot" ? 0 : scene?.detailVisibility ?? 0));
   const currentScene = scene;
   if (currentScene) inspectionOverlay.render(currentScene.decryptionFrame,
@@ -1174,12 +1041,6 @@ function releaseThree() {
   if (!scene) return;
   resumeCell = { ...scene.getStats().selectedCell }; resumeSelection = selected;
   scene.dispose(); scene = undefined;
-  if (mode === "detail") {
-    $("#detail-content").style.opacity = "1";
-    $("#detail-content").style.translate = "0 0";
-    $("#detail-content").inert = false;
-    documentDecryption.reset($("#detail-content"), true);
-  }
   threeState = "off"; syncThreeButton();
   $("#hover-label").hidden = true;
   delete $("#three-scene").dataset.renderQuality;

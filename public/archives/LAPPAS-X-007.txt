@@ -14,19 +14,19 @@ Highlights
 2. Capture and rescue: a caught player is escorted to a gas cage and the partner has to hold to break them out in time, with its own HUD, escape UI and game-over flow.
 3. Co-op systems over Netcode with the server deciding shared state: doors, lifts and boxes that need both players, a ping system, throwing, quests, save points and the character select.
 
-THE GAME / Two thieves, one way out
+Two thieves, one way out
 
 Lyra and Fia are both in for theft, and neither of them gets out of the prison alone. Each player claims one of them on the character select screen, and the run starts once both roles are taken.
 
 We built the two of them to be good at different things. Lyra is 1.8 m tall, drags boxes, and can put on a mask that keeps guards from growing suspicious of her. Fia is 1.0 m tall, jumps 1.4 m to Lyra's 1.0, climbs ledges and can dash 3.5 m. Some magic barriers stop only one of them, marked with a paw or a witch icon, so most rooms have a route for each.
 
-TWO PLAYERS / Split up, then meet at the door
+Split up, then meet at the door
 
 The first stretch of Level 1 gives Lyra and Fia a "Find a way out" step each. The two run in parallel, and only when both are done does the next step appear: "Meet at the door".
 
 Each character also has an exit of their own, and the level is won only when both players are standing in theirs. A checkpoint saves only after every connected player has walked into it, so a restart always brings the two of them back to the same checkpoint.
 
-GUARDS / Guards that see and hear
+Guards that see and hear
 
 I built the guard AI. Each guard is one state machine with 18 states and a suspicion meter from 0 to 1. He sees 12.3 m in a 120 degree cone. An unmasked player within 2.8 m fills the meter in one second, and at the edge of his sight in about 1.8 seconds.
 
@@ -34,7 +34,7 @@ Hearing is a separate system. Crouching carries 4 m, walking 10 m and running 16
 
 A noise can pull a guard off his patrol, but it cannot interrupt a guard who is already watching someone. I set it up this way so a thrown coin has to be planned before a guard looks at you; once he is watching, it does nothing.
 
-CAPTURE AND RESCUE / Fifteen seconds in the gas cage
+Fifteen seconds in the gas cage
 
 Getting caught does not end the run. The guard cuffs the player and walks them to his cage. During the escort their camera sits 35 degrees off the guard's right shoulder, because from straight behind, the guard hides the player walking in front of him.
 
@@ -42,7 +42,7 @@ In the cage, green gas thickens as time runs down. The partner has 15 seconds to
 
 If the time runs out, or a guard catches the second player while the first is still held, the level ends for both. I built the cage HUD for the free player: a cage icon tracks the partner across the screen and flashes faster as time runs out.
 
-CO-OP MECHANISMS / Doors and boxes that need both of you
+Doors and boxes that need both of you
 
 The latch door has one lever locked to Lyra and one to Fia, and opens only while both are down. The push box has a handle for each at their own height. Once both have grabbed, either player's W fills one shared ring, and ten taps slide the box 2.5 m. Pushed off a ledge, it becomes a step, and the landing reaches guards 25 m away. The lift door is a heavy gate they raise together, walk under, and let slam shut behind them for good.
 
@@ -50,7 +50,7 @@ The takedown needs both players too. A masked Lyra presses a seal onto an unawar
 
 For these mechanisms the server writes only who is gripping, how many taps have landed and when a sequence starts. Each machine works out the door height and the players' animations from that start time, so a player who joins late sees the same door and no animation has to be sent.
 
-PING, THROW, QUESTS / Pointing, throwing and keeping track
+Pointing, throwing and keeping track
 
 Middle mouse drops a ping on whatever is under the crosshair. Each player has one ping at a time, and it lasts 8 seconds. A ping on a guard sticks to him and moves with him, so the partner knows which guard is meant after he turns a corner.
 
@@ -58,7 +58,7 @@ Holding E lifts a crate overhead. A tap of the left mouse button tosses it 4 m, 
 
 A teammate set up the first quest data and HUD. I turned each level's quests into node graphs of reach, interact and acquire steps, each assigned to Lyra, Fia, either or both, with the server deciding who completed each step. Character select is server-owned as well, and a player who drops out mid-level rejoins in whichever role is free.
 
-NEXT / What I'd build next
+What I'd build next
 
 Coins still use an older flat noise radius that ignores walls, and I want them on the same hearing model as footsteps. Lyra and Fia have separate entries in the noise table with the same values, and quieter steps for Fia would give the players a reason to send her ahead.
 
