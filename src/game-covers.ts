@@ -1,6 +1,7 @@
 import "./game-covers.css";
 import type { ArchiveRecord } from "./data";
 import { escapeHtml as e } from "./html";
+import { embedUrl, isFile, seconds, youtubeId } from "./video";
 
 /**
  * Covers for games with a `menu` theme: the first screen of a game's page is drawn in the
@@ -12,7 +13,8 @@ import { escapeHtml as e } from "./html";
 export interface CoverSection { id: string; heading: string }
 
 const isWeb = (value: string) => /^https?:\/\//i.test(value);
-const media = (value: string) => e(isWeb(value) ? value : `${import.meta.env.BASE_URL}${value.replace(/^\//, "")}`);
+const url = (value: string) => (isWeb(value) ? value : `${import.meta.env.BASE_URL}${value.replace(/^\//, "")}`);
+const media = (value: string) => e(url(value));
 const pad = (value: number) => String(value).padStart(2, "0");
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -28,12 +30,48 @@ abstract class GameCover {
   /** Builds the cover; call once the subclass fields are set. */
   protected build(theme: string) {
     this.el.className = `tm tm-${theme}`;
-    this.el.innerHTML = this.markup();
+    this.el.innerHTML = this.markup() + this.runMarkup();
     this.el.addEventListener("click", (event) => {
-      const part = (event.target as Element).closest<HTMLElement>("[data-sec]");
+      const target = event.target as Element;
+      const part = target.closest<HTMLElement>("[data-sec]");
       if (part) this.onPick(part.dataset.sec!);
+      const run = target.closest<HTMLElement>("[data-run]");
+      if (run) this.play(Number(run.dataset.run) || 0);
     });
+    // The largest YouTube still when the video has one (a missing one comes back as a 120 px placeholder).
+    const still = this.el.querySelector<HTMLImageElement>(".tm-run img[data-fallback]");
+    still?.addEventListener("load", () => { if (still.naturalWidth <= 120) still.src = still.dataset.fallback!; }, { once: true });
     addEventListener("resize", this.onResize);
+  }
+
+  /** The full playthrough on the cover: a still with a play mark until it is clicked, then the player in its place. */
+  private runMarkup() {
+    const run = this.r.playthrough;
+    if (!run) return "";
+    const id = youtubeId(run.src);
+    const poster = id ? `https://i.ytimg.com/vi/${id}/maxresdefault.jpg` : this.r.cover ?? this.r.hero;
+    const still = poster ? `<img src="${media(poster)}" alt=""${id ? ` data-fallback="https://i.ytimg.com/vi/${id}/hqdefault.jpg"` : ""} decoding="async">` : "";
+    const chapters = run.chapters?.length ? `<ol>${run.chapters.map((c) => `<li><button type="button" data-run="${seconds(c.at)}"><span>${e(c.at)}</span>${e(c.label)}</button></li>`).join("")}</ol>` : "";
+    return `<figure class="tm-run tm-in">
+      <div class="tm-run-frame"><button type="button" class="tm-run-start" data-run="0" aria-label="Play the full playthrough of ${e(this.r.title)}">${still}<span class="tm-run-mark" aria-hidden="true"></span></button></div>
+      <figcaption>Full playthrough</figcaption>${chapters}</figure>`;
+  }
+
+  private play(at: number) {
+    const run = this.r.playthrough!, frame = this.el.querySelector<HTMLElement>(".tm-run-frame")!;
+    const video = frame.querySelector("video");
+    if (video) { video.currentTime = at; void video.play().catch(() => {}); return; }
+    if (isFile(run.src)) {
+      const player = Object.assign(document.createElement("video"), { src: url(run.src), controls: true, autoplay: true, playsInline: true });
+      player.currentTime = at;
+      frame.replaceChildren(player);
+      return;
+    }
+    const player = Object.assign(document.createElement("iframe"), { src: embedUrl(run.src, { start: at, autoplay: true }), title: `${this.r.title}: full playthrough`, allowFullscreen: true });
+    player.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
+    player.referrerPolicy = "strict-origin-when-cross-origin";
+    frame.replaceChildren(player);
+    player.focus();
   }
 
   /** The art (inside `.tm-art`, with the key art on top for the handover), the title block and the parts. */
@@ -47,8 +85,8 @@ abstract class GameCover {
     this.resize();
     this.show(-1, true);
   }
-  /** The page has come up. */
-  begin(_instant: boolean) {}
+  /** The page has come up (and can be measured). */
+  begin(_instant: boolean) { this.resize(); }
   /** The page scrolled to section `k` of `nav` (-1: back on the cover). */
   current(k: number) {
     if (k === this.sel) return;
@@ -71,6 +109,12 @@ abstract class GameCover {
     const z = narrow ? Math.min(1, innerWidth / 660) : Math.min(1.4, Math.max(0.7, Math.min(innerWidth / 1440, innerHeight / 900)));
     this.el.style.setProperty("--tmz", z.toFixed(3));
     this.layout();
+    // On a phone the playthrough sits right under the text, clear of the cover's parts lower down.
+    const run = this.el.querySelector<HTMLElement>(".tm-run"), text = this.el.querySelector(".pg-intro")?.closest(".tm-in");
+    if (!run) return;
+    const below = text ? text.getBoundingClientRect().bottom - this.el.getBoundingClientRect().top : 0;
+    run.style.top = narrow && below > 0 ? `${Math.round(below + 8)}px` : "";
+    run.style.bottom = narrow && below > 0 ? "auto" : "";
   }
 
   destroy() {

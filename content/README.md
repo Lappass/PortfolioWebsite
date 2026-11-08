@@ -31,7 +31,7 @@
 | `links`   | 链接数组，每项 `{ "label": "GitHub", "url": "https://..." }`               |
 | `menu`    | 游戏页的封面造型：`lastmile`、`trail`、`lockdown` 或 `sniff`。设置后页面第一屏是这款游戏自己的造型（齿轮、山路、公寓、证物墙），造型里的部件对应 `study` 的各节；素材在 `public/works/<编号>/menu/`（由 `art/` 下的海报脚本生成）。缺省时第一屏是主视觉 |
 | `trailer` | 预告片，写法同 `video`；缺省时用 `video` |
-| `playthrough` | 完整流程视频 `{ "src": "...", "chapters": [{ "at": "3:20", "label": "第二天" }] }`，章节可省略 |
+| `playthrough` | 完整流程视频 `{ "src": "...", "chapters": [{ "at": "3:20", "label": "第二天" }] }`，章节可省略。`src` 写法同 `video`，YouTube 的 `youtu.be` 或 `watch?v=` 链接直接贴即可，页面会换成嵌入播放器。设了 `menu` 的游戏直接在封面上放一个视频（缩略图加播放键，点了才载入播放器；手机上排在文字下方）；其余游戏在预告片之后加一块「Full playthrough」，封面多一个同名按钮。章节显示在视频下方，点击跳到对应时间 |
 | `download` | 下载 `{ "url": "https://...", "label": "可选说明", "size": "可选大小" }` |
 | `study`   | 这款游戏的页面正文，写法见下。缺省时页面用 `abstract` 与 `findings` |
 

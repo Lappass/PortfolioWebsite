@@ -5,6 +5,7 @@ import { logo } from "./brand";
 import { paintArtwork } from "./case-art";
 import type { Sound } from "./audio";
 import { createGameCover, type CoverSection, type GameCoverView } from "./game-covers";
+import { embedUrl, isFile, isWeb, seconds } from "./video";
 
 const heroArt = new Map<string, string>();
 type ScreenRect = { left: number; top: number; right: number; bottom: number; quad?: [number, number][] };
@@ -33,9 +34,7 @@ function heroSource(r: ArchiveRecord) {
   return url;
 }
 
-const isWeb = (value: string) => /^https?:\/\//i.test(value);
 const media = (value: string) => escapeHtml(isWeb(value) ? value : `${import.meta.env.BASE_URL}${value.replace(/^\//, "")}`);
-const isFile = (value: string) => /\.(mp4|webm|ogv|mov)(\?|#|$)/i.test(value);
 const pad = (value: number) => String(value).padStart(2, "0");
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -49,7 +48,7 @@ interface Neighbours { previous: ArchiveRecord; next: ArchiveRecord; position: n
 
 /** One block of the page below the cover. */
 type Section =
-  | { id: string; heading: string; kind: "play" | "trailer" | "shots" | "about" }
+  | { id: string; heading: string; kind: "play" | "trailer" | "playthrough" | "shots" | "about" }
   | { id: string; heading: string; kind: "study"; study: CaseStudySection };
 
 /**
@@ -96,6 +95,7 @@ export class ProjectPage {
       if (action === "unity") this.loadUnity(button);
       if (action === "go") this.goTo(button.dataset.to!);
       if (action === "shot") this.showShot(Number(button.dataset.i));
+      if (action === "chapter") this.seek(Number(button.dataset.at));
       if (action === "save" && this.record) this.setSaved(this.handlers.save(this.record.id));
       if (action === "fullscreen") void this.root.querySelector<HTMLIFrameElement>(".pp-unity iframe")?.requestFullscreen?.().catch(() => {});
     });
@@ -187,6 +187,8 @@ export class ProjectPage {
     const out: Section[] = [];
     if (r.unity) out.push({ id: "play", heading: "Play", kind: "play" });
     if (r.trailer ?? r.video) out.push({ id: "trailer", heading: "Trailer", kind: "trailer" });
+    // Games with their own cover play it on the cover itself (src/game-covers.ts).
+    if (r.playthrough && !r.menu) out.push({ id: "playthrough", heading: "Full playthrough", kind: "playthrough" });
     r.study?.sections.forEach((study, i) => out.push({ id: `s${i + 1}`, heading: study.heading, kind: "study", study }));
     if (!r.study) out.push({ id: "about", heading: "About", kind: "about" });
     if (r.gallery?.length) out.push({ id: "shots", heading: "Screenshots", kind: "shots" });
@@ -205,6 +207,7 @@ export class ProjectPage {
       <div class="pg-actions">
         ${button(Boolean(r.unity), "Play", `<button type="button" data-page="go" data-to="play">Play</button>`)}
         ${button(Boolean(r.trailer ?? r.video), "Trailer", `<button type="button" data-page="go" data-to="trailer">Trailer</button>`)}
+        ${r.playthrough && !r.menu ? `<button type="button" data-page="go" data-to="playthrough">Full playthrough</button>` : ""}
         ${button(Boolean(r.download), "Download", `<a href="${e(r.download?.url ?? "")}" target="_blank" rel="noopener noreferrer">Download${r.download?.size ? ` · ${e(r.download.size)}` : ""}</a>`)}
       </div></div>`;
   }
@@ -219,6 +222,11 @@ export class ProjectPage {
     }
     if (s.kind === "play") return `${open}<h2>Play</h2><div class="pp-frame">${this.unityMarkup(r)}</div></section>`;
     if (s.kind === "trailer") return `${open}<h2>Trailer</h2><div class="pp-frame">${this.videoMarkup(r, (r.trailer ?? r.video)!)}</div></section>`;
+    if (s.kind === "playthrough") {
+      const run = r.playthrough!;
+      const chapters = run.chapters?.length ? `<ol class="pg-chapters">${run.chapters.map((c) => `<li><button type="button" data-page="chapter" data-at="${seconds(c.at)}"><span>${e(c.at)}</span>${e(c.label)}</button></li>`).join("")}</ol>` : "";
+      return `${open}<h2>Full playthrough</h2><div class="pp-frame">${this.videoMarkup(r, run.src)}</div>${chapters}</section>`;
+    }
     if (s.kind === "shots") {
       return `${open}<h2>Screenshots</h2><div class="pg-shots"><figure class="pg-shot"></figure><div class="pg-thumbs">${r.gallery!.map((shot, k) => `<button type="button" data-page="shot" data-i="${k}" aria-label="Screenshot ${k + 1}"><img src="${media(shot.src)}" alt="" loading="lazy"></button>`).join("")}</div></div></section>`;
     }
@@ -375,8 +383,15 @@ export class ProjectPage {
 
   private videoMarkup(r: ArchiveRecord, src: string) {
     if (isFile(src)) return `<video controls playsinline preload="metadata"${r.cover ? ` poster="${media(r.cover)}"` : ""} src="${media(src)}"></video>`;
-    if (isWeb(src)) return `<iframe src="${escapeHtml(src)}" title="${escapeHtml(r.title)} video" loading="lazy" allow="fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe>`;
+    if (isWeb(src)) return `<iframe src="${escapeHtml(embedUrl(src))}" title="${escapeHtml(r.title)} video" loading="lazy" allow="fullscreen; picture-in-picture; encrypted-media; autoplay" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
     return "";
+  }
+
+  /** A playthrough chapter: jump the video there and start it. */
+  private seek(at: number) {
+    const frame = this.root.querySelector<HTMLElement>(".pg-playthrough .pp-frame > video, .pg-playthrough .pp-frame > iframe");
+    if (frame instanceof HTMLVideoElement) { frame.currentTime = at; void frame.play().catch(() => {}); }
+    else if (frame instanceof HTMLIFrameElement && this.record?.playthrough) frame.src = embedUrl(this.record.playthrough.src, { start: at });
   }
 
   private loadUnity(button: HTMLElement) {

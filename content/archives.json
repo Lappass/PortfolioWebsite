@@ -88,6 +88,9 @@
       "loader": "lockdown",
       "hero": "works/x-002/hero.jpg",
       "video": "works/x-002/demo.mp4",
+      "playthrough": {
+        "src": "https://youtu.be/JcOGLEW8Dzo"
+      },
       "gallery": [
         {
           "src": "works/x-002/kitchen.jpg",
@@ -551,6 +554,9 @@
       "back": "works/x-004/back.jpg",
       "loader": "lastmile",
       "hero": "works/x-004/hero.jpg",
+      "playthrough": {
+        "src": "https://youtu.be/Alf_cNTs91A"
+      },
       "gallery": [
         {
           "src": "works/x-004/title.jpg",
