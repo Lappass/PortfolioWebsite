@@ -3,11 +3,11 @@
   "alias": "Shuhang Chen",
   "role": "Game Developer",
   "roleEn": "Game developer",
-  "tagline": "I make games in Unity and C#. Three of the ones here are solo projects, and the fourth is a team capstone.",
+  "tagline": "I work mainly in Unity and C#. Three of the four games here are solo projects, and Sniff & Snitch is a team capstone.",
   "avatar": "",
   "bio": [
-    "LOCKDOWN, Trail Adventure and Last Mile are solo projects. I designed, wrote and programmed each of them. Sniff & Snitch is an online two-player capstone game, where I am a programmer and designer on a team.",
-    "This site is a small game too. Every work sits on the shelf as a game case, and opening one sends its disc into the console on the desk."
+    "I designed, wrote and programmed LOCKDOWN, Trail Adventure and Last Mile on my own in 2026. Sniff & Snitch is a two-player online game made with a capstone team, where I'm a programmer and designer.",
+    "This site is built on RhineLabUI, an open-source Three.js project. I added the game cases, the console and the figure that carries the disc."
   ],
   "skills": [
     {
@@ -57,8 +57,8 @@
       ]
     },
     {
-      "time": "Future",
-      "title": "What's next?",
+      "time": "2027",
+      "title": "Not decided yet",
       "detail": "",
       "logo": "assets/experience-logos/next.svg",
       "upcoming": true

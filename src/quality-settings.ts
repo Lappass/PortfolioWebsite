@@ -48,7 +48,7 @@ function range(
 export function qualityMarkup(quality: RenderQuality) {
   const preset = matchingPreset(quality);
   return `<section class="quality-settings" aria-label="Quality settings">
-    <div class="quality-heading"><h3>RENDER QUALITY</h3>${choiceControl('id="quality-preset"', "Quality preset", preset, (Object.keys(presetLabels) as QualityPreset[]).map(key => [key, presetLabels[key]]))}</div>
+    <div class="quality-heading"><h3>Render quality</h3>${choiceControl('id="quality-preset"', "Quality preset", preset, (Object.keys(presetLabels) as QualityPreset[]).map(key => [key, presetLabels[key]]))}</div>
     <p class="quality-summary" id="quality-summary" aria-live="polite"></p>
     <details class="quality-advanced"><summary>Advanced <span>Sharpness / Materials / Shadows</span></summary><div class="quality-grid">
     ${range(quality, "scale", "Render scale", "Relative to screen pixels, capped by the density limit; higher values sharpen fine lines", 50, 200)}

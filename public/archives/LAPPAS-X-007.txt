@@ -1,13 +1,13 @@
 ﻿Sniff & Snitch
-An online co-op prison break for two
+A two-player online co-op stealth game
 
 Shuhang Chen · Programmer and designer, capstone team · Unity · C# · Netcode for GameObjects · 2026 · In development
 
-Lyra, a witch, and Fia, a red panda, are both in for theft, and neither gets out of the magic prison alone. One player takes each. They split up where the routes differ, meet at doors that need both of them, and slip past guards who see in a cone and hear through walls. A caught player goes to a gas cage, and the partner has 15 seconds to get there. I was a programmer and designer on the capstone team.
+Two players break out of a magic prison together, one as Lyra, a witch, and one as Fia, a red panda. Routes split where one of them can pass and the other can't, and doors, boxes and takedowns need both. Guards see in a 120-degree cone and hear through walls. A caught player is taken to a gas cage, and the partner has 15 seconds to open it. Capstone team project; I'm a programmer and designer on it.
 
-- Each guard is one state machine with 18 states that sees 12.3 m in a 120 degree cone and hears through walls, each wall halving what is left past 5 m.
-- A caught player is walked to a gas cage, and the partner has 15 seconds to get there and hold E for 1.5 seconds.
-- Latch doors, push boxes, the lift gate and the takedown need both players, with the server syncing only grips, taps and start times.
+- Guards are state machines with 18 states. They see 12.3 m in a 120-degree cone and hear through walls, with each wall halving a sound past its first 5 m.
+- A caught player is walked to a gas cage. The partner has 15 seconds to reach it and hold E for 1.5 seconds.
+- Doors, push boxes, the lift gate and the takedown need both players. The server only syncs who is gripping, tap counts and start times; animations are computed locally.
 
 Lyra and Fia
 

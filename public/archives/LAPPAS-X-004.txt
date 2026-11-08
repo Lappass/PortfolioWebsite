@@ -1,13 +1,13 @@
 ﻿Last Mile
-Ten days running a delivery station
+A management game about a food-delivery station
 
 Shuhang Chen · Solo project · Unity · C# · 2026
 
-Ten days running Lanting, a small food-delivery station. Orders land on a 3D city as countdown pins, and for each one you pick who goes: a rider paid by the drop, a ground robot or a drone. Sending Chen instead of Xiaoyu on an ID check decides who gets closer to the bill they are saving for. Over the ten days headquarters moves the station onto machines, one rider's place at a time.
+You manage Lanting, a small food-delivery station, for ten days. Orders appear on a 3D map of the district as countdown pins, and you assign each one to a rider, a ground robot or a drone. Riders are paid per drop, and each of them needs money for something by a certain day. From Day 3 headquarters starts adding machines, and each one takes a rider's place on the roster.
 
-- Each order is dispatched by hand to a courier with a name, and the deadline comes from the fastest rested courier, so a slower pick is what makes it late.
-- Four riders each need money for one thing by one evening, and a fair share of the work just covers it.
-- The district is one road graph modelled on Xujiahui, filled in by editor scripts, and the editor can play all ten days by itself to check the 132 orders.
+- Every order is assigned by hand. The deadline is set from the fastest available courier, so a late order is usually the result of a dispatch decision.
+- Four riders each have one bill due on a set day, and an even share of the orders is just enough to cover it.
+- The district is a road graph based on Xujiahui, filled in by editor scripts. A headless test plays all ten days and checks that all 132 orders resolve.
 
 The orders
 

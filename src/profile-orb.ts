@@ -6,7 +6,7 @@ export type Chapter = 'identity' | 'about' | 'skills' | 'experience';
 const chapters: Chapter[] = ['identity', 'about', 'skills', 'experience'];
 const COUNT = 30000;
 const groups = profile.skills.map((skill, sourceIndex) => ({ ...skill, sourceIndex })).filter(skill => skill.items.length);
-const captions = ['My mark.', 'About me.', 'What I work with.', 'Where I have been.'];
+const captions = ['The logo', 'Portrait', 'Tools', 'Experience'];
 const skillIcons: Record<string, string> = { Unity: 'unity', UE: 'unrealengine', 'C#': 'csharp', Java: 'java', 'C++': 'cplusplus' };
 const skillMarks = groups.flatMap((group, groupIndex) => {
   const items = group.items.filter(item => skillIcons[item]), center = skillCenter(groupIndex, groups.length);
@@ -309,7 +309,7 @@ export class ProfileOrb {
   private updateLabels() {
     const index = chapters.indexOf(this.chapter); this.figure.dataset.shape = this.chapter;
     this.labels.dataset.chapter = this.chapter;
-    this.figure.querySelector('.profile-orb-caption')!.textContent = this.chapter === 'about' && this.figure.dataset.portrait === 'error' ? 'Portrait unavailable. Explore the particle sphere.' : captions[index];
+    this.figure.querySelector('.profile-orb-caption')!.textContent = this.chapter === 'about' && this.figure.dataset.portrait === 'error' ? 'Portrait unavailable.' : captions[index];
     this.figure.querySelector('figcaption small')!.textContent = this.chapter === 'about' ? 'Drag to rotate · Click to scatter · Move to interact' : 'Click a panel · Move to interact';
     this.labels.replaceChildren();
     const names = this.chapter === 'skills' ? groups.map(s => s.group) : this.chapter === 'experience' ? profile.experience.map(s => s.time) : [];

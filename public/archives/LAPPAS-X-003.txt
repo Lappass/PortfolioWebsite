@@ -1,13 +1,13 @@
 ﻿Trail Adventure
-Climbing a mountain island with an old camera
+A first-person climbing and wildlife photography game
 
 Shuhang Chen · Solo project · Unity · C# · 2026
 
-Leo, an old photographer, has left you his cabin, his camera and a mountain island. Every trip starts at the bench, packing four tools, and ends at the summit or when you are too worn out to go on. Any face steeper than 50 degrees can be climbed on one stamina bar, and 24 species fill a field guide. Sixteen islanders ask for photos, and what they give back comes down on a paper parachute.
+You inherit a cabin and a camera from Leo, an old photographer, on a mountain island with 24 animal species. Each trip starts by packing four tools at the cabin bench and ends at the summit, or when hunger, cold and tiredness have eaten the stamina bar. Any slope over 50 degrees can be climbed. Sixteen islanders ask for photos and send tools back by paper parachute.
 
-- Any face steeper than 50 degrees can be climbed, on one stamina bar that hunger, cold, tiredness, injury and the weight of the bag each take a slice off.
-- Photos score one to three stars for what is in the frame, and each of the 24 species has its own row of moments in the field guide.
-- The island, the cave and the old mine are generated in the editor, and the journal-style interface is drawn in code.
+- Climbing, running and jumping all spend one stamina bar. Hunger, cold, tiredness, injury and pack weight each shorten it.
+- A photo scores one to three stars from what is in the frame: distance, eye contact, flight, young, golden hour. Each species has a list of moments to collect.
+- The island, cave and mine are built by editor scripts, and the UI is drawn in code to look like a paper journal.
 
 The climb
 

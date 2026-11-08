@@ -33,7 +33,7 @@ export function pwaSettingsMarkup() {
     : ios() ? "In Safari, tap Share → Add to Home Screen, then open it from the home screen icon."
     : installPrompt ? "Install to open the portfolio in its own window."
     : "Install or add to the home screen from your browser menu.";
-  return `<section id="pwa-settings" class="pwa-settings" aria-label="Home screen and offline use"><h3>APP / HOME SCREEN & OFFLINE</h3><p>${guidance}</p><p class="pwa-status" role="status">${status}</p><div class="pwa-actions">${installPrompt && !installed() ? '<button data-pwa-action="install">Install on device ↗</button>' : ""}${registration?.waiting ? '<span>New version ready</span><button data-pwa-action="update">Update and restart ↻</button>' : ""}${failed ? '<button data-pwa-action="retry">Retry offline save ↻</button>' : ""}</div></section>`;
+  return `<section id="pwa-settings" class="pwa-settings" aria-label="Home screen and offline use"><h3>Home screen and offline use</h3><p>${guidance}</p><p class="pwa-status" role="status">${status}</p><div class="pwa-actions">${installPrompt && !installed() ? '<button data-pwa-action="install">Install on device ↗</button>' : ""}${registration?.waiting ? '<span>New version ready</span><button data-pwa-action="update">Update and restart ↻</button>' : ""}${failed ? '<button data-pwa-action="retry">Retry offline save ↻</button>' : ""}</div></section>`;
 }
 function refresh() {
   const current = document.querySelector("#pwa-settings");

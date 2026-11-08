@@ -1,13 +1,13 @@
 ﻿LOCKDOWN
-Cooking for three through a twenty-day lockdown
+A 20-day survival game about cooking for a family in lockdown
 
 Shuhang Chen · Solo project · Unity · C# · 2026
 
-Twenty days at home with Grandpa and Daughter during a city lockdown with no announced end. Each morning a package arrives, and by Day 7 it can be just noodles, a cabbage and some rice. You fit what came into the pan as a tangram puzzle, store the leftovers in a fridge where food rots, and answer the family and the building on the phone. The idea comes from my family's 2022 lockdown in Shanghai.
+LockDown is a survival game set in one apartment during a 20-day city lockdown. Each morning a supply package arrives, and by Day 7 it may be just noodles, a cabbage and rice. Cooking is a tangram puzzle: you cut the ingredients, fit them into a pan that is too small, and store the leftovers in a fridge where food rots. The family and the neighbours reach you through the phone. Based on my family's lockdown in Shanghai in 2022.
 
-- Cooking is a tangram puzzle, where twelve ingredient shapes of 3 to 7 cells are cut and fitted into a pan that is never big enough.
-- The fridge is a 6 by 8 grid, and from Day 8 anything stored for two days grows a rotten cell that spreads.
-- The phone's three channels, the newspaper, the building group and the family chat, report the same shortage from three distances.
+- Twelve ingredients, each a shape of 3 to 7 cells, are cut and fitted into a pan of 18 to 25 cells.
+- The fridge is a 6 by 8 grid. From Day 8, food stored for two days starts to rot, and the rot spreads to neighbouring cells.
+- The phone has a newspaper, a building group chat and a family chat. On Day 4 the building asks about medicine, on Day 5 the paper reports refills running late, and the same morning Grandpa's box is empty.
 
 The 2022 lockdown
 

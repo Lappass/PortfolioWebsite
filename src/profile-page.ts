@@ -276,7 +276,7 @@ export class ProfilePage {
             <canvas class="profile-particle-canvas" tabindex="0" role="img" aria-label="Interactive particles. In About, drag or use arrow keys to rotate the portrait; click or press Space to scatter and regroup."></canvas>
             <div class="profile-orb-labels" aria-hidden="true"></div>
           </div>
-          <figcaption><p class="profile-orb-caption">A mark of my own.</p><small>Click a panel · Move to interact</small></figcaption>
+          <figcaption><p class="profile-orb-caption">The logo</p><small>Click a panel · Move to interact</small></figcaption>
           <dl class="pc-readouts">${readouts.map(([label, value]) => `<div><dt>${label}</dt><dd data-count="${value}">00</dd></div>`).join("")}</dl>
         </figure>
         ${panel("skills", 2, `${tools} tools`, `<div class="pc-content profile-skills">${p.skills.map((s, index) => `<div data-skill-group="${index}"><h3>${e(s.group)}</h3><p>${s.items.length ? s.items.map(e).join(" / ") : "—"}</p></div>`).join("")}</div>`)}

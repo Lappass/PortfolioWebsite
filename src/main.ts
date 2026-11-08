@@ -851,7 +851,7 @@ attachPadInput({
     scene?.setPad({ home: 1 });
     clearTimeout(cheatLight);
     cheatLight = window.setTimeout(() => scene?.setPad({ home: 0 }), 1600);
-    notify("Cheat code. Thanks for playing.");
+    notify("Cheat code accepted");
   },
 });
 document.addEventListener("keydown", (e) => {
