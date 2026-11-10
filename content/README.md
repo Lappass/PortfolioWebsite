@@ -55,6 +55,22 @@
 
 插盘后打开的是一整页往下滚的页面。第一屏是封面：有 `menu` 的游戏用它自己的造型，否则用主视觉；封面上有标题、`en` 一句、`pitch`、`facts` 连成的一行，以及 Play（`unity`）、Trailer（`trailer`，缺省用 `video`）、Download（`download`）三个按钮，没有的灰显为 not yet。往下依次是试玩、预告片、`sections` 每节一块（标题、`summary`，第一张 `media` 大图、第二张小图）、截图（`gallery`）和链接。封面造型里的部件（营地、订单条、窗格、名牌）各对应一节，点击跳过去，滚动时点亮当前一节；右侧圆点可以跳到任何一块，↑↓ 与 PageUp/PageDown 逐块移动。没有 `summary` 时取 `body` 的第一句。配图放在 `public/works/<编号>/study/`。TXT 下载会附上各节正文。
 
+一节也可以照着打印版作品集的那一页来排：加上 `spread`，这一节就显示 `body` 的全部段落（不再用 `summary`），图片按对应版式摆放。Trail Adventure 用的就是这种写法，对应它的 PDF 作品集。
+
+| `spread`    | 版式 |
+| ----------- | ---- |
+| `prints`    | 左边文字，右边是三张斜放的实拍照片（白边相纸） |
+| `grid`      | 左边文字，右边两列编号截图；`note` 写在图下 |
+| `bleed`     | 第一张图贴着页面左边缘铺满整节，第二张（通常是横条）插在最后一段之前 |
+| `pair`      | 图配前几段文字，下一行是最后一段配第二张较小的图 |
+| `herd`      | 顶部一排物种图标（`herd: [{ "src", "name" }]`），下面文字配一张图，最后一段放在图下 |
+| `trio`      | 左边文字，右边一大两小 |
+| `annotated` | 顶部一张宽图，`marks: [{ "x", "y" }]`（百分比）标编号；下面是文字、`points` 编号说明（“名称. 说明”）和第二张图 |
+| `cards`     | 一段引言，下面一排卡片，每张图写 `title` 与 `note` |
+| `card`      | 整幅图上压一张纸片，写 `controls`：每行 `[{ "keys": ["W", "A"], "say": "walk" }]`，鼠标键写 `mouse-left`、`mouse-right`、`mouse-wheel` |
+
+`media` 每项还可以写 `focus`（裁切时保留的位置，CSS `object-position`，如 `"12% 50%"`）。`note` 用于 `prints`（文字下方）和 `grid`（图下），显示为灰色小字。手机上所有版式都改为单列。
+
 文字一律用自己的口吻：短句，具体的人名、地名和数字写在句子里，讲意图用第一人称；标题是名词或平常的句子。校验会拒绝全大写的 `en` 和标题、含 " that " 的标题、COMING SOON / A GAME BY / SOLO DEVELOPER / MIN READ / RESTRICTED 这类套话，以及不在 25 到 90 个词之间的 `summary`。
 
 封面区按 Unity、视频、封面图的顺序选择第一个可用项；有 Unity 时视频单独显示在下方。

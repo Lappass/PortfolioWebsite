@@ -38,7 +38,21 @@ export interface ArchiveRecord {
   study?: CaseStudy;
 }
 
-export interface CaseStudyMedia { src: string; caption?: string }
+export interface CaseStudyMedia {
+  src: string;
+  caption?: string;
+  /** In a `cards` spread: the card's title and the text under it. */
+  title?: string;
+  note?: string;
+  /** In an `annotated` spread: numbered dots on the picture, in percent of its width and height. */
+  marks?: { x: number; y: number }[];
+  /** Which part of the picture stays in view when a spread crops it (CSS object-position, e.g. "12% 50%"). */
+  focus?: string;
+}
+/** A key on the controls card: a key name, or `mouse-left`, `mouse-right`, `mouse-wheel`. */
+export type ControlRow = { keys: string[]; say: string }[];
+/** How a section is laid out when it follows a printed work sample page for page (content/README.md). */
+export type SpreadKind = "prints" | "grid" | "bleed" | "pair" | "herd" | "trio" | "annotated" | "cards" | "card";
 export interface CaseStudySection {
   heading: string;
   /** The paragraph shown beside the pictures. `body` and `points` are kept for the TXT download. */
@@ -47,6 +61,14 @@ export interface CaseStudySection {
   points?: string[];
   /** The first picture is shown large, the second small. */
   media?: CaseStudyMedia[];
+  /** Lay the section out like a printed page: every paragraph of `body` shows, and the pictures take the spread's places. */
+  spread?: SpreadKind;
+  /** A muted line under the pictures (`grid`), or under the text. */
+  note?: string;
+  /** The species strip of a `herd` spread. */
+  herd?: { src: string; name: string }[];
+  /** The rows of a `card` spread. */
+  controls?: ControlRow[];
 }
 export interface CaseStudy {
   pitch: string;

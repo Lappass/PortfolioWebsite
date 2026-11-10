@@ -205,6 +205,114 @@
 .pg-dots button:hover::before { opacity: 1; }
 .pg-dots button.on::before { background: var(--pp-accent); opacity: 1; transform: scale(1.4); }
 
+/* Sections that follow a printed work sample page for page (`spread` in content/README.md):
+   the full text in a serif, captions and headings in the narrow sans, pictures where the page had them. */
+.pg-spread { --pg-gap: clamp(24px, 4vw, 56px); --pg-pad: clamp(48px, 8vh, 96px); display: grid; gap: var(--pg-gap); align-items: start; }
+.pg-spread p { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 17px; line-height: 1.65; max-width: 34em; }
+.pg-spread p + p, .pg-spread p + figure, .pg-spread figure + p { margin-top: 14px; }
+.pg-spread h2, .pg-spread h3, .pg-spread figcaption, .pg-spread .pg-note, .pg-species, .pg-numbered b { font-family: Bahnschrift, "Segoe UI", sans-serif; }
+.pg-spread h3 { margin: 12px 0 4px; font-size: 17px; font-weight: 600; }
+.pg-spread figure { margin: 0; }
+.pg-pic { position: relative; overflow: hidden; background: var(--pp-panel); }
+.pg-pic img { display: block; width: 100%; height: auto; }
+.pg-spread figcaption { margin-top: 8px; font-size: 13.5px; line-height: 1.45; color: var(--pp-muted); }
+.pg-spread figcaption b { margin-right: 8px; font-weight: 600; color: var(--pp-ink); }
+.pg-spread .pg-fignote { margin-top: 10px; font-size: 15.5px; }
+.pg-spread .pg-note { margin-top: 14px; font-size: 13.5px; color: var(--pp-muted); }
+/* Cropped pictures fill the frame they are given. */
+.pg-gridpics .pg-pic, .pg-cardrow .pg-pic, .pg-triopics .pg-pic, .pg-wide .pg-pic { aspect-ratio: 16 / 9; }
+.pg-gridpics img, .pg-cardrow img, .pg-triopics img, .pg-wide img, .pg-bleedpic img, .pg-backdrop img { height: 100%; object-fit: cover; }
+
+/* Real photos as prints pinned to the page. */
+.pg-prints { grid-template-columns: minmax(0, 34fr) minmax(0, 66fr); }
+.pg-board { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 28px 34px; align-items: center; padding: 10px 6px 0 0; }
+.pg-print { padding: 10px 10px 0; background: #fff; box-shadow: 0 4px 14px rgba(38, 48, 44, 0.18); }
+.pg-print figcaption { margin: 0; padding: 8px 2px 10px; font-family: Georgia, serif; font-style: italic; font-size: 13.5px; color: var(--pp-ink); }
+.pg-print:nth-child(1) { transform: rotate(-1.2deg); }
+.pg-print:nth-child(2) { grid-row: 2; margin-left: 6%; transform: rotate(0.9deg); }
+.pg-print:nth-child(3) { grid-column: 2; grid-row: 1 / span 2; transform: rotate(1.5deg); }
+
+/* Text beside a grid of numbered pictures. */
+.pg-grid { grid-template-columns: minmax(0, 34fr) minmax(0, 66fr); }
+.pg-gridpics { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 22px; }
+
+/* The first picture runs off the left edge, top to bottom; the second sits inside the text. */
+.pg-bleed { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; }
+.pg-spread .pg-bleedpic { margin: calc(-1 * var(--pg-pad)) 0 calc(-1 * var(--pg-pad)) calc(-1 * var(--pp-edge)); min-height: 560px; }
+.pg-bleedpic .pg-pic { height: 100%; }
+.pg-bleedpic img { position: absolute; inset: 0; object-position: 56% 100%; }
+.pg-bleed .pg-col { align-self: center; }
+
+/* Picture and text, then text and a smaller picture. */
+.pg-pair { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+.pg-pair .pg-after { align-self: center; }
+.pg-pair > figure:last-child { width: 78%; justify-self: end; }
+
+/* The species strip across the top, then text and the field guide. */
+.pg-species { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px 8px; margin: 0; padding: 0; list-style: none; text-align: center; font-size: 12.5px; color: var(--pp-muted); }
+.pg-species img { display: block; width: 100%; height: 64px; object-fit: contain; margin-bottom: 2px; }
+.pg-spread.pg-herd { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+.pg-spread.pg-herd > h2 { grid-column: 1 / -1; margin-bottom: 0; }
+
+/* One large picture over two small ones. */
+.pg-trio { grid-template-columns: minmax(0, 36fr) minmax(0, 64fr); }
+.pg-triopics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 22px; }
+.pg-triopics .pg-lead { grid-column: 1 / -1; }
+
+/* A wide picture with numbered dots, the key to them beside the text. */
+.pg-annotated { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1fr); }
+.pg-annotated .pg-wide { grid-column: 1 / -1; }
+.pg-annotated .pg-wide .pg-pic { aspect-ratio: 1136 / 316; }
+.pg-mark { position: absolute; transform: translate(-50%, -50%); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--pp-paper); color: var(--pp-ink); font: 600 13px/1 Bahnschrift, "Segoe UI", sans-serif; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35); }
+.pg-numbered { margin: 0; padding: 0; list-style: none; counter-reset: n; }
+.pg-numbered li { counter-increment: n; position: relative; padding-left: 28px; font-family: Georgia, serif; font-size: 15.5px; line-height: 1.5; }
+.pg-numbered li + li { margin-top: 8px; }
+.pg-numbered li::before { content: counter(n); position: absolute; left: 0; top: 2px; font: 600 13px/1.4 Bahnschrift, "Segoe UI", sans-serif; color: var(--pp-accent); }
+
+/* A short introduction, then a row of cards. */
+.pg-cards { grid-template-columns: minmax(0, 1fr); }
+.pg-cardrow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; margin-top: 18px; }
+.pg-cardrow .pg-pic { aspect-ratio: 4 / 3; }
+.pg-cardrow .pg-fignote { margin-top: 0; font-size: 15px; }
+
+/* The controls on a paper card over a full picture. */
+.pg-card { position: relative; display: block; }
+.pg-backdrop .pg-pic { aspect-ratio: 16 / 9; max-height: 86vh; width: 100%; }
+.pg-backdrop img { position: absolute; inset: 0; }
+.pg-backdrop figcaption { position: absolute; right: 18px; bottom: 14px; margin: 0; color: #fff; text-shadow: 0 1px 4px rgba(20, 30, 40, 0.6); }
+.pg-backdrop { position: relative; }
+.pg-paper { position: absolute; left: 6%; top: 50%; width: min(480px, 42%); padding: 30px 36px 26px; background: #fbf8ee; border-radius: 4px; color: #3a4640;
+  box-shadow: 0 10px 30px rgba(20, 30, 40, 0.35); transform: translateY(-50%) rotate(-1.2deg); }
+.pg-paper::before, .pg-paper::after { content: ""; position: absolute; top: -11px; height: 22px; opacity: 0.88; }
+.pg-paper::before { left: 54px; width: 96px; background: #9ccfc4 radial-gradient(rgba(255, 255, 255, 0.75) 1.6px, transparent 1.8px) 0 0 / 10px 10px; transform: rotate(-3deg); }
+.pg-paper::after { right: 46px; width: 84px; background: #e9a9a6 linear-gradient(90deg, rgba(255, 255, 255, 0.45) 50%, transparent 50%) 0 0 / 8px 8px; transform: rotate(2.5deg); }
+.pg-paper h2 { margin: 0; padding-bottom: 12px; border-bottom: 3px dotted #d8d2bc; font-family: "Segoe Print", "Bradley Hand", cursive; font-size: 27px; font-weight: 700; color: #26302c; }
+.pg-spread .pg-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; padding: 6px 0; max-width: none; font-family: "Segoe Print", "Bradley Hand", cursive; font-size: 15.5px; line-height: 1.25; }
+.pg-paper h2 + .pg-keys { margin-top: 10px; }
+.pg-kp { display: inline-flex; align-items: center; gap: 6px; margin-right: 14px; }
+.pg-keys kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 25px; height: 25px; padding: 0 7px; background: #fff; border: 1.6px solid #26302c; border-bottom-width: 3px; border-radius: 6px;
+  font: 700 12px/1 Bahnschrift, "Segoe UI", sans-serif; color: #26302c; }
+.pg-keys .pg-key-mouse { display: inline-flex; color: #26302c; }
+.pg-mouse { width: 17px; height: 25px; }
+
+@media (max-width: 860px) {
+  .pg-spread, .pg-spread.pg-herd { grid-template-columns: minmax(0, 1fr); }
+  .pg-spread .pg-bleedpic { margin: calc(-1 * var(--pg-pad)) calc(-1 * var(--pp-edge)) 0; min-height: 0; }
+  .pg-bleedpic .pg-pic { aspect-ratio: 4 / 3; }
+  .pg-pair > figure:last-child { width: 100%; }
+  .pg-pair .pg-after { order: 1; }
+  .pg-species { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .pg-cardrow { grid-template-columns: 1fr 1fr; }
+  .pg-board { grid-template-columns: 1fr 1fr; }
+  .pg-print:nth-child(1) { grid-column: 1 / -1; }
+  .pg-print:nth-child(2) { grid-row: auto; margin-left: 0; }
+  .pg-print:nth-child(3) { grid-column: auto; grid-row: auto; }
+  .pg-backdrop .pg-pic { aspect-ratio: 4 / 3; }
+  .pg-backdrop figcaption { position: static; color: var(--pp-muted); text-shadow: none; }
+  .pg-paper { position: relative; left: auto; top: auto; width: auto; margin: 22px 4px 0; padding: 26px 22px 20px; transform: rotate(-1deg); }
+}
+
 @media (max-width: 860px) {
   .pp-brand, .pp-bar nav button span, .pp-bar small { display: none; }
   .pp-bar { grid-template-columns: 1fr auto; }

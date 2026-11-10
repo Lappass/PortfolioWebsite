@@ -1,5 +1,5 @@
 import "./project-page.css";
-import type { ArchiveRecord, CaseStudySection } from "./data";
+import type { ArchiveRecord, CaseStudyMedia, CaseStudySection } from "./data";
 import { escapeHtml } from "./html";
 import { logo } from "./brand";
 import { paintArtwork } from "./case-art";
@@ -36,6 +36,44 @@ function heroSource(r: ArchiveRecord) {
 
 const media = (value: string) => escapeHtml(isWeb(value) ? value : `${import.meta.env.BASE_URL}${value.replace(/^\//, "")}`);
 const pad = (value: number) => String(value).padStart(2, "0");
+
+/* ---- Sections laid out like the pages of a printed work sample (`spread` in content/README.md). ---- */
+const mouse = (lit: "left" | "right" | "wheel") => {
+  const on = "var(--pp-accent)", off = "#fff";
+  return `<svg class="pg-mouse" viewBox="0 0 17 25" aria-hidden="true"><rect x="1" y="1" width="15" height="23" rx="7.5" fill="#fff"/><path d="M1.8 10V8.5A6.7 6.7 0 0 1 8.5 1.8V10Z" fill="${lit === "left" ? on : off}"/><path d="M15.2 10V8.5A6.7 6.7 0 0 0 8.5 1.8V10Z" fill="${lit === "right" ? on : off}"/><path d="M1 10H16M8.5 1V10" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="7.3" y="3.6" width="2.4" height="4.4" rx="1.2" fill="${lit === "wheel" ? on : "currentColor"}"/><rect x="1" y="1" width="15" height="23" rx="7.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>`;
+};
+const MOUSE_SAY: Record<string, string> = { "mouse-left": "Left mouse button", "mouse-right": "Right mouse button", "mouse-wheel": "Mouse wheel" };
+const keyCap = (key: string) => key.startsWith("mouse-")
+  ? `<span class="pg-key-mouse" role="img" aria-label="${MOUSE_SAY[key] ?? key}">${mouse(key.slice(6) as "left" | "right" | "wheel")}</span>`
+  : `<kbd>${escapeHtml(key)}</kbd>`;
+
+function spreadMarkup(s: CaseStudySection) {
+  const e = escapeHtml, pics = s.media ?? [], body = s.body;
+  const para = (list: string[]) => list.map((p) => `<p>${e(p)}</p>`).join("");
+  const fig = (m: CaseStudyMedia | undefined, cls = "", n?: number) => m ? `<figure class="${cls}"><div class="pg-pic"><img src="${media(m.src)}" alt="${e(m.caption ?? m.title ?? s.heading)}" loading="lazy" decoding="async"${m.focus ? ` style="object-position:${e(m.focus)}"` : ""}>${
+    (m.marks ?? []).map((p, k) => `<span class="pg-mark" style="left:${p.x}%;top:${p.y}%" aria-hidden="true">${k + 1}</span>`).join("")}</div>${
+    m.title ? `<h3>${e(m.title)}</h3>` : ""}${m.caption ? `<figcaption>${n ? `<b>${n}</b>` : ""}${e(m.caption)}</figcaption>` : ""}${m.note ? `<p class="pg-fignote">${e(m.note)}</p>` : ""}</figure>` : "";
+  const head = `<h2>${e(s.heading)}</h2>`;
+  const note = s.note ? `<p class="pg-note">${e(s.note)}</p>` : "";
+  const numbered = (list: string[]) => `<ol class="pg-numbered">${list.map((p) => {
+    const [, lead, rest] = /^([^.]+\.)\s(.*)$/.exec(p) ?? [, "", p];
+    return `<li>${lead ? `<b>${e(lead)}</b> ` : ""}${e(rest!)}</li>`;
+  }).join("")}</ol>`;
+  switch (s.spread) {
+    case "prints": return `<div class="pg-col">${head}${para(body)}${note}</div><div class="pg-board">${pics.map((m) => fig(m, "pg-print")).join("")}</div>`;
+    case "grid": return `<div class="pg-col">${head}${para(body)}</div><div><div class="pg-gridpics">${pics.map((m, i) => fig(m, "", i + 1)).join("")}</div>${note}</div>`;
+    case "bleed": return `${fig(pics[0], "pg-bleedpic")}<div class="pg-col">${head}${para(body.slice(0, -1))}${fig(pics[1], "pg-inline")}${para(body.slice(-1))}</div>`;
+    case "pair": return `${fig(pics[0])}<div class="pg-col">${head}${para(body.slice(0, -1))}</div><div class="pg-col pg-after">${para(body.slice(-1))}</div>${fig(pics[1])}`;
+    case "herd": return `${head}<ul class="pg-species">${(s.herd ?? []).map((a) => `<li><img src="${media(a.src)}" alt="" loading="lazy">${e(a.name)}</li>`).join("")}</ul>
+      <div class="pg-col">${para(body.slice(0, -1))}</div><div>${fig(pics[0])}<p class="pg-fignote">${e(body[body.length - 1])}</p></div>`;
+    case "trio": return `<div class="pg-col">${head}${para(body)}</div><div class="pg-triopics">${pics.map((m, i) => fig(m, i ? "" : "pg-lead")).join("")}</div>`;
+    case "annotated": return `${fig(pics[0], "pg-wide")}<div class="pg-col">${head}${para(body)}</div>${s.points ? numbered(s.points) : "<div></div>"}${fig(pics[1])}`;
+    case "cards": return `<div class="pg-col">${head}${para(body)}</div><div class="pg-cardrow">${pics.map((m) => fig(m)).join("")}</div>`;
+    case "card": return `${fig(pics[0], "pg-backdrop")}<div class="pg-paper">${head}${(s.controls ?? []).map((row) =>
+      `<p class="pg-keys">${row.map((c) => `<span class="pg-kp">${c.keys.map(keyCap).join("")}<span>${e(c.say)}</span></span>`).join("")}</p>`).join("")}</div>`;
+    default: return `<div class="pg-col">${head}${para(body)}</div>`;
+  }
+}
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export const workHash = (id: string) => `#/work/${id.toLowerCase()}`;
@@ -214,6 +252,7 @@ export class ProjectPage {
 
   private sectionMarkup(r: ArchiveRecord, s: Section, i: number) {
     const e = escapeHtml, open = `<section class="pg-sec pg-${s.kind}" id="sec-${e(s.id)}" data-block="${e(s.id)}" data-i="${i}" tabindex="-1">`;
+    if (s.kind === "study" && s.study.spread) return `${open.replace('class="pg-sec ', `class="pg-sec pg-spread pg-${e(s.study.spread)} `)}${spreadMarkup(s.study)}</section>`;
     if (s.kind === "study") {
       const [big, small] = s.study.media ?? [];
       const figure = (m: { src: string; caption?: string }, cls: string) => `<figure class="${cls}"><img src="${media(m.src)}" alt="${e(m.caption ?? s.heading)}" loading="lazy" decoding="async">${m.caption ? `<figcaption>${e(m.caption)}</figcaption>` : ""}</figure>`;

@@ -82,6 +82,9 @@ function validateVoice(record, label, errors) {
   });
 }
 
+/** Section layouts that follow a printed work sample page for page (src/project-page.ts, spreadMarkup). */
+const SPREADS = ["prints", "grid", "bleed", "pair", "herd", "trio", "annotated", "cards", "card"];
+
 /** The case study a game's page is built from: a pitch, a few facts, and sections of text with pictures. */
 function validateStudy(study, label, errors) {
   if (study === undefined) return;
@@ -104,6 +107,12 @@ function validateStudy(study, label, errors) {
     if (section?.points !== undefined && !texts(section.points)) errors.push(`${at}.points：必须是非空文本数组`);
     if (section?.summary !== undefined && !isText(section.summary)) errors.push(`${at}.summary：必须是非空文本`);
     for (const key of ["kicker", "stats", "layout"]) if (section?.[key] !== undefined) errors.push(`${at}.${key}：已废弃，请删除`);
+    if (section?.spread !== undefined && !SPREADS.includes(section.spread)) errors.push(`${at}.spread：只能是 ${SPREADS.join("、")} 之一`);
+    if (section?.note !== undefined && !isText(section.note)) errors.push(`${at}.note：必须是非空文本`);
+    if (section?.herd !== undefined && (!Array.isArray(section.herd) || !section.herd.every((a) => a && isMediaPath(a.src) && isText(a.name))))
+      errors.push(`${at}.herd：每项需要有效的 src 和 name`);
+    if (section?.controls !== undefined && (!Array.isArray(section.controls) || !section.controls.every((row) => Array.isArray(row) && row.every((c) => c && texts(c.keys) && isText(c.say)))))
+      errors.push(`${at}.controls：每行是 { keys, say } 数组`);
     if (section?.media !== undefined && (!Array.isArray(section.media) || !section.media.every((item) => item && isMediaPath(item.src) && (item.caption === undefined || isText(item.caption)))))
       errors.push(`${at}.media：每项需要有效的 src，caption 为可选文本`);
   });

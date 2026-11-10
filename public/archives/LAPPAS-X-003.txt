@@ -15,8 +15,6 @@ I started hiking after I moved to the United States for university, and I usuall
 
 The basic rules of the game are taken from those trips. Animals stay away from the path, so the player has to climb to get to them. Climbing uses stamina. Animals leave once they notice the player, so a good photo usually takes patience.
 
-A few of my photos are in the game too. They are the first pages of Leo's Journal.
-
 The first version
 
 In the first version, the player followed a fixed trail with obstacles on it and rolled a die at each one to get past. I got this idea from real hiking, because on a real mountain you almost always stay on the trail. In the game, though, there was only walking between the obstacles, and it was boring.
@@ -31,7 +29,7 @@ Climbing is slow on purpose, about 0.6 meters a second. The player goes up one p
 
 Running, climbing and jumping all use stamina, but walking is free, so that the player can look at the mountain and not at the bar.
 
-Hunger, cold, injury, tiredness and a heavy bag each take a piece off the end of the bar, and each piece has its own color. I like it because I don't have to explain several systems to the player. The stamina bar is the only resource they have to manage, and every other effect is added on top of it. It is also how a real hike works, where being hungry or cold just means you have less energy to climb, and I think that helps the player feel they are really on the mountain.
+Hunger, cold, injury, tiredness and a heavy bag each take a piece off the end of the bar, and each piece has its own color. This idea comes from the game Peak. I like it because I don't have to explain several systems to the player. The stamina bar is the only resource they have to manage, and every other effect is added on top of it. It is also how a real hike works, where being hungry or cold just means you have less energy to climb, and I think that helps the player feel they are really on the mountain.
 
 Photography
 
@@ -47,7 +45,7 @@ The animals I met on real trips did not all react to me the same way. On Mount R
 
 Some have habits of their own. Foxes steal snacks. Goats spar with each other and will butt anyone who gets too close. The ptarmigan hen won't leave her nest, and the owl is only out from early evening until morning. Sneaking lets the player get nearer before being noticed.
 
-Each animal in the field guide has a list of moments to photograph, such as a close-up, on the run, or at night. Every new moment gives one star, so the player has a reason to go back to an animal they have already photographed.
+The field guide works like a Pokédex. Each animal has a list of moments to photograph, such as a close-up, on the run, or at night. Every new moment gives one star, so the player has a reason to go back to an animal they have already photographed.
 
 Legendary creatures
 
@@ -65,23 +63,9 @@ Every request gives an item back, and all eight tools come from requests. So eve
 
 The Flashlight is an example. The cave is completely dark inside. Nell stands at the cave mouth and won't go in. When the player talks to her, she says that someone else on the island, Shepherd Bram, has a flashlight. The player goes to find Bram and takes a few photos for him, and then he gives her the Flashlight. With it she can go back and explore the whole cave.
 
-- Nell at the cave mouth.
-
-- Bram's last request: the ducks on the pond.
-
-- The ducks in the viewfinder.
-
-- The Flashlight comes down by parachute.
-
-- Down the mine ladder by flashlight.
-
-- Old Ida in the Miners' Camp.
-
 The cabin
 
 When I get home from a real trip, I have photos and a few small things from the way. The cabin is where the game keeps those. Every trip starts and ends here.
-
-The mail-order catalogue sells furniture and carvings for stars, so the camera is not the only thing stars can buy.
 
 - Camera bench. The player spends stars here to upgrade the camera.
 
@@ -98,14 +82,6 @@ The mail-order catalogue sells furniture and carvings for stars, so the camera i
 Planning a trip
 
 Before a trip the player makes a few choices in the cabin. I put them there so that part of the day is already decided when she walks out of the door.
-
-- The weather. The window shows the weather for the day. If it says cold or rain, a jacket is worth a place in the bag.
-
-- Packing. The tools for the day are laid out on the bench by the door.
-
-- Where to start. On the wall map the player picks the trailhead or any fire she reached on an earlier trip.
-
-- Film. One roll is ten shots, and a new roll only comes from resting at a fire. The number at the bottom right of the viewfinder is how many shots are left.
 
 How to play
 
