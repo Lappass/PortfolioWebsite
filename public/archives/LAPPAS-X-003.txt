@@ -1,7 +1,7 @@
 ﻿Trail Adventure
 A first-person climbing and wildlife photography game
 
-Shuhang Chen · Solo project · Unity · C# · 2026
+Shuhang Chen · Two-person project · Unity · C# · 2026
 
 You inherit a cabin and a camera from Leo, an old photographer, on a mountain island with 24 animal species. Each trip starts by packing four tools at the cabin bench and ends at the summit, or when hunger, cold and tiredness have eaten the stamina bar. Any slope over 50 degrees can be climbed. Sixteen islanders ask for photos and send tools back by paper parachute.
 
@@ -9,74 +9,112 @@ You inherit a cabin and a camera from Leo, an old photographer, on a mountain is
 - A photo scores one to three stars from what is in the frame: distance, eye contact, flight, young, golden hour. Each species has a list of moments to collect.
 - The island, cave and mine are built by editor scripts, and the UI is drawn in code to look like a paper journal.
 
-The climb
+Where it started
 
-The part I care about is the climb. I want it to cost something, so that a goat photographed on a high ledge is remembered together with the way up to it.
+I started hiking after I moved to the United States for university, and I usually had my camera with me. The game comes from those trips. Mount Rainier is the one I remember best. A ground squirrel sat on the rocks and looked straight at me. Higher up it was foggy, and a marmot was watching from a ridge. Both of them lived a long way up, and I only saw them because I had walked that far.
 
-The idea comes from my own trips. On Mount Rainier a marmot watched me from a ridge in the fog, and I only saw it because I had walked a long way up to where it lived. My photos from that trip are the first pages of Leo's Journal, the book by the armchair in the cabin. I use those trips as design rules.
+The basic rules of the game are taken from those trips. Animals stay away from the path, so the player has to climb to get to them. Climbing uses stamina. Animals leave once they notice the player, so a good photo usually takes patience.
 
-- The animals live away from the path, so the player has to go up to them.
+A few of my photos are in the game too. They are the first pages of Leo's Journal.
 
-- Going up is tiring, and tiredness is what ends a trip.
+The first version
 
-- Animals leave when they see you, so a good photo takes waiting.
+In the first version, the player followed a fixed trail with obstacles on it and rolled a die at each one to get past. I got this idea from real hiking, because on a real mountain you almost always stay on the trail. In the game, though, there was only walking between the obstacles, and it was boring.
 
-- What I keep from a trip is what I brought back, so the game has a cabin that keeps it.
+While I was testing it, the part I enjoyed most was running around and taking photos of the animals. It also reminded me of Antelope Canyon in Arizona. When I was there I really wanted to leave the trail and walk out into the desert around it. So I decided to build the game around photography and let the player walk wherever they want.
 
-A trip
+I removed the trails and the dice. Now the player can climb anywhere on the mountain to look for animals, and the mountain is the obstacle.
 
-Every trip starts and ends in the cabin. She packs up to four tools at the bench, reads the weather card in the window, and picks a start on the wall map, at the trailhead or at a fire she has found. I put this at home on purpose. By the time she opens the door she has already made a few decisions about the day.
+Climbing and stamina
 
-On the mountain she climbs, creeps up on animals and takes photos. People at the fires ask for photos, she sends them from the phone on her wrist, and what they give back comes down on a paper parachute. A night at a fire brings a fresh roll of film. The trip ends at the summit, when she picks Go home, or when she is too worn out to go on.
+Climbing is slow on purpose, about 0.6 meters a second. The player goes up one pull at a time, following the hands. I kept the hands low on the screen so they don't cover the rock or an animal sitting on it.
 
-- What to carry: four places in the bag, and every tool adds weight.
+Running, climbing and jumping all use stamina, but walking is free, so that the player can look at the mountain and not at the bar.
 
-- Move or wait: stamina comes back fast, but hunger and tiredness build all day.
+Hunger, cold, injury, tiredness and a heavy bag each take a piece off the end of the bar, and each piece has its own color. I like it because I don't have to explain several systems to the player. The stamina bar is the only resource they have to manage, and every other effect is added on top of it. It is also how a real hike works, where being hungry or cold just means you have less energy to climb, and I think that helps the player feel they are really on the mountain.
 
-- Shoot or wait: a roll has ten shots, and a blurred photo scores half.
+Photography
 
-Climbing
+In real life, animals get scared when a person shows up. But when they haven't noticed anyone, they carry on with their own things, and every animal has moments of its own that are worth a photo. The scoring follows this. A photo gets more points if the animal is close, if it is running or flying, or if it is looking into the lens.
 
-The first version had set obstacles on the trails and a die roll to get past each one, and the walking between them was dead time. I replaced all of that with climbing. Any face steeper than 50 degrees can be climbed by holding the left mouse button.
+When I take photos while running, they come out shaky. I also didn't want the player to run up to an animal and take a quick shot, so moving while shooting blurs the photo. A blurred photo only gets half the score and can't be sent for a request.
 
-Walking is free. Running costs 2.5 stamina a second, climbing up to 4, hanging still 2, a jump 5, and a lunge up the face with Space 20 at once for 1.7 metres. A second after she stops spending, the bar comes back at 20 a second. I made walking free so that players look at the mountain while they walk, not at the bar.
+New photos earn stars, and the player spends the stars at the bench in the cabin to upgrade the camera. I wanted photography to have a positive feedback loop. The more good photos the player takes, the better the camera gets, and with a better camera they can take more and better photos.
 
-Five afflictions each take a coloured slice off the end of the bar: hunger, tiredness, cold, injury and the weight of the bag. The bar shrinks a slice at a time, so the player can see what took each one, and most of them can be dealt with.
+Animals
 
-- The Down Jacket cuts cold to 30 percent.
+The animals I met on real trips did not all react to me the same way. On Mount Rainier the ground squirrel sat and looked right at me, and the marmot kept watching from a ridge. So in the game all 24 species behave differently. When an animal notices the player, it might stare, freeze, ignore her or walk closer. When it gets scared, it might run, crouch, climb a tree or charge at her.
 
-- The Flashlight is the only light in the cave. If it pushes the Down Jacket out of the bag, the snow above the mine is a much harder climb.
+Some have habits of their own. Foxes steal snacks. Goats spar with each other and will butt anyone who gets too close. The ptarmigan hen won't leave her nest, and the owl is only out from early evening until morning. Sneaking lets the player get nearer before being noticed.
 
-The camera
+Each animal in the field guide has a list of moments to photograph, such as a close-up, on the run, or at night. Every new moment gives one star, so the player has a reason to go back to an animal they have already photographed.
 
-The right mouse button brings the camera up and the left button takes the shot. The score comes from what is in the frame: getting close, a bird in flight, an animal looking at the lens, a mother with her young, golden hour. The points add up to one, two or three stars. Moving shakes the camera and a blurred photo scores half, so the good photos come from keeping still.
+Legendary creatures
 
-Each species in the field guide has a row of moments, from first sight and a close-up to the things only that animal does. A new moment earns a star, and stars are the only currency, so an animal she has already photographed is still worth finding again.
+When people are out in nature, they often feel that something like a mountain spirit might live there. I wanted the game to have that too, so the island has nine legendary creatures, taken from Chinese ink landscape paintings and old Chinese stories. They are very hard to find and hard to photograph well. Meeting one is a surprise, and it gives the player one more reason to keep climbing.
 
-The 24 species do not all react the same way. A boar charges, a squirrel runs up a tree, foxes steal snacks, and the owl only comes out between 17:30 and 6:30. If every animal ran off the same way, players would learn one trick and use it on all of them.
+Six of them are inside paintings. The player touches a scroll, ink covers the screen, and when it clears she is standing inside the painting. Most of them come out of the mist to watch her, and go back into it if she gets too close.
 
-The islanders
+The other three are in the sky. The Wind Whale circles the island over the sea all day. The Thunder Wyvern only appears after it starts raining, so the player has to pick a day with rain in the forecast.
 
-The player is a young woman with no name. Leo, an old photographer who walked this mountain for forty years, has left her his camera and a letter, and she lives in his cabin. "It's yours now," he writes. Sixteen people on the island make 38 requests between them. The eight tools come out of six of those stories, so every new ability has a person behind it.
+Requests
 
-Nell waits at the cave mouth and will not go past the daylight. She tells the player that Shepherd Bram has a flashlight. Without one, the player feels her way along the wall inside at a little over half speed. Bram's last request is the ducks on the pond, and that photo brings the Flashlight down by parachute. With a light the cave opens up: nine species, and Old Ida deep in the old mine.
+Sixteen people live on the island. Each one has a short story of two or three photo requests. The stories don't depend on each other, so getting stuck on a hard request only stops that one story. I spread the requests so that every one of the 24 species is asked for at least once, and this takes the player all over the island.
 
-Old Marten knew Leo. His last request is a ptarmigan close enough to count its feathers. When the photo works, his postcard is waiting at home: "We never did get that ptarmigan. You did."
+Every request gives an item back, and all eight tools come from requests. So every tool the player gets has a small story behind it, and it doesn't feel like something she just picked up off the ground.
+
+The Flashlight is an example. The cave is completely dark inside. Nell stands at the cave mouth and won't go in. When the player talks to her, she says that someone else on the island, Shepherd Bram, has a flashlight. The player goes to find Bram and takes a few photos for him, and then he gives her the Flashlight. With it she can go back and explore the whole cave.
+
+- Nell at the cave mouth.
+
+- Bram's last request: the ducks on the pond.
+
+- The ducks in the viewfinder.
+
+- The Flashlight comes down by parachute.
+
+- Down the mine ladder by flashlight.
+
+- Old Ida in the Miners' Camp.
 
 The cabin
 
-After a real trip I come home with photos and a few things to remember it by, so the cabin keeps them. A finished story sends a postcard, with her photo on the front and a note and a crayon drawing on the back. A carving of a species can be ordered for the Carver's Shelf once every moment of it is in the guide, and stars buy parts for Leo's camera at the bench.
+When I get home from a real trip, I have photos and a few small things from the way. The cabin is where the game keeps those. Every trip starts and ends here.
 
-The interface follows the same idea. The HUD, the panels and the field guide look like a travel journal, with paper, washi tape, rubber stamps and sticker icons where text labels would normally go. The wrist phone is a device, so it keeps a clean screen.
+The mail-order catalogue sells furniture and carvings for stars, so the camera is not the only thing stars can buy.
 
-Next
+- Camera bench. The player spends stars here to upgrade the camera.
 
-At the moment only the owl keeps set hours. The next build makes the time of day part of planning a trip.
+- Carver's Shelf. When every moment of a species is in the field guide, the player can order a carving of it.
 
-- The hedgehog comes out towards dusk and deer are easiest to find early in the morning, so requests that mention a time depend on it.
+- Photo board. The player's favorite photos.
 
-- An owl that roosts during the day, so players who never stay out after dark can still find one asleep in a tree.
+- Postcard strings. When someone's story is finished, they send a postcard with a note on the back.
 
-- Ambient occlusion for the faceted rock and the cave, and depth of field in the viewfinder.
+- Wardrobe. The jackets hang here. Every tool has its own place in the cabin.
+
+- Packing bench. The player packs the bag here before a trip.
+
+Planning a trip
+
+Before a trip the player makes a few choices in the cabin. I put them there so that part of the day is already decided when she walks out of the door.
+
+- The weather. The window shows the weather for the day. If it says cold or rain, a jacket is worth a place in the bag.
+
+- Packing. The tools for the day are laid out on the bench by the door.
+
+- Where to start. On the wall map the player picks the trailhead or any fire she reached on an earlier trip.
+
+- Film. One roll is ten shots, and a new roll only comes from resting at a fire. The number at the bottom right of the viewfinder is how many shots are left.
+
+How to play
+
+W A S D: walk. Shift: run. C: sneak.
+
+Left mouse: hold on rock to climb. Space: jump, or lunge up while climbing.
+
+Right mouse: raise the camera. Left mouse: take the photo. Scroll: zoom.
+
+R: find animals nearby. E: talk, rest, use. Tab: phone, settings, quit. I: bag.
 
 Link: https://github.com/Lappass
