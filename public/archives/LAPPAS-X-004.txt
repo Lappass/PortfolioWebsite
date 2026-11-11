@@ -1,100 +1,62 @@
-﻿Last Mile
-A management game about a food-delivery station
+﻿Sniff & Snitch
+A two-player online co-op stealth game
 
-Shuhang Chen · Solo project · Unity · C# · 2026
+Shuhang Chen · Programmer and designer, capstone team · Unity · C# · Netcode for GameObjects · 2026 · In development
 
-You manage Lanting, a small food-delivery station, for ten days. Orders appear on a 3D map of the district as countdown pins, and you assign each one to a rider, a ground robot or a drone. Riders are paid per drop, and each of them needs money for something by a certain day. From Day 3 headquarters starts adding machines, and each one takes a rider's place on the roster.
+Two players break out of a magic prison together, one as Lyra, a witch, and one as Fia, a red panda. Routes split where one of them can pass and the other can't, and doors, boxes and takedowns need both. Guards see in a 120-degree cone and hear through walls. A caught player is taken to a gas cage, and the partner has 15 seconds to open it. Capstone team project; I'm a programmer and designer on it.
 
-- Every order is assigned by hand. The deadline is set from the fastest available courier, so a late order is usually the result of a dispatch decision.
-- Four riders each have one bill due on a set day, and an even share of the orders is just enough to cover it.
-- The district is a road graph based on Xujiahui, filled in by editor scripts. A headless test plays all ten days and checks that all 132 orders resolve.
+- Guards are state machines with 18 states. They see 12.3 m in a 120-degree cone and hear through walls, with each wall halving a sound past its first 5 m.
+- A caught player is walked to a gas cage. The partner has 15 seconds to reach it and hold E for 1.5 seconds.
+- Doors, push boxes, the lift gate and the takedown need both players. The server only syncs who is gripping, tap counts and start times; animations are computed locally.
 
-Where it started
+Lyra and Fia
 
-When I was back in China for the summer, I kept seeing delivery riders cut across the road wherever they could, just to make the time limit on an order. And now in Jersey City, across the river from New York, I see a lot of Uber's delivery robots on the sidewalks.
+Lyra and Fia are both in for theft, and neither of them gets out of the prison alone. Each player claims one of them on the character select screen, and the run starts once both roles are taken.
 
-So the first version was about the rules the riders work under. The player never gave an order to anyone. They set the base pay, the late fees and how many orders a rider could carry at once, and about thirty riders decided for themselves when to accept, rest or quit. It ended the way the game still ends, with an AI taking the player's job.
+We built the two of them to be good at different things. Lyra is 1.8 m tall, drags boxes, and can put on a mask that keeps guards from growing suspicious of her. Fia is 1.0 m tall, jumps 1.4 m to Lyra's 1.0, climbs ledges and can dash 3.5 m. Some magic barriers stop only one of them, marked with a paw or a witch icon, so most rooms have a route for each.
 
-When I played it I felt a long way from the riders, and the game was boring. I had nothing to do with any of them, so when I replaced a rider with a machine I didn't care why.
+Meeting up
 
-So I cut the riders down to four and gave them names, and now the player gives every order to one of them by hand.
+The first stretch of Level 1 gives Lyra and Fia a "Find a way out" step each. The two run in parallel, and only when both are done does the next step appear: "Meet at the door".
 
-Dispatch
+Each character also has an exit of their own, and the level is won only when both players are standing in theirs. A checkpoint saves only after every connected player has walked into it, so a restart always brings the two of them back to the same checkpoint.
 
-The player spends most of the game on this screen. Time stops while an order is open, so there is no need to click the first name in a hurry.
+Guards
 
-The deadline is worked out from the fastest courier who could take the order. When that one is already out, the player has to send someone slower or let the order wait.
+I built the guard AI. Each guard is one state machine with 18 states and a suspicion meter from 0 to 1. He sees 12.3 m in a 120 degree cone. An unmasked player within 2.8 m fills the meter in one second, and at the edge of his sight in about 1.8 seconds.
 
-- Orders. Each one is a paper slip with a countdown.
+Hearing is a separate system. Crouching carries 4 m, walking 10 m and running 16 m. The first 5 m of a sound pass through walls at full strength, and each wall after that halves what is left, so Fia running behind one wall is heard out to 10.5 m instead of 16.
 
-- The same order on the map, with the time it has left.
+A noise can pull a guard off his patrol, but it cannot interrupt a guard who is already watching someone. I set it up this way so a thrown coin has to be planned before a guard looks at you; once he is watching, it does nothing.
 
-- Dispatch. Everyone who could take it, when they would arrive, and how early or late that is.
+The cage
 
-- The roster. A card that can't take this order is locked and says why. The robot can't climb stairs.
+Getting caught does not end the run. The guard cuffs the player and walks them to his cage. During the escort their camera sits 35 degrees off the guard's right shoulder, because from straight behind, the guard hides the player walking in front of him.
 
-- The selected rider: Streets, Strength, Judgment and stamina.
+In the cage, green gas thickens as time runs down. The partner has 15 seconds to get there and hold E for 1.5 seconds. Opening the lock makes a 14 m noise, and for 20 seconds any guard who sees the empty cage comes to check. When Fia frees Lyra with the gas nearly full, the clang of the lock turns the nearest guard toward them as they run.
 
-The four riders
+If the time runs out, or a guard catches the second player while the first is still held, the level ends for both. I built the cage HUD for the free player: a cage icon tracks the partner across the screen and flashes faster as time runs out.
 
-With only four riders the player gets to know each one. They have three numbers out of ten, for how well they know the streets, how much they can carry, and how they handle a difficult handover. Each of them is also saving for one thing that has to be paid by a certain evening.
+Doors and boxes
 
-I set the amounts so that a fair share of the work just about covers them. A rider who is passed over for a few orders comes up short, and that stays for the rest of the run. Xiaoyu loses the room, moves an hour away, and is 20 seconds late to every shift after that. Chen leaves after day 9.
+The latch door has one lever locked to Lyra and one to Fia, and opens only while both are down. The push box has a handle for each at their own height. Once both have grabbed, either player's W fills one shared ring, and ten taps slide the box 2.5 m. Pushed off a ledge, it becomes a step, and the landing reaches guards 25 m away. The lift door is a heavy gate they raise together, walk under, and let slam shut behind them for good.
 
-Pay
+The takedown needs both players too. A masked Lyra presses a seal onto an unaware guard, which weakens him for 6 seconds. In that window Fia drops onto him from at least 1.4 m above, and he is out for 12 seconds unless another guard walks up and wakes him.
 
-The platform pays the riders, and the station doesn't. A delivery is ¥4 to ¥6, and half of that if it is late. So when the player gives an order to one rider, the other three earn nothing from it.
+For these mechanisms the server writes only who is gripping, how many taps have landed and when a sequence starts. Each machine works out the door height and the players' animations from that start time, so a player who joins late sees the same door and no animation has to be sent.
 
-On day 4 Xiaoyu texts during the evening wave. She is ¥30 short on her deposit, it is due tonight, and the order she is asking for pays ¥5. The player can give it to her, promise her the next one, or tell her not now. If the player promises and then gives someone else an order she could have taken, the promise is broken.
+Pings and throws
 
-The report at the end of the day has the station's target and every rider's pay on one page. On this day the station delivered 12 against a target of 10. Xiaoyu took home ¥5, she is last on the board, and her deposit fell short.
+Middle mouse drops a ping on whatever is under the crosshair. Each player has one ping at a time, and it lasts 8 seconds. A ping on a guard sticks to him and moves with him, so the partner knows which guard is meant after he turns a corner.
 
-During the shift
+Holding E lifts a crate overhead. A tap of the left mouse button tosses it 4 m, and holding for half a second throws it 8 m. The crate sits a set height above each character's own head, because a height measured on Lyra left Fia's crate floating a metre above her.
 
-A shift gets interrupted a lot. All of these used to open as the same box in the middle of the screen. I moved each kind onto its own object, so the player can see what kind of thing it is before reading it. The clock waits while one is open, and every answer has its cost written on the button.
+A teammate set up the first quest data and HUD. I turned each level's quests into node graphs of reach, interact and acquire steps, each assigned to Lyra, Fia, either or both, with the server deciding who completed each step. Character select is server-owned as well, and a player who drops out mid-level rejoins in whichever role is free.
 
-Story calls
+Next
 
-From day 2, one rider calls each evening about something the board doesn't count. Ajie wants a day off the crates. Lin wants to finish early for school pickup. Chen wants someone to learn his route. Yes usually costs ¥30 and about 25 seconds of the rider's time, and no is free.
+Coins still use an older flat noise radius that ignores walls, and I want them on the same hearing model as footsteps. Lyra and Fia have separate entries in the noise table with the same values, and quieter steps for Fia would give the players a reason to send her ahead.
 
-The calls follow on from each other. Xiaoyu has three. On day 3 she asks if someone could ride the old blocks with her once. On day 7 head office has asked her to mark the entrances the robots keep getting wrong, and she asks for a little time to write them up properly and for the notes to say they are hers. On day 10 she asks if her name is going in with the final report.
-
-The robots use her entrances in the end even if the player says no. Her name is only kept on them if the player says yes.
-
-Robots and drones
-
-On day 3 head office sends a robot on trial and wants it compared with the riders by the evening. If the riders were on time more often, the player can send it back. If they weren't, it stays, and the player either pays to keep everyone or lets one rider go.
-
-I didn't want the machines to be riders with better numbers. The robot never gets tired and isn't paid by the delivery, but it can't climb stairs or check an ID at the door. The drone is the fastest thing on the map, but it can't lift a crate. So in the first days the station still needs riders for those orders.
-
-Then head office asks for two machines on the roster, then three, then four. The roster only has six places, so to bring in a machine the player has to take a rider off.
-
-AO-6
-
-AO-6 arrives on day 6. For each order it marks one courier as its pick and gives a reason. The reason is usually one of the player's own earlier choices, with the day and the order number.
-
-Every dispatch the player confirms is kept as an example, and so is every time they pick someone else. The newer examples count for more, and the next suggestion for that kind of order leans the same way.
-
-I made AO-6 polite, and its picks are usually right. It never decides for the player. But its pick is at the top of the list and Confirm is the biggest button on the panel, so the easiest thing to do is agree with it. I wanted the player to train it by their own choice, without the game forcing them to.
-
-Day 11
-
-Day 10 ends with a report and a thank-you. At 06:00 on day 11 the phone has a notice from head office. The manager's position has been removed and AO-6 runs Lanting now.
-
-At first this was only a notice, and all the player could do was read it. So I let them answer back. They can ask AO-6 why, and it answers with the numbers from their own run: how many of its picks they confirmed, and how many calls from the road they handled. Then it lists the rules it took from them.
-
-After that the title screen is different. The badge doesn't open the door, and there is a stamp on the shutter.
-
-The desk and the phone
-
-The screen is the part I redid the most. The early versions looked like a dashboard. The version in the game now is made of things from the station manager's desk. Orders are paper slips with a tear line, and riders are ID cards in a rail along the bottom.
-
-Between shifts the game is a phone. The morning message, the plan for the day and the evening report are all on it, and so is the notice on day 11. The light on the city changes from morning to evening, and the paper keeps its own colors so it reads the same at any hour.
-
-How to play
-
-Left mouse: click an order, then a courier, then Confirm. Space: pause and resume. W, A, S, D: move the map. Drag the map with the mouse, and zoom with the wheel.
-
-Esc: close the order. F8: fast forward.
+Every guard has a hearing multiplier, set to 1 in the current levels; I want to use it for a guard dog at 2.5. I also built a slow curse for guards who cannot reach a player, which slows the player to 45% speed for 3.5 seconds, and I want to place it where a player can stand out of reach.
 
 Link: https://github.com/Lappass

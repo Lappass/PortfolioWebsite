@@ -1,4 +1,4 @@
-// Cover and key art for Last Mile (work X-004).
+// Cover and key art for Last Mile (work X-002).
 // Homage in method only: the Modern Times idea of a worker caught in the machine's
 // gears, printed like an old screen-printed one-sheet. Three inks on paper (ink,
 // amber, the paper itself): each ink is its own layer with rough edges and worn
@@ -13,7 +13,7 @@ import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
 
 const { default: sharp } = await import(process.env.SHARP_MODULE ? pathToFileURL(resolve(process.env.SHARP_MODULE)).href : "sharp");
-const WORKS = resolve(new URL("../public/works/x-004/", import.meta.url).pathname.replace(/^\/(\w:)/, "$1"));
+const WORKS = resolve(new URL("../public/works/x-002/", import.meta.url).pathname.replace(/^\/(\w:)/, "$1"));
 const OUT = process.env.OUT_DIR ? resolve(process.env.OUT_DIR) : WORKS;
 const SHOTS = process.env.LASTMILE_SHOTS ?? "F:/UnityProject/DeliveryService/Captures";
 mkdirSync(OUT, { recursive: true });

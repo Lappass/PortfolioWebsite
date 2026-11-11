@@ -216,7 +216,7 @@ const trail: GameLoader = (c, w, h, t, art) => {
 // three inks. Order slips come in with their countdowns running, the rider runs the track
 // along the bottom as the progress bar, and each order's countdown stops as they pass its stop.
 // With the last one in, the view pulls back from the rider on the key art
-// (public/works/x-004/hero.jpg) to the whole frame. Shapes follow art/lastmile_poster.mjs.
+// (public/works/x-002/hero.jpg) to the whole frame. Shapes follow art/lastmile_poster.mjs.
 const LM_PAPER = "#ede6d6", LM_CARD = "#f6f1e6", LM_INK = "#272c30", LM_AMBER = "#f1b05f";
 // Each order's countdown, in seconds.
 const LM_ORDERS: number[] = [46, 31, 58, 22, 40, 24];
@@ -342,7 +342,7 @@ const lastmile: GameLoader = (c, w, h, t, art) => {
 
 // Sniff & Snitch: a spy-film style opening, in the game's own terms. White dots roll across the
 // dark one after another; the last opens into a prison searchlight that sweeps the lineup wall
-// of the key art (public/works/x-007/hero.jpg) and finds the two of them. The booking camera
+// of the key art (public/works/x-004/hero.jpg) and finds the two of them. The booking camera
 // flashes, the light holds on them a beat, then opens out to the whole key art for the page.
 // Only the rhythm is borrowed: no barrel, gun or film marks.
 const SN_DARK = "#0c0a0d", SN_WALL = "#d8d5cf";

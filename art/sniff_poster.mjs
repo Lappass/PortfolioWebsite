@@ -1,4 +1,4 @@
-// Cover and key art for Sniff & Snitch (work X-007), a two-player co-op escape from a magic prison.
+// Cover and key art for Sniff & Snitch (work X-004), a two-player co-op escape from a magic prison.
 // The cover is the police lineup from the game's own character select: the height chart, the
 // booking placards ("Charge: Theft") and the two thieves themselves, cut out of the team's
 // character sheets and stood against the chart at their heights (Lyra 5'9", Fia 3'3"). Colours
@@ -11,7 +11,7 @@ import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
 
 const { default: sharp } = await import(process.env.SHARP_MODULE ? pathToFileURL(resolve(process.env.SHARP_MODULE)).href : "sharp");
-const WORKS = resolve(new URL("../public/works/x-007/", import.meta.url).pathname.replace(/^\/(\w:)/, "$1"));
+const WORKS = resolve(new URL("../public/works/x-004/", import.meta.url).pathname.replace(/^\/(\w:)/, "$1"));
 const OUT = process.env.OUT_DIR ? resolve(process.env.OUT_DIR) : WORKS;
 mkdirSync(resolve(OUT, "menu"), { recursive: true });
 

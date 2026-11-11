@@ -1,4 +1,4 @@
-// Cover and key art for LOCKDOWN (work X-002).
+// Cover and key art for LOCKDOWN (work X-001).
 // Homage in method only: the composition of the Ratatouille poster, the view from a
 // rooftop at night over a city of lit windows. Here it is the view from a balcony ledge
 // during the lockdown: a low-poly skyline where only a few windows are still lit, and in
@@ -6,13 +6,13 @@
 // steam rising from its kitchen vent. Flat, faceted shapes throughout; the title is built
 // from cells.
 // Run: node art/lockdown_poster.mjs  (needs sharp; SHARP_MODULE may point to it)
-// OUT_DIR renders somewhere else (drafts); screenshots are always read from public/works/x-002.
+// OUT_DIR renders somewhere else (drafts); screenshots are always read from public/works/x-001.
 import { mkdirSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
 
 const { default: sharp } = await import(process.env.SHARP_MODULE ? pathToFileURL(resolve(process.env.SHARP_MODULE)).href : "sharp");
-const WORKS = resolve(new URL("../public/works/x-002/", import.meta.url).pathname.replace(/^\/(\w:)/, "$1"));
+const WORKS = resolve(new URL("../public/works/x-001/", import.meta.url).pathname.replace(/^\/(\w:)/, "$1"));
 const OUT = process.env.OUT_DIR ? resolve(process.env.OUT_DIR) : WORKS;
 mkdirSync(OUT, { recursive: true });
 

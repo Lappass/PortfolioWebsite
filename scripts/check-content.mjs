@@ -178,10 +178,10 @@ for (const [name, mutate, error] of invalidCases) {
 
 test("featured projects preserve their explicit display order", () => {
   const edited = structuredClone(content);
-  edited.featured = ["X-007", "X-004", "X-002", "X-001"];
+  edited.featured = ["X-004", "X-003", "X-002", "X-001"];
   assert.deepEqual(validateContent(edited).featured, edited.featured);
 });
-for (const featured of [["X-001"], ["X-001","X-001","X-004","X-007"], ["X-001","X-004","X-007","X-999"]]) {
+for (const featured of [["X-001"], ["X-001","X-001","X-002","X-004"], ["X-001","X-002","X-004","X-999"]]) {
   test(`rejects invalid featured selection ${featured.join(',')}`, () => {
     const edited = structuredClone(content); edited.featured = featured;
     assert.throws(() => validateContent(edited), /featured/);
