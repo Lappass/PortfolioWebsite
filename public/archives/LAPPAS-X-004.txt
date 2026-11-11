@@ -9,70 +9,92 @@ You manage Lanting, a small food-delivery station, for ten days. Orders appear o
 - Four riders each have one bill due on a set day, and an even share of the orders is just enough to cover it.
 - The district is a road graph based on Xujiahui, filled in by editor scripts. A headless test plays all ten days and checks that all 132 orders resolve.
 
-The orders
+Where it started
 
-The riders are paid by the drop, so sending Chen instead of Xiaoyu on an ID check decides which of them gets closer to the bill they are saving for. Over the ten days headquarters moves the station onto robots and drones.
+When I was back in China for the summer, I kept seeing delivery riders cut across the road wherever they could, just to make the time limit on an order. And now in Jersey City, across the river from New York, I see a lot of Uber's delivery robots on the sidewalks.
 
-The first version was a policy game with sliders for pay and late fees, and a pay cut was spread over everyone, so nobody in particular lost anything. I changed it so the player hands out every order by hand to riders with names.
+So the first version was about the rules the riders work under. The player never gave an order to anyone. They set the base pay, the late fees and how many orders a rider could carry at once, and about thirty riders decided for themselves when to accept, rest or quit. It ended the way the game still ends, with an AI taking the player's job.
 
-- The board counts parcels, so a crate counts the same as a coffee.
+When I played it I felt a long way from the riders, and the game was boring. I had nothing to do with any of them, so when I replaced a rider with a machine I didn't care why.
 
-- Each machine fixes one problem and leaves another.
-
-- AO-6, the assistant from day 6, never overrules the player.
-
-A day
-
-The station gets ¥180 each morning. The player can save it, or spend ¥80 to coach the rider who knows the streets least, ¥90 on breakfast and a rest, or ¥50 to add 15 seconds to the first four orders.
-
-A shift is two 90-second waves. On day 1 six orders arrive one at a time. From day 2 each wave opens with two orders and the rest land in a burst from 36 seconds in, while the first riders are still out, so someone has to wait. Orders rise to 16 a day by day 7. Between waves the player can pay ¥40 for 20 more seconds on new orders, or take ¥60 of rush money that cuts 15 seconds and adds one to the target.
-
-Each rider costs ¥30 in wages at night. The report puts delivered against target next to what each rider took home, so a good day for the station and a bad day for one rider sit on the same page. A station that can't pay wages closes, and the player replays that morning.
+So I cut the riders down to four and gave them names, and now the player gives every order to one of them by hand.
 
 Dispatch
 
-Clicking a pin lists who could take the order, with an arrival estimate. A card for someone who can't go is locked and says why, and the clock holds until the player chooses.
+The player spends most of the game on this screen. Time stops while an order is open, so there is no need to click the first name in a hurry.
 
-The deadline comes from the fastest rested courier on the ground who could take the order, times about 1.4 on day 2 and 1.2 by day 10. I based it on the best courier so that a slower pick, or an order left waiting, is what makes it late. Orders cancel 25 seconds after the deadline.
+The deadline is worked out from the fastest courier who could take the order. When that one is already out, the player has to send someone slower or let the order wait.
 
-Each drop costs a rider 8 stamina on top of the ride, and a tired rider slows to 70% speed. Rest gives 12 seconds off and about 36 stamina. Waiting at the station gives nothing, so a break is something the manager has to give.
+- Orders. Each one is a paper slip with a countdown.
 
-- Standard: anyone. ¥6 to the station, ¥4 to the rider.
+- The same order on the map, with the time it has left.
 
-- ID check: a rider, or from day 8 a robot with an ¥80 scanner. ¥8 and ¥5.
+- Dispatch. Everyone who could take it, when they would arrive, and how early or late that is.
 
-- Sixth floor, no lift: a rider or a drone. ¥8 and ¥5.
+- The roster. A card that can't take this order is locked and says why. The robot can't climb stairs.
 
-- Heavy restock: Strength 8. ¥10 and ¥6. A late drop halves both.
+- The selected rider: Streets, Strength, Judgment and stamina.
 
-The machines
+The four riders
 
-The robot arrives on day 3. It is never paid per drop, but it can't climb stairs or check an ID. That night headquarters compares it with the riders on standard orders. If the riders were on time more often, the player can send it back. A tie goes to the robot.
+With only four riders the player gets to know each one. They have three numbers out of ten, for how well they know the streets, how much they can carry, and how they handle a difficult handover. Each of them is also saving for one thing that has to be paid by a certain evening.
 
-The drone comes on day 4. It flies straight over the blocks and is the fastest courier on the map, but it carries a load of 5 at most. If the robot stayed, headquarters wants 2 machines on the roster from day 6, 3 from day 8 and 4 on day 10, out of six places, so every machine takes a rider's place.
+I set the amounts so that a fair share of the work just about covers them. A rider who is passed over for a few orders comes up short, and that stays for the rest of the run. Xiaoyu loses the room, moves an hour away, and is 20 seconds late to every shift after that. Chen leaves after day 9.
 
-From day 6 AO-6 recommends someone for every order. Each Confirm, or each time the player picks someone else, is saved as an example. It keeps the last 96 and cites them: "This follows what you did on Day 6, #1058." I wanted the player to train it willingly, one Confirm at a time.
+Pay
 
-The riders
+The platform pays the riders, and the station doesn't. A delivery is ¥4 to ¥6, and half of that if it is late. So when the player gives an order to one rider, the other three earn nothing from it.
 
-Each rider has three scores out of 10: Streets for speed, Strength for load, Judgment for tricky handovers. Chen is 9, 4 and 9. Ajie is 5, 9 and 5. Lin is 8, 6 and 6. Xiaoyu joins on day 2 at 4, 6 and 8.
+On day 4 Xiaoyu texts during the evening wave. She is ¥30 short on her deposit, it is due tonight, and the order she is asking for pays ¥5. The player can give it to her, promise her the next one, or tell her not now. If the player promises and then gives someone else an order she could have taken, the promise is broken.
 
-Each is short of money for one thing by one evening: Xiaoyu ¥30 for a room deposit by day 4, Lin ¥40 rent by day 5, Ajie ¥50 he owes a friend by day 6, Chen ¥80 for his wife's medicine by day 9. A fair share of the work just covers it. On the evening her deposit is due, Xiaoyu asks for an order and stops halfway: "Could I... sorry. Could I take this one?" If she falls short she loses the room and starts every shift 20 seconds late.
+The report at the end of the day has the station's target and every rider's pay on one page. On this day the station delivered 12 against a target of 10. Xiaoyu took home ¥5, she is last on the board, and her deposit fell short.
 
-From day 2 one rider calls each evening about something the board doesn't count. Ajie asks for small parcels, because "the board counts parcels, not weight." I kept one rule for the writing: the riders talk about crates, rent and doorbells, and only AO-6 and headquarters carry the satire.
+During the shift
 
-The district
+A shift gets interrupted a lot. All of these used to open as the same box in the middle of the screen. I moved each kind onto its own object, so the player can see what kind of thing it is before reading it. The clock waits while one is open, and every answer has its cost written on the button.
 
-The map is modelled on Xujiahui: 26 hand-placed junctions around a six-armed crossing, with eight outer districts generated as five-by-five street grids. Orders go to four of them, among them Willow Bend and Heron Road.
+Story calls
 
-An editor script finds each closed block in the road graph, lines its edges with lots and fills the middle with a grid turned to the longest side. The ordinary buildings are built in code. The landmarks and vehicles are AI-generated models that editor scripts fit into the blocks.
+From day 2, one rider calls each evening about something the board doesn't count. Ajie wants a day off the crates. Lin wants to finish early for school pickup. Chen wants someone to learn his route. Yes usually costs ¥30 and about 25 seconds of the rider's time, and no is free.
 
-The light follows the shift from warm morning to blue evening, but the interface keeps its colours, so a red countdown at dusk looks the same as one at breakfast.
+The calls follow on from each other. Xiaoyu has three. On day 3 she asks if someone could ride the old blocks with her once. On day 7 head office has asked her to mark the entrances the robots keep getting wrong, and she asks for a little time to write them up properly and for the notes to say they are hers. On day 10 she asks if her name is going in with the final report.
 
-Teaching and testing
+The robots use her entrances in the end even if the player says no. Her name is only kept on them if the player says yes.
 
-Day 1 teaches by doing. Zhou Heng, the regional manager, walks the player through the first dispatch, and later lessons appear the first time they are needed, such as Strength on the first full crate.
+Robots and drones
 
-The editor can also play the trial by itself. A scripted manager runs all ten days on the real roads and traffic, and the run fails if any of the 132 orders doesn't end in a delivery or a cancellation, if traffic stops, if two bodies overlap, or if a story call is left open.
+On day 3 head office sends a robot on trial and wants it compared with the riders by the evening. If the riders were on time more often, the player can send it back. If they weren't, it stays, and the player either pays to keep everyone or lets one rider go.
+
+I didn't want the machines to be riders with better numbers. The robot never gets tired and isn't paid by the delivery, but it can't climb stairs or check an ID at the door. The drone is the fastest thing on the map, but it can't lift a crate. So in the first days the station still needs riders for those orders.
+
+Then head office asks for two machines on the roster, then three, then four. The roster only has six places, so to bring in a machine the player has to take a rider off.
+
+AO-6
+
+AO-6 arrives on day 6. For each order it marks one courier as its pick and gives a reason. The reason is usually one of the player's own earlier choices, with the day and the order number.
+
+Every dispatch the player confirms is kept as an example, and so is every time they pick someone else. The newer examples count for more, and the next suggestion for that kind of order leans the same way.
+
+I made AO-6 polite, and its picks are usually right. It never decides for the player. But its pick is at the top of the list and Confirm is the biggest button on the panel, so the easiest thing to do is agree with it. I wanted the player to train it by their own choice, without the game forcing them to.
+
+Day 11
+
+Day 10 ends with a report and a thank-you. At 06:00 on day 11 the phone has a notice from head office. The manager's position has been removed and AO-6 runs Lanting now.
+
+At first this was only a notice, and all the player could do was read it. So I let them answer back. They can ask AO-6 why, and it answers with the numbers from their own run: how many of its picks they confirmed, and how many calls from the road they handled. Then it lists the rules it took from them.
+
+After that the title screen is different. The badge doesn't open the door, and there is a stamp on the shutter.
+
+The desk and the phone
+
+The screen is the part I redid the most. The early versions looked like a dashboard. The version in the game now is made of things from the station manager's desk. Orders are paper slips with a tear line, and riders are ID cards in a rail along the bottom.
+
+Between shifts the game is a phone. The morning message, the plan for the day and the evening report are all on it, and so is the notice on day 11. The light on the city changes from morning to evening, and the paper keeps its own colors so it reads the same at any hour.
+
+How to play
+
+Left mouse: click an order, then a courier, then Confirm. Space: pause and resume. W, A, S, D: move the map. Drag the map with the mouse, and zoom with the wheel.
+
+Esc: close the order. F8: fast forward.
 
 Link: https://github.com/Lappass

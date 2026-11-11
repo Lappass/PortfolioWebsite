@@ -56,7 +56,7 @@ function spreadMarkup(s: CaseStudySection) {
   const head = `<h2>${e(s.heading)}</h2>`;
   const note = s.note ? `<p class="pg-note">${e(s.note)}</p>` : "";
   const numbered = (list: string[]) => `<ol class="pg-numbered">${list.map((p) => {
-    const [, lead, rest] = /^([^.]+\.)\s(.*)$/.exec(p) ?? [, "", p];
+    const [, lead, rest] = /^([^.:]+[.:])\s(.*)$/.exec(p) ?? [, "", p];
     return `<li>${lead ? `<b>${e(lead)}</b> ` : ""}${e(rest!)}</li>`;
   }).join("")}</ol>`;
   switch (s.spread) {
@@ -68,15 +68,20 @@ function spreadMarkup(s: CaseStudySection) {
       <div class="pg-col">${para(body.slice(0, -1))}</div><div>${fig(pics[0])}<p class="pg-fignote">${e(body[body.length - 1])}</p></div>`;
     case "trio": return `<div class="pg-col">${head}${para(body)}</div><div class="pg-triopics">${pics.map((m, i) => fig(m, i ? "" : "pg-lead")).join("")}</div>`;
     case "annotated": return `${fig(pics[0], "pg-wide")}<div class="pg-col">${head}${para(body)}</div>${s.points ? numbered(s.points) : "<div></div>"}${fig(pics[1])}`;
-    case "cards": return `<div class="pg-col">${head}${para(body)}</div><div class="pg-cardrow">${pics.map((m) => fig(m)).join("")}</div>`;
+    case "cards": return `<div class="pg-col">${head}${para(body.slice(0, 1))}</div><div class="pg-cardrow">${pics.map((m) => fig(m)).join("")}</div>${body.length > 1 ? `<div class="pg-col">${para(body.slice(1))}</div>` : ""}`;
     case "card": return `${fig(pics[0], "pg-backdrop")}<div class="pg-paper">${head}${(s.controls ?? []).map((row) =>
       `<p class="pg-keys">${row.map((c) => `<span class="pg-kp">${c.keys.map(keyCap).join("")}<span>${e(c.say)}</span></span>`).join("")}</p>`).join("")}</div>`;
     case "rows": return `<div class="pg-col">${head}${para(body)}</div><div class="pg-rowpics">${pics.map((m) => fig(m)).join("")}</div>`;
     case "float": return `${fig(pics[0])}<div class="pg-col">${head}${fig(pics[1], "pg-floatpic")}${para(body)}</div><div class="pg-strip">${pics.slice(2).map((m) => fig(m)).join("")}${s.note ? `<p>${e(s.note)}</p>` : ""}</div>`;
-    case "banner": return `<div class="pg-wideset">${pics.map((m) => fig(m)).join("")}</div>${head}${para(body)}`;
+    case "banner": return `<div class="pg-wideset">${pics.map((m) => fig(m)).join("")}</div>${head}${para(body.slice(0, 1))}<div>${para(body.slice(1))}</div>`;
     case "tall": return `<div class="pg-tallpics">${pics.map((m) => fig(m)).join("")}</div><div class="pg-col">${head}${para(body)}</div>`;
     case "faces": return `${head}<ul class="pg-portraits">${(s.herd ?? []).map((a) => `<li><img src="${media(a.src)}" alt="" loading="lazy">${e(a.name)}${a.sub ? `<small>${e(a.sub)}</small>` : ""}</li>`).join("")}</ul>${para(body)}${fig(pics[0])}`;
     case "flank": return `${fig(pics[0])}<div class="pg-col">${head}${para(body)}</div>${fig(pics[1])}`;
+    case "stack": return `<div class="pg-col">${head}${para(body)}</div><div class="pg-stackpics">${pics.map((m) => fig(m)).join("")}</div>`;
+    case "beside": return `<div class="pg-col">${head}${para(body)}</div><div class="pg-sidepics">${pics.slice(0, 2).map((m) => fig(m)).join("")}</div>${pics.slice(2).map((m) => fig(m, "pg-band")).join("")}`;
+    case "marked": return `${fig(pics[0])}<div class="pg-col">${head}${para(body.slice(0, 1))}${s.points ? numbered(s.points) : ""}${para(body.slice(1))}</div>`;
+    case "edge": return `${fig(pics[0], "pg-bleedpic")}<div class="pg-col">${head}${para(body)}${note}</div>${fig(pics[1])}`;
+    case "corner": return `<div class="pg-wideset">${pics.slice(0, -1).map((m) => fig(m)).join("")}</div>${fig(pics.at(-1), "pg-cornerpic")}<div class="pg-col">${head}${para(body.slice(0, 1))}</div><div class="pg-col pg-late">${para(body.slice(1))}</div>`;
     default: return `<div class="pg-col">${head}${para(body)}</div>`;
   }
 }
@@ -144,6 +149,12 @@ export class ProjectPage {
       if (action === "fullscreen") void this.root.querySelector<HTMLIFrameElement>(".pp-unity iframe")?.requestFullscreen?.().catch(() => {});
     });
     this.root.addEventListener("keydown", (event) => this.trapFocus(event));
+    // Pictures in a row share one height: once each loads, its width follows its shape (project-page.css, --r).
+    this.root.addEventListener("load", (event) => {
+      const img = event.target;
+      if (img instanceof HTMLImageElement && img.naturalHeight && img.closest(".pg-wideset, .pg-tallpics, .pg-sidepics"))
+        img.closest("figure")?.style.setProperty("--r", String(img.naturalWidth / img.naturalHeight));
+    }, true);
   }
 
   get isOpen() { return this.state === "opening" || this.state === "open"; }
