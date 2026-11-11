@@ -311,7 +311,7 @@ export class ArchiveScene {
     // All composer passes see the same geometry within one application frame.
     // Generate the shadow map in the beauty pass and reuse it in depth/normal passes.
     this.renderer.shadowMap.autoUpdate = false;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap; // three.js swaps PCFSoft for PCF at the first shadow pass, rebuilding any shader built before it.
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
     this.renderer.domElement.setAttribute(
@@ -810,10 +810,14 @@ export class ArchiveScene {
     this.appearance.prepare(this.model);
     this.appearance.apply(this.model, 0);
     printCase(this.model, fileAtCell(this.selectedCell), anisotropy, true);
-    this.scene.add(this.setup.group);
+    this.scene.add(this.setup.group, this.setup.lights);
     this.scene.add(this.figure.group);
-    void this.figure.load(publicAsset("assets/figure.glb")).catch((error) => console.warn("Figure unavailable", error));
-    void this.setup.load(publicAsset("assets/console-setup.glb")).catch((error) => console.warn("Console setup unavailable", error));
+    const figureReady = this.figure.load(publicAsset("assets/figure.glb")).catch((error) => console.warn("Figure unavailable", error));
+    const setupReady = this.setup.load(publicAsset("assets/console-setup.glb")).catch((error) => console.warn("Console setup unavailable", error));
+    // Once both are in, build the desk's shaders while the visitor is still on the shelf.
+    void Promise.all([figureReady, setupReady])
+      .then(() => this.setup.warm(this.renderer, this.scene, this.camera, this.superPerformance ? null : this.composer.readBuffer))
+      .catch((error) => console.warn("Desk warm-up skipped", error));
     this.scene.add(this.model);
     this.model.position.copy(this.cellPosition(poolCell(this.selectedSlot)));
     this.loaded = true;

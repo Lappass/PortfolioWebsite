@@ -220,7 +220,6 @@ class TrailCover extends GameCover {
       <circle class="tr-glow" r="70" fill="url(#tr-fire)"/>
       <g class="tr-tent"><path d="M-46 0 L-22 -40 L2 0 Z" fill="#fbf4e2"/><path d="M-22 -40 L-14 0 L-28 0 Z" fill="#25322e" opacity=".75"/><path d="M-22 -40 L2 0 L8 0 L-16 -40 Z" fill="#d8ccb2"/></g>
       <g transform="translate(20 0)"><path d="M-12 2 h24" stroke="#43362a" stroke-width="5" stroke-linecap="round"/><path class="tr-flame" d="M-9 0 C-9 -12 0 -16 0 -26 C6 -16 9 -12 9 0 Z" fill="#e08e3c"/></g>
-      <text class="tr-label" x="-54" y="26">${e(s.heading)}</text>
       <rect x="-60" y="-60" width="110" height="80" fill="transparent"/></g>`).join("");
     const last = this.nav.at(-1);
     const summit = c.at(-1)!;
@@ -234,7 +233,7 @@ class TrailCover extends GameCover {
           <path d="${d}" fill="none" stroke="#fbf4e2" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 15" opacity=".45"/>
           <path class="tr-done" d="${d}" fill="none" stroke="#fbf4e2" stroke-width="4" stroke-linecap="round" opacity=".9"/>
           <g class="tr-camps">${camps}</g>
-          ${last ? `<g data-sec="${e(last.id)}" data-i="${this.nav.length - 1}" class="tr-summit" transform="translate(${summit.x - 38} ${summit.y})"><rect x="-3" y="-120" width="5" height="120" fill="#43362a"/><path d="M-1 -118 L-58 -102 L-1 -86 Z" fill="#e08e3c"/><text class="tr-label" x="-8" y="-66" text-anchor="end">${e(last.heading)}</text><rect x="-70" y="-130" width="90" height="140" fill="transparent"/></g>` : ""}
+          ${last ? `<g data-sec="${e(last.id)}" data-i="${this.nav.length - 1}" class="tr-summit" transform="translate(${summit.x - 38} ${summit.y})"><rect x="-3" y="-120" width="5" height="120" fill="#43362a"/><path d="M-1 -118 L-58 -102 L-1 -86 Z" fill="#e08e3c"/><rect x="-70" y="-130" width="90" height="140" fill="transparent"/></g>` : ""}
           <g class="tr-hiker"><g transform="scale(.42) translate(0 -118)" fill="#fff">
             <path d="M13 -127A13 15 0 1 1 -13 -127A13 15 0 1 1 13 -127Z"/><path d="M-14 -131C-15 -151 15 -151 14 -131ZM-15.5 -134h31v6h-31ZM-5 -115h10v10h-10Z"/>
             <path d="M-8 -108C-19 -107 -25 -103 -26 -94L-25 -54C-26 -32 -27 -14 -26 2L26 2C27 -14 26 -32 25 -54L26 -94C25 -103 19 -107 8 -108Z"/>
@@ -257,8 +256,6 @@ class TrailCover extends GameCover {
     this.el.querySelectorAll<SVGGElement>(".tr-camp").forEach((g) => {
       const c = this.camps[Number(g.dataset.i)];
       g.setAttribute("transform", `translate(${c.x} ${c.y})`);
-      // Camps on the right-hand side read their label leftwards so it stays in the frame.
-      if (c.x > 1250) { const t = g.querySelector("text")!; t.setAttribute("x", "32"); t.setAttribute("text-anchor", "end"); }
     });
     this.trail.style.strokeDasharray = `${this.total} ${this.total}`;
     this.walkFrom = 0;

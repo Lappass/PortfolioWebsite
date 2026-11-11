@@ -57,6 +57,12 @@ export class ConsoleSetup {
   private drawn = "";
   loaded = false;
   private disposed = false;
+  /**
+   * The desk's two lights live outside `group` and stay in the scene, dark while the desk is
+   * hidden: three.js builds every material's shader for a fixed number of lights, so lights
+   * that come and go with the desk would recompile the whole scene the first time it appears.
+   */
+  readonly lights = new THREE.Group();
 
   constructor() {
     void prepareIdentity(profile.name);
@@ -70,10 +76,11 @@ export class ConsoleSetup {
     this.controller.position.copy(this.controllerPivot);
     this.group.add(this.controller);
     // A local warm key light, lit only while the camera is at the console (decay 0, range 24).
+    this.lights.matrixAutoUpdate = false;
     this.lamp.position.set(-2, 6.5, 5);
-    this.group.add(this.lamp);
+    this.lights.add(this.lamp);
     this.glow.position.set(0, 2.5, -.7);
-    this.group.add(this.glow);
+    this.lights.add(this.glow);
   }
 
   async load(url: string) {
@@ -150,6 +157,30 @@ export class ConsoleSetup {
 
   dispose() { this.disposed = true; }
 
+  /**
+   * Build the desk's shaders and upload its textures ahead of the first insert, so the
+   * first time the desk appears does not stall on a slower machine.
+   */
+  async warm(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, target: THREE.WebGLRenderTarget | null) {
+    if (!this.loaded) return;
+    for (const material of this.surfaces) {
+      const { map, emissiveMap } = material as THREE.MeshStandardMaterial;
+      if (map) renderer.initTexture(map);
+      if (emissiveMap) renderer.initTexture(emissiveMap);
+    }
+    renderer.initTexture(this.texture);
+    // compile() only looks at visible objects; it runs synchronously, so the desk is never drawn here.
+    // A shader also depends on where it draws (tone mapping is left to the output pass when the
+    // scene goes through the composer), so compile for the target the frame really uses.
+    const shown = this.group.visible, previous = renderer.getRenderTarget();
+    this.group.visible = true;
+    renderer.setRenderTarget(target);
+    const ready = renderer.compileAsync(scene, camera);
+    renderer.setRenderTarget(previous);
+    this.group.visible = shown;
+    await ready;
+  }
+
   private animateDesk(time: number, lift: number) {
     const dt = THREE.MathUtils.clamp(time - this.last, 0, .1);
     this.last = time;
@@ -173,12 +204,14 @@ export class ConsoleSetup {
     const presence = Math.max(THREE.MathUtils.smoothstep(insert, 0.06, 0.16), THREE.MathUtils.smoothstep(workspace, .02, .18));
     this.group.visible = visible && this.loaded && presence > 0;
     this.presence = this.group.visible ? presence : 0;
-    if (!this.group.visible) return;
+    if (!this.group.visible) { this.lamp.intensity = this.glow.intensity = 0; return; }
     for (const surface of this.surfaces) {
       surface.opacity = presence;
     }
     this.group.matrix.copy(caseMatrix).multiply(new THREE.Matrix4().makeTranslation(SETUP_ORIGIN));
     this.group.matrixWorldNeedsUpdate = true;
+    this.lights.matrix.copy(this.group.matrix);
+    this.lights.matrixWorldNeedsUpdate = true;
     // One assembled terminal: screen and drive share a fixed forward direction.
     this.monitor.rotation.y = 0;
     // Put the controller back after acknowledgement, before the screen close-up.
