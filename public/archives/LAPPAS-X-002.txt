@@ -9,54 +9,74 @@ LockDown is a survival game set in one apartment during a 20-day city lockdown. 
 - The fridge is a 6 by 8 grid. From Day 8, food stored for two days starts to rot, and the rot spreads to neighbouring cells.
 - The phone has a newspaper, a building group chat and a family chat. On Day 4 the building asks about medicine, on Day 5 the paper reports refills running late, and the same morning Grandpa's box is empty.
 
-The 2022 lockdown
+Where it started
 
-LockDown is about slowly losing control while you wait for something with no announced end. The idea comes from my family's 2022 lockdown in Shanghai. We ate whatever came in the supply package, my grandparents needed medicine that nobody was allowed to go and get, and nobody told us when it would end.
+In 2022 my family was locked down in Shanghai. There were five of us in the apartment: my grandparents, my parents and me. We ate what came in the government supply package, and some of the food had already gone bad when it reached us. My grandparents needed their medicine, and nobody was allowed out to buy it.
 
-I use those memories as design rules. The player receives supplies instead of shopping. The apartment never grows. Food, medicine and the neighbors' requests all come out of one small reserve. The run lasts twenty days, but the screen shows the day number with no countdown.
+My parents kept the house running like that for months. The hardest thing was that nobody could tell us when it would end.
 
-The cooking puzzle starts from the traditional Chinese tangram. Here the shapes are ingredients and the space is a pan or a fridge, and the gaps and leftovers show the shortage without a line of dialogue.
+One day
 
-A day
+I want the player to feel how boring the lockdown was, so they do almost the same things every day. The mechanics that come in later are only small changes to what is already there, and the main thing the player does is still cooking the meal.
 
-Each morning starts with yesterday's consequences. Everyone loses 2 morale and 1 health, the fridge is checked for rot, and a package arrives. By Day 7 the bag can be just noodles, a cabbage and some rice.
+The first version
 
-The player reads the phone, plans the meal, fits the food into the pan and serves it. Leftovers go into the fridge if they fit and are lost if they don't. Before Day 3 there is no fridge, and only the largest leftover keeps on the counter. Sleep moves the day on but resets nothing.
+I finished the first version in July. It ran for thirty days, and anything that had been in the fridge for three days simply disappeared. That was too simple. The player only had to remember which day the food went in.
+
+Now rot starts in one cell of an ingredient and spreads to the cells next to it, and it can move into other food that is touching it. The player has to look at the fridge and decide what to cook first and what to move away.
+
+I also cut the run from thirty days to twenty, and I rebuilt the room and the interface. The pictures show how the game looked in September, before that.
 
 The pan
 
-I built the game around a pan rather than a resource screen, because every problem in the house ends up at dinner. A resource screen would turn Grandpa's tablets into a number. The pan turns them into a space that is too small.
+The cooking puzzle comes from tangram, the Chinese puzzle where flat pieces have to fit inside an outline. In LockDown the pieces are ingredients and the outline is the pan.
 
-The twelve ingredients are shapes of 3 to 7 cells, each with its own calories and nutrients. A cabbage is a five-cell cross worth 25 kcal, and pork takes seven cells and gives 250. A meal is scored against a 470 kcal target: 38% balance, 24% calories, 20% total nutrients and 18% pan filled. Under 42% nobody recovers health, and under 28% everyone gets weaker.
+A tangram has one correct answer. I didn't want that here, because there were no perfect meals during the lockdown. So every ingredient has a shape, calories and a food type, and there is never room for all of them. So the player has to choose which food to cook today and which to leave.
 
-Until Day 6 there is no knife, so the pan is a plain rectangle and every piece goes in whole. After that the pan is an irregular shape of roughly 18 to 25 cells, always with a solid 3 by 3 core so the largest piece fits. The knife cuts along the grid, and the part you don't cook goes to the fridge.
+The knife
+
+On Day 1 the handle comes off the family's knife, and for five days every ingredient goes into the pan whole. On Day 6 a new knife is at the bottom of the food bag. I use cutting to encourage the player to fit awkwardly shaped ingredients into pans that are a different shape every day.
+
+The puzzle is my own version of tangram, the traditional Chinese puzzle. When I was thinking about how to add variations to it, I thought about what I really do when I cook: I cut food up, and I store some of it for later. Adding those brings my own life into the game. It also gives the player harder puzzles, and makes them think more about how to manage their food.
 
 The fridge
 
-Each new rule arrives through something in the house. On Day 1 the fridge is broken, and the next day Aunt Li complains in the building group about Grandpa dragging it around at midnight. On Day 3 he gets it working and storage unlocks. After two days of cooking everything at once, the player knows what a fridge is for.
+I made the fridge because during the lockdown we had to plan carefully too. We put some of our food away in the fridge to eat later, because we couldn't be sure what was coming. In the game the fridge is broken on Day 1, and Grandpa gets it working again on Day 3. It is a grid like the pan, and the leftovers have to fit in it.
 
-The fridge is a 6 by 8 grid. On Day 7 the building loses power, and from Day 8 anything stored for two days grows a rotten cell. Each morning a rotten cell spreads to the next cell of the same item 62% of the time and into a touching item 35% of the time.
+In the game I made this harsher than it was for us. From Day 8 the building loses power at times, and the food in the fridge starts to rot. Rot spreads between cells that touch, and if rotten food goes into the pan, the family loses health. So every morning the player opens the fridge, cooks the oldest things first and drags the bad pieces away from the good ones.
 
-Rot never deletes food. The good cells can still be cooked, or cut away from the bad ones. The grade ignores rot on purpose. Every rotten cell in the pan costs each person 4 health, up to 14 a meal, so an S meal with rot in it still makes the family ill.
+The family and the building
 
-The household
+There were five of us at home in 2022. In the game the family has three members, one for each age. Grandpa is old, and his health depends on medicine that has to come from outside. Daughter is young and says it out loud when she is hungry, bored or scared. The player is in the middle and does the cooking.
 
-In 2022 there were five of us at home. For the game I cut the household to three: Grandpa, whose health depends on things from outside, Daughter, who says out loud what everyone feels, and the player, with no name or face, who makes the decisions. Director Zhang, Mr. Wang, Aunt Li, Uncle Yu and the 6F Stranger reach the flat through the building chat.
-
-Grandpa starts on 60 health and loses 5 more every morning until his medicine is secured. On Day 5 his last box is empty. Aunt Li checks her own drawer, and half the time her strip is empty too. The 6F Stranger can get the pills sooner for two things from the fridge, and the chat names the two the game took.
-
-On Day 8 Daughter has a fever of 38.2. A warm meal from a fridge item gives her 25 health, and letting her rest costs her 20. On Day 13 Zhang asks for food for the sealed seventh floor. On Day 18 taking Daughter downstairs early works 60% of the time, and if the patrol stops them, everyone loses 12 morale.
+The neighbors are in the building's group chat, which comes from the residents' group our compound had. For it I picked four kinds of people who were typical of the lockdown. Director Zhang is the official one, who posts the notices. Aunt Li is the helpful one, who shares what she has. Mr. Wang is the pessimist, who doubts the notices and argues with them. The stranger on the sixth floor is the one who profits from the shortage, with medicine to trade for food.
 
 The phone
 
-The phone has three channels at three distances: the city newspaper, the building group and the family chat. Often they cover the same problem. On Day 4 Zhang asks every flat for its medicine doses, on Day 5 the paper reports refills running late, and that morning Grandpa finds his box empty.
+In 2022 the news, our residents' group and my own family would all talk about the same shortage, and each of them said something different. So the phone in the game has the same three places to read: a newspaper, the building's group chat and the family chat.
 
-The HUD shows the day and each person's health. After dinner one family member answers in a single line, the weakest one when the meal went badly, and that is how the player learns what the family thinks of the food. A meal with rot in it gets "That tastes off. Is it still fresh?" The letter grade sits behind a small Last meal toggle. On Day 20 the lockdown simply ends, and the report shows the days at home and each person's health.
+Day 5 is an example. The newspaper says prescriptions are late all over the city. In the building group Aunt Li looks for her own box of tablets and finds it empty. In the family chat Grandpa says his are gone.
 
-Next
+The newspaper never says when the lockdown will end. On Day 11 it reports that a reopening notice going around the chats was false.
 
-In the next build the knife slowly goes blunt. Hard ingredients wear it down faster, a blunt knife only cuts soft food like tofu or cabbage, and sharpening it depends on a neighbor lending a stone. Cut surfaces spoil faster than whole ingredients. On outage days the spoilage clock advances twice and the fridge hum cuts out.
+Choices
 
-Choices should also reach further. In that build the player picks which two items go to the 6F Stranger, and he comes back on Day 13 expecting the same deal. If Daughter was left to rest, her fever returns on Day 14. 7F sends something back on Day 17 only if they were helped. If the patrol catches the family on Day 18, no package arrives on Day 19.
+Five of the twenty days have a choice. It comes as a chat message, and the player answers in the chat. Whichever answer the player picks, the family loses something.
+
+On Day 5 Grandpa's tablets are gone. The player can ask the neighbors, which is free but may not work. They can send Director Zhang a photo of the empty box and wait for a pharmacy van. Or they can give two things from the fridge to the stranger on the sixth floor and get the medicine now.
+
+The later choices are about food. A sealed floor asks for some, and Grandpa wants to give his share away.
+
+The last morning
+
+The lockdown ends after Day 20. Nothing in the game says it is coming, and the last day starts like all the others. Then the report comes up. It shows how many days the family spent at home and how healthy everyone is.
+
+If anyone's health reaches zero, the run stops on that day and the same report comes up. I kept the report this short because I don't want the ending to feel like winning.
+
+How to play
+
+Left mouse: click the floor to walk, click the package, the counter or the fridge to use it, drag food into the pan or the fridge.
+
+Q and E: turn the camera. Tab: phone. R: rotate the piece. Right mouse: put a piece back, or throw food out of the fridge. Space: make the cut. Esc: close.
 
 Link: https://github.com/Lappass

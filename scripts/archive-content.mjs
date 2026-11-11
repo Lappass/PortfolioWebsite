@@ -83,7 +83,7 @@ function validateVoice(record, label, errors) {
 }
 
 /** Section layouts that follow a printed work sample page for page (src/project-page.ts, spreadMarkup). */
-const SPREADS = ["prints", "grid", "bleed", "pair", "herd", "trio", "annotated", "cards", "card"];
+const SPREADS = ["prints", "grid", "bleed", "pair", "herd", "trio", "annotated", "cards", "card", "rows", "float", "banner", "tall", "faces", "flank"];
 
 /** The case study a game's page is built from: a pitch, a few facts, and sections of text with pictures. */
 function validateStudy(study, label, errors) {

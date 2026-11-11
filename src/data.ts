@@ -48,11 +48,14 @@ export interface CaseStudyMedia {
   marks?: { x: number; y: number }[];
   /** Which part of the picture stays in view when a spread crops it (CSS object-position, e.g. "12% 50%"). */
   focus?: string;
+  /** A bold word or two before the caption, e.g. "Day 3". */
+  label?: string;
 }
 /** A key on the controls card: a key name, or `mouse-left`, `mouse-right`, `mouse-wheel`. */
 export type ControlRow = { keys: string[]; say: string }[];
 /** How a section is laid out when it follows a printed work sample page for page (content/README.md). */
-export type SpreadKind = "prints" | "grid" | "bleed" | "pair" | "herd" | "trio" | "annotated" | "cards" | "card";
+export type SpreadKind = "prints" | "grid" | "bleed" | "pair" | "herd" | "trio" | "annotated" | "cards" | "card"
+  | "rows" | "float" | "banner" | "tall" | "faces" | "flank";
 export interface CaseStudySection {
   heading: string;
   /** The paragraph shown beside the pictures. `body` and `points` are kept for the TXT download. */
@@ -65,8 +68,8 @@ export interface CaseStudySection {
   spread?: SpreadKind;
   /** A muted line under the pictures (`grid`), or under the text. */
   note?: string;
-  /** The species strip of a `herd` spread. */
-  herd?: { src: string; name: string }[];
+  /** The strip of species (`herd`) or people (`faces`). */
+  herd?: { src: string; name: string; sub?: string }[];
   /** The rows of a `card` spread. */
   controls?: ControlRow[];
 }

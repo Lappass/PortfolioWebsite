@@ -52,7 +52,7 @@ function spreadMarkup(s: CaseStudySection) {
   const para = (list: string[]) => list.map((p) => `<p>${e(p)}</p>`).join("");
   const fig = (m: CaseStudyMedia | undefined, cls = "", n?: number) => m ? `<figure class="${cls}"><div class="pg-pic"><img src="${media(m.src)}" alt="${e(m.caption ?? m.title ?? s.heading)}" loading="lazy" decoding="async"${m.focus ? ` style="object-position:${e(m.focus)}"` : ""}>${
     (m.marks ?? []).map((p, k) => `<span class="pg-mark" style="left:${p.x}%;top:${p.y}%" aria-hidden="true">${k + 1}</span>`).join("")}</div>${
-    m.title ? `<h3>${e(m.title)}</h3>` : ""}${m.caption ? `<figcaption>${n ? `<b>${n}</b>` : ""}${e(m.caption)}</figcaption>` : ""}${m.note ? `<p class="pg-fignote">${e(m.note)}</p>` : ""}</figure>` : "";
+    m.title ? `<h3>${e(m.title)}</h3>` : ""}${m.caption ? `<figcaption>${n ? `<b>${n}</b>` : m.label ? `<b>${e(m.label)}</b>` : ""}${e(m.caption)}</figcaption>` : ""}${m.note ? `<p class="pg-fignote">${e(m.note)}</p>` : ""}</figure>` : "";
   const head = `<h2>${e(s.heading)}</h2>`;
   const note = s.note ? `<p class="pg-note">${e(s.note)}</p>` : "";
   const numbered = (list: string[]) => `<ol class="pg-numbered">${list.map((p) => {
@@ -61,7 +61,7 @@ function spreadMarkup(s: CaseStudySection) {
   }).join("")}</ol>`;
   switch (s.spread) {
     case "prints": return `<div class="pg-col">${head}${para(body)}${note}</div><div class="pg-board">${pics.map((m) => fig(m, "pg-print")).join("")}</div>`;
-    case "grid": return `<div class="pg-col">${head}${para(body)}</div><div><div class="pg-gridpics">${pics.map((m, i) => fig(m, "", i + 1)).join("")}</div>${note}</div>`;
+    case "grid": return `<div class="pg-col">${head}${para(body)}</div><div><div class="pg-gridpics${pics.length === 3 ? " pg-three" : ""}">${pics.map((m, i) => fig(m, "", m.label ? undefined : i + 1)).join("")}</div>${note}</div>`;
     case "bleed": return `${fig(pics[0], "pg-bleedpic")}<div class="pg-col">${head}${para(body.slice(0, -1))}${fig(pics[1], "pg-inline")}${para(body.slice(-1))}</div>`;
     case "pair": return `${fig(pics[0])}<div class="pg-col">${head}${para(body.slice(0, -1))}</div><div class="pg-col pg-after">${para(body.slice(-1))}</div>${fig(pics[1])}`;
     case "herd": return `${head}<ul class="pg-species">${(s.herd ?? []).map((a) => `<li><img src="${media(a.src)}" alt="" loading="lazy">${e(a.name)}</li>`).join("")}</ul>
@@ -71,6 +71,12 @@ function spreadMarkup(s: CaseStudySection) {
     case "cards": return `<div class="pg-col">${head}${para(body)}</div><div class="pg-cardrow">${pics.map((m) => fig(m)).join("")}</div>`;
     case "card": return `${fig(pics[0], "pg-backdrop")}<div class="pg-paper">${head}${(s.controls ?? []).map((row) =>
       `<p class="pg-keys">${row.map((c) => `<span class="pg-kp">${c.keys.map(keyCap).join("")}<span>${e(c.say)}</span></span>`).join("")}</p>`).join("")}</div>`;
+    case "rows": return `<div class="pg-col">${head}${para(body)}</div><div class="pg-rowpics">${pics.map((m) => fig(m)).join("")}</div>`;
+    case "float": return `${fig(pics[0])}<div class="pg-col">${head}${fig(pics[1], "pg-floatpic")}${para(body)}</div><div class="pg-strip">${pics.slice(2).map((m) => fig(m)).join("")}${s.note ? `<p>${e(s.note)}</p>` : ""}</div>`;
+    case "banner": return `<div class="pg-wideset">${pics.map((m) => fig(m)).join("")}</div>${head}${para(body)}`;
+    case "tall": return `<div class="pg-tallpics">${pics.map((m) => fig(m)).join("")}</div><div class="pg-col">${head}${para(body)}</div>`;
+    case "faces": return `${head}<ul class="pg-portraits">${(s.herd ?? []).map((a) => `<li><img src="${media(a.src)}" alt="" loading="lazy">${e(a.name)}${a.sub ? `<small>${e(a.sub)}</small>` : ""}</li>`).join("")}</ul>${para(body)}${fig(pics[0])}`;
+    case "flank": return `${fig(pics[0])}<div class="pg-col">${head}${para(body)}</div>${fig(pics[1])}`;
     default: return `<div class="pg-col">${head}${para(body)}</div>`;
   }
 }

@@ -69,7 +69,16 @@
 | `cards`     | 一段引言，下面一排卡片，每张图写 `title` 与 `note` |
 | `card`      | 整幅图上压一张纸片，写 `controls`：每行 `[{ "keys": ["W", "A"], "say": "walk" }]`，鼠标键写 `mouse-left`、`mouse-right`、`mouse-wheel` |
 
-`media` 每项还可以写 `focus`（裁切时保留的位置，CSS `object-position`，如 `"12% 50%"`）。`note` 用于 `prints`（文字下方）和 `grid`（图下），显示为灰色小字。手机上所有版式都改为单列。
+| `rows`      | 左边文字，右边一列图，每张图旁边写 `title` 与 `note` |
+| `float`     | 大图配文字，第二张小图浮在文字里，其余图排成一行，`note` 跟在这一行后面 |
+| `banner`    | 一张或两张图横在上面，下面标题和各段并排 |
+| `tall`      | 竖图在前排成一行，文字在右 |
+| `faces`     | 一排人物头像（`herd`，每项可加 `sub` 小字），下面各段并排，最后一张图 |
+| `flank`     | 文字左右各一张竖图 |
+
+`grid` 只有三张图时排成三列并保持原图比例（适合手机截图）。图注前的粗体：`grid` 默认是编号，图写了 `label`（如 `"Day 5"`）时改用它。LockDown 用了后面这几种，对应它的 PDF 作品集。
+
+`media` 每项还可以写 `focus`（裁切时保留的位置，CSS `object-position`，如 `"12% 50%"`）。`note` 用于 `prints`（文字下方）、`grid`（图下，灰色小字）和 `float`（那一排图后面）。手机上所有版式都改为单列。
 
 文字一律用自己的口吻：短句，具体的人名、地名和数字写在句子里，讲意图用第一人称；标题是名词或平常的句子。校验会拒绝全大写的 `en` 和标题、含 " that " 的标题、COMING SOON / A GAME BY / SOLO DEVELOPER / MIN READ / RESTRICTED 这类套话，以及不在 25 到 90 个词之间的 `summary`。
 

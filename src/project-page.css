@@ -296,6 +296,57 @@
 .pg-keys .pg-key-mouse { display: inline-flex; color: #26302c; }
 .pg-mouse { width: 17px; height: 25px; }
 
+/* Three tall phone screens side by side keep their own shape. */
+.pg-gridpics.pg-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pg-gridpics.pg-three .pg-pic { aspect-ratio: auto; }
+.pg-gridpics.pg-three img { height: auto; }
+
+/* Text beside a column of pictures, each with a title and a line or two. */
+.pg-rows { grid-template-columns: minmax(0, 36fr) minmax(0, 64fr); }
+.pg-rowpics { display: grid; gap: 20px; align-self: center; }
+.pg-rowpics .pg-pic { aspect-ratio: 16 / 9; }
+.pg-rowpics img { height: 100%; object-fit: cover; }
+.pg-rowpics figure { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); column-gap: 24px; align-items: center; }
+.pg-rowpics .pg-pic { grid-row: 1 / span 2; }
+.pg-rowpics h3 { align-self: end; margin: 0 0 4px; }
+.pg-rowpics .pg-fignote { align-self: start; margin: 0; font-size: 15px; }
+
+/* A large picture beside the text, a small one floated in it, and a row of small ones below. */
+.pg-float { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.pg-spread .pg-floatpic { float: right; width: 42%; margin: 4px 0 10px 22px; }
+.pg-floatpic .pg-pic { background: #fff; }
+.pg-strip { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 1.3fr); gap: 18px; align-items: start; }
+.pg-spread .pg-strip > p { margin: 0 0 0 16px; }
+
+/* Pictures across the top, then the heading and the paragraphs side by side. */
+.pg-banner { grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr) minmax(0, 1fr); }
+.pg-wideset { grid-column: 1 / -1; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 24px; }
+.pg-spread.pg-banner > p, .pg-spread.pg-faces > p { margin-top: 0; }
+
+/* Tall pictures first, then the text. */
+.pg-tall { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+.pg-tallpics { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 24px; }
+
+/* A row of portraits, then two paragraphs and a picture. */
+.pg-faces { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.15fr); }
+.pg-spread.pg-faces > h2 { grid-column: 1 / -1; margin-bottom: 0; }
+.pg-portraits { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 18px; margin: 0; padding: 0; list-style: none;
+  font: 13.5px/1.4 Bahnschrift, "Segoe UI", sans-serif; }
+.pg-portraits img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; image-rendering: pixelated; margin-bottom: 7px; }
+.pg-portraits small { display: block; font-size: 12px; color: var(--pp-muted); }
+
+/* A tall picture on either side of the text. */
+.pg-flank { grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.3fr) minmax(0, 0.75fr); }
+
+/* LockDown's controls card is the game's own grey panel with dark keys. */
+.project-page[data-theme="lockdown"] .pg-paper { left: auto; right: 5%; width: min(460px, 40%); background: #e2e0d3; border-radius: 10px; color: #3a474b; transform: translateY(-50%); }
+.project-page[data-theme="lockdown"] .pg-paper::before, .project-page[data-theme="lockdown"] .pg-paper::after { display: none; }
+.project-page[data-theme="lockdown"] .pg-paper h2 { font-family: Bahnschrift, "Segoe UI", sans-serif; font-size: 26px; color: #2c3a40; border-bottom: 1px solid #b9bbac; }
+.project-page[data-theme="lockdown"] .pg-keys { font-family: Bahnschrift, "Segoe UI", sans-serif; font-size: 15px; }
+.project-page[data-theme="lockdown"] .pg-keys kbd { background: #3c4a4d; border: 0; border-radius: 5px; color: #f1efe4; min-width: 27px; letter-spacing: 0.03em; }
+.project-page[data-theme="lockdown"] .pg-keys .pg-key-mouse { color: #2c3a40; }
+.project-page[data-theme="lockdown"] .pg-backdrop figcaption { right: auto; left: 18px; }
+
 @media (max-width: 860px) {
   .pg-spread, .pg-spread.pg-herd { grid-template-columns: minmax(0, 1fr); }
   .pg-spread .pg-bleedpic { margin: calc(-1 * var(--pg-pad)) calc(-1 * var(--pp-edge)) 0; min-height: 0; }
@@ -309,6 +360,16 @@
   .pg-print:nth-child(2) { grid-row: auto; margin-left: 0; }
   .pg-print:nth-child(3) { grid-column: auto; grid-row: auto; }
   .pg-backdrop .pg-pic { aspect-ratio: 4 / 3; }
+  .pg-rowpics figure { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 14px; }
+  .pg-spread .pg-floatpic { width: 46%; }
+  .pg-strip { grid-template-columns: 1fr 1fr; }
+  .pg-spread .pg-strip > p { grid-column: 1 / -1; margin: 0; }
+  .pg-wideset { grid-auto-flow: row; }
+  .pg-tallpics { gap: 14px; }
+  .pg-portraits { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+  .pg-spread.pg-flank { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .pg-flank .pg-col { grid-column: 1 / -1; order: -1; }
+  .project-page[data-theme="lockdown"] .pg-paper { right: auto; width: auto; transform: none; }
   .pg-backdrop figcaption { position: static; color: var(--pp-muted); text-shadow: none; }
   .pg-paper { position: relative; left: auto; top: auto; width: auto; margin: 22px 4px 0; padding: 26px 22px 20px; transform: rotate(-1deg); }
 }

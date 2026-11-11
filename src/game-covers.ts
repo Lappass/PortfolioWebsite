@@ -328,6 +328,10 @@ const PIECES: { c: string; cells: [number, number][] }[] = [
   { c: "#f5e39a", cells: [[0, 2], [1, 2], [1, 3], [1, 4]] },
   { c: "#d9a58a", cells: [[2, 3], [3, 3], [4, 3], [3, 2]] },
   { c: "#9fb8c9", cells: [[5, 2], [5, 3], [5, 4], [5, 5]] },
+  // The top floors, for pages with more than eight sections.
+  { c: "#b9d48f", cells: [[0, 1], [1, 1], [2, 1], [2, 2]] },
+  { c: "#e8b860", cells: [[3, 0], [3, 1], [4, 1], [4, 2]] },
+  { c: "#c98f6a", cells: [[4, 0], [5, 0], [5, 1], [6, 1]] },
 ];
 // A five-by-seven cell font for the title.
 const GLYPHS: Record<string, string[]> = {

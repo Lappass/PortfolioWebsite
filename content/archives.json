@@ -111,11 +111,11 @@
       ],
       "menu": "lockdown",
       "study": {
-        "pitch": "A survival game about one apartment and twenty days of lockdown. Each day you cook whatever the supply package brings by fitting ingredient shapes into a pan, store the leftovers in a fridge that can rot, and deal with the family and the neighbours on the phone.",
+        "pitch": "In LockDown the player lives in a small apartment with Grandpa and Daughter during a city lockdown. Each ingredient is a shape, and the pan is a grid that is always a little too small for the food. The game is twenty days long, but the player is never told that.",
         "facts": [
           {
             "label": "Role",
-            "value": "Design, writing, programming"
+            "value": "Design, programming, writing"
           },
           {
             "label": "Team",
@@ -127,161 +127,363 @@
           },
           {
             "label": "Engine",
-            "value": "Unity 6, C#"
+            "value": "Unity 6"
           },
           {
             "label": "Platform",
-            "value": "PC"
+            "value": "Windows PC"
           }
         ],
         "sections": [
           {
-            "heading": "The 2022 lockdown",
+            "heading": "Where it started",
+            "spread": "rows",
             "body": [
-              "LockDown is about slowly losing control while you wait for something with no announced end. The idea comes from my family's 2022 lockdown in Shanghai. We ate whatever came in the supply package, my grandparents needed medicine that nobody was allowed to go and get, and nobody told us when it would end.",
-              "I use those memories as design rules. The player receives supplies instead of shopping. The apartment never grows. Food, medicine and the neighbors' requests all come out of one small reserve. The run lasts twenty days, but the screen shows the day number with no countdown.",
-              "The cooking puzzle starts from the traditional Chinese tangram. Here the shapes are ingredients and the space is a pan or a fridge, and the gaps and leftovers show the shortage without a line of dialogue."
+              "In 2022 my family was locked down in Shanghai. There were five of us in the apartment: my grandparents, my parents and me. We ate what came in the government supply package, and some of the food had already gone bad when it reached us. My grandparents needed their medicine, and nobody was allowed out to buy it.",
+              "My parents kept the house running like that for months. The hardest thing was that nobody could tell us when it would end."
             ],
-            "summary": "In 2022 my family was locked down at home in Shanghai. We ate what came in the supply packages, and my grandparents ran low on medicine that nobody was allowed to go out and buy. LockDown turns that into rules: no shopping, only packages; one apartment that never changes; twenty days with no countdown on the screen.",
             "media": [
               {
-                "src": "works/x-002/study/e11.jpg",
-                "caption": "Day 12 in the apartment."
+                "src": "works/x-002/study/door.jpg",
+                "title": "The package",
+                "note": "We couldn't go shopping, so the player can't either. Each morning they get what is in the bag at the door and have to cook with that."
+              },
+              {
+                "src": "works/x-002/study/pills.jpg",
+                "title": "Grandpa's tablets",
+                "note": "On Day 5 Grandpa's medicine runs out. His health drops every day he goes without it, and a better meal doesn't change that."
+              },
+              {
+                "src": "works/x-002/study/hud.jpg",
+                "title": "No end date",
+                "note": "The screen shows the day number and how everyone in the family is doing. It never shows how many days are left."
               }
             ]
           },
           {
-            "heading": "A day",
+            "heading": "One day",
+            "spread": "cards",
             "body": [
-              "Each morning starts with yesterday's consequences. Everyone loses 2 morale and 1 health, the fridge is checked for rot, and a package arrives. By Day 7 the bag can be just noodles, a cabbage and some rice.",
-              "The player reads the phone, plans the meal, fits the food into the pan and serves it. Leftovers go into the fridge if they fit and are lost if they don't. Before Day 3 there is no fridge, and only the largest leftover keeps on the counter. Sleep moves the day on but resets nothing."
+              "I want the player to feel how boring the lockdown was, so they do almost the same things every day. The mechanics that come in later are only small changes to what is already there, and the main thing the player does is still cooking the meal."
             ],
             "media": [
               {
-                "src": "works/x-002/study/01.jpg",
-                "caption": "The daily loop, from the GDD."
+                "src": "works/x-002/study/day_package.jpg",
+                "title": "The package",
+                "note": "A bag arrives at the door in the morning. The player doesn't choose what is in it."
               },
               {
-                "src": "works/x-002/study/02.jpg",
-                "caption": "The Day 7 package: noodles, a cabbage and rice for three people."
+                "src": "works/x-002/study/day_cook.jpg",
+                "title": "One meal",
+                "note": "The player fits the food into one pan for the whole family. What is left over goes into the fridge or is thrown away."
               },
               {
-                "src": "works/x-002/study/e21.jpg",
-                "caption": "Day 1 morning, with the first package waiting to be picked up."
+                "src": "works/x-002/study/day_table.jpg",
+                "title": "The table",
+                "note": "The family eats and says what they think of it. Everyone's health and morale go up or down."
               },
               {
-                "src": "works/x-002/study/e22.jpg",
-                "caption": "Day 6, after dinner."
+                "src": "works/x-002/study/day_phone.jpg",
+                "title": "The phone, then sleep",
+                "note": "Messages from the family and the building come in on the phone. Sleeping starts the next day, and nothing is reset."
+              }
+            ]
+          },
+          {
+            "heading": "The first version",
+            "spread": "grid",
+            "body": [
+              "I finished the first version in July. It ran for thirty days, and anything that had been in the fridge for three days simply disappeared. That was too simple. The player only had to remember which day the food went in.",
+              "Now rot starts in one cell of an ingredient and spreads to the cells next to it, and it can move into other food that is touching it. The player has to look at the fridge and decide what to cook first and what to move away.",
+              "I also cut the run from thirty days to twenty, and I rebuilt the room and the interface. The pictures show how the game looked in September, before that."
+            ],
+            "media": [
+              {
+                "src": "works/x-002/study/sep_room.jpg",
+                "caption": "The apartment, with a pixelated city behind it"
+              },
+              {
+                "src": "works/x-002/study/sep_pan.jpg",
+                "caption": "The pan was a plain square"
+              },
+              {
+                "src": "works/x-002/study/sep_fridge.jpg",
+                "caption": "The fridge"
+              },
+              {
+                "src": "works/x-002/study/sep_chat.jpg",
+                "caption": "The family chat on Day 5"
               }
             ],
-            "summary": "A day starts with the costs of the day before: everyone loses 2 morale and 1 health, the fridge is checked for rot, and a package arrives at the door. By Day 7 it can be just noodles, a cabbage and some rice. You read the phone, cook, serve, and put what is left in the fridge. Then you sleep."
+            "note": "September build."
           },
           {
             "heading": "The pan",
+            "spread": "float",
             "body": [
-              "I built the game around a pan rather than a resource screen, because every problem in the house ends up at dinner. A resource screen would turn Grandpa's tablets into a number. The pan turns them into a space that is too small.",
-              "The twelve ingredients are shapes of 3 to 7 cells, each with its own calories and nutrients. A cabbage is a five-cell cross worth 25 kcal, and pork takes seven cells and gives 250. A meal is scored against a 470 kcal target: 38% balance, 24% calories, 20% total nutrients and 18% pan filled. Under 42% nobody recovers health, and under 28% everyone gets weaker.",
-              "Until Day 6 there is no knife, so the pan is a plain rectangle and every piece goes in whole. After that the pan is an irregular shape of roughly 18 to 25 cells, always with a solid 3 by 3 core so the largest piece fits. The knife cuts along the grid, and the part you don't cook goes to the fridge."
+              "The cooking puzzle comes from tangram, the Chinese puzzle where flat pieces have to fit inside an outline. In LockDown the pieces are ingredients and the outline is the pan.",
+              "A tangram has one correct answer. I didn't want that here, because there were no perfect meals during the lockdown. So every ingredient has a shape, calories and a food type, and there is never room for all of them. So the player has to choose which food to cook today and which to leave."
             ],
             "media": [
               {
-                "src": "works/x-002/study/03.jpg",
-                "caption": "The meal screen: shapes on the left, the pan, the fridge, and the 470 kcal target."
+                "src": "works/x-002/study/pan.jpg",
+                "caption": "Day 1. Pork, rice, tofu and cabbage are in the pan. The potato and the egg on the left didn't fit."
               },
               {
-                "src": "works/x-002/study/04.jpg",
-                "caption": "Day 6: the new knife splits a piece of tofu along the grid."
+                "src": "works/x-002/study/tangram.jpg",
+                "caption": "Tangram figures. Every one uses the same seven pieces."
               },
               {
-                "src": "works/x-002/study/e31.jpg",
-                "caption": "Before the knife, whole pieces fill a plain rectangular pan."
+                "src": "works/x-002/study/pan_d6.jpg",
+                "caption": "Day 6"
               },
               {
-                "src": "works/x-002/study/e32.jpg",
-                "caption": "Later, pork, tofu and egg share an irregular pan."
+                "src": "works/x-002/study/pan_d8.jpg",
+                "caption": "Day 8"
+              },
+              {
+                "src": "works/x-002/study/pan_d13.jpg",
+                "caption": "Day 13"
+              },
+              {
+                "src": "works/x-002/study/pan_d19.jpg",
+                "caption": "Day 19"
               }
             ],
-            "summary": "Twelve ingredients, each a tangram-style shape of 3 to 7 cells, go into the pan. A meal is scored against a 470 kcal target: 38% for balance, 24% for calories, 20% for nutrients and 18% for how full the pan is. There is no knife until Day 6, so early on every piece goes in whole. After that you can cut along the grid, and the pan becomes an irregular shape of 18 to 25 cells."
+            "note": "The pan has a different outline each day."
+          },
+          {
+            "heading": "The knife",
+            "spread": "banner",
+            "body": [
+              "On Day 1 the handle comes off the family's knife, and for five days every ingredient goes into the pan whole. On Day 6 a new knife is at the bottom of the food bag. I use cutting to encourage the player to fit awkwardly shaped ingredients into pans that are a different shape every day.",
+              "The puzzle is my own version of tangram, the traditional Chinese puzzle. When I was thinking about how to add variations to it, I thought about what I really do when I cook: I cut food up, and I store some of it for later. Adding those brings my own life into the game. It also gives the player harder puzzles, and makes them think more about how to manage their food."
+            ],
+            "media": [
+              {
+                "src": "works/x-002/study/cut.jpg",
+                "caption": "Day 6. Cutting a piece of tofu in two before it goes into the pan."
+              }
+            ]
           },
           {
             "heading": "The fridge",
+            "spread": "tall",
             "body": [
-              "Each new rule arrives through something in the house. On Day 1 the fridge is broken, and the next day Aunt Li complains in the building group about Grandpa dragging it around at midnight. On Day 3 he gets it working and storage unlocks. After two days of cooking everything at once, the player knows what a fridge is for.",
-              "The fridge is a 6 by 8 grid. On Day 7 the building loses power, and from Day 8 anything stored for two days grows a rotten cell. Each morning a rotten cell spreads to the next cell of the same item 62% of the time and into a touching item 35% of the time.",
-              "Rot never deletes food. The good cells can still be cooked, or cut away from the bad ones. The grade ignores rot on purpose. Every rotten cell in the pan costs each person 4 health, up to 14 a meal, so an S meal with rot in it still makes the family ill."
+              "I made the fridge because during the lockdown we had to plan carefully too. We put some of our food away in the fridge to eat later, because we couldn't be sure what was coming. In the game the fridge is broken on Day 1, and Grandpa gets it working again on Day 3. It is a grid like the pan, and the leftovers have to fit in it.",
+              "In the game I made this harsher than it was for us. From Day 8 the building loses power at times, and the food in the fridge starts to rot. Rot spreads between cells that touch, and if rotten food goes into the pan, the family loses health. So every morning the player opens the fridge, cooks the oldest things first and drags the bad pieces away from the good ones."
             ],
             "media": [
               {
-                "src": "works/x-002/study/05.jpg",
-                "caption": "The fridge on Day 8, with rot crossing between items where they touch."
+                "src": "works/x-002/study/fridge_d3.jpg",
+                "caption": "The fridge works again, and it is empty.",
+                "label": "Day 3"
               },
               {
-                "src": "works/x-002/study/e41.jpg",
-                "caption": "Day 3: Grandpa says to put spare food in the fridge."
-              },
-              {
-                "src": "works/x-002/study/e42.jpg",
-                "caption": "The repaired fridge on Day 3: 48 empty cells."
+                "src": "works/x-002/study/fridge_d8.jpg",
+                "caption": "The dark cells are rotten: 13 of the 34 in use.",
+                "label": "Day 8"
               }
-            ],
-            "summary": "The fridge is broken on Day 1. Grandpa fixes it on Day 3, and from then on leftovers go into a 6 by 8 grid. On Day 7 the power goes out, and from Day 8 anything stored for two days grows a rotten cell that spreads each morning. Rotten cells can still be cooked, but each one in the pan costs every person 4 health."
+            ]
           },
           {
-            "heading": "The household",
+            "heading": "The family and the building",
+            "spread": "faces",
+            "herd": [
+              {
+                "src": "works/x-002/study/people/you.jpg",
+                "name": "You"
+              },
+              {
+                "src": "works/x-002/study/people/grandpa.jpg",
+                "name": "Grandpa"
+              },
+              {
+                "src": "works/x-002/study/people/daughter.jpg",
+                "name": "Daughter"
+              },
+              {
+                "src": "works/x-002/study/people/zhang.jpg",
+                "name": "Director Zhang",
+                "sub": "committee"
+              },
+              {
+                "src": "works/x-002/study/people/wang.jpg",
+                "name": "Mr. Wang"
+              },
+              {
+                "src": "works/x-002/study/people/li.jpg",
+                "name": "Aunt Li"
+              },
+              {
+                "src": "works/x-002/study/people/yu.jpg",
+                "name": "Uncle Yu",
+                "sub": "10th floor"
+              },
+              {
+                "src": "works/x-002/study/people/stranger.jpg",
+                "name": "6F Stranger"
+              }
+            ],
             "body": [
-              "In 2022 there were five of us at home. For the game I cut the household to three: Grandpa, whose health depends on things from outside, Daughter, who says out loud what everyone feels, and the player, with no name or face, who makes the decisions. Director Zhang, Mr. Wang, Aunt Li, Uncle Yu and the 6F Stranger reach the flat through the building chat.",
-              "Grandpa starts on 60 health and loses 5 more every morning until his medicine is secured. On Day 5 his last box is empty. Aunt Li checks her own drawer, and half the time her strip is empty too. The 6F Stranger can get the pills sooner for two things from the fridge, and the chat names the two the game took.",
-              "On Day 8 Daughter has a fever of 38.2. A warm meal from a fridge item gives her 25 health, and letting her rest costs her 20. On Day 13 Zhang asks for food for the sealed seventh floor. On Day 18 taking Daughter downstairs early works 60% of the time, and if the patrol stops them, everyone loses 12 morale."
+              "There were five of us at home in 2022. In the game the family has three members, one for each age. Grandpa is old, and his health depends on medicine that has to come from outside. Daughter is young and says it out loud when she is hungry, bored or scared. The player is in the middle and does the cooking.",
+              "The neighbors are in the building's group chat, which comes from the residents' group our compound had. For it I picked four kinds of people who were typical of the lockdown. Director Zhang is the official one, who posts the notices. Aunt Li is the helpful one, who shares what she has. Mr. Wang is the pessimist, who doubts the notices and argues with them. The stranger on the sixth floor is the one who profits from the shortage, with medicine to trade for food."
             ],
             "media": [
               {
-                "src": "works/x-002/study/06.jpg",
-                "caption": "Day 5: the 6F Stranger takes two fridge items for the medicine."
-              },
-              {
-                "src": "works/x-002/study/07.jpg",
-                "caption": "Day 13: the seventh floor is sealed and asks for food."
-              },
-              {
-                "src": "works/x-002/study/e51.jpg",
-                "caption": "Day 8: Daughter has a fever, and the player chooses porridge."
-              },
-              {
-                "src": "works/x-002/study/e52.jpg",
-                "caption": "Day 18: take Daughter downstairs early, or wait for the assigned time."
+                "src": "works/x-002/study/table.jpg",
+                "caption": "After each meal someone in the family says how it was."
               }
-            ],
-            "summary": "Three people live in the apartment: Grandpa, Daughter and the player. Grandpa needs medicine and loses 5 health every morning until it is found. On Day 5 his last box runs out, and a stranger on the sixth floor offers pills in exchange for two items from the fridge. Daughter gets a fever on Day 8. Five neighbours talk to you through the building group chat."
+            ]
           },
           {
             "heading": "The phone",
+            "spread": "flank",
             "body": [
-              "The phone has three channels at three distances: the city newspaper, the building group and the family chat. Often they cover the same problem. On Day 4 Zhang asks every flat for its medicine doses, on Day 5 the paper reports refills running late, and that morning Grandpa finds his box empty.",
-              "The HUD shows the day and each person's health. After dinner one family member answers in a single line, the weakest one when the meal went badly, and that is how the player learns what the family thinks of the food. A meal with rot in it gets \"That tastes off. Is it still fresh?\" The letter grade sits behind a small Last meal toggle. On Day 20 the lockdown simply ends, and the report shows the days at home and each person's health."
+              "In 2022 the news, our residents' group and my own family would all talk about the same shortage, and each of them said something different. So the phone in the game has the same three places to read: a newspaper, the building's group chat and the family chat.",
+              "Day 5 is an example. The newspaper says prescriptions are late all over the city. In the building group Aunt Li looks for her own box of tablets and finds it empty. In the family chat Grandpa says his are gone.",
+              "The newspaper never says when the lockdown will end. On Day 11 it reports that a reopening notice going around the chats was false."
             ],
             "media": [
               {
-                "src": "works/x-002/study/08.jpg",
+                "src": "works/x-002/study/news.jpg",
+                "caption": "The newspaper.",
+                "label": "Day 5"
+              },
+              {
+                "src": "works/x-002/study/group.jpg",
+                "caption": "The building group, after the player asks the neighbors for medicine."
+              }
+            ]
+          },
+          {
+            "heading": "Choices",
+            "spread": "grid",
+            "body": [
+              "Five of the twenty days have a choice. It comes as a chat message, and the player answers in the chat. Whichever answer the player picks, the family loses something.",
+              "On Day 5 Grandpa's tablets are gone. The player can ask the neighbors, which is free but may not work. They can send Director Zhang a photo of the empty box and wait for a pharmacy van. Or they can give two things from the fridge to the stranger on the sixth floor and get the medicine now.",
+              "The later choices are about food. A sealed floor asks for some, and Grandpa wants to give his share away."
+            ],
+            "media": [
+              {
+                "src": "works/x-002/study/chat_d5.jpg",
+                "caption": "The last box of tablets is empty.",
+                "label": "Day 5"
+              },
+              {
+                "src": "works/x-002/study/chat_d13.jpg",
+                "caption": "The seventh floor is sealed and asks for food.",
+                "label": "Day 13"
+              },
+              {
+                "src": "works/x-002/study/chat_d16.jpg",
+                "caption": "Grandpa offers his portion to Daughter.",
+                "label": "Day 16"
+              }
+            ]
+          },
+          {
+            "heading": "The last morning",
+            "spread": "banner",
+            "body": [
+              "The lockdown ends after Day 20. Nothing in the game says it is coming, and the last day starts like all the others. Then the report comes up. It shows how many days the family spent at home and how healthy everyone is.",
+              "If anyone's health reaches zero, the run stops on that day and the same report comes up. I kept the report this short because I don't want the ending to feel like winning."
+            ],
+            "media": [
+              {
+                "src": "works/x-002/study/end_over.jpg",
                 "caption": "The report after Day 20."
               },
               {
-                "src": "works/x-002/study/e61.jpg",
-                "caption": "The Day 5 paper reports medicine refills running late."
-              },
-              {
-                "src": "works/x-002/study/e62.jpg",
-                "caption": "After dinner, one family member answers in a single line."
+                "src": "works/x-002/study/end_early.jpg",
+                "caption": "A run that stopped on Day 5. Grandpa's health reached zero."
               }
-            ],
-            "summary": "The phone has three channels: the city newspaper, the building group chat and the family chat. After each dinner one family member comments on the meal in a single line, usually the person who is doing worst. The letter grade is hidden behind a toggle. On Day 20 the lockdown ends and a report shows everyone's health."
+            ]
           },
           {
-            "heading": "Next",
+            "heading": "How to play",
+            "spread": "card",
             "body": [
-              "In the next build the knife slowly goes blunt. Hard ingredients wear it down faster, a blunt knife only cuts soft food like tofu or cabbage, and sharpening it depends on a neighbor lending a stone. Cut surfaces spoil faster than whole ingredients. On outage days the spoilage clock advances twice and the fridge hum cuts out.",
-              "Choices should also reach further. In that build the player picks which two items go to the 6F Stranger, and he comes back on Day 13 expecting the same deal. If Daughter was left to rest, her fever returns on Day 14. 7F sends something back on Day 17 only if they were helped. If the patrol catches the family on Day 18, no package arrives on Day 19."
+              "Left mouse: click the floor to walk, click the package, the counter or the fridge to use it, drag food into the pan or the fridge.",
+              "Q and E: turn the camera. Tab: phone. R: rotate the piece. Right mouse: put a piece back, or throw food out of the fridge. Space: make the cut. Esc: close."
             ],
-            "summary": "The next build adds a knife that goes blunt, with a neighbour's sharpening stone to fix it, and cut surfaces that spoil faster than whole ingredients. Choices should also come back later: the sixth-floor stranger returns on Day 13 expecting the same deal, and a fever left untreated returns on Day 14."
+            "media": [
+              {
+                "src": "works/x-002/study/keys.jpg",
+                "caption": "Day 7 in the apartment."
+              }
+            ],
+            "controls": [
+              [
+                {
+                  "keys": [
+                    "mouse-left"
+                  ],
+                  "say": "click the floor to walk"
+                }
+              ],
+              [
+                {
+                  "keys": [
+                    "mouse-left"
+                  ],
+                  "say": "click the package, the counter or the fridge to use it"
+                }
+              ],
+              [
+                {
+                  "keys": [
+                    "Q",
+                    "E"
+                  ],
+                  "say": "turn the camera"
+                },
+                {
+                  "keys": [
+                    "Tab"
+                  ],
+                  "say": "phone"
+                }
+              ],
+              [
+                {
+                  "keys": [
+                    "mouse-left"
+                  ],
+                  "say": "drag food into the pan or the fridge"
+                }
+              ],
+              [
+                {
+                  "keys": [
+                    "R"
+                  ],
+                  "say": "rotate the piece"
+                }
+              ],
+              [
+                {
+                  "keys": [
+                    "mouse-right"
+                  ],
+                  "say": "put a piece back, or throw food out of the fridge"
+                }
+              ],
+              [
+                {
+                  "keys": [
+                    "Space"
+                  ],
+                  "say": "make the cut"
+                },
+                {
+                  "keys": [
+                    "Esc"
+                  ],
+                  "say": "close"
+                }
+              ]
+            ]
           }
         ]
       },
