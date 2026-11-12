@@ -32,6 +32,9 @@
 .tm-run ol button:hover { text-decoration: underline; }
 /* Last Mile: under the dispatch board, clear of the machine. */
 .tm-lastmile .tm-run { left: 64px; right: auto; bottom: 40px; width: 560px; }
+/* Trail Adventure: on the empty slope bottom right, below the summit and clear of the camps. */
+.tm-trail .tm-run { right: 72px; bottom: 36px; width: 420px; }
+.tm-trail .tm-run figcaption { color: var(--cream); }
 
 /* The page's own text block inside a cover (title line, pitch, facts, buttons). */
 .tm .pg-intro { margin-top: 14px; max-width: 34em; }

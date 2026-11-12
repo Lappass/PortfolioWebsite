@@ -874,6 +874,9 @@
       "back": "works/x-003/back.jpg",
       "loader": "trail",
       "hero": "works/x-003/hero.jpg",
+      "playthrough": {
+        "src": "https://youtu.be/gLxpqa9Hkqk"
+      },
       "gallery": [
         {
           "src": "works/x-003/cabin.jpg",
