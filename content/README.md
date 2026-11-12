@@ -30,8 +30,8 @@
 | `unity`   | Unity WebGL 构建的 `index.html` 路径，例如 `works/x-002/unity/index.html`；页面先显示封面，点击后才加载 |
 | `links`   | 链接数组，每项 `{ "label": "GitHub", "url": "https://..." }`               |
 | `menu`    | 游戏页的封面造型：`lastmile`、`trail`、`lockdown` 或 `sniff`。设置后页面第一屏是这款游戏自己的造型（齿轮、山路、公寓、证物墙），造型里的部件对应 `study` 的各节；素材在 `public/works/<编号>/menu/`（由 `art/` 下的海报脚本生成）。缺省时第一屏是主视觉 |
-| `trailer` | 预告片，写法同 `video`；缺省时用 `video` |
-| `playthrough` | 完整流程视频 `{ "src": "...", "chapters": [{ "at": "3:20", "label": "第二天" }] }`，章节可省略。`src` 写法同 `video`，YouTube 的 `youtu.be` 或 `watch?v=` 链接直接贴即可，页面会换成嵌入播放器。设了 `menu` 的游戏直接在封面上放一个视频（缩略图加播放键，点了才载入播放器；手机上排在文字下方）；其余游戏在预告片之后加一块「Full playthrough」，封面多一个同名按钮。章节显示在视频下方，点击跳到对应时间 |
+| `trailer` | 预告片，写法同 `video`；缺省时用 `video`。设了 `menu` 的游戏把预告片直接放在封面上（缩略图加播放键，点了才载入播放器；手机上排在文字下方），封面的 Trailer 按钮就地播放；其余游戏在封面下方单独一块 |
+| `playthrough` | 完整流程视频 `{ "src": "...", "chapters": [{ "at": "3:20", "label": "第二天" }] }`，章节可省略。`src` 写法同 `video`，YouTube 的 `youtu.be` 或 `watch?v=` 链接直接贴即可，页面会换成嵌入播放器。封面下方加一块「Full playthrough」，封面多一个同名按钮。章节显示在视频下方，点击跳到对应时间 |
 | `download` | 下载 `{ "url": "https://...", "label": "可选说明", "size": "可选大小" }` |
 | `study`   | 这款游戏的页面正文，写法见下。缺省时页面用 `abstract` 与 `findings` |
 
@@ -53,7 +53,7 @@
 }
 ```
 
-插盘后打开的是一整页往下滚的页面。第一屏是封面：有 `menu` 的游戏用它自己的造型，否则用主视觉；封面上有标题、`en` 一句、`pitch`、`facts` 连成的一行，以及 Play（`unity`）、Trailer（`trailer`，缺省用 `video`）、Download（`download`）三个按钮，没有的灰显为 not yet。往下依次是试玩、预告片、`sections` 每节一块（标题、`summary`，第一张 `media` 大图、第二张小图）、截图（`gallery`）和链接。封面造型里的部件（营地、订单条、窗格、名牌）各对应一节，点击跳过去，滚动时点亮当前一节；右侧圆点可以跳到任何一块，↑↓ 与 PageUp/PageDown 逐块移动。没有 `summary` 时取 `body` 的第一句。配图放在 `public/works/<编号>/study/`。TXT 下载会附上各节正文。
+插盘后打开的是一整页往下滚的页面。第一屏是封面：有 `menu` 的游戏用它自己的造型，否则用主视觉；封面上有标题、`en` 一句、`pitch`、`facts` 连成的一行，以及 Play（`unity`）、Trailer（`trailer`，缺省用 `video`）、Download（`download`）三个按钮，没有的灰显为 not yet。往下依次是试玩、预告片（有 `menu` 的游戏放在封面上）、完整流程视频、`sections` 每节一块（标题、`summary`，第一张 `media` 大图、第二张小图）、截图（`gallery`）和链接。封面造型里的部件（营地、订单条、窗格、名牌）各对应一节，点击跳过去，滚动时点亮当前一节；右侧圆点可以跳到任何一块，↑↓ 与 PageUp/PageDown 逐块移动。没有 `summary` 时取 `body` 的第一句。配图放在 `public/works/<编号>/study/`。TXT 下载会附上各节正文。
 
 一节也可以照着打印版作品集的那一页来排：加上 `spread`，这一节就显示 `body` 的全部段落（不再用 `summary`），图片按对应版式摆放。Trail Adventure 用的就是这种写法，对应它的 PDF 作品集。
 

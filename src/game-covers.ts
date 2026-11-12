@@ -1,7 +1,7 @@
 import "./game-covers.css";
 import type { ArchiveRecord } from "./data";
 import { escapeHtml as e } from "./html";
-import { embedUrl, isFile, seconds, youtubeId } from "./video";
+import { embedUrl, isFile, youtubeId } from "./video";
 
 /**
  * Covers for games with a `menu` theme: the first screen of a game's page is drawn in the
@@ -44,30 +44,35 @@ abstract class GameCover {
     addEventListener("resize", this.onResize);
   }
 
-  /** The full playthrough on the cover: a still with a play mark until it is clicked, then the player in its place. */
+  /** The trailer on the cover: a still with a play mark until it is clicked, then the player in its place. */
+  private trailer() { return this.r.trailer ?? this.r.video; }
+
   private runMarkup() {
-    const run = this.r.playthrough;
-    if (!run) return "";
-    const id = youtubeId(run.src);
-    const poster = id ? `https://i.ytimg.com/vi/${id}/maxresdefault.jpg` : this.r.cover ?? this.r.hero;
-    const still = poster ? `<img src="${media(poster)}" alt=""${id ? ` data-fallback="https://i.ytimg.com/vi/${id}/hqdefault.jpg"` : ""} decoding="async">` : "";
-    const chapters = run.chapters?.length ? `<ol>${run.chapters.map((c) => `<li><button type="button" data-run="${seconds(c.at)}"><span>${e(c.at)}</span>${e(c.label)}</button></li>`).join("")}</ol>` : "";
+    const src = this.trailer();
+    if (!src) return "";
+    const id = youtubeId(src);
+    // A video file shows its own frame a second in; the key art would blend into the cover around it.
+    const poster = id ? `https://i.ytimg.com/vi/${id}/maxresdefault.jpg` : isFile(src) ? undefined : this.r.cover ?? this.r.hero;
+    const still = isFile(src) ? `<video src="${media(src)}#t=1" muted playsinline preload="metadata" tabindex="-1" aria-hidden="true"></video>` : poster ? `<img src="${media(poster)}" alt=""${id ? ` data-fallback="https://i.ytimg.com/vi/${id}/hqdefault.jpg"` : ""} decoding="async">` : "";
     return `<figure class="tm-run tm-in">
-      <div class="tm-run-frame"><button type="button" class="tm-run-start" data-run="0" aria-label="Play the full playthrough of ${e(this.r.title)}">${still}<span class="tm-run-mark" aria-hidden="true"></span></button></div>
-      <figcaption>Full playthrough</figcaption>${chapters}</figure>`;
+      <div class="tm-run-frame"><button type="button" class="tm-run-start" data-run="0" aria-label="Play the trailer of ${e(this.r.title)}">${still}<span class="tm-run-mark" aria-hidden="true"></span></button></div>
+      <figcaption>Trailer</figcaption></figure>`;
   }
 
-  private play(at: number) {
-    const run = this.r.playthrough!, frame = this.el.querySelector<HTMLElement>(".tm-run-frame")!;
-    const video = frame.querySelector("video");
+  /** Starts the trailer on the cover (also the cover's Trailer button). */
+  play(at = 0) {
+    const src = this.trailer(), frame = this.el.querySelector<HTMLElement>(".tm-run-frame");
+    if (!src || !frame) return;
+    const video = frame.querySelector<HTMLVideoElement>("video[controls]");
     if (video) { video.currentTime = at; void video.play().catch(() => {}); return; }
-    if (isFile(run.src)) {
-      const player = Object.assign(document.createElement("video"), { src: url(run.src), controls: true, autoplay: true, playsInline: true });
+    if (isFile(src)) {
+      const player = Object.assign(document.createElement("video"), { src: url(src), controls: true, autoplay: true, playsInline: true });
       player.currentTime = at;
       frame.replaceChildren(player);
+      player.focus();
       return;
     }
-    const player = Object.assign(document.createElement("iframe"), { src: embedUrl(run.src, { start: at, autoplay: true }), title: `${this.r.title}: full playthrough`, allowFullscreen: true });
+    const player = Object.assign(document.createElement("iframe"), { src: embedUrl(src, { start: at, autoplay: true }), title: `${this.r.title}: trailer`, allowFullscreen: true });
     player.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
     player.referrerPolicy = "strict-origin-when-cross-origin";
     frame.replaceChildren(player);
@@ -109,7 +114,7 @@ abstract class GameCover {
     const z = narrow ? Math.min(1, innerWidth / 660) : Math.min(1.4, Math.max(0.7, Math.min(innerWidth / 1440, innerHeight / 900)));
     this.el.style.setProperty("--tmz", z.toFixed(3));
     this.layout();
-    // On a phone the playthrough sits right under the text, clear of the cover's parts lower down.
+    // On a phone the trailer sits right under the text, clear of the cover's parts lower down.
     const run = this.el.querySelector<HTMLElement>(".tm-run"), text = this.el.querySelector(".pg-intro")?.closest(".tm-in");
     if (!run) return;
     const below = text ? text.getBoundingClientRect().bottom - this.el.getBoundingClientRect().top : 0;

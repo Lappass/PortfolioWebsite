@@ -241,9 +241,9 @@ export class ProjectPage {
   private sectionsFor(r: ArchiveRecord): Section[] {
     const out: Section[] = [];
     if (r.unity) out.push({ id: "play", heading: "Play", kind: "play" });
-    if (r.trailer ?? r.video) out.push({ id: "trailer", heading: "Trailer", kind: "trailer" });
-    // Games with their own cover play it on the cover itself (src/game-covers.ts).
-    if (r.playthrough && !r.menu) out.push({ id: "playthrough", heading: "Full playthrough", kind: "playthrough" });
+    // Games with their own cover play the trailer on the cover itself (src/game-covers.ts).
+    if ((r.trailer ?? r.video) && !r.menu) out.push({ id: "trailer", heading: "Trailer", kind: "trailer" });
+    if (r.playthrough) out.push({ id: "playthrough", heading: "Full playthrough", kind: "playthrough" });
     r.study?.sections.forEach((study, i) => out.push({ id: `s${i + 1}`, heading: study.heading, kind: "study", study }));
     if (!r.study) out.push({ id: "about", heading: "About", kind: "about" });
     if (r.gallery?.length) out.push({ id: "shots", heading: "Screenshots", kind: "shots" });
@@ -262,7 +262,7 @@ export class ProjectPage {
       <div class="pg-actions">
         ${button(Boolean(r.unity), "Play", `<button type="button" data-page="go" data-to="play">Play</button>`)}
         ${button(Boolean(r.trailer ?? r.video), "Trailer", `<button type="button" data-page="go" data-to="trailer">Trailer</button>`)}
-        ${r.playthrough && !r.menu ? `<button type="button" data-page="go" data-to="playthrough">Full playthrough</button>` : ""}
+        ${r.playthrough ? `<button type="button" data-page="go" data-to="playthrough">Full playthrough</button>` : ""}
         ${button(Boolean(r.download), "Download", `<a href="${e(r.download?.url ?? "")}" target="_blank" rel="noopener noreferrer">Download${r.download?.size ? ` · ${e(r.download.size)}` : ""}</a>`)}
       </div></div>`;
   }
@@ -320,6 +320,8 @@ export class ProjectPage {
   private goTo(id: string) {
     const behavior: ScrollBehavior = reduced() || this.root.classList.contains("instant") ? "instant" : "smooth";
     if (id === "cover") { this.root.scrollTo({ top: 0, behavior }); return; }
+    // A cover with the trailer on it starts it in place.
+    if (id === "trailer" && this.cover && !this.sections.some((s) => s.id === "trailer")) { this.root.scrollTo({ top: 0, behavior }); this.cover.play(); return; }
     this.root.querySelector<HTMLElement>(`#sec-${CSS.escape(id)}`)?.scrollIntoView({ behavior, block: "start" });
   }
 
