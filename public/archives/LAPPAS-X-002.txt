@@ -21,7 +21,7 @@ So I cut the riders down to four and gave them names, and now the player gives e
 
 Dispatch
 
-The player spends most of the game on this screen. Time stops while an order is open, so there is no need to click the first name in a hurry.
+The player spends most of the game on this screen. A day is two waves of orders, morning and evening. Time stops while an order is open, so there is no need to click the first name in a hurry.
 
 The deadline is worked out from the fastest courier who could take the order. When that one is already out, the player has to send someone slower or let the order wait.
 
@@ -29,17 +29,25 @@ The deadline is worked out from the fastest courier who could take the order. Wh
 
 - The same order on the map, with the time it has left.
 
-- Dispatch. Everyone who could take it, when they would arrive, and how early or late that is.
+- Dispatch. Every courier who could take it, rider or machine, when they would arrive, and how early or late that is.
 
 - The roster. A card that can't take this order is locked and says why. The robot can't climb stairs.
 
 - The selected rider: Streets, Strength, Judgment and stamina.
 
+AO-6
+
+From day 6 the dispatch panel has one more thing on it. AO-6 marks one courier as its pick for the order and gives a reason. The reason is usually one of the player's own earlier choices, with the day and the order number.
+
+Every dispatch the player confirms is kept as an example, and so is every time they pick someone else. The newer examples count for more, and the next suggestion for that kind of order leans the same way. After day 10 these examples are what AO-6 runs the station with.
+
+I made AO-6 polite, and its picks are usually right. It never decides for the player. But its pick is at the top of the list and Confirm is the biggest button on the panel, so the easiest thing to do is agree with it. I wanted the player to train it by their own choice, without the game forcing them to.
+
 The four riders
 
 With only four riders the player gets to know each one. They have three numbers out of ten, for how well they know the streets, how much they can carry, and how they handle a difficult handover. Each of them is also saving for one thing that has to be paid by a certain evening.
 
-I set the amounts so that a fair share of the work just about covers them. A rider who is passed over for a few orders comes up short, and that stays for the rest of the run. Xiaoyu loses the room, moves an hour away, and is 20 seconds late to every shift after that. Chen leaves after day 9.
+I set the amounts so that a fair share of the work just about covers them. A rider who is passed over for a few orders comes up short, and that stays for the rest of the run. Xiaoyu loses the room, moves an hour away, and is 20 seconds late to every shift after that. Lin takes night work at a warehouse and starts each morning tired. Ajie gets a call from another platform on day 8. Chen leaves after day 9.
 
 Pay
 
@@ -47,19 +55,13 @@ The platform pays the riders, and the station doesn't. A delivery is ¥4 to ¥6,
 
 On day 4 Xiaoyu texts during the evening wave. She is ¥30 short on her deposit, it is due tonight, and the order she is asking for pays ¥5. The player can give it to her, promise her the next one, or tell her not now. If the player promises and then gives someone else an order she could have taken, the promise is broken.
 
+A broken promise costs trust, and so does a no. Trust is never shown as a number. A rider who has lost it keeps their answers short and stops asking for orders, so the player no longer hears when they are short of money. A rider who takes home much less than the others two shifts in a row signs with another platform, and one who trusts the station stays for a third.
+
 The report at the end of the day has the station's target and every rider's pay on one page. On this day the station delivered 12 against a target of 10. Xiaoyu took home ¥5, she is last on the board, and her deposit fell short.
 
 During the shift
 
 A shift gets interrupted a lot. All of these used to open as the same box in the middle of the screen. I moved each kind onto its own object, so the player can see what kind of thing it is before reading it. The clock waits while one is open, and every answer has its cost written on the button.
-
-Story calls
-
-From day 2, one rider calls each evening about something the board doesn't count. Ajie wants a day off the crates. Lin wants to finish early for school pickup. Chen wants someone to learn his route. Yes usually costs ¥30 and about 25 seconds of the rider's time, and no is free.
-
-The calls follow on from each other. Xiaoyu has three. On day 3 she asks if someone could ride the old blocks with her once. On day 7 head office has asked her to mark the entrances the robots keep getting wrong, and she asks for a little time to write them up properly and for the notes to say they are hers. On day 10 she asks if her name is going in with the final report.
-
-The robots use her entrances in the end even if the player says no. Her name is only kept on them if the player says yes.
 
 Robots and drones
 
@@ -69,21 +71,19 @@ I didn't want the machines to be riders with better numbers. The robot never get
 
 Then head office asks for two machines on the roster, then three, then four. The roster only has six places, so to bring in a machine the player has to take a rider off.
 
-AO-6
+Story calls
 
-AO-6 arrives on day 6. For each order it marks one courier as its pick and gives a reason. The reason is usually one of the player's own earlier choices, with the day and the order number.
+From day 2, one rider calls each evening about something the board doesn't count. Ajie wants a day off the crates. Lin wants to finish early for school pickup. Chen wants someone to learn his route. Yes usually costs ¥30 and about 25 seconds of the rider's time. No is free, but the rider remembers it. When Lin asks about pickup again on day 8, he starts with what happened on day 4.
 
-Every dispatch the player confirms is kept as an example, and so is every time they pick someone else. The newer examples count for more, and the next suggestion for that kind of order leans the same way.
+The calls follow on from each other. Xiaoyu has three. On day 3 she asks if someone could ride the old blocks with her once. On day 7 head office has asked her to mark the entrances the robots keep getting wrong, and she asks for a little time to write them up properly and for the notes to say they are hers. On day 10 she asks if her name is going in with the final report.
 
-I made AO-6 polite, and its picks are usually right. It never decides for the player. But its pick is at the top of the list and Confirm is the biggest button on the panel, so the easiest thing to do is agree with it. I wanted the player to train it by their own choice, without the game forcing them to.
+The robots use her entrances in the end even if the player says no. Her name is only kept on them if the player says yes.
 
 Day 11
 
 Day 10 ends with a report and a thank-you. At 06:00 on day 11 the phone has a notice from head office. The manager's position has been removed and AO-6 runs Lanting now.
 
-At first this was only a notice, and all the player could do was read it. So I let them answer back. They can ask AO-6 why, and it answers with the numbers from their own run: how many of its picks they confirmed, and how many calls from the road they handled. Then it lists the rules it took from them.
-
-After that the title screen is different. The badge doesn't open the door, and there is a stamp on the shutter.
+At first this was only a notice, and all the player could do was read it. So I let them answer back. They can ask AO-6 why, and it answers with the numbers from their own run: how many of its picks they confirmed, and how many calls from the road they handled. Then it lists the rules it took from them. Afterwards, on the title screen, the badge no longer opens the station door.
 
 The desk and the phone
 

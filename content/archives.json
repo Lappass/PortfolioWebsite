@@ -490,7 +490,7 @@
       ],
       "menu": "lastmile",
       "study": {
-        "pitch": "Last Mile is a management game. The player runs Lanting Station, a food-delivery station in Shanghai, for ten days. Orders come in from the shops nearby, and for every order the player picks which rider takes it. There are four riders and they are paid for each delivery, so picking one of them also decides who earns money that day.",
+        "pitch": "Last Mile is a management game. The player is the new manager of Lanting Station, a food-delivery station in Shanghai, and runs it for ten days. For every order the player picks which rider takes it. There are four riders and they are paid for each delivery, so picking one of them also decides who earns money that day.",
         "facts": [
           {
             "label": "Role",
@@ -540,13 +540,13 @@
             "heading": "Dispatch",
             "spread": "marked",
             "body": [
-              "The player spends most of the game on this screen. Time stops while an order is open, so there is no need to click the first name in a hurry.",
+              "The player spends most of the game on this screen. A day is two waves of orders, morning and evening. Time stops while an order is open, so there is no need to click the first name in a hurry.",
               "The deadline is worked out from the fastest courier who could take the order. When that one is already out, the player has to send someone slower or let the order wait."
             ],
             "points": [
               "Orders. Each one is a paper slip with a countdown.",
               "The same order on the map, with the time it has left.",
-              "Dispatch. Everyone who could take it, when they would arrive, and how early or late that is.",
+              "Dispatch. Every courier who could take it, rider or machine, when they would arrive, and how early or late that is.",
               "The roster. A card that can't take this order is locked and says why. The robot can't climb stairs.",
               "The selected rider: Streets, Strength, Judgment and stamina."
             ],
@@ -580,11 +580,30 @@
             ]
           },
           {
+            "heading": "AO-6",
+            "spread": "tall",
+            "body": [
+              "From day 6 the dispatch panel has one more thing on it. AO-6 marks one courier as its pick for the order and gives a reason. The reason is usually one of the player's own earlier choices, with the day and the order number.",
+              "Every dispatch the player confirms is kept as an example, and so is every time they pick someone else. The newer examples count for more, and the next suggestion for that kind of order leans the same way. After day 10 these examples are what AO-6 runs the station with.",
+              "I made AO-6 polite, and its picks are usually right. It never decides for the player. But its pick is at the top of the list and Confirm is the biggest button on the panel, so the easiest thing to do is agree with it. I wanted the player to train it by their own choice, without the game forcing them to."
+            ],
+            "media": [
+              {
+                "src": "works/x-002/study/ao6_pick.jpg",
+                "caption": "Day 8. AO-6 picks a robot, R-03, for a crate of milk: \"This follows what you did on Day 7, #1082.\""
+              },
+              {
+                "src": "works/x-002/study/ao6_morning.jpg",
+                "caption": "Day 6, 06:00. The morning message now comes from AO-6 and not from Zhou Heng."
+              }
+            ]
+          },
+          {
             "heading": "The four riders",
             "spread": "cards",
             "body": [
               "With only four riders the player gets to know each one. They have three numbers out of ten, for how well they know the streets, how much they can carry, and how they handle a difficult handover. Each of them is also saving for one thing that has to be paid by a certain evening.",
-              "I set the amounts so that a fair share of the work just about covers them. A rider who is passed over for a few orders comes up short, and that stays for the rest of the run. Xiaoyu loses the room, moves an hour away, and is 20 seconds late to every shift after that. Chen leaves after day 9."
+              "I set the amounts so that a fair share of the work just about covers them. A rider who is passed over for a few orders comes up short, and that stays for the rest of the run. Xiaoyu loses the room, moves an hour away, and is 20 seconds late to every shift after that. Lin takes night work at a warehouse and starts each morning tired. Ajie gets a call from another platform on day 8. Chen leaves after day 9."
             ],
             "media": [
               {
@@ -597,7 +616,7 @@
                 "src": "works/x-002/study/p_ajie.jpg",
                 "caption": "Streets 5 · Strength 9 · Judgment 5",
                 "title": "Ajie",
-                "note": "He carries the crates. The board counts a crate as one parcel, so he is last on it. He owes a friend ¥50 by day 6."
+                "note": "He carries the crates. The station's ranking board only counts parcels, so a crate is worth the same as a coffee and he is last on it. He owes a friend ¥50 by day 6."
               },
               {
                 "src": "works/x-002/study/p_lin.jpg",
@@ -619,6 +638,7 @@
             "body": [
               "The platform pays the riders, and the station doesn't. A delivery is ¥4 to ¥6, and half of that if it is late. So when the player gives an order to one rider, the other three earn nothing from it.",
               "On day 4 Xiaoyu texts during the evening wave. She is ¥30 short on her deposit, it is due tonight, and the order she is asking for pays ¥5. The player can give it to her, promise her the next one, or tell her not now. If the player promises and then gives someone else an order she could have taken, the promise is broken.",
+              "A broken promise costs trust, and so does a no. Trust is never shown as a number. A rider who has lost it keeps their answers short and stops asking for orders, so the player no longer hears when they are short of money. A rider who takes home much less than the others two shifts in a row signs with another platform, and one who trusts the station stays for a third.",
               "The report at the end of the day has the station's target and every rider's pay on one page. On this day the station delivered 12 against a target of 10. Xiaoyu took home ¥5, she is last on the board, and her deposit fell short."
             ],
             "media": [
@@ -628,7 +648,7 @@
               },
               {
                 "src": "works/x-002/study/report.jpg",
-                "caption": "The report that night."
+                "caption": "The report that night, from Zhou Heng."
               }
             ]
           },
@@ -662,10 +682,33 @@
             ]
           },
           {
+            "heading": "Robots and drones",
+            "spread": "beside",
+            "body": [
+              "On day 3 head office sends a robot on trial and wants it compared with the riders by the evening. If the riders were on time more often, the player can send it back. If they weren't, it stays, and the player either pays to keep everyone or lets one rider go.",
+              "I didn't want the machines to be riders with better numbers. The robot never gets tired and isn't paid by the delivery, but it can't climb stairs or check an ID at the door. The drone is the fastest thing on the map, but it can't lift a crate. So in the first days the station still needs riders for those orders.",
+              "Then head office asks for two machines on the roster, then three, then four. The roster only has six places, so to bring in a machine the player has to take a rider off."
+            ],
+            "media": [
+              {
+                "src": "works/x-002/study/robot_day3.jpg",
+                "caption": "Day 3, after closing, in Zhou Heng's report. The robot was on time more often, so it stays."
+              },
+              {
+                "src": "works/x-002/study/staffing.jpg",
+                "caption": "Day 7. The roster is full, so another machine means choosing who it replaces. Chen is selected."
+              },
+              {
+                "src": "works/x-002/study/machines.jpg",
+                "caption": "The roster on day 10 of the same run: four robots and two drones."
+              }
+            ]
+          },
+          {
             "heading": "Story calls",
             "spread": "banner",
             "body": [
-              "From day 2, one rider calls each evening about something the board doesn't count. Ajie wants a day off the crates. Lin wants to finish early for school pickup. Chen wants someone to learn his route. Yes usually costs ¥30 and about 25 seconds of the rider's time, and no is free.",
+              "From day 2, one rider calls each evening about something the board doesn't count. Ajie wants a day off the crates. Lin wants to finish early for school pickup. Chen wants someone to learn his route. Yes usually costs ¥30 and about 25 seconds of the rider's time. No is free, but the rider remembers it. When Lin asks about pickup again on day 8, he starts with what happened on day 4.",
               "The calls follow on from each other. Xiaoyu has three. On day 3 she asks if someone could ride the old blocks with her once. On day 7 head office has asked her to mark the entrances the robots keep getting wrong, and she asks for a little time to write them up properly and for the notes to say they are hers. On day 10 she asks if her name is going in with the final report.",
               "The robots use her entrances in the end even if the player says no. Her name is only kept on them if the player says yes."
             ],
@@ -688,56 +731,13 @@
             ]
           },
           {
-            "heading": "Robots and drones",
-            "spread": "beside",
-            "body": [
-              "On day 3 head office sends a robot on trial and wants it compared with the riders by the evening. If the riders were on time more often, the player can send it back. If they weren't, it stays, and the player either pays to keep everyone or lets one rider go.",
-              "I didn't want the machines to be riders with better numbers. The robot never gets tired and isn't paid by the delivery, but it can't climb stairs or check an ID at the door. The drone is the fastest thing on the map, but it can't lift a crate. So in the first days the station still needs riders for those orders.",
-              "Then head office asks for two machines on the roster, then three, then four. The roster only has six places, so to bring in a machine the player has to take a rider off."
-            ],
-            "media": [
-              {
-                "src": "works/x-002/study/robot_day3.jpg",
-                "caption": "Day 3, after closing. The robot was on time more often, so it stays."
-              },
-              {
-                "src": "works/x-002/study/staffing.jpg",
-                "caption": "Day 7. The roster is full, so another machine means choosing who it replaces. Chen is selected."
-              },
-              {
-                "src": "works/x-002/study/machines.jpg",
-                "caption": "The roster on day 10 of the same run: four robots and two drones."
-              }
-            ]
-          },
-          {
-            "heading": "AO-6",
-            "spread": "tall",
-            "body": [
-              "AO-6 arrives on day 6. For each order it marks one courier as its pick and gives a reason. The reason is usually one of the player's own earlier choices, with the day and the order number.",
-              "Every dispatch the player confirms is kept as an example, and so is every time they pick someone else. The newer examples count for more, and the next suggestion for that kind of order leans the same way.",
-              "I made AO-6 polite, and its picks are usually right. It never decides for the player. But its pick is at the top of the list and Confirm is the biggest button on the panel, so the easiest thing to do is agree with it. I wanted the player to train it by their own choice, without the game forcing them to."
-            ],
-            "media": [
-              {
-                "src": "works/x-002/study/ao6_morning.jpg",
-                "caption": "Day 6, 06:00. AO-6's first morning message, where Zhou Heng's used to be."
-              },
-              {
-                "src": "works/x-002/study/ao6_pick.jpg",
-                "caption": "Day 8. AO-6 picks robot R-03 for a crate of milk: \"This follows what you did on Day 7, #1082.\""
-              }
-            ]
-          },
-          {
             "heading": "Day 11",
             "spread": "edge",
             "body": [
               "Day 10 ends with a report and a thank-you. At 06:00 on day 11 the phone has a notice from head office. The manager's position has been removed and AO-6 runs Lanting now.",
-              "At first this was only a notice, and all the player could do was read it. So I let them answer back. They can ask AO-6 why, and it answers with the numbers from their own run: how many of its picks they confirmed, and how many calls from the road they handled. Then it lists the rules it took from them.",
-              "After that the title screen is different. The badge doesn't open the door, and there is a stamp on the shutter."
+              "At first this was only a notice, and all the player could do was read it. So I let them answer back. They can ask AO-6 why, and it answers with the numbers from their own run: how many of its picks they confirmed, and how many calls from the road they handled. Then it lists the rules it took from them. Afterwards, on the title screen, the badge no longer opens the station door."
             ],
-            "note": "There is one way off this route. If the riders beat the robot on day 3 and the player sends it back, the station stays all-human and AO-6 never arrives. The manager keeps the job if more than 80% of the orders from day 6 to day 10 are on time.",
+            "note": "I also put in one easter egg, on day 3. If the riders beat the robot that day and the player sends it back, the station stays all-human and AO-6 never arrives. The manager then keeps the job if more than 80% of the orders from day 6 to day 10 are on time. Buying a machine later puts the station back on the pilot, and that can't be undone.",
             "media": [
               {
                 "src": "works/x-002/study/revoked.jpg",
@@ -926,7 +926,8 @@
             "heading": "Where it started",
             "body": [
               "I started hiking after I moved to the United States for university, and I usually had my camera with me. The game comes from those trips. Mount Rainier is the one I remember best. A ground squirrel sat on the rocks and looked straight at me. Higher up it was foggy, and a marmot was watching from a ridge. Both of them lived a long way up, and I only saw them because I had walked that far.",
-              "The basic rules of the game are taken from those trips. Animals stay away from the path, so the player has to climb to get to them. Climbing uses stamina. Animals leave once they notice the player, so a good photo usually takes patience."
+              "The basic rules of the game are taken from those trips. Animals stay away from the path, so the player has to climb to get to them. Climbing uses stamina. Animals leave once they notice the player, so a good photo usually takes patience.",
+              "Trail Adventure grew out of my own life as an undergraduate in the United States. It is built from my own experience, and it shows what I did besides studying. I think it represents me better than anything else I have made, both as a game designer and as an ordinary person."
             ],
             "media": [
               {
@@ -974,11 +975,73 @@
             "note": "October 11 build. I didn't take screenshots back then, so I checked out that version again and captured these."
           },
           {
+            "heading": "What I wanted from the game",
+            "spread": "cards",
+            "body": [
+              "After the first version I had three things I wanted the game to do. Every system below was made for one of them."
+            ],
+            "media": [
+              {
+                "src": "works/x-003/study/telescope.jpg",
+                "focus": "50% 22%",
+                "title": "The mountain is the obstacle",
+                "caption": "The mountain, seen through the telescope in the cabin.",
+                "note": "I want getting up high to be hard work, so that reaching a high ledge feels like an achievement. So the player can climb any surface, and hunger, cold, injury, tiredness and a heavy bag all take a piece of the same stamina bar."
+              },
+              {
+                "src": "works/x-003/study/radar.jpg",
+                "focus": "55% 60%",
+                "title": "Animals have to be found",
+                "caption": "The radar on the watch gives a rough direction.",
+                "note": "I want the player to remember where they found each animal and how they got the photo. So each of the 24 species reacts to the player in its own way, and the people on the island and the radar only give a rough idea of where to look."
+              },
+              {
+                "src": "works/x-003/study/postcards.jpg",
+                "focus": "30% 50%",
+                "title": "A cabin that remembers the trip",
+                "caption": "The photo board, the postcard strings and the carvings in the cabin.",
+                "note": "I want coming home to be part of the trip. So photos earn stars for the camera and for furniture, and the photos, postcards and carvings stay in the cabin, which fills up as the player plays."
+              }
+            ]
+          },
+          {
+            "heading": "What the player does",
+            "spread": "marked",
+            "body": [
+              "The player's goal is to photograph the animals on the island. Getting to them is the hard part, so most of a trip is climbing.",
+              "Apart from the requests, the game doesn't force any goal on the player. On every trip she sets her own, such as an animal she wants to photograph. She can try for the summit, look for animals she hasn't found yet, or finish some requests. A trip ends at the summit, when she picks Go home on the phone, or when she is too tired to go on. An end card adds up the trip and gives it a rank.",
+              "The game doesn't have many rules. The player can climb almost anywhere. If the stamina bar runs out while she is climbing, she falls, and a long fall hurts her. She also gets cold, hungry and tired. Animals notice her, and when they do they may run away."
+            ],
+            "points": [
+              "Fill the field guide with photos. When every moment of a species is in the guide, the player can order a new carving of it for the cabin.",
+              "Finish requests for the people on the island. They give tools that help her climb higher and go further.",
+              "Spend the stars on upgrades for the camera and things for the cabin."
+            ],
+            "media": [
+              {
+                "src": "works/x-003/study/loop.jpg",
+                "caption": "One trip. Climbing, photographing and sending repeat through the day. A night at a fire starts the next day, and the trip ends at the summit, by going home, or when the player is worn out."
+              }
+            ]
+          },
+          {
+            "heading": "How the systems connect",
+            "spread": "banner",
+            "body": [
+              "Everything in the game goes through two things, the stamina bar and the camera. Climbing uses the bar, and hunger, cold and a heavy bag make it shorter. Photos fill the field guide, the guide gives stars, and stars buy a better camera. Requests join the two sides, because a photo sent to someone comes back as a tool for the climb."
+            ],
+            "media": [
+              {
+                "src": "works/x-003/study/sysmap.jpg"
+              }
+            ]
+          },
+          {
             "heading": "Climbing and stamina",
             "body": [
-              "Climbing is slow on purpose, about 0.6 meters a second. The player goes up one pull at a time, following the hands. I kept the hands low on the screen so they don't cover the rock or an animal sitting on it.",
-              "Running, climbing and jumping all use stamina, but walking is free, so that the player can look at the mountain and not at the bar.",
-              "Hunger, cold, injury, tiredness and a heavy bag each take a piece off the end of the bar, and each piece has its own color. This idea comes from the game Peak. I like it because I don't have to explain several systems to the player. The stamina bar is the only resource they have to manage, and every other effect is added on top of it. It is also how a real hike works, where being hungry or cold just means you have less energy to climb, and I think that helps the player feel they are really on the mountain."
+              "I want it to take effort to reach an animal, so climbing is slow on purpose, about 0.6 meters a second. The player goes up one pull at a time, following the hands. I kept the hands low on the screen so they don't cover the rock or an animal sitting on it.",
+              "I want the player to look at the mountain and not at the bar while walking, so walking is free. Running, climbing and jumping all use stamina.",
+              "I wanted the stamina bar to be the only resource the player has to manage, so that I don't have to explain several systems to them. Hunger, cold, injury, tiredness and a heavy bag each take a piece off the end of the bar, and each piece has its own color. This idea comes from the game Peak. It is also how a real hike works, where being hungry or cold just means you have less energy to climb, and I think that helps the player feel they are really on the mountain."
             ],
             "media": [
               {
@@ -996,7 +1059,7 @@
             "body": [
               "In real life, animals get scared when a person shows up. But when they haven't noticed anyone, they carry on with their own things, and every animal has moments of its own that are worth a photo. The scoring follows this. A photo gets more points if the animal is close, if it is running or flying, or if it is looking into the lens.",
               "When I take photos while running, they come out shaky. I also didn't want the player to run up to an animal and take a quick shot, so moving while shooting blurs the photo. A blurred photo only gets half the score and can't be sent for a request.",
-              "New photos earn stars, and the player spends the stars at the bench in the cabin to upgrade the camera. I wanted photography to have a positive feedback loop. The more good photos the player takes, the better the camera gets, and with a better camera they can take more and better photos."
+              "I wanted photography to have a positive feedback loop. New photos earn stars, and the player spends the stars at the bench in the cabin to upgrade the camera. The more good photos the player takes, the better the camera gets, and with a better camera they can take more and better photos."
             ],
             "media": [
               {
@@ -1015,7 +1078,7 @@
             "body": [
               "The animals I met on real trips did not all react to me the same way. On Mount Rainier the ground squirrel sat and looked right at me, and the marmot kept watching from a ridge. So in the game all 24 species behave differently. When an animal notices the player, it might stare, freeze, ignore her or walk closer. When it gets scared, it might run, crouch, climb a tree or charge at her.",
               "Some have habits of their own. Foxes steal snacks. Goats spar with each other and will butt anyone who gets too close. The ptarmigan hen won't leave her nest, and the owl is only out from early evening until morning. Sneaking lets the player get nearer before being noticed.",
-              "The field guide works like a Pokédex. Each animal has a list of moments to photograph, such as a close-up, on the run, or at night. Every new moment gives one star, so the player has a reason to go back to an animal they have already photographed."
+              "I wanted the player to have a reason to go back to an animal they have already photographed. So the field guide works like a Pokédex. Each animal has a list of moments to photograph, such as a close-up, on the run, or at night, and every new moment gives one star."
             ],
             "media": [
               {
@@ -1149,8 +1212,8 @@
           {
             "heading": "Requests",
             "body": [
-              "Sixteen people live on the island. Each one has a short story of two or three photo requests. The stories don't depend on each other, so getting stuck on a hard request only stops that one story. I spread the requests so that every one of the 24 species is asked for at least once, and this takes the player all over the island.",
-              "Every request gives an item back, and all eight tools come from requests. So every tool the player gets has a small story behind it, and it doesn't feel like something she just picked up off the ground.",
+              "I use requests to take the player all over the island. Sixteen people live there, and each one has a short story of two or three photo requests. I spread the requests so that every one of the 24 species is asked for at least once. The stories don't depend on each other, so getting stuck on a hard request only stops that one story.",
+              "I wanted every tool the player gets to have a small story behind it, so that it doesn't feel like something she just picked up off the ground. So every request gives an item back, and all eight tools come from requests.",
               "The Flashlight is an example. The cave is completely dark inside. Nell stands at the cave mouth and won't go in. When the player talks to her, she says that someone else on the island, Shepherd Bram, has a flashlight. The player goes to find Bram and takes a few photos for him, and then he gives her the Flashlight. With it she can go back and explore the whole cave."
             ],
             "media": [
@@ -1234,7 +1297,7 @@
           {
             "heading": "Planning a trip",
             "body": [
-              "Before a trip the player makes a few choices in the cabin. I put them there so that part of the day is already decided when she walks out of the door."
+              "I wanted part of the day to be decided already when the player walks out of the door. So before a trip she makes a few choices in the cabin."
             ],
             "media": [
               {

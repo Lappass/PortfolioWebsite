@@ -273,6 +273,7 @@
 /* A short introduction, then a row of cards. */
 .pg-cards { grid-template-columns: minmax(0, 1fr); }
 .pg-cardrow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; margin-top: 18px; }
+.pg-cardrow:has(> figure:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px; }
 .pg-cardrow .pg-pic { aspect-ratio: 4 / 3; }
 .pg-cardrow .pg-fignote { margin-top: 0; font-size: 15px; }
 
@@ -387,6 +388,7 @@
   .pg-pair .pg-after { order: 1; }
   .pg-species { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .pg-cardrow { grid-template-columns: 1fr 1fr; }
+  .pg-cardrow:has(> figure:nth-child(3):last-child) { grid-template-columns: minmax(0, 1fr); gap: 22px; }
   .pg-board { grid-template-columns: 1fr 1fr; }
   .pg-print:nth-child(1) { grid-column: 1 / -1; }
   .pg-print:nth-child(2) { grid-row: auto; margin-left: 0; }

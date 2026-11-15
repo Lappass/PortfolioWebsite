@@ -15,6 +15,8 @@ I started hiking after I moved to the United States for university, and I usuall
 
 The basic rules of the game are taken from those trips. Animals stay away from the path, so the player has to climb to get to them. Climbing uses stamina. Animals leave once they notice the player, so a good photo usually takes patience.
 
+Trail Adventure grew out of my own life as an undergraduate in the United States. It is built from my own experience, and it shows what I did besides studying. I think it represents me better than anything else I have made, both as a game designer and as an ordinary person.
+
 The first version
 
 In the first version, the player followed a fixed trail with obstacles on it and rolled a die at each one to get past. I got this idea from real hiking, because on a real mountain you almost always stay on the trail. In the game, though, there was only walking between the obstacles, and it was boring.
@@ -23,13 +25,35 @@ While I was testing it, the part I enjoyed most was running around and taking ph
 
 I removed the trails and the dice. Now the player can climb anywhere on the mountain to look for animals, and the mountain is the obstacle.
 
+What I wanted from the game
+
+After the first version I had three things I wanted the game to do. Every system below was made for one of them.
+
+What the player does
+
+The player's goal is to photograph the animals on the island. Getting to them is the hard part, so most of a trip is climbing.
+
+Apart from the requests, the game doesn't force any goal on the player. On every trip she sets her own, such as an animal she wants to photograph. She can try for the summit, look for animals she hasn't found yet, or finish some requests. A trip ends at the summit, when she picks Go home on the phone, or when she is too tired to go on. An end card adds up the trip and gives it a rank.
+
+The game doesn't have many rules. The player can climb almost anywhere. If the stamina bar runs out while she is climbing, she falls, and a long fall hurts her. She also gets cold, hungry and tired. Animals notice her, and when they do they may run away.
+
+- Fill the field guide with photos. When every moment of a species is in the guide, the player can order a new carving of it for the cabin.
+
+- Finish requests for the people on the island. They give tools that help her climb higher and go further.
+
+- Spend the stars on upgrades for the camera and things for the cabin.
+
+How the systems connect
+
+Everything in the game goes through two things, the stamina bar and the camera. Climbing uses the bar, and hunger, cold and a heavy bag make it shorter. Photos fill the field guide, the guide gives stars, and stars buy a better camera. Requests join the two sides, because a photo sent to someone comes back as a tool for the climb.
+
 Climbing and stamina
 
-Climbing is slow on purpose, about 0.6 meters a second. The player goes up one pull at a time, following the hands. I kept the hands low on the screen so they don't cover the rock or an animal sitting on it.
+I want it to take effort to reach an animal, so climbing is slow on purpose, about 0.6 meters a second. The player goes up one pull at a time, following the hands. I kept the hands low on the screen so they don't cover the rock or an animal sitting on it.
 
-Running, climbing and jumping all use stamina, but walking is free, so that the player can look at the mountain and not at the bar.
+I want the player to look at the mountain and not at the bar while walking, so walking is free. Running, climbing and jumping all use stamina.
 
-Hunger, cold, injury, tiredness and a heavy bag each take a piece off the end of the bar, and each piece has its own color. This idea comes from the game Peak. I like it because I don't have to explain several systems to the player. The stamina bar is the only resource they have to manage, and every other effect is added on top of it. It is also how a real hike works, where being hungry or cold just means you have less energy to climb, and I think that helps the player feel they are really on the mountain.
+I wanted the stamina bar to be the only resource the player has to manage, so that I don't have to explain several systems to them. Hunger, cold, injury, tiredness and a heavy bag each take a piece off the end of the bar, and each piece has its own color. This idea comes from the game Peak. It is also how a real hike works, where being hungry or cold just means you have less energy to climb, and I think that helps the player feel they are really on the mountain.
 
 Photography
 
@@ -37,7 +61,7 @@ In real life, animals get scared when a person shows up. But when they haven't n
 
 When I take photos while running, they come out shaky. I also didn't want the player to run up to an animal and take a quick shot, so moving while shooting blurs the photo. A blurred photo only gets half the score and can't be sent for a request.
 
-New photos earn stars, and the player spends the stars at the bench in the cabin to upgrade the camera. I wanted photography to have a positive feedback loop. The more good photos the player takes, the better the camera gets, and with a better camera they can take more and better photos.
+I wanted photography to have a positive feedback loop. New photos earn stars, and the player spends the stars at the bench in the cabin to upgrade the camera. The more good photos the player takes, the better the camera gets, and with a better camera they can take more and better photos.
 
 Animals
 
@@ -45,7 +69,7 @@ The animals I met on real trips did not all react to me the same way. On Mount R
 
 Some have habits of their own. Foxes steal snacks. Goats spar with each other and will butt anyone who gets too close. The ptarmigan hen won't leave her nest, and the owl is only out from early evening until morning. Sneaking lets the player get nearer before being noticed.
 
-The field guide works like a Pokédex. Each animal has a list of moments to photograph, such as a close-up, on the run, or at night. Every new moment gives one star, so the player has a reason to go back to an animal they have already photographed.
+I wanted the player to have a reason to go back to an animal they have already photographed. So the field guide works like a Pokédex. Each animal has a list of moments to photograph, such as a close-up, on the run, or at night, and every new moment gives one star.
 
 Legendary creatures
 
@@ -57,9 +81,9 @@ The other three are in the sky. The Wind Whale circles the island over the sea a
 
 Requests
 
-Sixteen people live on the island. Each one has a short story of two or three photo requests. The stories don't depend on each other, so getting stuck on a hard request only stops that one story. I spread the requests so that every one of the 24 species is asked for at least once, and this takes the player all over the island.
+I use requests to take the player all over the island. Sixteen people live there, and each one has a short story of two or three photo requests. I spread the requests so that every one of the 24 species is asked for at least once. The stories don't depend on each other, so getting stuck on a hard request only stops that one story.
 
-Every request gives an item back, and all eight tools come from requests. So every tool the player gets has a small story behind it, and it doesn't feel like something she just picked up off the ground.
+I wanted every tool the player gets to have a small story behind it, so that it doesn't feel like something she just picked up off the ground. So every request gives an item back, and all eight tools come from requests.
 
 The Flashlight is an example. The cave is completely dark inside. Nell stands at the cave mouth and won't go in. When the player talks to her, she says that someone else on the island, Shepherd Bram, has a flashlight. The player goes to find Bram and takes a few photos for him, and then he gives her the Flashlight. With it she can go back and explore the whole cave.
 
@@ -81,7 +105,7 @@ When I get home from a real trip, I have photos and a few small things from the 
 
 Planning a trip
 
-Before a trip the player makes a few choices in the cabin. I put them there so that part of the day is already decided when she walks out of the door.
+I wanted part of the day to be decided already when the player walks out of the door. So before a trip she makes a few choices in the cabin.
 
 How to play
 
