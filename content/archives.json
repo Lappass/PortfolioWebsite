@@ -846,6 +846,11 @@
             ]
           }
         ]
+      },
+      "download": {
+        "url": "https://drive.google.com/file/d/1kCqkJIWlcOUfsB-hHDuT-e2PfNrd3uIU/view",
+        "label": "Windows build, 15 Nov 2026 (Google Drive). Unzip and run the .exe inside.",
+        "size": "352 MB"
       }
     },
     {
