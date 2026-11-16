@@ -62,8 +62,8 @@ function chart(floor, ft, x0, x1, labelX, from = 36, to = 96) {
 // Cut-outs from the character sheets (art/sniff/lyra.png, fia.png) and the game's own booking
 // placards (art/sniff/placard-*.png, from Assets/Sniff/art/2d/ui/SelectionUI).
 const ART = resolve(new URL("./sniff/", import.meta.url).pathname.replace(/^\/(\w:)/, "$1"));
-// Lyra's head is 94% of her cut-out's height (the ponytail rises above it); Fia's ears are hers.
-const FIGURES = { lyra: { file: "lyra.png", feet: 5.75, head: 0.94 }, fia: { file: "fia.png", feet: 3.25, head: 1 } };
+// Lyra's head is 93% of her cut-out's height (the ponytail rises above it); Fia's ears are hers.
+const FIGURES = { lyra: { file: "lyra.png", feet: 5.75, head: 0.93 }, fia: { file: "fia.png", feet: 3.25, head: 1 } };
 
 /**
  * The lineup's overlays for a wall with its floor at `floor` and a foot to `ft` px: each figure
