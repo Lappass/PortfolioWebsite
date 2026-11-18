@@ -7,7 +7,9 @@ const chapters: Chapter[] = ['identity', 'about', 'skills', 'experience'];
 const COUNT = 30000;
 const groups = profile.skills.map((skill, sourceIndex) => ({ ...skill, sourceIndex })).filter(skill => skill.items.length);
 const captions = ['The logo', 'Portrait', 'Tools', 'Experience'];
-const skillIcons: Record<string, string> = { Unity: 'unity', UE: 'unrealengine', 'C#': 'csharp', Java: 'java', 'C++': 'cplusplus' };
+const skillIcons: Record<string, string> = { Unity: 'unity', UE: 'unrealengine', 'C#': 'csharp', Java: 'java', 'C++': 'cplusplus', Blender: 'blender', Git: 'git', 'Unity Netcode': 'netcode' };
+// Black or single-colour marks are drawn in the page's ink instead of their own colour.
+const inkIcons = new Set(['Unity', 'UE', 'Unity Netcode']);
 const skillMarks = groups.flatMap((group, groupIndex) => {
   const items = group.items.filter(item => skillIcons[item]), center = skillCenter(groupIndex, groups.length);
   return items.map((item, index) => ({ item, group: group.sourceIndex,
@@ -39,7 +41,7 @@ async function sampleMark(path: string, resolution = 96) {
 let skillSamples: Promise<number[][][]> | undefined;
 // Rasterize once, then retain only point coordinates and colors on the GPU.
 const loadSkillMarks = () => skillSamples ??= Promise.all(skillMarks.map(async mark => {
-  const monochrome = mark.item === 'Unity' || mark.item === 'UE';
+  const monochrome = inkIcons.has(mark.item);
   return (await sampleMark(`assets/skill-logos/${skillIcons[mark.item]}.svg`)).map(([u, v, r, g, b]) =>
     [mark.x + u * .105, mark.y + v * .105, ...(monochrome ? [.93, .89, .82] : [r, g, b])]);
 })).catch(error => { skillSamples = undefined; throw error; });

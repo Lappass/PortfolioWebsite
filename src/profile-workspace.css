@@ -1,6 +1,14 @@
 #stage[data-workspace="true"] > :not(#three-scene):not(#modal-root):not(#toast) { opacity: 0 !important; pointer-events: none !important; transition: opacity 250ms; }
 /* One screen: header on top, status bar pinned to the bottom, the console centred in between. */
-.profile-page { --pc-gap: clamp(36px,4vw,72px); display: flex; flex-direction: column; background: var(--pp-paper); transform: none; }
+.profile-page { --pc-gap: clamp(36px,4vw,72px); display: flex; flex-direction: column; transform: none;
+  /* Same room as the home screen: warm light from the upper left, a faint glow behind the orb, cool haze along the floor. */
+  background:
+    radial-gradient(ellipse 46% 52% at 50% 47%, color-mix(in srgb, var(--pp-accent) 7%, transparent), transparent 72%),
+    radial-gradient(ellipse 62% 58% at 8% -6%, color-mix(in srgb, var(--pp-accent) 10%, transparent), transparent 70%),
+    linear-gradient(0deg, color-mix(in srgb, #8796a8 6%, transparent), transparent 34%),
+    var(--pp-paper); }
+/* Side margins and centring for the header row, console and status bar (project pages no longer share this rule). */
+.profile-page .pp-body { box-sizing: border-box; padding-left: var(--pp-edge); padding-right: var(--pp-edge); margin-left: auto; margin-right: auto; }
 /* display:flex above would otherwise override [hidden] and leave a clear full-screen layer over the site. */
 .profile-page[hidden] { display: none; }
 .profile-page.visible { transition: opacity 280ms; }
@@ -60,7 +68,7 @@
 .profile-console #profile-title { margin: 0 0 14px; font-size: clamp(34px,3.4vw,54px); line-height: 1.05; font-weight: 600; letter-spacing: -.035em; outline: none; }
 .profile-console .pp-abstract { margin: 0; font-size: 15px; line-height: 1.8; color: var(--pp-muted); }
 .profile-console .pp-links { margin-top: 20px; }
-.profile-bio p { margin: 0 0 14px; font-size: 16px; line-height: 1.85; }
+.profile-bio p { margin: 0 0 12px; font-size: 15px; line-height: 1.8; }
 .profile-bio p:last-child { margin-bottom: 0; }
 .profile-skills { display: grid; gap: 0; }
 .profile-skills > div { display: grid; grid-template-columns: 96px minmax(0,1fr); gap: 16px; padding: 11px 0; border-top: 1px solid var(--pp-line); }
