@@ -1,62 +1,110 @@
 ﻿Sniff & Snitch
-A two-player online co-op stealth game
+A two-player online stealth game
 
-Shuhang Chen · Programmer and designer, capstone team · Unity · C# · Netcode for GameObjects · 2026 · In development
+Shuhang Chen · Programmer, team project · Unity 6 · C# · Unity Relay · 2026 · In development
 
-Two players break out of a magic prison together, one as Lyra, a witch, and one as Fia, a red panda. Routes split where one of them can pass and the other can't, and doors, boxes and takedowns need both. Guards see in a 120-degree cone and hear through walls. A caught player is taken to a gas cage, and the partner has 15 seconds to open it. Capstone team project; I'm a programmer and designer on it.
+Two players sneak through a guarded prison online, one as Lyra, a tall and strong human, and one as Fia, a small fox who can climb. Most doors, boxes and guards need both of them. When a guard catches one, he locks them in a gas cage, and only the partner can get them out. This was a team project, and I was a programmer on it.
 
-- Guards are state machines with 18 states. They see 12.3 m in a 120-degree cone and hear through walls, with each wall halving a sound past its first 5 m.
-- A caught player is walked to a gas cage. The partner has 15 seconds to reach it and hold E for 1.5 seconds.
-- Doors, push boxes, the lift gate and the takedown need both players. The server only syncs who is gripping, tap counts and start times; animations are computed locally.
+- The host decides anything both players can see: pickups, doors, cages and guards. Each player still moves their own body on their own computer.
+- Only sight starts a chase. A sound can send a guard to look, so the player is never caught by something they couldn't see coming.
+- A caught player waits in a gas cage for fifteen seconds, and the partner has to reach it and hold E for a second and a half.
 
-Lyra and Fia
+Where it started
 
-Lyra and Fia are both in for theft, and neither of them gets out of the prison alone. Each player claims one of them on the character select screen, and the run starts once both roles are taken.
+Our team started with a plain co-op stealth game, where two players sneak through the same level side by side.
 
-We built the two of them to be good at different things. Lyra is 1.8 m tall, drags boxes, and can put on a mask that keeps guards from growing suspicious of her. Fia is 1.0 m tall, jumps 1.4 m to Lyra's 1.0, climbs ledges and can dash 3.5 m. Some magic barriers stop only one of them, marked with a paw or a witch icon, so most rooms have a route for each.
+The two players hardly needed each other. Each of them could get past a guard alone, so the second player was mostly company.
 
-Meeting up
+I wanted them to interact, so I suggested we do what It Takes Two does: give each character different abilities and make those abilities work on each other. The stealth itself comes from Dishonored 2, where a guard's eyes and ears are rules the player can learn.
 
-The first stretch of Level 1 gives Lyra and Fia a "Find a way out" step each. The two run in parallel, and only when both are done does the next step appear: "Meet at the door".
+Two bodies
 
-Each character also has an exit of their own, and the level is won only when both players are standing in theirs. A checkpoint saves only after every connected player has walked into it, so a restart always brings the two of them back to the same checkpoint.
+Lyra and Fia share the same controls, but their bodies are different, so the same level is a different place for each of them.
 
-Guards
+Lyra weighs 65 kg and is 1.8 m tall. She can't climb ledges, but she can drag crates and carts and wear a mask. While the mask is on, guards don't see her at all. Fia weighs 15 kg and is 1 m tall. She can dash, jump higher, climb ledges, hide inside crates and drop a rope from a ledge for Lyra.
 
-I built the guard AI. Each guard is one state machine with 18 states and a suspicion meter from 0 to 1. He sees 12.3 m in a 120 degree cone. An unmasked player within 2.8 m fills the meter in one second, and at the edge of his sight in about 1.8 seconds.
+Many levers can only be pulled by one of them, and many routes only one of them can take. So a room often starts with one player opening the way for the other.
 
-Hearing is a separate system. Crouching carries 4 m, walking 10 m and running 16 m. The first 5 m of a sound pass through walls at full strength, and each wall after that halves what is left, so Fia running behind one wall is heard out to 10.5 m instead of 16.
+Two pairs of hands
 
-A noise can pull a guard off his patrol, but it cannot interrupt a guard who is already watching someone. I set it up this way so a thrown coin has to be planned before a guard looks at you; once he is watching, it does nothing.
+Some things in the level only move when both players work on them at the same time.
 
-The cage
+- Lift door. Each player grips one side of a heavy door. Once both are holding it, they lift it together and walk under, and it slams shut behind them for good, so neither one can go back alone.
 
-Getting caught does not end the run. The guard cuffs the player and walks them to his cage. During the escort their camera sits 35 degrees off the guard's right shoulder, because from straight behind, the guard hides the player walking in front of him.
+- Lever pairs. In the reservoir the water only rises when two levers are down. One of them only Lyra can pull, and the other only Fia can pull.
 
-In the cage, green gas thickens as time runs down. The partner has 15 seconds to get there and hold E for 1.5 seconds. Opening the lock makes a 14 m noise, and for 20 seconds any guard who sees the empty cage comes to check. When Fia frees Lyra with the gas nearly full, the clang of the lock turns the nearest guard toward them as they run.
+- Takedown. A disguised Lyra marks a guard, which leaves him weak for a moment. Fia then drops on him from above and knocks him out.
 
-If the time runs out, or a guard catches the second player while the first is still held, the level ends for both. I built the cage HUD for the free player: a cage icon tracks the partner across the screen and flashes faster as time runs out.
+Who decides
 
-Doors and boxes
+In an online game two computers can disagree about what happened. If both players grab the last iceball at the same moment, each computer may think it got it. So I made the host the only one who decides anything both players can see.
 
-The latch door has one lever locked to Lyra and one to Fia, and opens only while both are down. The push box has a handle for each at their own height. Once both have grabbed, either player's W fills one shared ring, and ten taps slide the box 2.5 m. Pushed off a ledge, it becomes a step, and the landing reaches guards 25 m away. The lift door is a heavy gate they raise together, walk under, and let slam shut behind them for good.
+Each player still moves their own body on their own computer, so moving never feels late. But a pickup, a door, a cage or a guard's state is a request to the host, and the host's answer is what both players see.
 
-The takedown needs both players too. A masked Lyra presses a seal onto an unaware guard, which weakens him for 6 seconds. In that window Fia drops onto him from at least 1.4 m above, and he is out for 12 seconds unless another guard walks up and wakes him.
+- Picking a character. Nobody spawns when they connect. Each player claims Lyra or Fia, and the host spawns both once both are taken.
 
-For these mechanisms the server writes only who is gripping, how many taps have landed and when a sequence starts. Each machine works out the door height and the players' animations from that start time, so a player who joins late sees the same door and no animation has to be sent.
+- Two backpacks. Each player has a backpack of their own with four slots. The host changes what is in them, and only the owner sees their slots on screen.
 
-Pings and throws
+- Guards. All guard AI runs on the host. The other computer only shows where each guard is and how alert he is.
 
-Middle mouse drops a ping on whatever is under the crosshair. Each player has one ping at a time, and it lasts 8 seconds. A ping on a guard sticks to him and moves with him, so the partner knows which guard is meant after he turns a corner.
+- Checkpoints. A checkpoint saves only once both players have reached it, and only the host writes the save file.
 
-Holding E lifts a crate overhead. A tap of the left mouse button tosses it 4 m, and holding for half a second throws it 8 m. The crate sits a set height above each character's own head, because a height measured on Lyra left Fia's crate floating a metre above her.
+- Offline testing. A designer can start the level from any spot without a network. That path uses a local backpack, and it is never the one a connected player uses.
 
-A teammate set up the first quest data and HUD. I turned each level's quests into node graphs of reach, interact and acquire steps, each assigned to Lyra, Fia, either or both, with the server deciding who completed each step. Character select is server-owned as well, and a player who drops out mid-level rejoins in whichever role is free.
+Seen and heard
 
-Next
+A guard sees in a cone and checks the player's head first, then the body, so Fia can hide behind something only a meter high. Lyra needs something a little taller.
 
-Coins still use an older flat noise radius that ignores walls, and I want them on the same hearing model as footsteps. Lyra and Fia have separate entries in the noise table with the same values, and quieter steps for Fia would give the players a reason to send her ahead.
+He also hears. Sneaking is quiet, walking is louder and running can be heard from far away. Throwing a pebble makes a guard turn his head, and a bottle makes him walk over to look. A wall between the sound and the guard makes it carry less far.
 
-Every guard has a hearing multiplier, set to 1 in the current levels; I want to use it for a guard dog at 2.5. I also built a slow curse for guards who cannot reach a player, which slows the player to 45% speed for 3.5 seconds, and I want to place it where a player can stand out of reach.
+The bolt over his head shows what he knows. Yellow means he heard something, and it can send him to look, but a sound alone never starts a chase. Red means he has seen the player. I made only sight start a chase so that the player is never caught by something they couldn't see coming.
+
+Getting caught
+
+The partner has to reach the cage and hold E for a second and a half to open it. If nobody comes, the level goes back to the last checkpoint.
+
+The cage was my idea. I wanted getting caught to be a story the two players can tell afterwards. The escort is slow and the gas takes time, so the free player always has a chance to come running.
+
+Gadgets
+
+Gadgets go in the backpack and take a slot on the hotbar. Each one belongs to one character. The snowball, the iceball, levitation and the masks are Lyra's. The rope and the pop-up crate are Fia's. If a gadget is dropped, it lies on the floor as a small light, and only the right character can pick it up.
+
+The snowball can be thrown at a guard's feet. It lands as a patch of ice that grows and then melts. Levitation lifts a guard off the ground, and he panics until he is put down. If he was walking a player to a cage, he lets go. A mask changes Lyra's clothes, and while she wears it the mask's own gadgets take over her hotbar.
+
+Pebbles and bottles come from piles that never run out, so a bad throw never leaves the players stuck.
+
+Ice and guards
+
+Gadgets don't have special code for each guard. Things in the level have states such as frozen or burning, and a small table says what each state does to a guard. A frozen floor makes him slip.
+
+So a snowball thrown in the right place stops a chase. The guard runs onto the ice, falls on his back and lies there for a few seconds, and the players get time to hide. It also works on a guard that is only walking his patrol.
+
+The hand and the Spring Gun
+
+I built Lyra's hand and Fia's Spring Gun together, because each one is mostly there for the other. Johnny is building a level around the two of them.
+
+The reservoir
+
+The reservoir is the end of the first level. Eric built the basin and its four water levels. I rebuilt the inside of its three rooms and made the boat the only way across.
+
+I took the idea from the Water Temple in Ocarina of Time: one room for each water level. Each time the players pull a pair of levers, the water rises one stage and the boat can reach the next room.
+
+On the water the work is still split. When Fia rows, Lyra can stand at the bow and throw iceballs at the towers.
+
+Level Viewer
+
+When two of us worked on the same level at once, keeping our changes apart was tiring, and in meetings it was hard to say what we meant while everyone watched one person's Unity screen. Eric had started a web page that shows a level, and I made it into one the whole team can mark up together, live.
+
+- What it shows. The blockout, Lyra's path in green and Fia's in orange, and every guard with his view cone and patrol.
+
+- Marking it up. Anyone can tag a spot where a player waits for their partner, a stretch in a guard's view, or leave a note. Everyone sees it live.
+
+- Back into Unity. A prop placed in the browser arrives in Unity as a ghost. The level designer checks it in place, and an admin approves it before it becomes real.
+
+How to play
+
+W, A, S and D walk, Shift runs and C sneaks. Space jumps, and a tap of Shift is Fia's dash. E uses, lifts and opens a cage. Hold Q for Lyra's masks or Fia's actions, and H drops Lyra's hand.
+
+Left mouse uses a gadget, and the mouse wheel button pings a spot for your partner. V shows your partner's view, and Esc pauses.
 
 Link: https://github.com/Lappass

@@ -55,7 +55,8 @@ export interface CaseStudyMedia {
 export type ControlRow = { keys: string[]; say: string }[];
 /** How a section is laid out when it follows a printed work sample page for page (content/README.md). */
 export type SpreadKind = "prints" | "grid" | "bleed" | "pair" | "herd" | "trio" | "annotated" | "cards" | "card"
-  | "rows" | "float" | "banner" | "tall" | "faces" | "flank" | "stack" | "beside" | "marked" | "edge" | "corner";
+  | "rows" | "float" | "banner" | "tall" | "faces" | "flank" | "stack" | "beside" | "marked" | "edge" | "corner"
+  | "columns" | "steps";
 export interface CaseStudySection {
   heading: string;
   /** The paragraph shown beside the pictures. `body` and `points` are kept for the TXT download. */

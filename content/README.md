@@ -79,8 +79,10 @@
 | `marked`    | 左边一张大图，`marks` 标编号；右边是标题、第一段、`points` 编号说明和其余段落 |
 | `edge`      | 第一张图贴着页面左边缘铺满，中间文字（`note` 跟在文字后），右边一张竖图 |
 | `corner`    | 前几张图横在左上，最后一张竖图占右边一整列，标题和各段在左下 |
+| `columns`   | 图（可省略）横在上面并裁成扁条，下面标题和各段在第一栏，`points` 每条一栏，“名称. 说明”的名称作小标题 |
+| `steps`     | 左边标题和各段，右边 `points` 编号说明（“名称. 说明”），图跟在后面 |
 
-`grid` 只有三张图时排成三列并保持原图比例（适合手机截图）。图注前的粗体：`grid` 默认是编号，图写了 `label`（如 `"Day 5"`）时改用它。LockDown 用了后面这几种，对应它的 PDF 作品集。Last Mile 又加了 `stack`、`beside`、`marked`、`edge`、`corner`。`cards` 的第一段在卡片上方，其余段落在卡片下方；`banner` 的第一段单独一栏，其余段落合为一栏。同一排的图（`banner`、`tall`、`beside`、`corner`）高度一致，宽度按各自比例。
+`grid` 只有三张图时排成三列并保持原图比例（适合手机截图）。图注前的粗体：`grid` 默认是编号，图写了 `label`（如 `"Day 5"`）时改用它。LockDown 用了后面这几种，对应它的 PDF 作品集。Last Mile 又加了 `stack`、`beside`、`marked`、`edge`、`corner`，Sniff & Snitch 又加了 `columns`、`steps`。`cards` 的第一段在卡片上方，其余段落在卡片下方；`banner` 的第一段单独一栏，其余段落合为一栏。同一排的图（`banner`、`tall`、`beside`、`corner`）高度一致，宽度按各自比例。
 
 `media` 每项还可以写 `focus`（裁切时保留的位置，CSS `object-position`，如 `"12% 50%"`）。`note` 用于 `prints`（文字下方）、`grid`（图下，灰色小字）和 `float`（那一排图后面）。手机上所有版式都改为单列。
 

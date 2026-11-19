@@ -367,6 +367,23 @@
 .pg-corner .pg-col { grid-row: 2; }
 .pg-corner .pg-late { padding-top: 46px; }
 
+/* A picture across the top, then the heading and a column for each named point. */
+.pg-columns { grid-template-columns: minmax(0, 0.9fr) repeat(3, minmax(0, 1fr)); }
+.pg-columns .pg-wideset .pg-pic { aspect-ratio: 1136 / 330; }
+.pg-columns .pg-wideset img { height: 100%; object-fit: cover; }
+.pg-columns h3 { margin: 4px 0 6px; color: var(--pp-accent); }
+.pg-spread.pg-columns .pg-col p { font-size: 16px; }
+
+/* The text on the left, numbered steps on the right. */
+.pg-steps { grid-template-columns: minmax(0, 40fr) minmax(0, 60fr); }
+.pg-steps .pg-numbered { padding-top: 62px; }
+.pg-steps .pg-numbered li { font-size: 16.5px; }
+.pg-steps .pg-numbered li + li { margin-top: 14px; }
+
+/* Sniff & Snitch's controls card hangs on the right, clear of the guard. */
+.project-page[data-theme="sniff"] .pg-paper { left: auto; right: 6%; }
+.project-page[data-theme="sniff"] .pg-backdrop figcaption { right: auto; left: 18px; }
+
 /* Last Mile's controls card is taped up with the orange from its key art. */
 .project-page[data-theme="lastmile"] .pg-paper::before { background: #f1a33c; }
 .project-page[data-theme="lastmile"] .pg-paper::after { display: none; }
@@ -409,6 +426,8 @@
   .pg-spread.pg-flank { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .pg-flank .pg-col { grid-column: 1 / -1; order: -1; }
   .project-page[data-theme="lockdown"] .pg-paper { right: auto; width: auto; transform: none; }
+  .project-page[data-theme="sniff"] .pg-paper { right: auto; }
+  .pg-steps .pg-numbered { padding-top: 0; }
   .pg-backdrop figcaption { position: static; color: var(--pp-muted); text-shadow: none; }
   .pg-paper { position: relative; left: auto; top: auto; width: auto; margin: 22px 4px 0; padding: 26px 22px 20px; transform: rotate(-1deg); }
 }

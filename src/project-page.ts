@@ -82,6 +82,11 @@ function spreadMarkup(s: CaseStudySection) {
     case "marked": return `${fig(pics[0])}<div class="pg-col">${head}${para(body.slice(0, 1))}${s.points ? numbered(s.points) : ""}${para(body.slice(1))}</div>`;
     case "edge": return `${fig(pics[0], "pg-bleedpic")}<div class="pg-col">${head}${para(body)}${note}</div>${fig(pics[1])}`;
     case "corner": return `<div class="pg-wideset">${pics.slice(0, -1).map((m) => fig(m)).join("")}</div>${fig(pics.at(-1), "pg-cornerpic")}<div class="pg-col">${head}${para(body.slice(0, 1))}</div><div class="pg-col pg-late">${para(body.slice(1))}</div>`;
+    case "columns": return `${pics.length ? `<div class="pg-wideset">${pics.map((m) => fig(m)).join("")}</div>` : ""}<div class="pg-col">${head}${para(body)}</div>${(s.points ?? []).map((p) => {
+      const [, lead, rest] = /^([^.:]+)[.:]\s(.*)$/.exec(p) ?? [, "", p];
+      return `<div class="pg-col">${lead ? `<h3>${e(lead)}</h3>` : ""}<p>${e(rest!)}</p></div>`;
+    }).join("")}`;
+    case "steps": return `<div class="pg-col">${head}${para(body)}</div><div>${s.points ? numbered(s.points) : ""}${pics.map((m) => fig(m)).join("")}</div>`;
     default: return `<div class="pg-col">${head}${para(body)}</div>`;
   }
 }
