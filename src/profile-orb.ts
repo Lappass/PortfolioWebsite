@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { logoTarget, particleEase } from './profile-particles';
 import { profile } from './profile';
+import { contactImage } from './contact-icons';
 
 export type Chapter = 'identity' | 'about' | 'skills' | 'experience';
 const chapters: Chapter[] = ['identity', 'about', 'skills', 'experience'];
@@ -24,7 +25,7 @@ function skillCenter(i: number, count: number) {
 }
 /** Rasterize an SVG once, fit inside a square, and keep opaque pixels as [u, v, r, g, b] with u, v in -.5 to .5. */
 async function sampleMark(path: string, resolution = 96) {
-  const image = new Image(); image.src = `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
+  const image = new Image(); image.src = path.startsWith('data:') ? path : `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
   await image.decode();
   const r = resolution, w = image.naturalWidth || r, h = image.naturalHeight || r, scale = r / Math.max(w, h);
   const canvas = Object.assign(document.createElement('canvas'), { width: r, height: r });
@@ -60,6 +61,13 @@ const loadExperienceMarks = () => experienceSamples ??= Promise.all(profile.expe
   let x = center.x - (fitted.reduce((sum, m) => sum + m.w, 0) + gap * (fitted.length - 1)) / 2;
   return fitted.map(m => { const mark = { ...m, x: x + m.w / 2, y: center.y }; x += m.w + gap; return mark; });
 }));
+// Contact buttons with a glyph (up to three): hovering one turns the whole field into its mark.
+const contactSlots = profile.contact.map((entry, index) => ({ index, src: contactImage(entry.label) }))
+  .filter((slot): slot is { index: number; src: string } => Boolean(slot.src)).slice(0, 3);
+let contactSamples: Promise<number[][][]> | undefined;
+const loadContactMarks = () => contactSamples ??= Promise.all(contactSlots.map(slot => sampleMark(slot.src, 140)))
+  .catch(error => { contactSamples = undefined; throw error; });
+const CONTACT_SIZE = .56, CONTACT_CELL = 2 / 140;
 const fract = (n: number) => n - Math.floor(n);
 const noise = (i: number) => fract(Math.sin(i * 127.1 + 311.7) * 43758.5453);
 // Marks are sampled on a lattice and several particles share each point; spreading them across their cell
@@ -91,6 +99,9 @@ const vertexShader = `
   attribute vec3 aPortraitNormal;
   attribute vec2 aSeed;
   attribute vec3 aInfo;
+  attribute vec4 aContactA;
+  attribute vec2 aContactB;
+  uniform vec3 uContact;
   uniform vec4 uWeights;
   uniform vec2 uViewport;
   uniform vec2 uPointer;
@@ -116,6 +127,9 @@ const vertexShader = `
     vec2 aboutXY = mix(sphereXY*.30, portraitXY, uPortraitMorph);
     vec2 skillsXY = aSkill.xy + sphereXY*aSkill.z;
     vec2 xy = aLogo*uWeights.x + aboutXY*uWeights.y + skillsXY*uWeights.z + aExperience.xy*uWeights.w;
+    // A hovered contact button pulls every particle into its glyph; between two glyphs they pass straight across.
+    float contact = min(1.0, uContact.x + uContact.y + uContact.z);
+    if (contact > .001) xy = mix(xy, (aContactA.xy*uContact.x + aContactA.zw*uContact.y + aContactB*uContact.z) / max(contact, .001), contact);
     float radius = length(sphereXY);
     float skillAlpha = aSkill.w > 1.5 ? .92 : aSkill.z == 0.0 ? .20 : .035 + pow(min(radius,1.0),3.0)*.25;
     if (uHoverGroup >= 0.0 && abs(aInfo.x-uHoverGroup)>.1) skillAlpha *= .3;
@@ -129,6 +143,8 @@ const vertexShader = `
     float darkness = 1.0-dot(textureColor,vec3(.2126,.7152,.0722));
     vec3 portraitColor = textureColor*(.88+.12*light)+vec3(.06+darkness*.14*light);
     vColor = mix(ink,portraitColor,portraitAmount);
+    vColor = mix(vColor, mix(uInk,uAccent,aInfo.z), contact);
+    vAlpha = mix(vAlpha, .40 + aInfo.z*.25, contact);
     vec2 diff = xy-uPointer;
     float distance = length(diff);
     if (distance > .0001 && distance < uPointerRadius) {
@@ -137,10 +153,10 @@ const vertexShader = `
       float push = pow(1.0-distance/uPointerRadius,2.0)*uPointerRadius*mix(.45,.12,detail)*uPointerStrength*(1.0-connector);
       xy += diff/distance*push;
     }
-    float depth = mix(s.z*.30,p.z,uPortraitMorph)*uWeights.y;
+    float depth = mix(s.z*.30,p.z,uPortraitMorph)*uWeights.y*(1.0-contact);
     gl_Position = vec4(xy.x*2.0/uViewport.x,-xy.y*2.0/uViewport.y,-depth,1.0);
     // The logo is drawn from a regular lattice; smaller points leave a visible grid of gaps (moire) in it.
-    gl_PointSize = uPointSize*mix(mix(.65,.8,uWeights.x),1.0,portraitAmount);
+    gl_PointSize = uPointSize*mix(mix(mix(.65,.8,uWeights.x),1.0,portraitAmount),.75,contact);
   }
 `;
 const fragmentShader = `
@@ -166,6 +182,8 @@ export class ProfileOrb {
   private size = 1;
   private chapter: Chapter = 'identity';
   private weights = new THREE.Vector4(1, 0, 0, 0);
+  private contactWeights = new THREE.Vector3();
+  private contactSlot = -1;
   private pointer: { x: number; y: number } | null = null;
   private hoverStrength = 0;
   private hoveredGroup = -1;
@@ -190,7 +208,7 @@ export class ProfileOrb {
         uPointer: { value: new THREE.Vector2(3, 3) }, uInk: { value: new THREE.Vector3(.95, .92, .90) },
         uAccent: { value: new THREE.Vector3(.88, .72, .47) }, uPointerStrength: { value: 0 },
         uPointerRadius: { value: .12 }, uPointSize: { value: 1.5 }, uTime: { value: 0 },
-        uRotation: { value: 0 }, uPortraitMorph: { value: 0 }, uBurst: { value: 0 }, uHoverGroup: { value: -1 },
+        uRotation: { value: 0 }, uPortraitMorph: { value: 0 }, uBurst: { value: 0 }, uHoverGroup: { value: -1 }, uContact: { value: this.contactWeights },
       } });
     this.prepareGeometry();
     const field = new THREE.Points(this.geometry, this.material); field.frustumCulled = false; this.scene.add(field);
@@ -246,6 +264,16 @@ export class ProfileOrb {
       experience.needsUpdate = info.needsUpdate = true;
       this.figure.dataset.experienceMarks = 'ready'; if (this.reduced) this.draw(1, 0);
     });
+    void loadContactMarks().then(samples => {
+      if (this.disposed || !samples.length) return;
+      const a = this.geometry.getAttribute('aContactA') as THREE.BufferAttribute, b = this.geometry.getAttribute('aContactB') as THREE.BufferAttribute;
+      for (let i = 0; i < COUNT; i++) samples.forEach((points, k) => {
+        const point = points[spread(i, points.length)];
+        const x = (point[0] + jitter(i + k * 7, CONTACT_CELL)) * CONTACT_SIZE, y = (point[1] + jitter(i + 1 + k * 7, CONTACT_CELL)) * CONTACT_SIZE;
+        if (k === 0) a.setXY(i, x, y); else if (k === 1) { a.setZ(i, x); a.setW(i, y); } else b.setXY(i, x, y);
+      });
+      a.needsUpdate = b.needsUpdate = true; this.figure.dataset.contactMarks = 'ready';
+    }).catch(() => { if (!this.disposed) this.figure.dataset.contactMarks = 'unavailable'; });
     this.figure.dataset.portrait = 'loading';
     void loadPortrait().then(data => {
       if (this.disposed) return;
@@ -296,6 +324,8 @@ export class ProfileOrb {
     this.geometry.setAttribute('aExperience', new THREE.BufferAttribute(experience, 3));
     this.geometry.setAttribute('aSeed', new THREE.BufferAttribute(seed, 2));
     this.geometry.setAttribute('aInfo', new THREE.BufferAttribute(info, 3));
+    this.geometry.setAttribute('aContactA', new THREE.BufferAttribute(new Float32Array(COUNT * 4), 4));
+    this.geometry.setAttribute('aContactB', new THREE.BufferAttribute(new Float32Array(COUNT * 2), 2));
     this.geometry.setAttribute('aPortrait', new THREE.BufferAttribute(new Float32Array(COUNT * 3), 3));
     this.geometry.setAttribute('aPortraitColor', new THREE.BufferAttribute(new Float32Array(COUNT * 3), 3));
     this.geometry.setAttribute('aPortraitNormal', new THREE.BufferAttribute(new Float32Array(COUNT * 3), 3));
@@ -306,6 +336,13 @@ export class ProfileOrb {
     if (next === this.chapter) return;
     this.chapter = next; if (next === 'about') this.aboutStart = this.elapsed;
     this.burst = 0; this.drag = null; this.updateLabels();
+    if (this.reduced) this.draw(1, 0);
+  }
+  /** Show the glyph of the contact link at this index (in profile.contact order), or return to the chapter's shape. */
+  contact(index: number | null) {
+    const slot = index === null || this.figure.dataset.contactMarks !== 'ready' ? -1 : contactSlots.findIndex(s => s.index === index);
+    if (slot === this.contactSlot) return;
+    this.contactSlot = slot; this.figure.dataset.contact = slot < 0 ? '' : String(index);
     if (this.reduced) this.draw(1, 0);
   }
   private updateLabels() {
@@ -392,12 +429,16 @@ export class ProfileOrb {
     if (!this.renderer || !this.width || !this.height) return;
     const chapter = chapters.indexOf(this.chapter), u = this.material.uniforms;
     for (let i = 0; i < 4; i++) this.weights.setComponent(i, this.weights.getComponent(i) + ((i === chapter ? 1 : 0) - this.weights.getComponent(i)) * blend);
+    const contactBlend = this.reduced ? 1 : 1 - Math.exp(-dt * 6);
+    for (let i = 0; i < 3; i++) this.contactWeights.setComponent(i, this.contactWeights.getComponent(i) + ((i === this.contactSlot ? 1 : 0) - this.contactWeights.getComponent(i)) * (dt || this.reduced ? contactBlend : 0));
+    const contactShown = this.contactWeights.x + this.contactWeights.y + this.contactWeights.z;
+    this.labels.style.opacity = contactShown > .05 ? String(Math.max(0, 1 - contactShown * 2)) : '';
     this.hoverStrength += ((this.pointer && !this.reduced && !this.drag ? 1 : 0) - this.hoverStrength) * (this.reduced ? 1 : 1 - Math.exp(-dt * 8));
     if (this.pointer) u.uPointer.value.lerp(new THREE.Vector2((this.pointer.x - this.width / 2) / this.size, (this.pointer.y - this.height / 2) / this.size), 1 - Math.exp(-dt * 12));
     u.uPointerStrength.value = this.hoverStrength; u.uTime.value = this.reduced ? 0 : this.elapsed;
     u.uRotation.value = this.rotation; u.uBurst.value = this.burst; u.uHoverGroup.value = this.hoveredGroup;
     u.uPortraitMorph.value = this.portraitReady ? this.reduced ? 1 : particleEase(.15, 1.8, this.elapsed - this.aboutStart) : 0;
-    const depth = this.weights.y > .98 && u.uPortraitMorph.value > .98;
+    const depth = this.weights.y > .98 && u.uPortraitMorph.value > .98 && contactShown < .02;
     this.material.depthTest = depth; this.material.depthWrite = depth;
     this.renderer.render(this.scene, this.camera);
     const stage = this.chapter !== 'about' ? this.chapter : depth ? 'formed' : 'assembling';

@@ -70,10 +70,22 @@
 .profile-console #profile-title { margin: 0 0 14px; font-size: clamp(34px,3.4vw,54px); line-height: 1.05; font-weight: 600; letter-spacing: -.035em; outline: none; }
 .profile-console .pp-abstract { margin: 0; font-size: 15px; line-height: 1.8; color: var(--pp-muted); }
 /* Contact buttons: a glyph and the name; they light up in the accent on hover. */
-.pc-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-.pc-links a { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 10px; border: 1px solid var(--pp-line); background: color-mix(in srgb, var(--pp-ink) 4%, transparent); color: var(--pp-ink); font-size: 13px; text-decoration: none; transition: border-color 200ms, background-color 200ms, color 200ms; }
-.pc-links svg { width: 16px; height: 16px; flex: none; }
-.pc-links a:hover, .pc-links a:focus-visible { border-color: var(--pp-accent); background: color-mix(in srgb, var(--pp-accent) 12%, transparent); color: var(--pp-accent); outline: none; }
+.pc-links { --cut: 8px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0,1fr); gap: 1px; padding: 1px; margin-top: 18px; background: var(--pp-line); clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut)); transition: background-color 240ms; }
+/* One strip across the panel, cut like the panels: the segments are its fill, the 1px gaps its dividers. The first segment follows the cut corner. */
+.pc-links a { display: flex; align-items: center; justify-content: center; gap: 9px; min-width: 0; min-height: 40px; padding: 0 8px; color: var(--pp-ink); font-size: 13px; text-decoration: none;
+  background: linear-gradient(var(--pp-accent), var(--pp-accent)) left top / 0% 2px no-repeat, color-mix(in srgb, var(--pp-paper) 72%, var(--pp-panel));
+  transition: background-size 380ms cubic-bezier(.2,.8,.2,1), background-color 240ms, color 240ms; }
+.pc-links a:first-child { clip-path: polygon(calc(var(--cut) - .6px) 0, 100% 0, 100% 100%, 0 100%, 0 calc(var(--cut) - .6px)); }
+.profile-introduction { container-type: inline-size; }
+/* A narrow panel keeps only the glyphs; the names stay for screen readers. */
+@container (max-width: 280px) { .pc-links span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } }
+.pc-links svg { width: 16px; height: 16px; flex: none; color: var(--pp-muted); transition: color 240ms, transform 240ms; }
+/* Hover lights the segment the way a selected panel lights: an accent line runs across its top. */
+.pc-links a:hover, .pc-links a:focus-visible { background-size: 100% 2px, auto; background-color: color-mix(in srgb, var(--pp-accent) 10%, var(--pp-panel)); outline: none; }
+.pc-links a:hover svg, .pc-links a:focus-visible svg { color: var(--pp-accent); transform: translateY(-1px); }
+.pc-panel.active .pc-links { background: color-mix(in srgb, var(--pp-accent) 45%, var(--pp-line)); }
+:root:not([data-dark-surface="true"]) .profile-page .pc-links a { background-color: color-mix(in srgb, var(--pp-paper) 70%, #ffffff); }
+:root:not([data-dark-surface="true"]) .profile-page .pc-links a:is(:hover,:focus-visible) { background-color: color-mix(in srgb, var(--pp-accent) 10%, #ffffff); }
 .profile-bio p { margin: 0 0 12px; font-size: 15px; line-height: 1.8; }
 .profile-bio p:last-child { margin-bottom: 0; }
 .profile-skills { display: grid; gap: 0; }
