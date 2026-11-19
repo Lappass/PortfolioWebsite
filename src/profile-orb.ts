@@ -199,7 +199,7 @@ export class ProfileOrb {
       this.renderer.setClearColor(0, 0); this.figure.dataset.renderer = 'gpu';
     } catch {
       this.figure.dataset.renderer = 'unavailable';
-      this.figure.querySelector('.profile-orb-caption')!.textContent = 'Particle display unavailable.';
+      this.canvas.setAttribute('aria-label', 'Particle display unavailable.');
     }
     root.addEventListener('pointermove', this.move, { passive: true }); root.addEventListener('pointerleave', this.leave);
     canvas.addEventListener('pointerdown', this.down); canvas.addEventListener('pointermove', this.rotate);
@@ -311,8 +311,8 @@ export class ProfileOrb {
   private updateLabels() {
     const index = chapters.indexOf(this.chapter); this.figure.dataset.shape = this.chapter;
     this.labels.dataset.chapter = this.chapter;
-    this.figure.querySelector('.profile-orb-caption')!.textContent = this.chapter === 'about' && this.figure.dataset.portrait === 'error' ? 'Portrait unavailable.' : captions[index];
-    this.figure.querySelector('figcaption small')!.textContent = this.chapter === 'about' ? 'Drag to rotate · Click to scatter · Move to interact' : 'Click a panel · Move to interact';
+    if (this.figure.dataset.renderer !== 'unavailable') this.canvas.setAttribute('aria-label', this.chapter === 'about' && this.figure.dataset.portrait === 'error' ? 'Portrait unavailable.'
+      : `${captions[index]}.${this.chapter === 'about' ? ' Drag or use arrow keys to rotate; click or press Space to scatter and regroup.' : ''}`);
     this.labels.replaceChildren();
     const names = this.chapter === 'skills' ? groups.map(s => s.group) : this.chapter === 'experience' ? profile.experience.map(s => s.time) : [];
     names.forEach((name, i) => {

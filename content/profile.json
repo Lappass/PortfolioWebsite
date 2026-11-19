@@ -3,11 +3,10 @@
   "alias": "Shuhang Chen",
   "role": "Game Developer",
   "roleEn": "Game developer",
-  "tagline": "I work mainly in Unity and C#. LOCKDOWN and Last Mile are solo projects, Nancy did the art for Trail Adventure, and Sniff & Snitch is a team capstone.",
   "avatar": "",
   "bio": [
-    "Most of my games start from something I lived through. LOCKDOWN is my family's lockdown in Shanghai in 2022, Trail Adventure is the hiking I did with a camera after moving to the US, and Last Mile is the delivery riders and robots I pass on the street.",
-    "I'd rather the rules carry the feeling than the text. In LOCKDOWN the pan is always a little too small for the food, and in Last Mile every order you give one rider is money the other three don't earn."
+    "I'm a senior at NYU studying Game Design, with a minor in Computer Science. I've interned at Hypergryph and Yahaha Studios, and I mostly do game programming and design. Outside games I watch films, build models and hike trails.",
+    "I don't like using rules to force the player into things. I'd rather the game's own language lead them to make decisions, and let them feel what the game is about through those decisions."
   ],
   "skills": [
     {
@@ -68,6 +67,14 @@
     {
       "label": "GitHub",
       "url": "https://github.com/Lappass"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/lappaschen/"
+    },
+    {
+      "label": "Email",
+      "url": "mailto:ShuhangChn@gmail.com"
     }
   ],
   "resume": "",

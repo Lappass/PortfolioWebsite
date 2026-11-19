@@ -5,7 +5,7 @@ export interface Profile {
   alias: string;
   role: string;
   roleEn: string;
-  tagline: string;
+  tagline?: string;
   avatar: string;
   bio: string[];
   skills: { group: string; items: string[] }[];

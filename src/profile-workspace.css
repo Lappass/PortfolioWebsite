@@ -7,6 +7,8 @@
     radial-gradient(ellipse 62% 58% at 8% -6%, color-mix(in srgb, var(--pp-accent) 10%, transparent), transparent 70%),
     linear-gradient(0deg, color-mix(in srgb, #8796a8 6%, transparent), transparent 34%),
     var(--pp-paper); }
+/* The header stays in the page's flow here (work pages float it over the cover), so it never covers the top panels. */
+.profile-page .pp-bar { position: sticky; flex: none; background: color-mix(in srgb, var(--pp-paper) 88%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--pp-line); }
 /* Side margins and centring for the header row, console and status bar (project pages no longer share this rule). */
 .profile-page .pp-body { box-sizing: border-box; padding-left: var(--pp-edge); padding-right: var(--pp-edge); margin-left: auto; margin-right: auto; }
 /* display:flex above would otherwise override [hidden] and leave a clear full-screen layer over the site. */
@@ -16,7 +18,7 @@
 .profile-entry-field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
 .profile-page.entering { overflow-y: hidden; }
 .profile-page.entering.visible { transition: none; }
-.profile-page.entering :is(.pp-bar,.pp-chapters,.pc-status,.profile-orb-study figcaption,.pc-readouts,.pc-ring) { opacity: var(--profile-reveal,0); pointer-events: none; }
+.profile-page.entering :is(.pp-bar,.pp-chapters,.pc-status,.pc-ring) { opacity: var(--profile-reveal,0); pointer-events: none; }
 /* Panels power on one after another as the entry settles. */
 .profile-page.entering .pc-panel { opacity: clamp(0, calc(var(--profile-reveal,0) * 2.4 - var(--i) * .45), 1); transform: translateY(calc((1 - clamp(0, calc(var(--profile-reveal,0) * 2.4 - var(--i) * .45), 1)) * 10px)); pointer-events: none; }
 .profile-page.entering #profile-title { opacity: var(--profile-heading,0); }
@@ -67,7 +69,11 @@
 .pc-meta { margin-left: auto; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--pp-muted); white-space: nowrap; }
 .profile-console #profile-title { margin: 0 0 14px; font-size: clamp(34px,3.4vw,54px); line-height: 1.05; font-weight: 600; letter-spacing: -.035em; outline: none; }
 .profile-console .pp-abstract { margin: 0; font-size: 15px; line-height: 1.8; color: var(--pp-muted); }
-.profile-console .pp-links { margin-top: 20px; }
+/* Contact buttons: a glyph and the name; they light up in the accent on hover. */
+.pc-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.pc-links a { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 10px; border: 1px solid var(--pp-line); background: color-mix(in srgb, var(--pp-ink) 4%, transparent); color: var(--pp-ink); font-size: 13px; text-decoration: none; transition: border-color 200ms, background-color 200ms, color 200ms; }
+.pc-links svg { width: 16px; height: 16px; flex: none; }
+.pc-links a:hover, .pc-links a:focus-visible { border-color: var(--pp-accent); background: color-mix(in srgb, var(--pp-accent) 12%, transparent); color: var(--pp-accent); outline: none; }
 .profile-bio p { margin: 0 0 12px; font-size: 15px; line-height: 1.8; }
 .profile-bio p:last-child { margin-bottom: 0; }
 .profile-skills { display: grid; gap: 0; }
@@ -103,15 +109,6 @@
 .profile-orb-labels { position: absolute; inset: 7%; pointer-events: none; }
 .profile-orb-labels span { position: absolute; transform: translateX(-50%); white-space: nowrap; font-size: 11px; color: var(--pp-muted); transition: color 220ms; }
 .profile-orb-labels span:is(.active,.upcoming) { color: var(--pp-accent); }
-.profile-orb-study figcaption { text-align: center; margin-top: 10px; }
-.profile-orb-index { font-size: 11px; letter-spacing: .14em; color: var(--pp-accent); }
-.profile-orb-caption { font-size: 15px; margin: 8px 0 8px; color: var(--pp-ink); }
-.profile-orb-study figcaption small { font-size: 12px; letter-spacing: .03em; color: var(--pp-muted); }
-.pc-readouts { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); width: 100%; max-width: 440px; margin: 22px 0 0; border-top: 1px solid var(--pp-line); border-bottom: 1px solid var(--pp-line); }
-.pc-readouts div { padding: 10px 0 12px; text-align: center; }
-.pc-readouts div + div { border-left: 1px solid var(--pp-line); }
-.pc-readouts dt { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--pp-muted); }
-.pc-readouts dd { margin: 4px 0 0; font-size: 26px; font-weight: 300; font-variant-numeric: tabular-nums; }
 
 .pc-status { position: sticky; bottom: 0; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; width: 100%; max-width: none; margin: 0; padding-top: 12px; padding-bottom: 12px; background: rgba(var(--theme-paper-rgb, 234, 229, 225), .88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--pp-line); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--pp-muted); }
 .pc-status span { display: inline-flex; align-items: center; gap: 8px; }
@@ -123,8 +120,6 @@
  .profile-console { row-gap: 16px; padding-top: 12px; padding-bottom: 12px; }
  .pc-panel { padding: 14px 20px 18px; }
  .pc-head { padding-bottom: 10px; margin-bottom: 12px; }
- .profile-orb-study figcaption { margin-top: 4px; }
- .pc-readouts { margin-top: 12px; }
  .profile-page .pp-bar { padding-top: 12px; padding-bottom: 12px; }
 }
 @media(max-width:1180px) {
@@ -143,9 +138,6 @@
  .profile-console { display: flex; flex-direction: column; gap: 16px; padding-top: 0; }
  .profile-orb-study { order: -1; position: sticky; top: var(--pc-header, 132px); z-index: 1; width: calc(100% + 2 * var(--pp-edge)); margin: 0 calc(-1 * var(--pp-edge)); padding: 8px var(--pp-edge) 12px; box-sizing: border-box; background: var(--pp-paper); border-bottom: 1px solid var(--pp-line); }
  .profile-orb-stage { width: 190px; min-width: 0; }
- .profile-orb-study figcaption { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 24px; margin-top: 4px; }
- .profile-orb-caption { font-size: 11px; margin: 0; }
- .profile-orb-study figcaption small, .pc-readouts { display: none; }
  /* At this size the labels would overlap the logos; the panel below lists them. */
  .profile-orb-labels { display: none; }
  .pc-panel { width: 100%; box-sizing: border-box; }
