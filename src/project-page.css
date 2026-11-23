@@ -165,24 +165,34 @@
 .pg-list { margin: 10px 0 0; padding-left: 1.2em; }
 .pg-list li { margin: 6px 0; font-size: 15px; line-height: 1.6; }
 .pg-tags { color: var(--pp-muted); font-size: 14px; }
-.pg-end { padding: clamp(32px, 5vh, 64px) 0; border-top: 1px solid var(--pp-line); }
-.pp-links { display: flex; flex-wrap: wrap; gap: 10px; }
-.pp-links a {
-  display: inline-flex;
+/* Where the work lives: one full-width row per link, in the page's own colours and type, above the next work. */
+.pg-end { display: grid; border-top: 1px solid var(--pp-line); }
+.pg-end a {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 18px;
-  min-height: 44px;
-  padding: 0 18px;
-  background: var(--pp-ink);
-  color: var(--pp-paper);
+  gap: clamp(16px, 3vw, 40px);
+  padding: clamp(24px, 3.4vw, 44px) 0;
+  color: var(--pp-ink);
   text-decoration: none;
-  font-size: 14px;
 }
-.pp-links a + a { background: transparent; color: var(--pp-ink); border: 1px solid var(--pp-ink); }
-[data-dark-surface="true"] .pp-links a { color: var(--pp-paper); }
-[data-dark-surface="true"] .pp-links a + a { color: var(--pp-ink); }
-.pp-links a:hover span { transform: translate(2px, -2px); }
-.pp-links span { transition: transform 0.2s; }
+.pg-end a + a { border-top: 1px solid var(--pp-line); }
+.pg-end a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--pp-accent); transform: scaleX(0); transform-origin: left; transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+/* The colour sits on the text, not the link, so the site's dark-theme link colour doesn't reach it. */
+.pg-end-name, .pg-end-go { color: var(--pp-ink); }
+.pg-end-name { display: flex; align-items: center; gap: 0.5em; font-size: clamp(22px, 2.6vw, 36px); line-height: 1.1; }
+.pg-end-name strong { font-weight: 600; transition: color 0.2s; }
+.pg-end-name svg { width: 0.85em; height: 0.85em; flex: none; color: var(--pp-muted); transition: color 0.2s; }
+.pg-end-url { justify-self: end; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; color: var(--pp-muted); }
+.pg-end-go { font-size: clamp(20px, 2.2vw, 30px); line-height: 1; transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s; }
+.pg-end a:is(:hover, :focus-visible)::after { transform: none; }
+.pg-end a:is(:hover, :focus-visible) :is(strong, svg, .pg-end-go) { color: var(--pp-accent); }
+.pg-end a:is(:hover, :focus-visible) .pg-end-go { transform: translate(4px, -4px); }
+.project-page .pg-end a:focus-visible { outline: none; }
+/* Sniff & Snitch names the link the way it sets its headings. */
+.project-page[data-theme="sniff"] .pg-end-name strong { font-family: Georgia, serif; font-style: italic; font-weight: 400; }
+@media (max-width: 560px) { .pg-end-url { display: none; } .pg-end a { grid-template-columns: minmax(0, 1fr) auto; } }
 
 .pp-next { border-top: 1px solid var(--pp-ink); }
 .pp-next button {

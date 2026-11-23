@@ -6,6 +6,10 @@ import { paintArtwork } from "./case-art";
 import type { Sound } from "./audio";
 import { createGameCover, type CoverSection, type GameCoverView } from "./game-covers";
 import { embedUrl, isFile, isWeb, seconds } from "./video";
+import { contactIcon } from "./contact-icons";
+
+/** The address as people say it: no scheme, no "www.", no trailing slash. */
+const shortUrl = (url: string) => { try { const u = new URL(url); return `${u.hostname.replace(/^www\./, "")}${u.pathname}`.replace(/\/$/, ""); } catch { return url; } };
 
 const heroArt = new Map<string, string>();
 type ScreenRect = { left: number; top: number; right: number; bottom: number; quad?: [number, number][] };
@@ -215,7 +219,8 @@ export class ProjectPage {
     const intro = this.introMarkup(record);
     this.cover = createGameCover(record, nav, intro, (id) => this.goTo(id));
     this.root.dataset.theme = record.menu ?? "";
-    const links = [...(record.links ?? []), ...(record.links?.some((link) => link.url === record.source) ? [] : [{ label: "Project link", url: record.source }])];
+    // Only links set on the work itself; `source` (the GitHub profile for every work) is not shown.
+    const links = record.links ?? [];
     this.root.innerHTML = `
       <header class="pp-bar">
         <button type="button" data-page="back">← <span>Back</span><small>Esc</small></button>
@@ -227,7 +232,7 @@ export class ProjectPage {
         <div class="pg-plain-content"><h1 id="pp-title" tabindex="-1">${e(record.title)}</h1>${intro}</div>`}</section>
       <main class="pg-body">
         ${this.sections.map((s, i) => this.sectionMarkup(record, s, i)).join("")}
-        <div class="pg-end"><div class="pp-links">${links.map((link) => `<a href="${e(link.url)}" target="_blank" rel="noopener noreferrer">${e(link.label)} <span>↗</span></a>`).join("")}</div></div>
+        ${links.length ? `<nav class="pg-end" aria-label="Links">${links.map((link) => `<a href="${e(link.url)}" target="_blank" rel="noopener noreferrer"><span class="pg-end-name">${contactIcon(link.label)}<strong>${e(link.label)}</strong></span><span class="pg-end-url">${e(shortUrl(link.url))}</span><span class="pg-end-go" aria-hidden="true">↗</span></a>`).join("")}</nav>` : ""}
       </main>
       <footer class="pp-next"><button type="button" data-page="next"><span>Next</span><strong>${e(next.title)} →</strong></button></footer>
       <nav class="pg-dots" aria-label="Sections"><button type="button" data-page="go" data-to="cover" title="Top" aria-label="Top"></button>${this.sections.map((s) => `<button type="button" data-page="go" data-to="${e(s.id)}" title="${e(s.heading)}" aria-label="${e(s.heading)}"></button>`).join("")}</nav>`;
