@@ -35,6 +35,6 @@
   - 节奏：见 `src/scene.ts` 的 `INSERT_PACE`，全程约 9.6 秒（原来实际约 9.7 秒），弹出仍为快速倒放。
   - 个人页没有插盘时，小人站在显示器左前方。
 - 动作：坐用 sit、站用 idle、换位置按进度播放 jump、开场挥手（wave）、站立时偶尔张望（look）、秘技「上上下下左右左右 B A」欢呼（cheer）并触发一次阵列波浪。头部骨骼单独跟随指针或光盘；待机轮播时低头打瞌睡。动作自带的位移在加载时去掉，位置全部由场景控制。实现见 `src/figure.ts` 与 `src/scene.ts` 的 `placeFigure`；收藏为空时显示平面图 `figure.webp`。`Rigged/` 原始文件只留在本机，不进仓库。
-- 手柄为用户自有设计（`art/controller-design.svg`）经 Meshy 生成，`art/console_setup.py` 把摇杆、方向键、ABXY 与 Home 键拆成独立部件。方向键倾斜左摇杆和十字键，Enter／Esc 按下 A／B；实体手柄（Gamepad API）可翻作品、A 进入、B 返回，逻辑在 `src/pad-input.ts`。
+- 手柄（2026-11-22 重做）：用户先后否定了 Meshy 版本、原叶形设计图（`art/controller-design.svg`，已不用）、经典极简双握把和「DualSense 那种」双色触控板版，从六个渲染方案里选了复古长条并要求做得更好看、加 RGB。现由 `art/controller.py` 的 `retro_dark` 样式建模（`art/console_setup.py` 调用；其他样式是挑选时的方案，保留以便重渲）：扁平圆角长条，两端略饱满、中段收腰，白上壳、石墨下壳，十字键与四个圆键各坐在一个石墨浅圆槽里，Home 键为琥珀月牙灯、A 键琥珀细环，没有摇杆。RGB：分模线上一圈灯带、两个圆槽边各一圈灯环（`Controller_Light_RGB`，UV 的 u 沿环走），网页用彩虹贴图滚动成流动光，有按键输入时变亮。方向键倾斜十字键，Enter／Esc 按下 A／B；实体手柄（Gamepad API）可翻作品、A 进入、B 返回，逻辑在 `src/pad-input.ts`。
 - 屏幕平均色驱动一盏点光照亮桌面；滑动阵列时游戏盒按速度后仰再回正；读盘期间镜头继续推近到屏幕接近占满。
 - 验证使用无头 Edge 逐帧截图；实体手柄未做实机测试，动效流畅度待用户确认。

@@ -1,4 +1,7 @@
-# Controller
+# Controller (retired)
+
+No longer used: since 2026-11-22 the desk controller is a retro bar pad modelled by `art/controller.py`; the leaf-grip design sheet (`art/controller-design.svg`) is retired too. The Meshy export is kept for reference only.
+
 
 - Source: `source.glb`, Meshy image-to-3D export `Meshy_AI_futuristic_gamepad_3d_1010135851_image-to-3d-texture`, supplied by Shuhang Chen on 2026-10-10.
 - Design: `art/controller-design.svg`, shaped after the brand mark. Replaces the earlier CC BY DualSense model.

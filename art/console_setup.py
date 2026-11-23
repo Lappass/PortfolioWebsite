@@ -1,5 +1,5 @@
 """Shared terminal: a low stand, an upright console with a vertical disc slot,
-a 16:9 monitor, and Shuhang's own controller (see art/vendor/gamepad).
+a 16:9 monitor, and Shuhang's own controller (art/controller.py).
 
 Run: blender --background --factory-startup --python art/console_setup.py
 Outputs art/console-setup.blend, art/console-setup-studio.png and public/assets/console-setup.glb.
@@ -82,65 +82,13 @@ CP = Vector((-.2, -.75, .36))
 bpy.ops.object.empty_add(location=CP)
 bpy.context.object.name = "Controller_Pivot"
 
-# Shuhang's own controller, generated with Meshy from art/controller-design.svg.
-# Source and modifications: art/vendor/gamepad/NOTES.md.
-import numpy as np
-before=set(scene.objects)
-bpy.ops.import_scene.gltf(filepath=str(ROOT/'art/vendor/gamepad/source.glb'))
-body=next(o for o in scene.objects if o not in before and o.type=='MESH')
-# The source faces -Y after glTF import. Lay its front face upward on the desk,
-# normalise the width and float it just above the soft pad.
-body.parent=None
-body.matrix_world=Matrix.Rotation(-pi/2,4,'X') @ body.matrix_world
-world=[body.matrix_world @ Vector(corner) for corner in body.bound_box]
-low=Vector(tuple(min(v[i] for v in world) for i in range(3)))
-high=Vector(tuple(max(v[i] for v in world) for i in range(3)))
-factor=3.1/(high.x-low.x)
-centre=(low+high)/2
-body.matrix_world=Matrix.Translation(Vector((CP.x,CP.y,.055))-Vector((centre.x,centre.y,low.z))*factor) @ Matrix.Scale(factor,4) @ body.matrix_world
-body.name='Controller_Body'
-# Moving parts, measured on the source: centre and radius as fractions of the width,
-# and the height (in desk units above the pad) below which the shell is left alone.
-# The site tilts the sticks and d-pad, presses the buttons and lights the home button.
-MID=.055+(high.z-low.z)*factor*.5
-PARTS=[('Controller_Stick_L',(-.2796,.1524),.068,1.120),('Controller_Stick_R',(.1387,.0032),.068,1.186),
-       ('Controller_Dpad',(-.1282,.0105),.072,MID),('Controller_Button_X',(.2796,.1913),.039,MID),
-       ('Controller_Button_Y',(.2218,.1303),.039,MID),('Controller_Button_B',(.3458,.1335),.039,MID),
-       ('Controller_Button_A',(.2848,.0704),.039,MID),('Controller_Player_Light_Home',(-.002,.170),.047,MID)]
-bpy.ops.object.select_all(action='DESELECT')
-body.select_set(True)
-bpy.context.view_layer.objects.active=body
-for name,(nx,ny),radius,floor in PARTS:
-    mesh=body.data
-    centres=np.empty(len(mesh.polygons)*3,dtype=np.float32)
-    mesh.polygons.foreach_get('center',centres)
-    c=centres.reshape(-1,3) @ np.array(body.matrix_world.to_3x3()).T + np.array(body.matrix_world.translation)
-    inside=(np.hypot((c[:,0]-CP.x)/3.1-nx,(c[:,1]-CP.y)/3.1-ny)<radius) & (c[:,2]>floor)
-    known=set(scene.objects)
-    bpy.ops.object.mode_set(mode='EDIT')
-    bpy.ops.mesh.select_mode(type='FACE')
-    bpy.ops.mesh.select_all(action='DESELECT')
-    edit=bmesh.from_edit_mesh(mesh)
-    edit.faces.ensure_lookup_table()
-    for index in np.flatnonzero(inside): edit.faces[index].select_set(True)
-    bmesh.update_edit_mesh(mesh)
-    bpy.ops.mesh.separate(type='SELECTED')
-    bpy.ops.object.mode_set(mode='OBJECT')
-    part=next(o for o in scene.objects if o not in known)
-    part.name=part.data.name=name
-    part.select_set(False)
-    print(name,int(inside.sum()),'faces')
-# The generated mesh is far denser than the web needs; UVs survive the collapse.
-# Splitting first keeps the seams between the parts fine.
-for obj in [o for o in scene.objects if o not in before and o.type=='MESH']:
-    tris=sum(len(p.vertices)-2 for p in obj.data.polygons)
-    reduce=obj.modifiers.new('Web budget','DECIMATE')
-    reduce.ratio=min(1,(56000 if obj is body else 1400)/max(1,tris))
-    bpy.context.view_layer.objects.active=obj
-    bpy.ops.object.modifier_apply(modifier=reduce.name)
-bpy.ops.object.select_all(action='DESELECT')
-for obj in list(scene.objects):
-    if obj not in before and obj.type=='EMPTY': bpy.data.objects.remove(obj,do_unlink=True)
+# Shuhang's own controller, built from his drawing (art/controller-design.svg) by
+# art/controller.py: the sticks, d-pad, face buttons and home light are their own objects.
+import sys
+sys.path.insert(0, str(ROOT / "art"))
+import controller
+controller.build(scene, CP)
+bpy.ops.object.select_all(action="DESELECT")
 
 def shell(name, levels):
     # Rounded perimeter rings, with tapered side walls rather than stacked cubes.

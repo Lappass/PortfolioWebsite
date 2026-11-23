@@ -42,6 +42,20 @@ export class ConsoleSetup {
   private padShown = { ...this.pad };
   private parts = new Map<string, THREE.Group>();
   private confirm?: THREE.MeshStandardMaterial;
+  /** The controller's RGB band and well rings: a rainbow that flows along each loop (u runs round it). */
+  private rgb?: THREE.MeshStandardMaterial;
+  private rainbow = (() => {
+    const canvas = Object.assign(document.createElement("canvas"), { width: 256, height: 1 });
+    const context = canvas.getContext("2d")!;
+    for (let x = 0; x < 256; x++) {
+      context.fillStyle = `hsl(${x / 256 * 360} 100% 55%)`;
+      context.fillRect(x, 0, 1, 1);
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  })();
   /** Where the figure stands on the desk, in case-local units: front-left of the monitor. */
   static readonly FIGURE_SPOT = SETUP_ORIGIN.clone().add(new THREE.Vector3(-2.15, .02, -.85));
   /** How present the desk is: 0 hidden, 1 fully there. */
@@ -107,17 +121,22 @@ export class ConsoleSetup {
           this.light = standard;
         }
         if (o.name.startsWith("Controller_Player_Light")) {
+          // The home mark (crescent and eye) is its own mesh on the dark button, so it glows whole.
           standard.emissive.set("#ffb43b");
-          // The home button glows through its own artwork: the crescent lights, the surround stays dark.
-          standard.emissiveMap = standard.map;
           standard.toneMapped = false;
           standard.emissiveIntensity = 0;
           this.playerLights.push(standard);
         }
-        if (o.name === "Controller_Button_A") {
-          // The confirm button answers a press through its own printed ring.
+        if (o.name === "Controller_Light_RGB") {
+          standard.emissive.set("#ffffff");
+          standard.emissiveMap = this.rainbow;
+          standard.toneMapped = false;
+          standard.emissiveIntensity = 1.4;
+          this.rgb = standard;
+        }
+        if (o.name === "Controller_Button_A_Ring") {
+          // The confirm button answers a press through its amber ring.
           standard.emissive.set("#ffb43b");
-          standard.emissiveMap = standard.map;
           standard.emissiveIntensity = 0;
           this.confirm = standard;
         }
@@ -137,17 +156,22 @@ export class ConsoleSetup {
         this.monitor.add(mesh);
       } else if (o.name.startsWith("Controller_")) {
         mesh.position.sub(this.controllerPivot);
-        if (/Stick|Dpad|Button/.test(o.name)) {
-          // Each moving part hangs from its own centre; sticks pivot below the cap.
-          const centre = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()).sub(this.controllerPivot);
-          if (o.name.includes("Stick")) centre.y -= .12;
-          const node = new THREE.Group();
-          node.position.copy(centre);
-          node.userData.rest = centre.y;
-          mesh.position.sub(centre);
+        const part = /^Controller_(Stick_[LR]|Dpad|Button_[ABXY])/.exec(o.name)?.[1];
+        if (part) {
+          // Each moving part hangs from its own centre; sticks pivot below the cap. Pieces that
+          // ride on a part (the confirm ring on A) join its node.
+          let node = this.parts.get(part);
+          if (!node) {
+            const centre = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()).sub(this.controllerPivot);
+            if (part.startsWith("Stick")) centre.y -= .12;
+            node = new THREE.Group();
+            node.position.copy(centre);
+            node.userData.rest = centre.y;
+            this.controller.add(node);
+            this.parts.set(part, node);
+          }
+          mesh.position.sub(node.position);
           node.add(mesh);
-          this.controller.add(node);
-          this.parts.set(o.name.slice("Controller_".length), node);
         } else this.controller.add(mesh);
       } else this.group.add(mesh);
     });
@@ -195,6 +219,9 @@ export class ConsoleSetup {
       if (node) node.position.y = node.userData.rest - shown[key] * .022;
     }
     if (this.confirm) this.confirm.emissiveIntensity = shown.a * 3;
+    // The rainbow flows round the loops, and brightens with any input.
+    this.rainbow.offset.x = (this.rainbow.offset.x - dt * .18) % 1;
+    if (this.rgb) this.rgb.emissiveIntensity = 1.4 + 1.2 * Math.max(shown.a, shown.b, shown.x, shown.y, Math.abs(shown.dx), Math.abs(shown.dy));
     for (const light of this.playerLights) light.emissiveIntensity = Math.max(light.emissiveIntensity, 1.6 * shown.home * (1 - lift));
   }
 
