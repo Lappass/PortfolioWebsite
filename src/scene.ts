@@ -1945,14 +1945,18 @@ export class ArchiveScene {
     }
     let viewSpan = framing.span;
     let cameraDistance = distance;
+    // Pointer parallax fades out as the camera closes on a screen, so the display is seen square.
+    let parallax = 1;
     if (this.caseMode && !cinematic && this.insert.value > 0) {
       const shot = this.insertShot(cameraAim.clone(), framing.span);
       cameraAim.copy(shot.aim);
       viewSpan = shot.span;
-      // Finish facing the fixed screen head-on; retain a little elevation to
-      // keep the console below it visible without skewing the screen edges.
-      const front = new THREE.Vector3(0, 0.11, 1).transformDirection(this.model.matrixWorld);
+      // Finish facing the fixed screen head-on: a little elevation keeps the console in view
+      // on the way, then it levels out as the screen fills the frame, so its edges stay square.
+      const level = THREE.MathUtils.smoothstep(this.insert.value, 0.78, 1);
+      const front = new THREE.Vector3(0, 0.11 * (1 - level), 1).normalize().transformDirection(this.model.matrixWorld);
       viewDirection.lerp(front, THREE.MathUtils.smoothstep(this.insert.value, 0.40, 0.78)).normalize();
+      parallax *= 1 - THREE.MathUtils.smoothstep(this.insert.value, 0.40, 0.78);
     }
     if (!cinematic && this.workspace.value > .001) {
       const p = this.workspace.value;
@@ -1967,6 +1971,7 @@ export class ArchiveScene {
       const span = THREE.MathUtils.lerp(Math.max(8.6, 13.6 / this.camera.aspect), fillScreen, screen);
       viewSpan = THREE.MathUtils.lerp(viewSpan, span, approach);
       cameraDistance = THREE.MathUtils.lerp(distance, 7, screen);
+      parallax *= 1 - screen;
     }
     if (!cinematic && this.intro.value > 0) {
       // Opening: a three-quarter close-up of the selected case, turning slowly, set low in
@@ -1984,8 +1989,8 @@ export class ArchiveScene {
       .clone()
       .addScaledVector(viewDirection, cameraDistance);
     if (!cinematic && this.motion.pointerParallax && !this.uiOnlyParallax) {
-      cameraPosition.x += this.pointer.x * 0.12;
-      cameraPosition.y -= this.pointer.y * 0.12;
+      cameraPosition.x += this.pointer.x * 0.12 * parallax;
+      cameraPosition.y -= this.pointer.y * 0.12 * parallax;
     }
     const cameraTransition = this.targetDetail || this.detail > 0.01
       ? this.motion.detailTransition
