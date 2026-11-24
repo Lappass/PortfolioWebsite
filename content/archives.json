@@ -435,6 +435,7 @@
           }
         ]
       },
+      "unity": "works/x-001/unity/index.html",
       "download": {
         "url": "https://drive.google.com/file/d/1kzXAnCxaNB51dKCUC6r2uStsOHaqU0as/view",
         "label": "Windows build v0.1.0 (Google Drive). Unzip and run LockDown.exe.",
@@ -847,6 +848,7 @@
           }
         ]
       },
+      "unity": "works/x-002/unity/index.html",
       "download": {
         "url": "https://drive.google.com/file/d/1kCqkJIWlcOUfsB-hHDuT-e2PfNrd3uIU/view",
         "label": "Windows build, 15 Nov 2026 (Google Drive). Unzip and run the .exe inside.",
@@ -1440,6 +1442,7 @@
           }
         ]
       },
+      "unity": "works/x-003/unity/index.html",
       "download": {
         "url": "https://drive.google.com/file/d/1w_2j-iSiIVIgy7f_oNSN7eaSV2JEk4MO/view",
         "label": "Windows build, 1 Nov 2026 (Google Drive). Unzip and run Trail Adventure.exe.",

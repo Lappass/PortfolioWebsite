@@ -27,7 +27,7 @@
 | `hero`    | 插入光盘后首页铺满全屏的主视觉（16:9，宽至少 1920）；缺省时用 `cover`，再缺省时用生成的封面图案 |
 | `gallery` | 画廊数组，每项 `{ "src": "...", "caption": "可选标题", "note": "可选旁注正文" }`；有 `note` 时可点击编号标题展开说明 |
 | `video`   | `.mp4` / `.webm` 文件路径，或 B 站、YouTube 等嵌入播放器的 HTTPS 地址      |
-| `unity`   | Unity WebGL 构建的 `index.html` 路径，例如 `works/x-002/unity/index.html`；页面先显示封面，点击后才加载 |
+| `unity`   | Unity WebGL 构建的 `index.html` 路径，例如 `works/x-002/unity/index.html`；页面先显示封面，点击后才加载。构建用 Gzip 压缩并开启 Decompression Fallback，再运行 `node scripts/pack-webgl.mjs <构建文件夹> x-002 "Last Mile"` 放进 `public/works/x-002/unity/`：文件名带内容哈希，超过 90 MB 的文件切片；页面加载时把切片拼回，并用浏览器原生的 gzip 解压边下载边解（静态托管不发 Content-Encoding，不这样做就只能等 Unity 用 JavaScript 慢慢解） |
 | `links`   | 链接数组，每项 `{ "label": "GitHub", "url": "https://..." }`；作品页末尾每条一行，缺省时不显示 |
 | `menu`    | 游戏页的封面造型：`lastmile`、`trail`、`lockdown` 或 `sniff`。设置后页面第一屏是这款游戏自己的造型（齿轮、山路、公寓、证物墙），造型里的部件对应 `study` 的各节；素材在 `public/works/<编号>/menu/`（由 `art/` 下的海报脚本生成）。缺省时第一屏是主视觉 |
 | `trailer` | 预告片，写法同 `video`；缺省时用 `video`。设了 `menu` 的游戏把预告片直接放在封面上（缩略图加播放键，点了才载入播放器；手机上排在文字下方），封面的 Trailer 按钮就地播放；其余游戏在封面下方单独一块 |

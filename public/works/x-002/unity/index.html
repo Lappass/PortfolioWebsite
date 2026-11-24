@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Last Mile</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; outline: none; }
+  #load { position: fixed; inset: 0; display: grid; place-content: center; gap: 14px; justify-items: center;
+    color: #d8d8d8; font: 14px/1.4 system-ui, sans-serif; text-align: center; padding: 24px; }
+  #bar { width: min(320px, 70vw); height: 2px; background: #333; }
+  #fill { height: 100%; width: 0; background: #e8e8e8; transition: width .2s; }
+  #note { color: #8a8a8a; font-size: 12px; }
+</style>
+</head>
+<body>
+<canvas id="game" tabindex="-1"></canvas>
+<div id="load">
+  <div>Loading Last Mile</div>
+  <div id="bar"><div id="fill"></div></div>
+  <div id="note">About 332 MB the first time, then it is kept in the browser.</div>
+</div>
+<script>
+  // Each Unity file is gzip, maybe in parts. Join the parts and let the browser unpack them as
+  // they arrive, so Unity gets plain bytes. Without DecompressionStream, Unity unpacks them itself.
+  var packed = {"Build/x-002-d6482543ac.framework.js.unityweb":{"parts":["Build/x-002-d6482543ac.framework.js.unityweb"],"size":98273,"unpacked":514437,"type":"application/octet-stream"},"Build/x-002-a247cb9d59.wasm.unityweb":{"parts":["Build/x-002-a247cb9d59.wasm.unityweb"],"size":14746163,"unpacked":59649195,"type":"application/wasm"},"Build/x-002-83fb88b6e0.data.unityweb":{"parts":["Build/x-002-83fb88b6e0.data.unityweb.part0","Build/x-002-83fb88b6e0.data.unityweb.part1","Build/x-002-83fb88b6e0.data.unityweb.part2","Build/x-002-83fb88b6e0.data.unityweb.part3"],"size":333106998,"unpacked":391244604,"type":"application/octet-stream"}};
+  var native = typeof DecompressionStream === "function";
+  var realFetch = window.fetch.bind(window);
+  var byUrl = {};
+  Object.keys(packed).forEach(function (u) { byUrl[new URL(u, location.href).href] = packed[u]; });
+  window.fetch = function (input, init) {
+    var href = new URL(typeof input === "string" ? input : input.url, location.href).href;
+    var entry = byUrl[href];
+    if (!entry) return realFetch(input, init);
+    var i = 0, reader = null;
+    var body = new ReadableStream({
+      pull: async function (controller) {
+        try {
+          for (;;) {
+            if (!reader) {
+              if (i >= entry.parts.length) { controller.close(); return; }
+              var res = await realFetch(entry.parts[i++]);
+              if (!res.ok) throw new Error("HTTP " + res.status + " for " + res.url);
+              reader = res.body.getReader();
+            }
+            var chunk = await reader.read();
+            if (chunk.done) { reader = null; continue; }
+            controller.enqueue(chunk.value);
+            return;
+          }
+        } catch (err) { controller.error(err); }
+      }
+    });
+    if (native) body = body.pipeThrough(new DecompressionStream("gzip"));
+    return Promise.resolve(new Response(body, { status: 200, headers: {
+      "Content-Type": entry.type, "Content-Length": String(native ? entry.unpacked : entry.size) } }));
+  };
+
+  var canvas = document.getElementById("game");
+  var fill = document.getElementById("fill");
+  var load = document.getElementById("load");
+  var config = {
+    dataUrl: "Build/x-002-83fb88b6e0.data.unityweb",
+    frameworkUrl: "Build/x-002-d6482543ac.framework.js.unityweb",
+    codeUrl: "Build/x-002-a247cb9d59.wasm.unityweb",
+    streamingAssetsUrl: "StreamingAssets",
+    companyName: "Lappas",
+    productName: "Last Mile",
+    productVersion: "web",
+    // File names carry a content hash, so a cached copy never needs checking again.
+    cacheControl: function () { return "immutable"; },
+    autoSyncPersistentDataPath: true,
+    showBanner: function (msg, type) { if (type === "error") showError(msg); else console.warn(msg); }
+  };
+  function showError(msg) {
+    load.style.display = "grid";
+    load.innerHTML = "<div>The game could not start in this browser.</div><div id=note></div>";
+    load.querySelector("#note").textContent = String(msg);
+  }
+  var script = document.createElement("script");
+  script.src = "Build/x-002-45d3f753c4.loader.js";
+  script.onload = function () {
+    createUnityInstance(canvas, config, function (p) { fill.style.width = (100 * p) + "%"; })
+      .then(function () { load.style.display = "none"; canvas.focus(); })
+      .catch(showError);
+  };
+  script.onerror = function () { showError("The loader did not download."); };
+  document.body.appendChild(script);
+  canvas.addEventListener("pointerdown", function () { canvas.focus(); });
+</script>
+</body>
+</html>
